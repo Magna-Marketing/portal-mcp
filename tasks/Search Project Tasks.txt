@@ -1,0 +1,69 @@
+Tool: search_project_tasks
+
+Description
+Searches for tasks within a single Everhour project by task title. project_id is the Asana project ID with "as:" prefix. query is the search string (task title). Result is the same array shape as Get Project Tasks. Related: Get Project Tasks (list all/filter), Get Task (one task by ID).
+
+Endpoint
+GET https://api.everhour.com/projects/{project_id}/tasks/search
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_id (string, required) - Asana project ID with "as:" prefix, e.g. as:1211038673444900. URI path parameter.
+query (string, required) - Search by task title (e.g. "Stage 4 PM Syncs + Updates").
+limit (number, optional) - Max results (default 10).
+searchInClosed (boolean, optional) - Include closed tasks in search. Default false.
+
+Result
+Same shape as Get Project Tasks. Returns an array of task objects. Each task has:
+id (string) - Task ID, e.g. as:<asana_task_gid>.
+name (string) - Task name.
+type (string) - e.g. "task".
+status (string) - e.g. "open", "completed".
+url (string) - Asana task URL.
+iteration (string) - Section name.
+projects (string[]) - Project IDs.
+createdAt (string) - Creation timestamp.
+dueOn (string) - Due date (YYYY-MM-DD).
+labels (string[]) - Task labels.
+estimate (object) - estimate.type, estimate.total in seconds (/3600 for hours).
+time (object) - time.total in seconds, time.users (Everhour user ID to seconds), time.timerTime. /3600 for hours.
+attributes (object) - Custom Asana/workspace attributes.
+assignees (array) - Each: accountId (as:<asana_user_gid>), accountName, userId (Everhour user ID).
+completed (boolean) - Whether task is completed.
+completedAt (string) - Completion timestamp.
+unbillable (boolean, optional) - Present only on billable projects. true = unbillable; absent = billable.
+Optional when present: parentName, parentId, startOn, metrics, _type.
+
+Example result
+
+[
+  {
+    "id": "as:1213485594364562",
+    "name": "Internal Syncs + Stand Ups",
+    "type": "task",
+    "status": "open",
+    "url": "https://app.asana.com/0/1211038673444900/1213485594364562/f",
+    "iteration": "Stage 4 AM/PM",
+    "projects": ["as:1211038673444900"],
+    "parentName": "Stage 4 Data Migration AM/PM",
+    "parentId": "as:1213485594364559",
+    "createdAt": "2026-03-02 15:20:25",
+    "dueOn": "2026-06-30",
+    "startOn": "2026-03-02",
+    "labels": [],
+    "estimate": { "type": "overall", "total": 126000 },
+    "time": {
+      "total": 8100,
+      "users": { "1413033": 2700, "1413062": 5400 },
+      "timerTime": 0
+    },
+    "completed": false,
+    "_type": "task"
+  }
+]

@@ -1,0 +1,60 @@
+Tool: update_task_estimate
+
+Description
+Updates the estimate on an existing Everhour task. task_id is the Asana task ID with "as:" prefix. Estimate is stored in Everhour and displayed in Asana. A task has either an overall estimate (single total) or user-level estimate splits (per-user), not both. Set type to "overall" for a single total or "users" for per-user splits. All time values in seconds (/3600 for hours). Related: Get Task or Get Project Tasks to read the current estimate (estimate.total, estimate.users).
+
+Endpoint
+PUT https://api.everhour.com/tasks/{task_id}/estimate
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+JSON. Required.
+total (number, required) - Estimate total time in seconds (/3600 for hours). For type "users", typically the sum of per-user values.
+type (string, required) - "overall" for a single total; "users" for user-level splits. A task has one or the other, not both.
+users (object) - For type "overall", use {} or omit. For type "users", required: Everhour user ID (string key) to estimate in seconds (same IDs as in all other endpoints).
+
+Input (parameters)
+task_id (string, required) - Asana task ID with "as:" prefix, e.g. as:1213261748977098. URI path parameter.
+
+Result
+Returns the updated estimate object. Overall: type "overall", total (seconds), no users. Users: type "users", total (seconds), users (Everhour user ID to seconds). Updated estimate appears in Get Task and Get Project Tasks.
+
+Example request body (overall)
+
+{
+  "total": 5600,
+  "type": "overall",
+  "users": {}
+}
+
+Example result (overall)
+
+{
+  "type": "overall",
+  "total": 5600
+}
+
+Example request body (user-level)
+
+{
+  "total": 6600,
+  "type": "users",
+  "users": {
+    "1413572": 4800,
+    "1398518": 1800
+  }
+}
+
+Example result (user-level)
+
+{
+  "type": "users",
+  "total": 6600,
+  "users": {
+    "1398518": 1800,
+    "1413572": 4800
+  }
+}

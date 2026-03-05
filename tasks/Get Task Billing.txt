@@ -1,0 +1,65 @@
+Tool: get_task_billing
+
+Description
+Returns a single Everhour task by task ID with billing information included. Same as Get Task but requires opts_include_billing=1, so the response includes task-level billing details. Use this when you need to determine whether a specific task is billable (on billable projects, each task can be billable or non-billable). task_id is the Asana task ID with "as:" prefix. Related: Get Task (same endpoint without billing), Get Project Tasks (list tasks).
+
+Endpoint
+GET https://api.everhour.com/tasks/{task_id}?opts_include_billing=1
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+task_id (string, required) - Asana task ID with "as:" prefix, e.g. as:1213485594364562. URI path parameter.
+opts_include_billing (number, required) - Set to 1 to include billing information in the response.
+
+Result
+Same task object as Get Task, with additional billing-related fields when the task or project is billable. Fields:
+id (string) - Task ID, e.g. as:<asana_task_gid>.
+name (string) - Task name.
+type (string) - e.g. "task".
+status (string) - e.g. "open", "completed".
+url (string) - Asana task URL.
+iteration (string) - Section name.
+projects (string[]) - Project IDs.
+createdAt (string) - Creation timestamp.
+dueOn (string) - Due date (YYYY-MM-DD).
+labels (string[]) - Task labels.
+estimate (object) - estimate.type, estimate.total in seconds (/3600 for hours).
+time (object) - time.total in seconds, time.users (Everhour user ID to seconds), time.timerTime. /3600 for hours.
+attributes (object) - Custom Asana/workspace attributes.
+assignees (array) - Each: accountId (as:<asana_user_gid>), accountName, userId (Everhour user ID).
+completed (boolean) - Whether task is completed.
+completedAt (string) - Completion timestamp.
+unbillable (boolean, optional) - Present only on billable projects. true = task is unbillable; absent = task is billable.
+Optional when present: parentName, parentId, startOn, metrics.
+
+Example result
+
+{
+  "iteration": "Stage 4 AM/PM",
+  "projects": ["as:1211038673444900"],
+  "parentId": "as:1213485594364559",
+  "parentName": "Stage 4 Data Migration AM/PM",
+  "completed": false,
+  "id": "as:1213485594364562",
+  "type": "task",
+  "name": "Internal Syncs + Stand Ups",
+  "url": "https://app.asana.com/0/1211038673444900/1213485594364562/f",
+  "status": "open",
+  "labels": [],
+  "createdAt": "2026-03-02 15:20:25",
+  "dueOn": "2026-06-30",
+  "startOn": "2026-03-02",
+  "time": {
+    "total": 8100,
+    "users": { "1413033": 2700, "1413062": 5400 },
+    "timerTime": 0
+  },
+  "estimate": { "type": "overall", "total": 126000 },
+  "assignees": {}
+}

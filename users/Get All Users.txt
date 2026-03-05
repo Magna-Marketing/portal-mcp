@@ -1,0 +1,77 @@
+Tool: get_all_users
+
+Description
+Returns all team users in Everhour. User id is the Everhour user ID: the same numeric ID used across all endpoints (clients, projects, tasks, time records). Use to resolve user IDs to names/emails or list team members. Each user includes id, email, name, headline, status, role, type, rate (cents), capacity (seconds), cost, costHistory, groups, timeTrackingPolicy, permissions, and avatarUrl. Related: Get User Time Records for time by user.
+
+Endpoint
+GET https://api.everhour.com/team/users
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+None.
+
+Result
+Returns an array of user objects. Each user has:
+id (number) - Everhour user ID. Same ID used across all endpoints.
+email (string) - User email.
+name (string) - Display name.
+headline (string) - Title/role (e.g. "Manager", "Developer").
+createdAt (string) - When user was added.
+status (string) - "active" or "removed".
+role (string) - e.g. "admin", "member".
+type (string) - e.g. "employee".
+rate (number) - Hourly rate in cents (/100 for dollars).
+capacity (number) - Capacity in seconds per period (/3600 for hours; e.g. 144000 = 40 h).
+cost (number) - Current cost rate in cents (/100 for dollars).
+costHistory (array) - Past cost entries: id, cost (cents), createdAt, appliedFrom (optional).
+groups (array) - Team/group memberships: { id, name }.
+resourcePlannerAccess (object) - viewMine, editMine, viewAll, editAll (boolean).
+timeTrackingPolicy (object) - allowTimeWithoutTask, allowManualTimeInput, allowFutureTime, allowCompletedTaskTime, allowTimeWithoutEstimate, allowExceedEstimate, allowManageEstimates (boolean); optional lockTimeAfter, lockTimePeriod.
+permissions (object) - billingBudgets, userLimits, costs, invoices, expenses ("write" or absent).
+avatarUrl, avatarUrlLarge (string) - Avatar URLs (optional).
+isEmailVerified (boolean) - Email verification flag.
+enableResourcePlanner (boolean) - Resource planner enabled for user.
+favorite (boolean) - Marked as favorite.
+
+Example result
+
+[
+  {
+    "isEmailVerified": true,
+    "costHistory": [
+      { "id": 701274, "cost": 2500, "createdAt": "2025-04-17 17:18:43" },
+      { "id": 721947, "cost": 5000, "createdAt": "2025-08-20 01:14:55" }
+    ],
+    "cost": 5000,
+    "resourcePlannerAccess": { "viewMine": true, "editMine": false, "viewAll": false, "editAll": false },
+    "timeTrackingPolicy": {
+      "allowTimeWithoutTask": false,
+      "allowManualTimeInput": true,
+      "allowFutureTime": false,
+      "allowCompletedTaskTime": false,
+      "allowTimeWithoutEstimate": false,
+      "allowExceedEstimate": false,
+      "allowManageEstimates": true
+    },
+    "permissions": { "billingBudgets": "write", "userLimits": "write", "costs": "write", "invoices": "write", "expenses": "write" },
+    "id": 1397573,
+    "email": "access@magnatech.io",
+    "name": "MTG Portal",
+    "headline": "",
+    "createdAt": "2025-04-17 17:18:24",
+    "groups": [{ "id": 383328, "name": "Operations/Exec" }],
+    "status": "active",
+    "role": "admin",
+    "type": "employee",
+    "rate": 20001,
+    "capacity": 144000,
+    "enableResourcePlanner": false,
+    "favorite": false
+  }
+]

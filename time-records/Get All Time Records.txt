@@ -1,0 +1,88 @@
+Tool: get_all_time_records
+
+Description
+Returns time records for the entire team in a date range. from and to (YYYY-MM-DD) are required. Do not use limit; use page (1, 2, 3, ...) and keep requesting until the response is empty. Each record includes id, date, user (Everhour user ID), time (seconds), comment, embedded task object, edit history, lock status, and cost. Related: Get Project Time Records, Get Task Time Records, Get User Time Records for filtered lists; Add Time to create.
+
+Endpoint
+GET https://api.everhour.com/team/time
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+Do not use limit.
+from (string, required) - Start date (YYYY-MM-DD). Must be included.
+to (string, required) - End date (YYYY-MM-DD). Must be included.
+page (number, optional) - Page number for pagination (1, 2, 3, ...). Keep requesting until response is empty.
+
+Result
+Returns an array of time record objects. Each record has:
+id (number) - Time record ID.
+date (string) - Date of the time entry (YYYY-MM-DD).
+createdAt (string) - When the record was created.
+user (number) - Everhour user ID (same across all endpoints).
+time (number) - Time logged in seconds (/3600 for hours).
+comment (string) - Optional comment on the entry.
+task (object) - Embedded task: id, name, type, status, url, iteration, projects, createdAt, labels, time (total, users, timerTime), completed, completedAt. Same IDs and units as Get Task.
+history (array) - Edit history: id, createdAt, time, action (e.g. "ADD"), previousTime, createdBy (Everhour user ID).
+lockReasons (string[]) - e.g. ["completed_task"].
+isLocked (boolean) - Whether the record is locked.
+cost (number) - Cost in cents (/100 for dollars).
+costRate (number) - Rate in cents (/100 for dollars).
+
+Example result
+
+[
+  {
+    "id": 241894970,
+    "date": "2025-02-18",
+    "createdAt": "2025-08-27 17:23:50",
+    "user": 1413041,
+    "time": 3600,
+    "comment": "[Legacy]",
+    "task": {
+      "id": "as:1211163954121331",
+      "name": "Legacy Task: Time Entries from 11/01/2023 to 07/31/2025",
+      "type": "task",
+      "status": "completed",
+      "url": "https://app.asana.com/0/1211163340538266/1211163954121331/f",
+      "iteration": "Legacy",
+      "projects": ["as:1211163340538266"],
+      "createdAt": "2025-08-27 16:32:54",
+      "labels": [],
+      "time": {
+        "total": 688500,
+        "users": {
+          "1398265": 40500,
+          "1398546": 130500,
+          "1413027": 105300,
+          "1413041": 273600,
+          "1413049": 70200,
+          "1413054": 49500,
+          "1413066": 18000
+        },
+        "timerTime": 0
+      },
+      "completed": true,
+      "completedAt": "2025-09-15 19:57:47"
+    },
+    "history": [
+      {
+        "id": 415685239,
+        "createdAt": "2025-08-27 17:23:50",
+        "time": 3600,
+        "action": "ADD",
+        "previousTime": 0,
+        "createdBy": 1398518
+      }
+    ],
+    "lockReasons": ["completed_task"],
+    "isLocked": true,
+    "cost": 5000,
+    "costRate": 5000
+  }
+]

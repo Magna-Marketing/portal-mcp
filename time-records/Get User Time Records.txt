@@ -1,0 +1,80 @@
+Tool: get_user_time_records
+
+Description
+Returns time records for a single user. user_id is the Everhour user ID (same numeric ID used across all endpoints). from and to are optional; use them when the user provides a date range. Result shape is the same as Get All Time Records. Related: Get All Time Records (team-wide), Get Project Time Records (by project), Get Task Time Records, Add Time.
+
+Endpoint
+GET https://api.everhour.com/users/{user_id}/time
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+user_id (number, required) - Everhour user ID, e.g. 1413572. URI path parameter. Same ID as in all other endpoints.
+from (string, optional) - Start date (YYYY-MM-DD). Use when user provides a date range.
+to (string, optional) - End date (YYYY-MM-DD). Use when user provides a date range.
+limit (number, optional) - Max records per page.
+page (number, optional) - Page number for pagination.
+
+Result
+Returns an array of time record objects. Each record has:
+id (number) - Time record ID.
+date (string) - Date of the time entry (YYYY-MM-DD).
+createdAt (string) - When the record was created.
+user (number) - Everhour user ID (same across all endpoints).
+time (number) - Time logged in seconds (/3600 for hours).
+comment (string) - Optional comment on the entry.
+task (object) - Embedded task: id, name, type, status, url, iteration, projects, estimate, time, attributes, assignees, completed. Same shape as Get Task.
+history (array) - Edit history: id, createdAt, time, action ("ADD", "EDIT"), previousTime, createdBy (Everhour user ID).
+lockReasons (string[]) - e.g. ["completed_task"] or [].
+isLocked (boolean) - Whether the record is locked.
+cost (number) - Cost in cents (/100 for dollars).
+costRate (number) - Rate in cents (/100 for dollars).
+
+Example result
+
+[
+  {
+    "id": 257291692,
+    "date": "2026-02-18",
+    "createdAt": "2026-02-27 17:19:51",
+    "user": 1413572,
+    "time": 1800,
+    "task": {
+      "id": "as:1213272542390755",
+      "name": "Monthly Recurring Daily AI Engineering Blocks (Sahitya)",
+      "type": "task",
+      "status": "completed",
+      "url": "https://app.asana.com/0/1211037049141165/1213272542390755/f",
+      "iteration": "Recurring Daily AI Engineering Calls",
+      "projects": ["as:1211037049141165"],
+      "createdAt": "2026-02-13 21:06:53",
+      "dueOn": "2026-02-28",
+      "startOn": "2026-02-01",
+      "labels": [],
+      "estimate": { "type": "overall", "total": 72000 },
+      "time": { "total": 27000, "users": { "1413572": 27000 }, "timerTime": 0 },
+      "completed": true,
+      "completedAt": "2026-03-03 19:27:35",
+      "assignees": [{ "accountId": "as:1211066046689528", "accountName": "Sahitya Pandey", "userId": 1413572 }]
+    },
+    "history": [
+      {
+        "id": 441079345,
+        "createdAt": "2026-02-27 17:19:51",
+        "time": 1800,
+        "action": "ADD",
+        "previousTime": 0,
+        "createdBy": 1413572
+      }
+    ],
+    "lockReasons": ["completed_task"],
+    "isLocked": true,
+    "cost": 2500,
+    "costRate": 5000
+  }
+]

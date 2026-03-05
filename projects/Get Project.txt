@@ -1,0 +1,93 @@
+Tool: get_project
+
+Description
+Returns a single Everhour project by ID. Projects are synced from Asana (platform "as"). Result is the same object shape as one element of Get All Projects: identity, status, assigned users, client link, custom Asana attributes, billing/budget/rate (billable only). Use the project id (e.g. as:<asana_project_gid>) to fetch. For a list of projects, see Get All Projects. For tasks in this project, see Get Project Tasks or Search Project Tasks.
+
+Endpoint
+GET https://api.everhour.com/projects/{project_id}
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_id (string, required) - Everhour project ID, e.g. as:<asana_project_gid>. URI path parameter.
+
+Result
+Returns a single project object with:
+id (string) - Project ID, e.g. as:<asana_project_gid>.
+name (string) - Project name.
+platform (string) - "as" for Asana.
+status (string) - e.g. "open".
+createdAt (string) - Creation date.
+workspaceId (string) - Asana workspace ID, e.g. as:1210229681323798.
+workspaceName (string) - Workspace name.
+client (number) - Everhour client ID (e.g. 10414383).
+users (number[]) - Everhour user IDs assigned to this project. Same numeric ID used across all endpoints.
+canSyncTasks (boolean) - Whether tasks can sync.
+attributes (object) - Custom fields from Asana: Project Lead, Manager, Salesforce Opportunity Id (1:1 with Salesforce Opportunity), Project Folder (Google Drive link), Key Account, Project Due On, Project Status, Project Start On, and other workspace-defined fields.
+foreign (boolean) - External/synced project.
+hasWebhook (boolean) - Webhook enabled.
+estimatesType (string) - e.g. "any".
+billing (object) - Billable projects only. e.g. { "type": "hourly" }. Omitted on non-billable.
+budget (object) - Billable projects only. Budget settings and progress; time values in seconds (/3600 for hours). Omitted on non-billable.
+rate (object) - Billable projects only. rate.rate in cents (/100 for dollars). Omitted on non-billable.
+enableResourcePlanner (boolean) - Resource planner enabled.
+isTemplate (boolean) - Template project.
+privacy (string) - e.g. "private".
+connectionStatus (string) - e.g. "auto".
+icon, color, viewSettings (object) - Display settings.
+favorite (boolean) - Marked as favorite.
+
+API units: budget.budget and budget.progress in seconds (/3600 for hours). rate.rate in cents (/100 for dollars).
+
+Example result
+
+{
+  "canSyncTasks": true,
+  "users": [1398216, 1398265, 1398266, 1398518],
+  "attributes": {
+    "Manager": "Joseph Lao",
+    "Key Account": "Key Account",
+    "Project Lead": "Eric Politi",
+    "Contract Type": "Project",
+    "Project Folder": "https://drive.google.com/drive/u/0/folders/1S39OWK4neBIU9Lu8EEef0WDH8J7EWCgU",
+    "Salesforce Opportunity Id": "006Qg00000Dkc4RIAR",
+    "Project Due On": "2026-03-06",
+    "Project Status": "On track",
+    "Project Start On": "2025-01-06"
+  },
+  "id": "as:1211038673444900",
+  "platform": "as",
+  "name": "MITER | Merge Project",
+  "createdAt": "2025-08-12",
+  "workspaceId": "as:1210229681323798",
+  "workspaceName": "Magna Technology Group",
+  "hasWebhook": true,
+  "status": "open",
+  "estimatesType": "any",
+  "billing": { "type": "hourly" },
+  "budget": {
+    "excludeUnbillableTime": true,
+    "excludeExpenses": true,
+    "period": "general",
+    "type": "time",
+    "budget": 17388000,
+    "disallowOverbudget": true,
+    "showToUsers": true,
+    "progress": 11302740,
+    "timeProgress": 11302740,
+    "expenseProgress": 0
+  },
+  "rate": { "type": "project_rate", "rate": 18500 },
+  "enableResourcePlanner": true,
+  "isTemplate": false,
+  "privacy": "private",
+  "connectionStatus": "auto",
+  "client": 10414383,
+  "foreign": true,
+  "favorite": false
+}

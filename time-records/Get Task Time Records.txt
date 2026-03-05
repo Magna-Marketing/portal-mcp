@@ -1,0 +1,95 @@
+Tool: get_task_time_records
+
+Description
+Returns time records for a single task. task_id is the Asana task ID with "as:" prefix (e.g. as:1213261748977098). from and to are optional; use them when the user provides a date range. Result shape is the same as Get All Time Records, with additional fields manualTime, timerTime, pastDateTime. Related: Get All Time Records (team-wide), Get Project Time Records, Get User Time Records, Add Time.
+
+Endpoint
+GET https://api.everhour.com/tasks/{task_id}/time
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+task_id (string, required) - Asana task ID with "as:" prefix, e.g. as:1213261748977098. URI path parameter.
+from (string, optional) - Start date (YYYY-MM-DD). Use when user provides a date range.
+to (string, optional) - End date (YYYY-MM-DD). Use when user provides a date range.
+limit (number, optional) - Max records per page.
+page (number, optional) - Page number for pagination.
+
+Result
+Returns an array of time record objects. Each record has:
+id (number) - Time record ID.
+date (string) - Date of the time entry (YYYY-MM-DD).
+createdAt (string) - When the record was created.
+user (number) - Everhour user ID (same across all endpoints).
+time (number) - Time logged in seconds (/3600 for hours).
+manualTime (number, optional) - Manual time in seconds.
+timerTime (number, optional) - Timer time in seconds.
+pastDateTime (number, optional) - Past date time in seconds.
+task (object) - Embedded task: id, name, type, status, url, iteration, projects, estimate, time, attributes, assignees, completed. Same shape as Get Task.
+history (array) - Edit history: id, createdAt, time, action ("ADD", "EDIT"), previousTime, createdBy (Everhour user ID), source.
+lockReasons (string[]) - e.g. ["completed_task"] or [].
+isLocked (boolean) - Whether the record is locked.
+cost (number) - Cost in cents (/100 for dollars).
+costRate (number) - Rate in cents (/100 for dollars).
+
+Example result
+
+[
+  {
+    "user": 1413061,
+    "history": [
+      {
+        "id": 439681083,
+        "time": 7200,
+        "previousTime": 0,
+        "action": "ADD",
+        "source": "not-set",
+        "createdAt": "2026-02-18 18:00:22",
+        "createdBy": 1413061
+      },
+      {
+        "id": 439681131,
+        "time": -3600,
+        "previousTime": 7200,
+        "action": "EDIT",
+        "source": "internal",
+        "createdAt": "2026-02-18 18:00:33",
+        "createdBy": 1413061
+      }
+    ],
+    "lockReasons": [],
+    "cost": 5000,
+    "isLocked": false,
+    "manualTime": 3600,
+    "timerTime": 0,
+    "id": 256446224,
+    "date": "2026-02-16",
+    "time": 3600,
+    "pastDateTime": 3600,
+    "task": {
+      "iteration": "Untitled section",
+      "projects": ["as:1211302978900701"],
+      "attributes": { "Status": "Ready for Yamin", "Need/Want": "Need", "Sprint": "19. MoonKnight", "Product Priority": "2. High" },
+      "completed": false,
+      "id": "as:1213261748977098",
+      "type": "task",
+      "name": "Source Preview and Download files are not working or implemented",
+      "url": "https://app.asana.com/0/1211302978900701/1213261748977098/f",
+      "status": "open",
+      "labels": [],
+      "createdAt": "2026-02-16 10:58:01",
+      "dueOn": "2026-02-25",
+      "startOn": "2026-02-16",
+      "time": { "total": 7200, "users": { "1413061": 7200 }, "timerTime": 0 },
+      "estimate": { "type": "overall", "total": 7600 },
+      "assignees": [{ "accountId": "as:1210990472716148", "accountName": "Pranesh Aditya S", "userId": 1413061 }]
+    },
+    "createdAt": "2026-02-18 18:00:22",
+    "costRate": 5000
+  }
+]

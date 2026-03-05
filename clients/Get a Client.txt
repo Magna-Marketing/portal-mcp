@@ -1,0 +1,51 @@
+Tool: get_client
+
+Description
+Returns a single Everhour client by its numeric ID. Everhour clients map 1:1 to Asana Portfolios; the projects array holds Asana Project IDs as as:<asana_project_gid>. Result shape is one element of Get All Clients. Use Get All Clients for the full list. Use Get Project or Get All Projects to fetch project details from a client's projects array.
+
+Endpoint
+GET https://api.everhour.com/clients/{client_id}
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+client_id (number, required) - Everhour client ID. URI path parameter.
+
+Result
+Returns a single client object with:
+id (number) - Everhour client ID.
+name (string) - Client name (matches Portfolio name in Asana).
+projects (string[]) - Asana project IDs: as:<asana_project_gid>.
+status (string) - "active" or inactive.
+createdAt (string) - Creation timestamp.
+lineItemMask (string) - Invoice line item template.
+paymentDueDays (number) - Days until payment due.
+reference (string) - Optional reference.
+businessDetails (string) - Business details for invoicing.
+invoicePublicNotes (string) - Notes on invoice.
+excludedLabels (string[]) - Labels excluded from invoicing.
+enableResourcePlanner (boolean) - Resource planner enabled.
+favorite (boolean) - Marked as favorite.
+
+Example result
+
+{
+  "id": 10414383,
+  "name": "MITER",
+  "projects": ["as:1211038673444900", "as:1211039005109812", "as:1212620000086570"],
+  "status": "active",
+  "createdAt": "2025-08-12 20:24:09",
+  "lineItemMask": "%MEMBER% :: %PROJECT% :: for %PERIOD%",
+  "paymentDueDays": 3,
+  "reference": "",
+  "businessDetails": "",
+  "invoicePublicNotes": "",
+  "excludedLabels": [],
+  "enableResourcePlanner": true,
+  "favorite": false
+}

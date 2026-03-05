@@ -1,0 +1,94 @@
+Tool: update_time_record
+
+Description
+Updates an existing time record by its Everhour time record ID. Body requires time (seconds), date (YYYY-MM-DD), task (Asana task ID with "as:" prefix), user (Everhour user ID), and optional comment. Returns the updated record on success, or 400 with an error if time exceeds the task estimate or API limits. Related: Add Time to create; Get All / Project / User / Task Time Records to read.
+
+Endpoint
+PUT https://api.everhour.com/time/{time_id}
+
+Headers (all Everhour API calls)
+X-Api-Key (required) - API key for authentication.
+Content-Type: application/json
+
+Body
+JSON. Required. Same fields as Add Time.
+time (number, required) - New time in seconds (/3600 for hours; e.g. 4200 = 1h 10m).
+date (string, required) - Date of the entry (YYYY-MM-DD).
+task (string, required) - Asana task ID with "as:" prefix, e.g. as:1213530756673956.
+user (number, required) - Everhour user ID (same ID used across all endpoints).
+comment (string, optional) - Comment for the time entry.
+
+Input (parameters)
+time_id (number, required) - Everhour time record ID, e.g. 257842229. URI path parameter.
+
+Result (success)
+Returns the updated time record object: id, date, user, time (seconds), comment, task (embedded), history (includes ADD, REMOVE, EDIT actions), lastHistory, lockReasons, isLocked, manualTime, timerTime, pastDateTime, cost (cents), costRate (cents), createdAt.
+
+Result (error)
+400 Bad Request with body: code 400, message "Bad Request", errors object (e.g. errors.time: "Time should be no more than 10.000 hours").
+
+Example request body
+
+{
+  "time": 4200,
+  "date": "2026-03-05",
+  "task": "as:1213530756673956",
+  "user": 1398518,
+  "comment": "some notes"
+}
+
+Example result (success)
+
+{
+  "user": 1398518,
+  "history": [
+    { "id": 441985374, "time": 3600, "previousTime": 0, "action": "ADD", "source": "not-set", "createdAt": "2026-03-05 20:35:28", "createdBy": 1397573 },
+    { "id": 441986248, "time": 600, "previousTime": 3600, "action": "EDIT", "source": "not-set", "createdAt": "2026-03-05 20:40:58", "createdBy": 1397573 }
+  ],
+  "lockReasons": [],
+  "cost": 5833,
+  "isLocked": false,
+  "manualTime": 4200,
+  "timerTime": 0,
+  "id": 257842229,
+  "date": "2026-03-05",
+  "time": 4200,
+  "pastDateTime": 0,
+  "comment": "some notes",
+  "task": {
+    "iteration": "Overall General (Manager only)",
+    "projects": ["as:1211037049141165"],
+    "completed": false,
+    "id": "as:1213530756673956",
+    "type": "task",
+    "name": "Monthly Overall Delivery, Operations and Finance Support (Yamin)",
+    "url": "https://app.asana.com/0/1211037049141165/1213530756673956/f",
+    "status": "open",
+    "labels": [],
+    "createdAt": "2026-03-03 19:27:41",
+    "dueOn": "2026-03-31",
+    "startOn": "2026-03-01",
+    "time": { "total": 4200, "users": { "1398518": 4200 }, "timerTime": 0 },
+    "estimate": { "type": "overall", "total": 216000 },
+    "assignees": [{ "accountId": "as:1209517443429231", "accountName": "Yamin Haji", "userId": 1398518 }]
+  },
+  "lastHistory": {
+    "id": 441986248,
+    "time": 600,
+    "previousTime": 3600,
+    "action": "EDIT",
+    "source": "not-set",
+    "createdAt": "2026-03-05 20:40:58",
+    "createdBy": 1397573
+  },
+  "createdAt": "2026-03-05 20:35:28",
+  "costRate": 5000
+}
+
+Example result (error)
+
+{
+  "code": 400,
+  "message": "Bad Request",
+  "errors": { "time": "Time should be no more than 10.000 hours" }
+}
