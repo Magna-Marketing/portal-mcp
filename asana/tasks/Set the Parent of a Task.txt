@@ -1,0 +1,40 @@
+Tool: set_parent_for_task
+
+Description
+Sets or changes the parent task of a task (makes it a subtask). Body includes parent (task GID). To make it a top-level task again, use parent with empty string or remove parent. Related: Create Subtask, Get Subtasks from a Task, Get a Task (parent).
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/setParent
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+parent (string, required) - Task GID of the new parent task. Use empty string "" to make this a top-level task.
+insert_after (string, optional) - Sibling task GID after which to insert (for order).
+insert_before (string, optional) - Sibling task GID before which to insert.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data (task object with updated parent).
+
+Example request body
+
+{
+  "parent": "1213485594364559"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review",
+    "parent": { "gid": "1213485594364559", "name": "Stage 4 Data Migration", "resource_type": "task" }
+  }
+}

@@ -1,0 +1,45 @@
+Tool: get_task
+
+Description
+Returns a single task by GID. Use opt_fields to request specific fields (e.g. followers, projects, memberships, custom_fields, parent, subtasks). Related: Get Tasks for Project, Update Task, Create Task, Get Subtasks, Get Dependencies, Get Dependents.
+
+Endpoint
+GET https://app.asana.com/api/1.0/tasks/{task_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return (e.g. name,notes,completed,due_on,assignee,followers,projects,memberships,parent,subtasks).
+opt_expand (string, optional) - Relation names to expand.
+
+Result
+Returns object with data (single task object). Fields include gid, resource_type, name, notes, completed, completed_at, due_on, start_on, created_at, modified_at, assignee, followers, projects, memberships, parent, custom_fields, resource_subtype, and more.
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review",
+    "notes": "Review design specs against requirements.",
+    "completed": false,
+    "due_on": "2026-06-30",
+    "start_on": "2026-03-02",
+    "created_at": "2026-03-02T15:20:25.000Z",
+    "modified_at": "2026-03-05T10:00:00.000Z",
+    "assignee": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+    "followers": [],
+    "projects": [{ "gid": "1112223334445556", "name": "Launch Campaign", "resource_type": "project" }],
+    "memberships": [
+      { "project": { "gid": "1112223334445556", "name": "Launch Campaign" }, "section": { "gid": "7778889990001112", "name": "In Progress" } }
+    ],
+    "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+  }
+}

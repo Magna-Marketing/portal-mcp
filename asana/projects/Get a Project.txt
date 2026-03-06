@@ -1,0 +1,38 @@
+Tool: get_project
+
+Description
+Returns a single project by GID. Use for full project details. Use opt_fields to request specific fields (members, sections, custom_field_settings, etc.). Related: Get Multiple Projects, Update Project, Get Sections for Project, Get Tasks for Project.
+
+Endpoint
+GET https://app.asana.com/api/1.0/projects/{project_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+opt_expand (string, optional) - Relation names to expand.
+
+Result
+Returns object with data (single project object). Fields include gid, resource_type, name, archived, created_at, current_status, due_on, notes, owner, workspace, team, members, sections, custom_field_settings, and more.
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Launch Campaign",
+    "archived": false,
+    "created_at": "2025-01-10T08:00:00.000Z",
+    "current_status": { "title": "On track", "color": "green", "status_type": "on_track" },
+    "due_on": "2025-06-30",
+    "notes": "Campaign launch project.",
+    "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+  }
+}

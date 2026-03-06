@@ -1,0 +1,43 @@
+Tool: search_tasks_for_workspace
+
+Description
+Searches for tasks in a workspace. Query parameters include text search, resource_subtype, completed_since, opt_fields. Returns matching tasks. Use for full-text search across task names and notes. Related: Get Tasks for Project, Get Multiple Tasks, Get a Task.
+
+Endpoint
+GET https://app.asana.com/api/1.0/workspaces/{workspace_gid}/tasks/search
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+workspace_gid (string, required) - Workspace GID. URI path parameter.
+text (string, optional) - Full-text search query (task name, notes).
+resource_subtype (string, optional) - Filter by task subtype (e.g. default_task, milestone).
+completed_since (string, optional) - ISO 8601 datetime; return tasks completed after this time.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page (max 100).
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of task objects matching the search). Each task has gid, resource_type, name, completed, created_at, modified_at, notes, and more (opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1213485594364562",
+      "resource_type": "task",
+      "name": "Design review",
+      "completed": false,
+      "created_at": "2026-03-02T15:20:25.000Z",
+      "notes": "Review design specs",
+      "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/workspaces/9876543210987654/tasks/search", "uri": "..." }
+}

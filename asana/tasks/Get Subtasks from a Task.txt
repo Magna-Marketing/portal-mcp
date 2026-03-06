@@ -1,0 +1,37 @@
+Tool: get_subtasks_for_task
+
+Description
+Returns all subtasks of a task. Optional opt_fields, limit, offset. Related: Create Subtask, Set Parent of a Task, Get a Task.
+
+Endpoint
+GET https://app.asana.com/api/1.0/tasks/{task_gid}/subtasks
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+task_gid (string, required) - Parent task GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of task objects that are subtasks of the given task). Each has gid, resource_type, name, completed, parent, created_at, etc.
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1213485594364565",
+      "resource_type": "task",
+      "name": "Review design specs",
+      "completed": false,
+      "parent": { "gid": "1213485594364562", "name": "Design review", "resource_type": "task" }
+    }
+  ]
+}

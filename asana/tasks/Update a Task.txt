@@ -1,0 +1,48 @@
+Tool: update_task
+
+Description
+Updates an existing task. Body can include name, notes, completed, due_on, assignee, start_on, resource_subtype, and more. Use opt_fields to request returned fields. Related: Get a Task, Create Task, Duplicate Task.
+
+Endpoint
+PATCH https://app.asana.com/api/1.0/tasks/{task_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. At least one field. All optional.
+name (string, optional) - Task name.
+notes (string, optional) - Notes/description.
+completed (boolean, optional) - Mark complete/incomplete.
+due_on (string, optional) - Due date YYYY-MM-DD.
+assignee (string, optional) - User GID to assign. Empty string to unassign.
+start_on (string, optional) - Start date YYYY-MM-DD.
+resource_subtype (string, optional) - default_task or milestone.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data (updated task object).
+
+Example request body
+
+{
+  "name": "Design review (updated)",
+  "completed": false,
+  "due_on": "2026-07-15"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review (updated)",
+    "completed": false,
+    "due_on": "2026-07-15",
+    "created_at": "2026-03-02T15:20:25.000Z"
+  }
+}

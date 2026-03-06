@@ -1,0 +1,37 @@
+Tool: remove_members_for_project
+
+Description
+Removes users and/or teams from a project. Body includes members (comma-separated user/team GIDs). Related: Add Users to a Project, Get Memberships from a Project.
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects/{project_gid}/removeMembers
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+members (string, required) - Comma-separated list of user GIDs or team GIDs to remove.
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (updated project or empty). 200 on success.
+
+Example request body
+
+{
+  "members": "1211007699959733"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Launch Campaign"
+  }
+}

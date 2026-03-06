@@ -1,0 +1,26 @@
+Tool: delete_project_status
+
+Description
+Deletes a project status update. Permanent. Related: Get a Project Status, Get Statuses from a Project, Create Project Status.
+
+Endpoint
+DELETE https://app.asana.com/api/1.0/project_statuses/{project_status_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+project_status_gid (string, required) - Project status GID. URI path parameter.
+
+Result
+Returns object with data: empty object {} on success. 204 or 200 depending on API version.
+
+Example result
+
+{
+  "data": {}
+}

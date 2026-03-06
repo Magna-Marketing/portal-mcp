@@ -1,0 +1,35 @@
+Tool: get_workspaces
+
+Description
+Returns all workspaces (and organizations) the authenticated user can access. Use to list workspaces and resolve workspace GID for other endpoints (e.g. Get Projects for Workspace, Get Users for Workspace). Related: Get Users for Workspace, Get Projects for Workspace.
+
+Endpoint
+GET https://app.asana.com/api/1.0/workspaces
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+opt_fields (string, optional) - Comma-separated list of fields to return (e.g. name,email_domains,is_organization).
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of workspace objects). Each has gid, resource_type, name, is_organization, email_domains (optional).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "9876543210987654",
+      "resource_type": "workspace",
+      "name": "My Workspace",
+      "is_organization": false
+    }
+  ]
+}

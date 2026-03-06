@@ -1,0 +1,33 @@
+Tool: get_sections_for_project
+
+Description
+Returns all sections in a project in order. Use to list columns/sections (e.g. for board view). Related: Get a Section, Create Section in Project, Add Task to Section, Get Tasks from Section.
+
+Endpoint
+GET https://app.asana.com/api/1.0/projects/{project_gid}/sections
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of section objects). Each has gid, resource_type, name, created_at, project.
+
+Example result
+
+{
+  "data": [
+    { "gid": "7778889990001111", "resource_type": "section", "name": "To Do", "project": { "gid": "1112223334445556" } },
+    { "gid": "7778889990001112", "resource_type": "section", "name": "In Progress", "project": { "gid": "1112223334445556" } },
+    { "gid": "7778889990001113", "resource_type": "section", "name": "Done", "project": { "gid": "1112223334445556" } }
+  ]
+}

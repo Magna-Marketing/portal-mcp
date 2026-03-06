@@ -1,0 +1,37 @@
+Tool: remove_dependents_for_task
+
+Description
+Removes dependent links: the given tasks no longer depend on this task. Body includes dependents (comma-separated task GIDs). Related: Get Dependents from a Task, Set Dependents for a Task.
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/removeDependents
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+dependents (string, required) - Comma-separated list of task GIDs to remove as dependents.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data (task object or empty). 200 on success.
+
+Example request body
+
+{
+  "dependents": "1213485594364564"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review"
+  }
+}

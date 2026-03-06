@@ -1,0 +1,40 @@
+Tool: get_tasks_for_section
+
+Description
+Returns tasks in a section. Section is a column in a project (e.g. "In Progress"). Use for listing tasks in one section. Related: Get Tasks for Project, Add Task to Section, Get a Section.
+
+Endpoint
+GET https://app.asana.com/api/1.0/sections/{section_gid}/tasks
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+section_gid (string, required) - Section GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of task objects in this section). Each has gid, resource_type, name, completed, created_at, memberships (with section), etc.
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1213485594364562",
+      "resource_type": "task",
+      "name": "Design review",
+      "completed": false,
+      "memberships": [
+        { "project": { "gid": "1112223334445556" }, "section": { "gid": "7778889990001112", "name": "In Progress" } }
+      ]
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/sections/7778889990001112/tasks", "uri": "..." }
+}

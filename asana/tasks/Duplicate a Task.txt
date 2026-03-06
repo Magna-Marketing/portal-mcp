@@ -1,0 +1,44 @@
+Tool: duplicate_task
+
+Description
+Duplicates a task. Optionally include name, include (comma-separated: subtasks, notes, assignee, etc.), name_suffix. Returns the new task. Related: Create Task, Get a Task.
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/duplicate
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Optional. All fields optional.
+name (string, optional) - Name for the duplicate. Default: original name.
+include (string, optional) - Comma-separated: "subtasks", "notes", "assignee", "attachments", "tags", "custom_fields", etc. What to copy.
+name_suffix (string, optional) - Suffix to add to name (e.g. " (Copy)").
+
+Input (parameters)
+task_gid (string, required) - Task GID to duplicate. URI path parameter.
+
+Result
+Returns object with data (new_task object). Contains job (async job GID) if duplication is async; otherwise contains the new task directly depending on API version.
+
+Example request body
+
+{
+  "name": "Design review (Copy)",
+  "include": "subtasks,notes"
+}
+
+Example result
+
+{
+  "data": {
+    "new_task": {
+      "gid": "1213485594364570",
+      "resource_type": "task",
+      "name": "Design review (Copy)",
+      "completed": false,
+      "created_at": "2026-03-05T14:00:00.000Z"
+    }
+  }
+}

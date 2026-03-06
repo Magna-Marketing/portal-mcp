@@ -1,0 +1,47 @@
+Tool: update_project
+
+Description
+Updates an existing project. Body can include name, notes, archived, color, due_on, public, default_view, etc. Related: Get a Project, Create Project.
+
+Endpoint
+PATCH https://app.asana.com/api/1.0/projects/{project_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. At least one field. All optional.
+name (string, optional) - Project name.
+notes (string, optional) - Project notes.
+archived (boolean, optional) - Archive/unarchive.
+color (string, optional) - Color name.
+due_on (string, optional) - Due date YYYY-MM-DD.
+public (boolean, optional) - Public to workspace.
+default_view (string, optional) - "list", "board", "timeline", "calendar".
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (updated project object).
+
+Example request body
+
+{
+  "name": "Launch Campaign (Updated)",
+  "notes": "Revised scope."
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Launch Campaign (Updated)",
+    "notes": "Revised scope.",
+    "archived": false,
+    "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+  }
+}

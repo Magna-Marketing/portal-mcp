@@ -1,0 +1,26 @@
+Tool: delete_task
+
+Description
+Deletes a task. Permanent. Subtasks may be promoted or deleted depending on API behavior. Related: Get a Task, Update Task, Create Task.
+
+Endpoint
+DELETE https://app.asana.com/api/1.0/tasks/{task_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data: empty object {} on success. 200.
+
+Example result
+
+{
+  "data": {}
+}

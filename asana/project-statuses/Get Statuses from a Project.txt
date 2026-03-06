@@ -1,0 +1,40 @@
+Tool: get_project_statuses_for_project
+
+Description
+Returns all project status updates for a project, in reverse chronological order (newest first). Use to show project health/updates. Related: Get a Project Status, Create Project Status, Delete Project Status.
+
+Endpoint
+GET https://app.asana.com/api/1.0/projects/{project_gid}/project_statuses
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of project_status objects). Each has gid, resource_type, title, text, color, created_at, author, status_type, project.
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "12345",
+      "resource_type": "project_status",
+      "title": "Weekly Update",
+      "text": "On track for launch.",
+      "color": "green",
+      "created_at": "2025-03-01T12:00:00.000Z",
+      "author": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+      "status_type": "on_track"
+    }
+  ]
+}

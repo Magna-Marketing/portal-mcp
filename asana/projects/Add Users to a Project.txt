@@ -1,0 +1,41 @@
+Tool: add_members_for_project
+
+Description
+Adds users and/or teams as members of a project. Body includes members (comma-separated user/team GIDs). Returns the updated project or list of project memberships. Related: Get Memberships from a Project, Remove Users from a Project.
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects/{project_gid}/addMembers
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+members (string, required) - Comma-separated list of user GIDs or team GIDs to add.
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (project object with updated members, or array of project_membership objects depending on API).
+
+Example request body
+
+{
+  "members": "1210038679514467,1211007699959733"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Launch Campaign",
+    "members": [
+      { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+      { "gid": "1211007699959733", "name": "John Smith", "resource_type": "user" }
+    ]
+  }
+}

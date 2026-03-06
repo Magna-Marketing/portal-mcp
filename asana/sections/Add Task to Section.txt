@@ -1,0 +1,42 @@
+Tool: add_task_for_section
+
+Description
+Adds a task to a section (moves it into that section in the project). Body includes task GID. Related: Get Tasks from Section, Get a Task, Remove Task from Section (add to different section or project).
+
+Endpoint
+POST https://app.asana.com/api/1.0/sections/{section_gid}/addTask
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+task (string, required) - Task GID to add to this section.
+insert_after (string, optional) - Task GID after which to insert (for ordering).
+insert_before (string, optional) - Task GID before which to insert.
+
+Input (parameters)
+section_gid (string, required) - Section GID. URI path parameter.
+
+Result
+Returns object with data (task object with updated membership in this section, or empty). Structure may include next_page for task list.
+
+Example request body
+
+{
+  "task": "1213485594364562"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review",
+    "memberships": [
+      { "project": { "gid": "1112223334445556" }, "section": { "gid": "7778889990001112", "name": "In Progress" } }
+    ]
+  }
+}

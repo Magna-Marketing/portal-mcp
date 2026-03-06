@@ -1,0 +1,37 @@
+Tool: get_dependents_for_task
+
+Description
+Returns tasks that depend on this task (tasks that are blocked by this task). Related: Set Dependents for a Task, Unlink Dependents, Get Dependencies from a Task.
+
+Endpoint
+GET https://app.asana.com/api/1.0/tasks/{task_gid}/dependents
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return on each dependent task.
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of task objects that have this task as a dependency).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1213485594364563",
+      "resource_type": "task",
+      "name": "Implementation",
+      "completed": false,
+      "created_at": "2026-03-02T16:00:00.000Z"
+    }
+  ]
+}

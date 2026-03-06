@@ -1,0 +1,40 @@
+Tool: get_projects
+
+Description
+Returns a list of projects. Use workspace to filter by workspace GID, or team to filter by team. For all projects in a workspace use Get All Projects in a Workspace. Response is wrapped in data array. Use opt_fields to request specific fields. Related: Get a Project, Create Project, Get Projects for Workspace.
+
+Endpoint
+GET https://app.asana.com/api/1.0/projects
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+workspace (string, optional) - Workspace GID. Filter projects to this workspace.
+team (string, optional) - Team GID. Filter to projects in this team.
+archived (boolean, optional) - If true, return only archived projects. Default false.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page (default 20, max 100).
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of project objects). Each has gid, resource_type, name, archived, created_at, current_status, due_on, notes, owner, workspace, team, and more (opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1112223334445556",
+      "resource_type": "project",
+      "name": "Launch Campaign",
+      "archived": false,
+      "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/projects", "uri": "..." }
+}

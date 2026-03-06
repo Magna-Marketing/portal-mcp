@@ -1,0 +1,39 @@
+Tool: get_users
+
+Description
+Returns a list of users. Typically used with workspace to list users in a workspace, or without for all users the authenticated user can see. Response is wrapped in data array. Use to resolve user GIDs to names/emails. Related: Get a User, Get Users for Workspace.
+
+Endpoint
+GET https://app.asana.com/api/1.0/users
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+workspace (string, optional) - Workspace GID. Filter to users in this workspace.
+team (string, optional) - Team GID. Filter to users in this team.
+opt_fields (string, optional) - Comma-separated list of fields to return (e.g. name,email,photo,workspaces).
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of user objects). Each has gid, resource_type, name, email (if permitted), photo, workspaces, and more (opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1210038679514467",
+      "resource_type": "user",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "photo": { "image_128x128": "https://..." },
+      "workspaces": [{ "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }]
+    }
+  ]
+}

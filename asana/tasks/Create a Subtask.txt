@@ -1,0 +1,47 @@
+Tool: create_subtask_for_task
+
+Description
+Creates a new subtask under a parent task. Body includes name (required), optional notes, completed, due_on, assignee, etc. Same fields as Create Task. Related: Get Subtasks from a Task, Set Parent of a Task, Get a Task.
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/subtasks
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+name (string, required) - Subtask name.
+notes (string, optional) - Notes/description.
+completed (boolean, optional) - Whether completed. Default false.
+due_on (string, optional) - Due date YYYY-MM-DD.
+assignee (string, optional) - User GID to assign.
+resource_subtype (string, optional) - default_task or milestone.
+
+Input (parameters)
+task_gid (string, required) - Parent task GID. URI path parameter.
+
+Result
+Returns object with data (created subtask object). Subtask has parent set to task_gid.
+
+Example request body
+
+{
+  "name": "Review design specs",
+  "notes": "Check alignment with requirements.",
+  "completed": false
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364565",
+    "resource_type": "task",
+    "name": "Review design specs",
+    "completed": false,
+    "parent": { "gid": "1213485594364562", "name": "Design review", "resource_type": "task" },
+    "created_at": "2026-03-05T12:00:00.000Z"
+  }
+}

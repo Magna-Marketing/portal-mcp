@@ -1,0 +1,37 @@
+Tool: get_status
+
+Description
+Returns a single status update by GID. Status updates can be attached to projects or goals (parent object). Related: Get Status Updates from an Object, Create Status Update, Delete Status Update.
+
+Endpoint
+GET https://app.asana.com/api/1.0/status_updates/{status_update_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+status_update_gid (string, required) - Status update GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+
+Result
+Returns object with data (status_update object). Fields include gid, resource_type, title, text, html_text, status_type, created_at, created_by, author, parent (project or goal), modified_at.
+
+Example result
+
+{
+  "data": {
+    "gid": "12345678",
+    "resource_type": "status_update",
+    "title": "Weekly Update",
+    "text": "On track.",
+    "html_text": "<body>On track.</body>",
+    "status_type": "on_track",
+    "created_at": "2025-03-01T12:00:00.000Z",
+    "author": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+    "parent": { "gid": "1112223334445556", "resource_type": "project", "name": "Launch Campaign" }
+  }
+}

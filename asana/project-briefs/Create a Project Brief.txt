@@ -1,0 +1,43 @@
+Tool: create_project_brief
+
+Description
+Creates a project brief for a project. If a brief already exists for the project, behavior may update or replace (check API). Body includes title, optional html_text and status. Related: Get Project Brief, Update Project Brief.
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects/{project_gid}/project_brief
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+title (string, optional) - Brief title.
+html_text (string, optional) - HTML content.
+status (string, optional) - "complete" or "incomplete".
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (created project_brief object).
+
+Example request body
+
+{
+  "title": "Q1 Launch Overview",
+  "html_text": "<body>Goals and scope...</body>",
+  "status": "incomplete"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "12345678",
+    "resource_type": "project_brief",
+    "title": "Q1 Launch Overview",
+    "html_text": "<body>Goals and scope...</body>",
+    "status": "incomplete"
+  }
+}

@@ -1,0 +1,41 @@
+Tool: add_followers_for_task
+
+Description
+Adds followers to a task. Body includes followers (comma-separated user GIDs or single user GID). Followers receive notifications. Related: Remove Followers from a Task, Get a Task (followers).
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/addFollowers
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+followers (string, required) - Comma-separated list of user GIDs to add as followers.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data (task object with updated followers list).
+
+Example request body
+
+{
+  "followers": "1210038679514467,1211007699959733"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review",
+    "followers": [
+      { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+      { "gid": "1211007699959733", "name": "John Smith", "resource_type": "user" }
+    ]
+  }
+}

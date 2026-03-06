@@ -1,0 +1,47 @@
+Tool: create_project_for_workspace
+
+Description
+Creates a new project in a specific workspace. Equivalent to Create Project with workspace in body; workspace_gid is in the path. Body includes name (required), optional notes, color, due_on, team, public, default_view. Related: Get Projects for Workspace, Get a Project, Update Project.
+
+Endpoint
+POST https://app.asana.com/api/1.0/workspaces/{workspace_gid}/projects
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+name (string, required) - Project name.
+notes (string, optional) - Project notes.
+color (string, optional) - Color name.
+due_on (string, optional) - Due date YYYY-MM-DD.
+team (string, optional) - Team GID.
+public (boolean, optional) - Public to workspace.
+default_view (string, optional) - "list", "board", "timeline", "calendar".
+
+Input (parameters)
+workspace_gid (string, required) - Workspace GID. URI path parameter.
+
+Result
+Returns object with data (created project object).
+
+Example request body
+
+{
+  "name": "Q2 Product Roadmap",
+  "notes": "High-level roadmap.",
+  "color": "light-blue"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Q2 Product Roadmap",
+    "archived": false,
+    "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+  }
+}

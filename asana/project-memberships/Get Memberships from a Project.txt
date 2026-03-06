@@ -1,0 +1,37 @@
+Tool: get_project_memberships_for_project
+
+Description
+Returns project membership records for a project. Each membership links a user/team to the project with a role. Use to list who has access to the project. Related: Add Users to a Project, Remove Users from a Project.
+
+Endpoint
+GET https://app.asana.com/api/1.0/projects/{project_gid}/project_memberships
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields (e.g. member,project,role).
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of project_membership objects). Each has gid, resource_type, member (user or team), project (compact), role (e.g. "editor", "commenter").
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "12345",
+      "resource_type": "project_membership",
+      "member": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+      "project": { "gid": "1112223334445556", "name": "Launch Campaign", "resource_type": "project" },
+      "role": "editor"
+    }
+  ]
+}

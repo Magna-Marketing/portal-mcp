@@ -1,0 +1,38 @@
+Tool: update_section
+
+Description
+Updates a section (e.g. rename). Body can include name. Related: Get a Section, Get Sections for Project, Create Section, Delete Section.
+
+Endpoint
+PATCH https://app.asana.com/api/1.0/sections/{section_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. At least one field.
+name (string, optional) - New section name.
+
+Input (parameters)
+section_gid (string, required) - Section GID. URI path parameter.
+
+Result
+Returns object with data (updated section object).
+
+Example request body
+
+{
+  "name": "In Progress (Active)"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "7778889990001112",
+    "resource_type": "section",
+    "name": "In Progress (Active)",
+    "project": { "gid": "1112223334445556", "name": "Launch Campaign", "resource_type": "project" }
+  }
+}

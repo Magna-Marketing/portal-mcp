@@ -1,0 +1,26 @@
+Tool: delete_status
+
+Description
+Deletes a status update. Permanent. Related: Get a Status Update, Get Status Updates from an Object, Create Status Update.
+
+Endpoint
+DELETE https://app.asana.com/api/1.0/status_updates/{status_update_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+status_update_gid (string, required) - Status update GID. URI path parameter.
+
+Result
+Returns object with data: empty object {} on success.
+
+Example result
+
+{
+  "data": {}
+}

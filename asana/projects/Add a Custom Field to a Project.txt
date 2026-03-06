@@ -1,0 +1,42 @@
+Tool: add_custom_field_setting_for_project
+
+Description
+Adds a custom field setting to a project so the project displays and can set values for that custom field. Body includes custom_field GID and optionally other settings. Related: Get a Project (custom_field_settings), Remove Custom Field Setting (if supported).
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects/{project_gid}/addCustomFieldSetting
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+custom_field (string, required) - Custom field GID to add.
+insert_after (string, optional) - GID of custom field setting after which to insert.
+insert_before (string, optional) - GID of custom field setting before which to insert.
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (updated project with new custom_field_setting) or the created custom_field_setting. Structure depends on API version.
+
+Example request body
+
+{
+  "custom_field": "5556667778889990"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Launch Campaign",
+    "custom_field_settings": [
+      { "gid": "123", "custom_field": { "gid": "5556667778889990", "name": "Priority", "resource_type": "custom_field" }, "project": { "gid": "1112223334445556" } }
+    ]
+  }
+}

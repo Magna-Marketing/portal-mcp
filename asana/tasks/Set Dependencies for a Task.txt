@@ -1,0 +1,37 @@
+Tool: add_dependencies_for_task
+
+Description
+Sets dependencies for a task. Body includes dependencies (comma-separated task GIDs). Those tasks become blocking: this task depends on them. Related: Get Dependencies from a Task, Unlink Dependencies from a Task.
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/addDependencies
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+dependencies (string, required) - Comma-separated list of task GIDs that this task will depend on.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data (task object or empty). 200 on success.
+
+Example request body
+
+{
+  "dependencies": "1213485594364559,1213485594364560"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review"
+  }
+}

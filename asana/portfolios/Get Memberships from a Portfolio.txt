@@ -1,0 +1,42 @@
+Tool: get_portfolio_memberships_for_portfolio
+
+Description
+Returns portfolio membership records for a portfolio. Each membership links a user to the portfolio with an access level (admin, editor, viewer). Use to list who has access to the portfolio. Related: Get a Portfolio, Add Users to a Portfolio.
+
+Endpoint
+GET https://app.asana.com/api/1.0/portfolios/{portfolio_gid}/portfolio_memberships
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+portfolio_gid (string, required) - Portfolio GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields (e.g. user,portfolio,access_level).
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of portfolio_membership objects). Each has:
+gid (string) - Membership GID.
+resource_type (string) - "portfolio_membership".
+portfolio (object) - Compact portfolio.
+user (object) - Compact user.
+access_level (string) - "admin", "editor", or "viewer".
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "12345",
+      "resource_type": "portfolio_membership",
+      "portfolio": { "gid": "1234567890123456", "name": "Q1 Initiatives", "resource_type": "portfolio" },
+      "user": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+      "access_level": "editor"
+    }
+  ]
+}

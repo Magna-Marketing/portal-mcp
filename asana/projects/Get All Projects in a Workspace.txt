@@ -1,0 +1,39 @@
+Tool: get_projects_for_workspace
+
+Description
+Returns all projects in a workspace. Use for listing every project in a workspace (optionally filter archived). Paginate with limit/offset. Related: Get Multiple Projects, Get a Project, Create Project in Workspace.
+
+Endpoint
+GET https://app.asana.com/api/1.0/workspaces/{workspace_gid}/projects
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+workspace_gid (string, required) - Workspace GID. URI path parameter.
+archived (boolean, optional) - If true, return only archived projects. Default false.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of project objects). Same shape as Get Multiple Projects.
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1112223334445556",
+      "resource_type": "project",
+      "name": "Launch Campaign",
+      "archived": false,
+      "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/workspaces/9876543210987654/projects", "uri": "..." }
+}

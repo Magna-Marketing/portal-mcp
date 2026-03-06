@@ -1,0 +1,38 @@
+Tool: get_items_for_portfolio
+
+Description
+Returns the list of items (projects) in a portfolio. Each item is a project. Use for listing all projects in a portfolio. Related: Get a Portfolio, Get Multiple Portfolios, Add Item for Portfolio (if supported).
+
+Endpoint
+GET https://app.asana.com/api/1.0/portfolios/{portfolio_gid}/items
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+portfolio_gid (string, required) - Portfolio GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return on each item (project).
+limit (number, optional) - Results per page (default 20, max 100).
+offset (string, optional) - Pagination offset; use next_page.offset from previous response.
+
+Result
+Returns object with data (array of project objects in this portfolio). Each item has project fields: gid, resource_type, name, archived, created_at, current_status, due_on, notes, owner, workspace, etc. (depending on opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1112223334445556",
+      "resource_type": "project",
+      "name": "Launch Campaign",
+      "archived": false,
+      "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/portfolios/1234567890123456/items", "uri": "..." }
+}

@@ -1,0 +1,44 @@
+Tool: get_users_for_workspace
+
+Description
+Returns all users in a workspace or organization. Use to list members of a workspace. Paginate with limit/offset. Related: Get Multiple Users, Get a User, Get Multiple Workspaces.
+
+Endpoint
+GET https://app.asana.com/api/1.0/workspaces/{workspace_gid}/users
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+workspace_gid (string, required) - Workspace (or organization) GID. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return (e.g. name,email,photo).
+limit (number, optional) - Results per page.
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of user objects in the workspace). Each has gid, resource_type, name, email (if permitted), photo, and more (opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1210038679514467",
+      "resource_type": "user",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "photo": { "image_128x128": "https://..." }
+    },
+    {
+      "gid": "1211007699959733",
+      "resource_type": "user",
+      "name": "John Smith",
+      "email": "john@example.com"
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/workspaces/9876543210987654/users", "uri": "..." }
+}

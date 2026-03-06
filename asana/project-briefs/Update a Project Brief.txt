@@ -1,0 +1,42 @@
+Tool: update_project_brief
+
+Description
+Updates an existing project brief. Use project_brief_gid to identify the brief. Body can include title, html_text, status. Related: Get Project Brief, Create Project Brief.
+
+Endpoint
+PATCH https://app.asana.com/api/1.0/project_briefs/{project_brief_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. At least one field required.
+title (string, optional) - Brief title.
+html_text (string, optional) - HTML content of the brief.
+status (string, optional) - "complete" or "incomplete".
+
+Input (parameters)
+project_brief_gid (string, required) - Project brief GID. URI path parameter.
+
+Result
+Returns object with data (updated project_brief object).
+
+Example request body
+
+{
+  "title": "Updated Q1 Overview",
+  "status": "complete"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "12345678",
+    "resource_type": "project_brief",
+    "title": "Updated Q1 Overview",
+    "html_text": "<body>Goals and scope...</body>",
+    "status": "complete"
+  }
+}

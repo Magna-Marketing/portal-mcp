@@ -1,0 +1,26 @@
+Tool: delete_section
+
+Description
+Deletes a section. Tasks in the section may be moved to another section or left unassigned depending on API behavior. Permanent. Related: Get a Section, Get Sections for Project, Create Section.
+
+Endpoint
+DELETE https://app.asana.com/api/1.0/sections/{section_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+section_gid (string, required) - Section GID. URI path parameter.
+
+Result
+Returns object with data: empty object {} on success.
+
+Example result
+
+{
+  "data": {}
+}

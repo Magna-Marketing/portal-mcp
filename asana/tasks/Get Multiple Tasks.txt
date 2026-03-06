@@ -1,0 +1,43 @@
+Tool: get_tasks
+
+Description
+Returns a list of tasks. Filter by project, section, tag, assignee, or workspace using query parameters. For tasks in a project use Get Tasks for Project; for workspace-wide list use multiple filters or Search Tasks in Workspace. Response is wrapped in data array. Related: Get a Task, Get Tasks for Project, Create Task, Update Task.
+
+Endpoint
+GET https://app.asana.com/api/1.0/tasks
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project (string, optional) - Project GID. Filter to tasks in this project.
+section (string, optional) - Section GID. Filter to tasks in this section.
+assignee (string, optional) - User GID. Filter to tasks assigned to this user.
+workspace (string, optional) - Workspace GID. Filter to tasks in this workspace.
+completed_since (string, optional) - ISO 8601 datetime; return tasks completed after this time.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page (default 20, max 100).
+offset (string, optional) - Pagination offset.
+
+Result
+Returns object with data (array of task objects). Each has gid, resource_type, name, completed, created_at, and more (opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1213485594364562",
+      "resource_type": "task",
+      "name": "Design review",
+      "completed": false,
+      "created_at": "2026-03-02T15:20:25.000Z",
+      "assignee": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" }
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/tasks", "uri": "..." }
+}

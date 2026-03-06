@@ -1,0 +1,41 @@
+Tool: insert_section_for_project
+
+Description
+Moves a section to a new position in the project, or inserts a new section at a position. Body includes section GID and insert_after (section GID) or insert_before. Use to reorder sections. Related: Get Sections for Project, Create Section, Update Section.
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects/{project_gid}/sections/insert
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+section (string, required) - Section GID to move or the new section to insert.
+insert_after (string, optional) - Section GID after which to place the section. Omit to insert at start.
+insert_before (string, optional) - Section GID before which to place the section.
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (updated section or project with reordered sections). Structure depends on API.
+
+Example request body
+
+{
+  "section": "7778889990001112",
+  "insert_after": "7778889990001111"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "7778889990001112",
+    "resource_type": "section",
+    "name": "In Progress",
+    "project": { "gid": "1112223334445556" }
+  }
+}

@@ -1,0 +1,37 @@
+Tool: get_user
+
+Description
+Returns a single user by GID. Use for current user (me) or any user by GID. Opt_fields to request name, email, photo, workspaces, etc. Related: Get Multiple Users, Get Users for Workspace.
+
+Endpoint
+GET https://app.asana.com/api/1.0/users/{user_gid}
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+user_gid (string, required) - User GID. Use "me" for the authenticated user. URI path parameter.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+
+Result
+Returns object with data (single user object). Fields include gid, resource_type, name, email, photo, workspaces, is_workspace_admin.
+
+Example result
+
+{
+  "data": {
+    "gid": "1210038679514467",
+    "resource_type": "user",
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "photo": { "image_128x128": "https://..." },
+    "workspaces": [
+      { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+    ],
+    "is_workspace_admin": false
+  }
+}

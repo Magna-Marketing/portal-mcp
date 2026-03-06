@@ -1,0 +1,43 @@
+Tool: add_members_for_portfolio
+
+Description
+Adds users as members of a portfolio. Request body includes members array (user GIDs) and optional role. Returns the updated portfolio. Related: Get Portfolio Memberships, Get a Portfolio.
+
+Endpoint
+POST https://app.asana.com/api/1.0/portfolios/{portfolio_gid}/addMembers
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+members (string, required) - Comma-separated list of user GIDs to add as members.
+role (string, optional) - Role for the new members: "admin", "editor", or "viewer". Omit for default.
+
+Input (parameters)
+portfolio_gid (string, required) - Portfolio GID. URI path parameter.
+
+Result
+Returns object with data (the updated portfolio object). Use opt_fields in request to control returned portfolio fields.
+
+Example request body
+
+{
+  "members": "1210038679514467,1211007699959733",
+  "role": "editor"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1234567890123456",
+    "resource_type": "portfolio",
+    "name": "Q1 Initiatives",
+    "members": [
+      { "gid": "1210038679514467", "resource_type": "user", "name": "Jane Doe" },
+      { "gid": "1211007699959733", "resource_type": "user", "name": "John Smith" }
+    ]
+  }
+}

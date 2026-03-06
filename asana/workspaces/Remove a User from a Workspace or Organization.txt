@@ -1,0 +1,33 @@
+Tool: remove_user_for_workspace
+
+Description
+Removes a user from a workspace or organization. Body or query includes user GID. Typically requires admin permissions. Related: Get Users for Workspace, Get Multiple Workspaces.
+
+Endpoint
+POST https://app.asana.com/api/1.0/workspaces/{workspace_gid}/removeUser
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+user (string, required) - User GID to remove from the workspace.
+
+Input (parameters)
+workspace_gid (string, required) - Workspace (or organization) GID. URI path parameter.
+
+Result
+Returns object with data: empty object {} on success. 200.
+
+Example request body
+
+{
+  "user": "1211007699959733"
+}
+
+Example result
+
+{
+  "data": {}
+}

@@ -1,0 +1,49 @@
+Tool: create_project_status_for_project
+
+Description
+Creates a new project status update for a project. Body includes title, text, optional color and status_type (on_track, at_risk, off_track, on_hold, complete). Related: Get Statuses from a Project, Get a Project Status, Delete Project Status.
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects/{project_gid}/project_statuses
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+title (string, required) - Title of the status update.
+text (string, optional) - Body text (can be markdown).
+color (string, optional) - green, yellow, red, blue.
+status_type (string, optional) - "on_track", "at_risk", "off_track", "on_hold", "complete".
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+
+Result
+Returns object with data (created project_status object).
+
+Example request body
+
+{
+  "title": "Weekly Update",
+  "text": "All milestones on track.",
+  "color": "green",
+  "status_type": "on_track"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "12345",
+    "resource_type": "project_status",
+    "title": "Weekly Update",
+    "text": "All milestones on track.",
+    "color": "green",
+    "created_at": "2025-03-01T12:00:00.000Z",
+    "author": { "gid": "1210038679514467", "name": "Jane Doe", "resource_type": "user" },
+    "status_type": "on_track",
+    "project": { "gid": "1112223334445556", "name": "Launch Campaign", "resource_type": "project" }
+  }
+}

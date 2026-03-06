@@ -1,0 +1,44 @@
+Tool: add_project_for_task
+
+Description
+Adds a task to a project. Body includes project GID. Optional insert_after, insert_before, section for ordering. Task can exist in multiple projects. Related: Get a Task (projects), Get Tasks for Project, Remove Project from Task (if supported).
+
+Endpoint
+POST https://app.asana.com/api/1.0/tasks/{task_gid}/addProject
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+project (string, required) - Project GID to add the task to.
+section (string, optional) - Section GID within the project to add the task to.
+insert_after (string, optional) - Task GID after which to insert (for order).
+insert_before (string, optional) - Task GID before which to insert.
+
+Input (parameters)
+task_gid (string, required) - Task GID. URI path parameter.
+
+Result
+Returns object with data (task object with updated memberships including the new project).
+
+Example request body
+
+{
+  "project": "1112223334445556",
+  "section": "7778889990001112"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1213485594364562",
+    "resource_type": "task",
+    "name": "Design review",
+    "memberships": [
+      { "project": { "gid": "1112223334445556", "name": "Launch Campaign" }, "section": { "gid": "7778889990001112", "name": "In Progress" } }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+Tool: create_project
+
+Description
+Creates a new project. Body must include workspace GID; name is required. Optional: notes, color, due_on, team, public, default_view, etc. Related: Get a Project, Get Multiple Projects, Create Project in Workspace.
+
+Endpoint
+POST https://app.asana.com/api/1.0/projects
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+JSON. Required.
+workspace (string, required) - Workspace GID.
+name (string, required) - Project name.
+notes (string, optional) - Project notes/description.
+color (string, optional) - Color name (e.g. light-green, dark-blue).
+due_on (string, optional) - Due date YYYY-MM-DD.
+team (string, optional) - Team GID.
+public (boolean, optional) - Whether project is public to workspace.
+default_view (string, optional) - "list", "board", "timeline", "calendar".
+
+Input (parameters)
+None (all in body).
+
+Result
+Returns object with data (created project object).
+
+Example request body
+
+{
+  "workspace": "9876543210987654",
+  "name": "Q2 Product Roadmap",
+  "notes": "High-level roadmap for Q2.",
+  "color": "light-blue"
+}
+
+Example result
+
+{
+  "data": {
+    "gid": "1112223334445556",
+    "resource_type": "project",
+    "name": "Q2 Product Roadmap",
+    "archived": false,
+    "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+  }
+}

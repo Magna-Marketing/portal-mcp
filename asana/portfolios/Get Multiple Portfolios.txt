@@ -1,0 +1,55 @@
+Tool: get_portfolios
+
+Description
+Returns a list of portfolios. Portfolios are high-level containers for projects (e.g. by client or initiative). Use workspace to filter by workspace GID, or omit for all accessible portfolios. Response is wrapped in data array. Use opt_fields to request specific fields (e.g. name, archived, color, created_at, created_by, custom_field_settings). Related: Get a Portfolio (single), Get Portfolio Items, Get Portfolio Memberships.
+
+Endpoint
+GET https://app.asana.com/api/1.0/portfolios
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+workspace (string, optional) - Workspace GID. Filter portfolios to this workspace.
+owner (string, optional) - User GID. Filter to portfolios owned by this user.
+opt_fields (string, optional) - Comma-separated list of fields to return (e.g. name,archived,color).
+opt_expand (string, optional) - Comma-separated list of relation names to expand.
+limit (number, optional) - Results per page (default 20, max 100).
+offset (string, optional) - Pagination offset; use next_page.offset from previous response for next page.
+
+Result
+Returns object with data (array of portfolio objects). Each portfolio has:
+gid (string) - Globally unique ID.
+resource_type (string) - "portfolio".
+name (string) - Portfolio name.
+archived (boolean) - Whether the portfolio is archived.
+color (string) - Color name or hex.
+created_at (string) - ISO 8601 datetime.
+created_by (object) - User who created (compact: gid, name, resource_type).
+custom_field_settings (array) - Optional, when requested via opt_fields.
+due_on (string) - Optional due date (YYYY-MM-DD).
+members (array) - Optional, when expanded.
+owner (object) - Optional, compact user.
+start_on (string) - Optional start date (YYYY-MM-DD).
+workspace (object) - Optional, compact workspace.
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1234567890123456",
+      "resource_type": "portfolio",
+      "name": "Q1 Initiatives",
+      "archived": false,
+      "color": "light-green",
+      "created_at": "2025-01-15T10:00:00.000Z",
+      "workspace": { "gid": "9876543210987654", "name": "My Workspace", "resource_type": "workspace" }
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/portfolios", "uri": "https://app.asana.com/api/1.0/portfolios?offset=..." }
+}

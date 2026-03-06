@@ -1,0 +1,44 @@
+Tool: get_tasks_for_project
+
+Description
+Returns tasks in a project. Optional: section GID to filter by section, completed_since, opt_fields. Paginate with limit/offset. Related: Get Tasks from Section, Get a Task, Add Project to Task, Create Task.
+
+Endpoint
+GET https://app.asana.com/api/1.0/projects/{project_gid}/tasks
+
+Headers (all Asana API calls)
+Authorization: Bearer <access_token> (Personal Access Token or OAuth).
+Content-Type: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+project_gid (string, required) - Project GID. URI path parameter.
+section (string, optional) - Section GID. Filter to tasks in this section.
+completed_since (string, optional) - ISO 8601 datetime; return tasks completed after this time.
+opt_fields (string, optional) - Comma-separated list of fields to return.
+limit (number, optional) - Results per page (default 20, max 100).
+offset (string, optional) - Pagination offset; use next_page.offset for next page.
+
+Result
+Returns object with data (array of task objects). Each has gid, resource_type, name, completed, created_at, due_on, assignee, memberships, and more (opt_fields).
+
+Example result
+
+{
+  "data": [
+    {
+      "gid": "1213485594364562",
+      "resource_type": "task",
+      "name": "Design review",
+      "completed": false,
+      "due_on": "2026-06-30",
+      "created_at": "2026-03-02T15:20:25.000Z",
+      "memberships": [
+        { "project": { "gid": "1112223334445556", "name": "Launch Campaign" }, "section": { "gid": "7778889990001112", "name": "In Progress" } }
+      ]
+    }
+  ],
+  "next_page": { "offset": "eyJ0eXBlIjoi...", "path": "/projects/1112223334445556/tasks", "uri": "..." }
+}
