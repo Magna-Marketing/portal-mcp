@@ -4,7 +4,7 @@ Description
 Updates an existing task. Body can include name, notes, completed, due_on, assignee, start_on, resource_subtype, and more. Use opt_fields to request returned fields. Related: Get a Task, Create Task, Duplicate Task.
 
 Endpoint
-PATCH https://app.asana.com/api/1.0/tasks/{task_gid}
+PUT https://app.asana.com/api/1.0/tasks/{task_gid}
 
 Headers (all Asana API calls)
 Authorization: Bearer <access_token> (Personal Access Token or OAuth).
