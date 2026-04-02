@@ -1,7 +1,7 @@
 Tool: get_project_time_records
 
 Description
-Returns time records for a single project. project_id is the Asana project ID with "as:" prefix. from and to are optional; use them when the user provides a date range. Works for both billable and non-billable projects. Result shape is the same as Get All Time Records. Not all time is billable: if the project does not have billing, time on that project is non-billable; if the project has billing, it can still have billable and non-billable tasks and time records. A time entry is billable when the project is billable and the embedded task does not have `unbillable: true`; if `unbillable` is absent on the task, treat the entry as billable by default. Related: Get All Time Records (team-wide), Get Task Time Records, Get User Time Records, Add Time.
+Returns time records for a single project. project_id is the Asana project ID with "as:" prefix. from and to are optional; use them when the user provides a date range. Optional limit and page for pagination. Works for both billable and non-billable projects. Result shape is the same as Get All Time Records. Each record includes id, date, user (Everhour user ID), time (seconds), comment, embedded task object, edit history, lock status, and cost. Related: Get All Time Records (team-wide), Get Task Time Records, Get User Time Records, Add Time. Not all time is billable: if the project does not have billing, time on that project is non-billable; if the project has billing, it can still have billable and non-billable tasks and time records. A time entry is billable when the project is billable and the embedded task does not have `unbillable: true`; if `unbillable` is absent on the task, treat the entry as billable by default.
 
 Endpoint
 GET https://api.everhour.com/projects/{project_id}/time
@@ -28,9 +28,9 @@ createdAt (string) - When the record was created.
 user (number) - Everhour user ID (same across all endpoints).
 time (number) - Time logged in seconds (/3600 for hours).
 comment (string) - Optional comment on the entry.
-task (object) - Embedded task: id, name, type, status, url, iteration, projects, estimate, time, attributes, assignees, completed. Same shape as Get Task.
-history (array) - Edit history: id, createdAt, time, action ("ADD", "EDIT"), previousTime, createdBy (Everhour user ID).
-lockReasons (string[]) - e.g. ["completed_task"] or [].
+task (object) - Embedded task: id, name, type, status, url, iteration, projects, createdAt, labels, time (total, users, timerTime), completed, completedAt. Same IDs and units as Get Task. When present: estimate, attributes, assignees, unbillable.
+history (array) - Edit history: id, createdAt, time, action (e.g. "ADD"), previousTime, createdBy (Everhour user ID).
+lockReasons (string[]) - e.g. ["completed_task"].
 isLocked (boolean) - Whether the record is locked.
 cost (number) - Cost in cents (/100 for dollars).
 costRate (number) - Rate in cents (/100 for dollars).
@@ -78,45 +78,47 @@ Example result
     "isLocked": true,
     "cost": 35000,
     "costRate": 5000
-  },
-  {
-    "id": 257149304,
-    "date": "2026-02-18",
-    "createdAt": "2026-02-26 14:51:35",
-    "user": 1413025,
-    "time": 14400,
-    "task": {
-      "id": "as:1213270553203631",
-      "name": "Unable to edit Prompts",
-      "type": "task",
-      "status": "completed",
-      "url": "https://app.asana.com/0/1211302978900701/1213270553203631/f",
-      "iteration": "Untitled section",
-      "projects": ["as:1211302978900701"],
-      "createdAt": "2026-02-13 20:21:27",
-      "dueOn": "2026-02-27",
-      "startOn": "2026-02-23",
-      "labels": [],
-      "estimate": { "type": "overall", "total": 57600 },
-      "time": { "total": 57600, "users": { "1413025": 57600 }, "timerTime": 0 },
-      "attributes": { "Status": "Completed", "Type": "Bug", "Sprint": "19. MoonKnight", "Product Priority": "1. Critical" },
-      "completed": true,
-      "completedAt": "2026-02-26 14:52:23",
-      "assignees": [{ "accountId": "as:1211044833945019", "accountName": "Aditya Pandey", "userId": 1413025 }]
-    },
-    "history": [
-      {
-        "id": 440844344,
-        "createdAt": "2026-02-26 14:51:35",
-        "time": 14400,
-        "action": "ADD",
-        "previousTime": 0,
-        "createdBy": 1413025
-      }
-    ],
-    "lockReasons": ["completed_task"],
-    "isLocked": true,
-    "cost": 20000,
-    "costRate": 5000
   }
 ]
+
+Example 2
+
+{
+  "id": 260069137,
+  "date": "2026-03-30",
+  "createdAt": "2026-03-31 21:42:04",
+  "user": 1413030,
+  "time": 1800,
+  "task": {
+    "id": "as:1213157388246446",
+    "name": "Unbillable ",
+    "type": "task",
+    "status": "open",
+    "url": "https://app.asana.com/0/1212667478457614/1213157388246446/f",
+    "iteration": "Unbillable",
+    "projects": ["as:1212667478457614"],
+    "createdAt": "2026-02-06 20:43:21",
+    "labels": [],
+    "unbillable": true,
+    "estimate": { "type": "overall", "total": 43200 },
+    "time": { "total": 37800, "users": { "1413030": 37800 }, "timerTime": 0 },
+    "completed": false
+  },
+  "history": [
+    {
+      "id": 445661039,
+      "createdAt": "2026-03-31 21:42:04",
+      "time": 1800,
+      "action": "ADD",
+      "previousTime": 0,
+      "previousDate": null,
+      "previousTask": null,
+      "createdBy": 1413030,
+      "warning": null
+    }
+  ],
+  "lockReasons": [],
+  "isLocked": false,
+  "cost": 2500,
+  "costRate": 5000
+}
