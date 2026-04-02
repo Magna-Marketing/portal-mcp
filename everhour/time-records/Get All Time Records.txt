@@ -1,7 +1,9 @@
 Tool: get_all_time_records
 
 Description
-Returns time records for the entire team in a date range. from and to (YYYY-MM-DD) are required. Do not use limit; use page (1, 2, 3, ...) and keep requesting until the response is empty. Each record includes id, date, user (Everhour user ID), time (seconds), comment, embedded task object, edit history, lock status, and cost. Related: Get Project Time Records, Get Task Time Records, Get User Time Records for filtered lists; Add Time to create. Not all time is billable: if the project does not have billing, time on that project is non-billable; if the project has billing, it can still have billable and non-billable tasks and time records. A time entry is billable when the project is billable and the embedded task does not have `unbillable: true`; if `unbillable` is absent on the task, treat the entry as billable by default.
+Returns time records for the entire team in a date range. from and to (YYYY-MM-DD) are required. Do not use limit; use page (1, 2, 3, ...) and keep requesting until the response is empty. Each record includes id, date, user (Everhour user ID), time (seconds), comment, embedded task object, edit history, lock status, and cost. Related: Get Project Time Records, Get Task Time Records, Get User Time Records for filtered lists; Add Time to create; Get a Project to resolve billing per project.
+
+Billable vs non-billable (interpretation): Time records do not include whether the project is billable. For each distinct project id in embedded task.projects (as: GIDs), call Get a Project (get_project) for that id. If get_project omits billing (and budget and rate; Everhour non-billable project), treat every time entry you attribute to that project as non-billable. Do not use task unbillable for that case. Only when get_project includes billing (billable project) apply task-level rules: the entry is non-billable if the embedded task has unbillable: true; if unbillable is absent, treat the entry as billable. If a task lists multiple projects, use get_project for the project you are attributing the hours to (e.g. the portfolio or report context).
 
 Endpoint
 GET https://api.everhour.com/team/time
@@ -27,7 +29,7 @@ createdAt (string) - When the record was created.
 user (number) - Everhour user ID (same across all endpoints).
 time (number) - Time logged in seconds (/3600 for hours).
 comment (string) - Optional comment on the entry.
-task (object) - Embedded task: id, name, type, status, url, iteration, projects, createdAt, labels, time (total, users, timerTime), completed, completedAt. Same IDs and units as Get Task.
+task (object) - Embedded task: id, name, type, status, url, iteration, projects, createdAt, labels, time (total, users, timerTime), completed, completedAt. Same IDs and units as Get Task. task.projects lists as: project GIDs; use get_project on each to decide billability (see Description). When present: unbillable (only meaningful after confirming project has billing via get_project).
 history (array) - Edit history: id, createdAt, time, action (e.g. "ADD"), previousTime, createdBy (Everhour user ID).
 lockReasons (string[]) - e.g. ["completed_task"].
 isLocked (boolean) - Whether the record is locked.
@@ -87,7 +89,7 @@ Example result
   }
 ]
 
-Example 2
+Example 2 (task.unbillable only affects billability after get_project for task.projects[0] returns billing; if that project has no billing, treat the whole entry as non-billable regardless of this flag)
 {
         "id": 260069137,
         "date": "2026-03-30",

@@ -32,6 +32,7 @@ Examples: `budget.budget` 17388000 sec = 4830 h. `rate.rate` 18500 cents = $185/
 
 - **Projects**: Billable projects include `billing`, `budget`, `rate` fields. Non-billable projects omit those three fields. All other fields are the same.
 - **Tasks**: If project is non-billable, all its tasks are non-billable (no flag needed). If project is billable, each task can be billable or unbillable: task has `unbillable: true` when unbillable; when absent, task is billable. Flag not present when the project itself is non-billable.
+- **Time records (Get All Time Records, Get Project Time Records, Get User Time Records, Get Task Time Records)**: Responses do not say whether the project is billable. Call **Get a Project** (`get_project`) for the relevant `as:` project id. If `get_project` omits `billing` (and `budget`, `rate`), treat every time entry on that project as **non-billable**; do not use `task.unbillable` to override that. **Only** when `get_project` includes `billing` apply task-level rules: entry is non-billable if embedded `task.unbillable` is `true`; if `unbillable` is absent, treat the entry as billable. For team-wide time, resolve each distinct project in `task.projects` via `get_project`.
 - **Get Task Billing**: Use when you need task-level billing info; call with `opts_include_billing=1`.
 
 ### Task estimates
@@ -92,8 +93,8 @@ Custom fields on projects (e.g. Manager, Project Lead, Salesforce Opportunity Id
 
 | Tool                     | Endpoint                              | Purpose |
 |--------------------------|---------------------------------------|---------|
-| get_all_time_records     | `GET /team/time`                      | Team time records in date range. **Required:** `from`, `to` (YYYY-MM-DD). Do not use `limit`; use `page` until empty response. Returns: id, date, user, time (seconds), comment, task (embedded), history, cost. |
-| get_project_time_records | `GET /projects/{project_id}/time`     | Time records for one project. **Required:** `project_id` (as:). **Optional:** `from`, `to`, `limit`, `page`. Same shape as get_all_time_records. |
+| get_all_time_records     | `GET /team/time`                      | Team time records in date range. **Required:** `from`, `to` (YYYY-MM-DD). Do not use `limit`; use `page` until empty response. Billability: use `get_project` per project in `task.projects` (see Billable vs non-billable). |
+| get_project_time_records | `GET /projects/{project_id}/time`     | Time records for one project. **Required:** `project_id` (as:). **Optional:** `from`, `to`, `limit`, `page`. Call `get_project` for same `project_id` before interpreting billability vs `task.unbillable`. |
 | get_user_time_records    | `GET /users/{user_id}/time`           | Time records for one user. **Required:** `user_id` (Everhour user ID). **Optional:** `from`, `to`, `limit`, `page`. Same shape as get_all_time_records. |
 | get_task_time_records    | `GET /tasks/{task_id}/time`           | Time records for one task. **Required:** `task_id` (as:). **Optional:** `from`, `to`, `limit`, `page`. Same shape as get_all_time_records. |
 | add_time                 | `POST /time`                          | Create a time record. Body: time (seconds), date (YYYY-MM-DD), task (as:), user (Everhour user ID), comment (optional). Returns created record; 400 on error. |
