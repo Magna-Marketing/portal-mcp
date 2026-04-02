@@ -1,7 +1,7 @@
 Tool: get_project_time_records
 
 Description
-Returns time records for a single project. project_id is the Asana project ID with "as:" prefix. from and to are optional; use them when the user provides a date range. Works for both billable and non-billable projects. Result shape is the same as Get All Time Records. Related: Get All Time Records (team-wide), Get Task Time Records, Get User Time Records, Add Time.
+Returns time records for a single project. project_id is the Asana project ID with "as:" prefix. from and to are optional; use them when the user provides a date range. Works for both billable and non-billable projects. Result shape is the same as Get All Time Records. Not all time is billable: if the project does not have billing, time on that project is non-billable; if the project has billing, it can still have billable and non-billable tasks and time records. A time entry is billable when the project is billable and the embedded task does not have `unbillable: true`; if `unbillable` is absent on the task, treat the entry as billable by default. Related: Get All Time Records (team-wide), Get Task Time Records, Get User Time Records, Add Time.
 
 Endpoint
 GET https://api.everhour.com/projects/{project_id}/time
