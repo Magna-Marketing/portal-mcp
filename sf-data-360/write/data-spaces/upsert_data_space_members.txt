@@ -1,0 +1,59 @@
+Tool: upsert_data_space_members
+
+Description
+Replace the membership list of a Data Space — which DMOs,
+Calculated Insights, Activations, Segments, and Data Graphs are
+visible inside it. Pass the complete desired set; objects not
+included are removed.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PUT {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName/members
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "members": [
+    { "memberType": "DataModelObject", "apiName": "UnifiedIndividual__dlm" },
+    { "memberType": "Segment",          "apiName": "EMEAHighValue" }
+  ]
+}
+
+Input (parameters)
+idOrName (string, required).
+members (array, required) - [{ memberType, apiName }]. Pass empty
+  array to clear membership.
+
+Result
+dataSpace (object) - Refreshed Data Space row.
+addedCount (number), removedCount (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent: re-passing the same members list is a no-op.
+
+Errors
+- 404 NOT_FOUND, 400 INVALID_MEMBER (apiName doesn't exist).
+
+Example request
+
+upsert_data_space_members({
+  "idOrName": "EMEA",
+  "members": [
+    { "memberType": "DataModelObject", "apiName": "UnifiedIndividual__dlm" }
+  ]
+})
+
+Example result
+{
+  "dataSpace": { "id": "0a0xx0000000002", "name": "EMEA", "memberCount": 1 },
+  "addedCount": 0, "removedCount": 13
+}

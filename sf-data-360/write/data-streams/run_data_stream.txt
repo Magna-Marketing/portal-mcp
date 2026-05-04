@@ -1,0 +1,55 @@
+Tool: run_data_stream
+
+Description
+Trigger an on-demand run of a Data Stream — pulls the latest data
+from the source Connection. Async; returns a `runId`. Poll via
+the Data Stream's main GET endpoint or via Bulk Ingest job status
+(when the stream uses an internal Bulk Ingest job).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-streams/:recordIdOrDeveloperName/actions/run
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "operationType": "Incremental" }
+
+Input (parameters)
+recordIdOrDeveloperName (string, required).
+operationType (string, optional) - "Full" | "Incremental".
+runIdempotencyKey (string, optional).
+
+Result
+runId (string).
+dataStreamId (string), developerName (string).
+status (string) - "Queued".
+submittedAt (ISO-8601).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight run per Data Stream.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS, 502 SOURCE_UNAVAILABLE.
+
+Example request
+
+run_data_stream({ "recordIdOrDeveloperName": "mc_sends",
+  "operationType": "Incremental" })
+
+Example result
+{
+  "runId": "RUN_DS_2026-04-29T13",
+  "dataStreamId": "0bcxx0000000001",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

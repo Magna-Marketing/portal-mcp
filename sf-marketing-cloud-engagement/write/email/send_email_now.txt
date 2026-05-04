@@ -1,0 +1,59 @@
+Tool: send_email_now
+
+Description
+Send a classic email immediately to a list / DE audience (the legacy
+"Send Now" flow). Uses the SOAP `Send` create with audience and
+classification options.
+
+For modern transactional sends prefer `send_transactional_email`. For
+journey-style sends use `inject_contacts_into_journey`.
+
+Marketing Cloud API
+SOAP API (`Send` Create).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest on Send.
+
+Input (parameters)
+emailId (number, optional) - Or emailCustomerKey.
+emailCustomerKey (string, optional).
+audience (object, required) - { type ("List"|"DataExtension"), id (List Id) | customerKey (DE Key) }.
+sendClassificationCustomerKey (string, optional).
+senderProfileCustomerKey (string, optional).
+deliveryProfileCustomerKey (string, optional).
+fromName (string, optional).
+fromAddress (string, optional).
+subject (string, optional) - Override email's subject.
+sendDate (string, optional, default now) - ISO timestamp; for scheduled sends.
+suppressTracking (boolean, optional, default false).
+isMultipart (boolean, optional, default true).
+
+Result
+sendId (number).
+status (string) - "Pending" | "Scheduled" | "Sending".
+queuedCount (number, when known).
+
+Required scopes
+- `email_send`.
+
+Idempotency & limits
+- Not idempotent — re-running creates another send.
+- Subject to provisioned hourly send rate.
+
+Errors
+- INVALID_AUDIENCE, SEND_LIMIT_EXCEEDED.
+
+Example request
+
+send_email_now({
+  "emailCustomerKey": "MTG_Welcome",
+  "audience": { "type": "List", "id": 12345 },
+  "sendClassificationCustomerKey": "Default Commercial"
+})

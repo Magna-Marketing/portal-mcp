@@ -1,0 +1,54 @@
+Tool: manage_survey
+
+Description
+Create / activate / deactivate / clone / delete Surveys via the Survey
+Builder API. For sending invitations programmatically use
+`SurveyInvitation` records (`dml_records`).
+
+Salesforce API
+REST API (Connect API + Data), v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/survey                            (create)
+PATCH /services/data/v66.0/connect/survey/{surveyId}                (update)
+POST /services/data/v66.0/connect/survey/{surveyId}/clone           (clone)
+DELETE /services/data/v66.0/sobjects/Survey/{id}                    (delete)
+PATCH /services/data/v66.0/sobjects/Survey/{id}                     (activate/deactivate)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "clone" | "delete".
+surveyId (string, optional) - Required for non-create.
+name (string, required for create/clone).
+description (string, optional).
+welcomeText (string, optional).
+thankYouText (string, optional).
+allowGuestUserAccess (boolean, optional, default false).
+templateName (string, optional, for create) - Survey template to start from.
+
+Result
+survey (object) - { id, name, status, isActive, version }.
+
+Required permissions
+- "Create and Set Up Surveys".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on name.
+
+Example request
+
+manage_survey({
+  "operation": "create",
+  "name": "MTG Project CSAT",
+  "description": "Sent at project close",
+  "welcomeText": "Thanks for working with us"
+})

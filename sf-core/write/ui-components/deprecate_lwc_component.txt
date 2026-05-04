@@ -1,0 +1,62 @@
+Tool: deprecate_lwc_component
+
+Description
+Soft-deprecate an LWC bundle. The component is renamed by prepending
+`DEPRECATED_`, the master label is updated, `isExposed` is set to
+false (so it can no longer be added to new pages), and a description
+note is appended. Existing FlexiPage placements are NOT removed; use
+`get_component_dependencies` + `analyze_component_usage` to plan their
+removal.
+
+Refuses to act on already-deprecated components (DeveloperName starts
+with `DEPRECATED_`).
+
+Salesforce API
+Tooling API, v66.0. Renames a bundle and updates its `Metadata`.
+Note: Renaming via Tooling API is supported by writing back the
+LightningComponentBundle's `Metadata.fullName`. Some orgs may require
+Metadata API for bundle rename.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest    (rename + meta updates)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+The MCP server submits a Metadata API package with the renamed bundle
+and updated meta XML.
+
+Input (parameters)
+name (string, required) - Existing bundle name (must NOT start with
+  `DEPRECATED_`).
+deprecationNote (string, optional, default "Deprecated as of {today}") -
+  Appended to description.
+disableExposure (boolean, optional, default true) - Sets isExposed=false.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+bundle (object) - { oldName, newName ("DEPRECATED_<name>"), oldLabel,
+  newLabel ("[DEPRECATED] <label>"), isExposed: false }.
+remainingPlacements (array, when computed) - { flexiPageName, region,
+  identifier } - existing FlexiPage uses still pointing at the old
+  component reference. The platform updates these to the new name
+  automatically; entries are surfaced for verification.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on already-deprecated names: returns no-op with reason.
+- Cannot rename managed bundles.
+
+Errors
+- ALREADY_DEPRECATED.
+- INVALID_FIELD: bundle is managed.
+- NOT_FOUND.
+
+Example request
+
+deprecate_lwc_component({ "name": "projectCard", "deprecationNote": "Replaced by projectCardV2 (Q3 2026)" })

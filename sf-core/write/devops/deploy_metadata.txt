@@ -1,0 +1,75 @@
+Tool: deploy_metadata
+
+Description
+Deploy a metadata package zip + manifest to the org. Supports
+`checkOnly` (validate-only), `runTests`, `testLevel`, `rollbackOnError`,
+and `ignoreWarnings`. Returns a `deployId` to poll with
+`get_deployment_status`.
+
+Salesforce API
+Metadata API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "deployOptions": {
+    "allowMissingFiles": false,
+    "autoUpdatePackage": false,
+    "checkOnly": false,
+    "ignoreWarnings": false,
+    "performRetrieve": false,
+    "purgeOnDelete": false,
+    "rollbackOnError": true,
+    "runTests": ["ProjectServiceTest"],
+    "singlePackage": true,
+    "testLevel": "RunSpecifiedTests"
+  },
+  "deployBase64": "UEsDB..."
+}
+
+Input (parameters)
+zipBase64 (string, required) - Base64-encoded deployment zip.
+checkOnly (boolean, optional, default false).
+rollbackOnError (boolean, optional, default true).
+ignoreWarnings (boolean, optional, default false).
+allowMissingFiles (boolean, optional, default false).
+autoUpdatePackage (boolean, optional, default false).
+purgeOnDelete (boolean, optional, default false) - Skip Recycle Bin for deletions.
+runTests (string[], optional) - Specific test class names; required when testLevel="RunSpecifiedTests".
+testLevel (string, optional) - "NoTestRun" | "RunSpecifiedTests" | "RunLocalTests" | "RunAllTestsInOrg".
+singlePackage (boolean, optional, default true).
+waitForCompletion (boolean, optional, default true) - Poll until terminal.
+
+Result
+deployId (string).
+status (string), done (boolean).
+componentSuccesses (array).
+componentFailures (array).
+runTestsResult (object|null) - { numTestsRun, numFailures, totalTime, failures, successes, codeCoverage, codeCoverageWarnings }.
+elapsedMs (number).
+
+Required permissions
+- "Modify Metadata Through Metadata API Functions" + (production) "Deploy Change Sets".
+
+Idempotency & limits
+- A deploy is not idempotent — same zip applied twice may trigger Apex compile and tests both times.
+- Production deploys mandate ≥75% code coverage and a real test run.
+
+Errors
+- DEPLOY_FAILED with componentFailures, INSUFFICIENT_TEST_COVERAGE.
+
+Example request
+
+deploy_metadata({
+  "zipBase64": "UEsDB...",
+  "checkOnly": false,
+  "rollbackOnError": true,
+  "testLevel": "RunSpecifiedTests",
+  "runTests": ["ProjectServiceTest", "ProjectTriggerHandlerTest"]
+})

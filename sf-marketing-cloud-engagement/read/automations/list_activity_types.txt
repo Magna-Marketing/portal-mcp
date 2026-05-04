@@ -1,0 +1,38 @@
+Tool: list_activity_types
+
+Description
+List the catalogue of automation activity types available in the org
+(Built-in Salesforce activities + any custom activities registered).
+Useful when authoring a new automation programmatically.
+
+Marketing Cloud API
+REST API (`/automation/v1/activitytypes`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/activitytypes
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeCustom (boolean, optional, default true).
+
+Result
+items (array) - { id, name, description, displayName, category, iconClass, isActive, configurationArguments (object schema) }.
+
+Required scopes
+- `automations_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_activity_types({})

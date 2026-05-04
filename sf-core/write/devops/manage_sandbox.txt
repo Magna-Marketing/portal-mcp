@@ -1,0 +1,59 @@
+Tool: manage_sandbox
+
+Description
+Create / clone / refresh / delete a sandbox. Long-running operations:
+the tool returns immediately with a `SandboxProcessId`; clients poll
+status with `view_sandbox`.
+
+Salesforce API
+Tooling API, v66.0. `SandboxInfo` and `SandboxProcess`.
+
+Endpoint
+POST   /services/data/v66.0/tooling/sobjects/SandboxInfo                (create or clone)
+PATCH  /services/data/v66.0/tooling/sobjects/SandboxInfo/{id}            (refresh)
+DELETE /services/data/v66.0/tooling/sobjects/SandboxInfo/{id}            (delete)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "SandboxName": "DEV1", "LicenseType": "DEVELOPER", "Description": "MTG dev sandbox", "AutoActivate": true, "ApexClassId": null, "TemplateId": null, "SourceId": null, "CopyChatter": false, "HistoryDays": 0 }
+
+Input (parameters)
+operation (string, required) - "create" | "clone" | "refresh" | "delete".
+sandboxName (string, required for create/clone/refresh).
+licenseType (string, required for create/clone) - "DEVELOPER" | "DEVELOPER_PRO" | "PARTIAL" | "FULL".
+description (string, optional).
+sourceSandboxName (string, optional, for clone).
+templateName (string, optional, for partial/full sandboxes with sandbox templates).
+apexClassName (string, optional) - Post-copy Apex class to run.
+copyChatter (boolean, optional, default false).
+historyDays (number, optional, default 0).
+autoActivate (boolean, optional, default true).
+waitForCompletion (boolean, optional, default false).
+
+Result
+sandboxInfoId (string).
+sandboxProcessId (string).
+status (string).
+operation (string).
+elapsedMs (number, optional, when waitForCompletion=true).
+
+Required permissions
+- "Manage Sandboxes" + run from production.
+
+Idempotency & limits
+- Not idempotent.
+- Refresh allowed once per `LicenseType`-specific window (Developer: 1/day; Full: 29 days).
+
+Errors
+- SANDBOX_LIMIT_EXCEEDED, SANDBOX_REFRESH_TOO_SOON, INVALID_LICENSE_TYPE.
+
+Example request (refresh)
+
+manage_sandbox({ "operation": "refresh", "sandboxName": "DEV1" })
+
+Example request (create developer)
+
+manage_sandbox({ "operation": "create", "sandboxName": "DEV2", "licenseType": "DEVELOPER", "description": "Daily dev" })

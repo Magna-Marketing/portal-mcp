@@ -1,0 +1,45 @@
+Tool: list_compact_layouts
+
+Description
+List compact layouts for an sObject (these drive the highlights panel
+fields on Lightning record pages). Returns the layout name, fields
+(with order), and the per-record-type primary assignment.
+
+Salesforce API
+REST API + Metadata API, v66.0. `/sobjects/{sObject}/describe/compactLayouts/...` (REST) and Metadata API `CompactLayout`.
+
+Endpoint
+GET /services/data/v66.0/sobjects/{sObject}/describe/compactLayouts/                (list)
+GET /services/data/v66.0/sobjects/{sObject}/describe/compactLayouts/{layoutId}      (single)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required).
+includeFieldDetails (boolean, optional, default true) - Include field labels and types.
+includeRecordTypePrimary (boolean, optional, default true).
+
+Result
+totalSize (number).
+compactLayouts (array) - Each:
+  id, name, label, sObject, isPrimary (boolean).
+  fields (array) - Each: { fieldApiName, label, type, length }.
+  recordTypeAssignments (array, when includeRecordTypePrimary=true) - [{ recordTypeId, recordTypeName, isPrimary }].
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_compact_layouts({ "sObject": "Account" })

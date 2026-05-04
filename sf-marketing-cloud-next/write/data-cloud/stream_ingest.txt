@@ -1,0 +1,86 @@
+Tool: stream_ingest
+
+Description
+Stream one or more records into a Data Cloud Streaming Ingestion
+endpoint. The destination is a Data Stream's source object; the
+records flow through the Data Stream into a DLO and (per mappings)
+into one or more DMOs in near real-time. Use for transactional
+events, web pixels, IoT, and CDC feeds.
+
+For >2k records / sec, prefer Bulk Ingest (`manage_bulk_ingest_job`
++ `upload_bulk_ingest_data`).
+
+Salesforce API
+Data Cloud Streaming Ingestion API.
+
+Endpoint
+POST {cdpInstanceUrl}/api/v1/ingest/sources/:sourceApiName/:objectApiName
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "data": [
+    {
+      "Id__c": "ORDER-100023",
+      "OrderDate__c": "2026-04-29T13:02:11Z",
+      "CustomerEmail__c": "jane@example.com",
+      "Amount__c": 199.99,
+      "Currency__c": "USD"
+    }
+  ]
+}
+
+Input (parameters)
+sourceApiName (string, required) - The Data Stream source API name
+  (typically the Data Stream's developer name without the `__dls`
+  suffix).
+objectApiName (string, required) - The target object on that source
+  (e.g. "Order").
+data (object[], required) - Up to 200 records per call. Each record
+  is keyed by the source object's column names.
+
+Result
+acceptedCount (number) - Records accepted (for downstream async processing).
+rejectedCount (number) - Records rejected at the API boundary
+  (schema / type validation failures).
+errors (array) - Per rejected record:
+  { index (number), code (string), message (string) }.
+ingestId (string) - Server-assigned id for tracing through to the
+  DLO load.
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- **Not idempotent** at the API boundary. Use a primary key column
+  on the DMO mapping for upstream dedupe.
+- 200 records / call; up to 200 calls / sec / source.
+- 1MB per record.
+
+Errors
+- 400 INVALID_FIELD (record schema mismatch),
+  413 PAYLOAD_TOO_LARGE, 404 NOT_FOUND (source / object),
+  401 invalid_token, 429 REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+stream_ingest({
+  "sourceApiName": "ecommerce",
+  "objectApiName": "Order",
+  "data": [
+    { "Id__c": "ORDER-100023", "Amount__c": 199.99,
+      "OrderDate__c": "2026-04-29T13:02:11Z" }
+  ]
+})
+
+Example result
+{
+  "acceptedCount": 1,
+  "rejectedCount": 0,
+  "errors": [],
+  "ingestId": "ING_abc123"
+}

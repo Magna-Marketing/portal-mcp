@@ -1,0 +1,66 @@
+Tool: lookup_universal_id
+
+Description
+Resolve a source-system record identifier to its Data 360 Unified
+Record ID — given a `(dataSourceId, dataSourceObjectId, sourceRecordId)`
+triple, returns the unified profile id (e.g. `UnifiedIndividual__dlm.Id__c`).
+Used by integration layers to bridge external IDs (CRM Lead/Contact id,
+MCE Subscriber Key, web pixel piVID) to the unified profile.
+
+Salesforce API
+Connect plane (default) or runtime plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/universalIdLookup/:entityName/:dataSourceId/:dataSourceObjectId/:sourceRecordId       (plane="connect")
+GET {cdpTenantUrl}/api/v1/universalIdLookup/:entityName/:dataSourceId__c/:dataSourceObjectId__c/:sourceRecordId__c                (plane="runtime")
+
+Headers
+Authorization: Bearer <core_access_token>     (connect)
+Authorization: Bearer <data_cloud_token>      (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+entityName (string, required) - e.g. "UnifiedIndividual" or
+  "UnifiedAccount".
+dataSourceId (string, required) - The source connector / system
+  identifier (e.g. "MCE_5001234").
+dataSourceObjectId (string, required) - The source object name
+  (e.g. "Subscriber").
+sourceRecordId (string, required) - The source-side primary key
+  (e.g. "MEM-100023").
+plane (string, optional, default "runtime").
+
+Result
+unifiedRecordId (string|null) - The Unified Individual / Unified
+  Account id, or null if no match.
+matchedAt (ISO-8601|null).
+identityResolutionRulesetId (string|null) - Which IR ruleset
+  produced the match.
+
+Required scopes
+- `cdp_profile_api_read` or `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND (no match), 401 invalid_token.
+
+Example request
+
+lookup_universal_id({
+  "entityName": "UnifiedIndividual",
+  "dataSourceId": "MCE_5001234",
+  "dataSourceObjectId": "Subscriber",
+  "sourceRecordId": "MEM-100023"
+})
+
+Example result
+{
+  "unifiedRecordId": "IND_001",
+  "matchedAt": "2026-04-29T08:00:00Z",
+  "identityResolutionRulesetId": "0YR580000000001"
+}

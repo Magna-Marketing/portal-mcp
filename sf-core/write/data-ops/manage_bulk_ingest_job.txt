@@ -1,0 +1,70 @@
+Tool: manage_bulk_ingest_job
+
+Description
+Full Bulk API 2.0 ingest job lifecycle in one tool: create, upload
+data (CSV or JSON), close (start processing), abort, get status, fetch
+successful/failed/unprocessed results, delete. Use Bulk API 2.0 for
+loads above ~10,000 records or any time you want resumable batches.
+
+Salesforce API
+Bulk API 2.0, v66.0.
+
+Endpoint
+POST   /services/data/v66.0/jobs/ingest                                                  (create)
+PUT    /services/data/v66.0/jobs/ingest/{jobId}/batches                                  (upload data)
+PATCH  /services/data/v66.0/jobs/ingest/{jobId}                                          (close or abort: state)
+GET    /services/data/v66.0/jobs/ingest/{jobId}                                          (get status)
+GET    /services/data/v66.0/jobs/ingest/{jobId}/successfulResults                        (CSV)
+GET    /services/data/v66.0/jobs/ingest/{jobId}/failedResults                            (CSV)
+GET    /services/data/v66.0/jobs/ingest/{jobId}/unprocessedrecords                       (CSV)
+DELETE /services/data/v66.0/jobs/ingest/{jobId}                                          (delete)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json (create/state) or text/csv (data upload)
+
+Body
+Create:
+{ "object": "Account", "operation": "insert", "lineEnding": "LF", "columnDelimiter": "COMMA", "contentType": "CSV", "externalIdFieldName": null, "assignmentRuleId": null }
+
+Input (parameters)
+operation (string, required) - "create" | "uploadData" | "close" | "abort" | "status" | "successfulResults" | "failedResults" | "unprocessedResults" | "delete".
+jobId (string, required for non-create).
+sObject (string, required for create).
+ingestOperation (string, required for create) - "insert" | "update" | "upsert" | "delete" | "hardDelete".
+externalIdFieldName (string, required for create when ingestOperation="upsert").
+contentType (string, optional, default "CSV") - "CSV" | "JSON".
+columnDelimiter (string, optional, default "COMMA") - "BACKQUOTE"|"CARET"|"COMMA"|"PIPE"|"SEMICOLON"|"TAB".
+lineEnding (string, optional, default "LF") - "LF" | "CRLF".
+assignmentRuleId (string, optional).
+data (string, optional, for uploadData) - CSV body or JSON array string.
+parseResultsAs (string, optional, default "csv") - "csv" | "rows".
+
+Result (per operation)
+For create: { jobId, state, contentUrl, lineEnding, columnDelimiter, contentType, object, operation, createdById, createdDate }.
+For uploadData: { jobId, status: "uploaded", contentSize }.
+For close/abort: { jobId, state }.
+For status: { jobId, state, recordsProcessed, retries, totalProcessingTime, errorMessage, numberRecordsFailed, ... }.
+For successfulResults / failedResults / unprocessedResults: { jobId, csv (string) | rows (array) }.
+For delete: { jobId, deleted: true }.
+
+Required permissions
+- "API Enabled" + DML permissions on the sObject.
+
+Idempotency & limits
+- Job creation is not idempotent.
+- 150 million records / 24 hours per org (`get_org_limits.DailyBulkApi*`).
+- Once `state="UploadComplete"` (after close), you cannot change the data.
+
+Errors
+- INVALID_JOB_STATE on calling close before uploadData.
+- DAILY_LIMIT_EXCEEDED.
+
+Example request (full lifecycle)
+
+manage_bulk_ingest_job({ "operation": "create", "sObject": "Account", "ingestOperation": "upsert", "externalIdFieldName": "External_Id__c" })
+  -> jobId
+manage_bulk_ingest_job({ "operation": "uploadData", "jobId": "<jobId>", "data": "External_Id__c,Name,Industry\nA1,ACME,Tech\n..." })
+manage_bulk_ingest_job({ "operation": "close", "jobId": "<jobId>" })
+manage_bulk_ingest_job({ "operation": "status", "jobId": "<jobId>" })           // poll
+manage_bulk_ingest_job({ "operation": "successfulResults", "jobId": "<jobId>" })

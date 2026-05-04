@@ -1,0 +1,58 @@
+Tool: list_dmo_mappings
+
+Description
+List Data Model Object mappings — the rules that copy data from
+a Data Lake Object (source) into a DMO (target). Each mapping has
+field-level mappings underneath.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sourceObject (string, optional) - Filter to mappings from one DLO
+  (the DLO's developer name).
+targetObject (string, optional) - Filter to mappings into one DMO.
+limit (number, optional, default 200).
+offset (number, optional).
+
+Result
+mappings (array) - Each: { developerName, label, sourceObject,
+  targetObject, fieldMappings (array<{ developerName, sourceField,
+  targetField, dataType, transformExpression, isPrimaryKey,
+  isExternalId }>), createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_dmo_mappings({ "sourceObject": "mc_sends__dll" })
+
+Example result
+{
+  "mappings": [
+    { "developerName": "mc_sends_to_send",
+      "sourceObject": "mc_sends__dll",
+      "targetObject": "Send__dlm",
+      "fieldMappings": [
+        { "sourceField": "Id__c", "targetField": "Id__c", "isPrimaryKey": true }
+      ] }
+  ]
+}

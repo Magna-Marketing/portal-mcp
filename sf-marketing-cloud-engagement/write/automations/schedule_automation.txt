@@ -1,0 +1,53 @@
+Tool: schedule_automation
+
+Description
+Set or remove an automation's schedule (cron / iCal-style recurrence).
+
+Marketing Cloud API
+REST API (`/automation/v1/automations/{id}/schedule`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/schedule
+DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/schedule
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "icalRecur": "FREQ=DAILY;INTERVAL=1",
+  "timezoneName": "Eastern Standard Time",
+  "startDate": "2026-05-01T01:00:00",
+  "endDate": "2027-01-01T00:00:00"
+}
+
+Input (parameters)
+automationId (string, optional).
+automationKey (string, optional).
+operation (string, required) - "set" | "clear".
+icalRecur (string, optional, required for set) - iCal RRULE (e.g. "FREQ=DAILY;INTERVAL=1").
+timezoneName (string, optional, default "Eastern Standard Time").
+startDate (string, optional, default = now).
+endDate (string, optional).
+
+Result
+schedule (object) - { id, icalRecur, timezoneName, startDate, endDate, nextRunDate }.
+
+Required scopes
+- `automations_write`.
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- INVALID_RRULE.
+
+Example request
+
+schedule_automation({
+  "automationKey": "mtg_nightly_member_sync",
+  "operation": "set",
+  "icalRecur": "FREQ=DAILY;INTERVAL=1;BYHOUR=1",
+  "timezoneName": "Eastern Standard Time"
+})

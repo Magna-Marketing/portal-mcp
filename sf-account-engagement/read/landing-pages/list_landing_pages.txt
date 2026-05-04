@@ -1,0 +1,63 @@
+Tool: list_landing_pages
+
+Description
+List Pardot-hosted Landing Pages. Each LP has a tracker-domain URL,
+optional layout template, an inlined Form (`formId`), and the
+campaign it attributes traffic to.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/landing-pages?fields={fields}&filter[campaignId]=eq,1024
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+campaignId (number, optional).
+formId (number, optional).
+folderId (number, optional).
+trackerDomainId (number, optional).
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,campaignId,folderId,
+  trackerDomainId,layoutTemplateId,formId,vanityUrl,vanityUrlPath,
+  url,bitlyShortUrl,bitlyIsPersonalized,title,description,
+  isDoNotIndex,isUseRedirectLocation,redirectLocation,salesforceId,
+  isDeleted,createdAt,updatedAt,createdById,updatedById).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+landingPages (array) - Each: { id, name, campaignId, folderId,
+  trackerDomainId, layoutTemplateId, formId, vanityUrl, vanityUrlPath,
+  url, title, description, isDoNotIndex, isUseRedirectLocation,
+  redirectLocation, salesforceId, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_landing_pages({ "campaignId": 1024 })
+
+Example result
+{
+  "landingPages": [
+    { "id": 6612, "name": "Spring LP", "vanityUrl": "https://go.magnatech.com/spring",
+      "campaignId": 1024, "formId": 4421 }
+  ]
+}

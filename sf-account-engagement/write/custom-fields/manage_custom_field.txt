@@ -1,0 +1,80 @@
+Tool: manage_custom_field
+
+Description
+Create, update, or delete a Prospect Custom Field. The `apiFieldId`
+is the stable name used in prospect writes; choose a snake-case
+identifier ending in `__c` to mirror SFDC custom-field convention.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/custom-fields                  (operation="create")
+PATCH  https://{pi-domain}/api/v5/objects/custom-fields/:id              (operation="update")
+DELETE https://{pi-domain}/api/v5/objects/custom-fields/:id              (operation="delete")
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "Region",
+  "fieldId": "region",
+  "apiFieldId": "region__c",
+  "type": "DROPDOWN",
+  "isUseValues": true,
+  "isRequired": false,
+  "isAnalyticsSynced": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required when operation in ["update","delete"]).
+name (string, required when create).
+fieldId (string, required when create) - Internal id (UI-visible).
+apiFieldId (string, required when create) - API name; immutable.
+type (string, required when create) - "TEXT" | "DROPDOWN" |
+  "RADIO_BUTTON" | "CHECKBOX" | "MULTI_SELECT" | "TEXTAREA" |
+  "DATE" | "NUMBER" | "CRM_USER" | "HIDDEN".
+isRequired (boolean, optional, default false).
+isUseValues (boolean, optional, default false) - Picklist values list.
+isRecordMultipleResponses (boolean, optional, default false).
+isAnalyticsSynced (boolean, optional, default false) - Mirrored to B2BMA.
+salesforceId (string, optional) - SFDC field reference.
+
+Result
+customField (object) - Created/updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Hard delete: deleted custom fields cannot be restored. Existing
+  prospect data on the field is preserved as orphaned values.
+- 100 custom fields per BU on Pro tier; 200 on Plus / Advanced /
+  Premium.
+
+Errors
+- 53 not_permitted, 49 readonly_field (api_field_id immutable on
+  update), 600 duplicate_api_field_id, 11 limit_reached.
+
+Example request
+
+manage_custom_field({
+  "operation": "create",
+  "name": "Region",
+  "fieldId": "region",
+  "apiFieldId": "region__c",
+  "type": "DROPDOWN",
+  "isUseValues": true
+})
+
+Example result
+{
+  "customField": { "id": 71, "name": "Region", "apiFieldId": "region__c",
+    "type": "DROPDOWN", "isUseValues": true }
+}

@@ -1,0 +1,60 @@
+Tool: get_data_stream
+
+Description
+Read a single Data Stream by api name (or id). Returns the source
+configuration, mapping rules, schedule, and last-run history.
+
+Salesforce API
+Data Cloud Metadata API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/metadata/datastreams/:dataStreamApiName
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataStreamApiName (string, required).
+dataSpace (string, optional, default "default").
+includeRunHistory (boolean, optional, default false) - When true,
+  also returns the last 25 runs.
+
+Result
+dataStream (object) - Same shape as `list_data_streams` rows plus:
+  sourceConfig (object), mappingRules (array<{ sourceField,
+  targetDmoField }>), schedule (object), category (string).
+runHistory (array, when includeRunHistory=true) -
+  [{ runId, startedAt, completedAt, status, recordsProcessed,
+     recordsRejected, errorRef }].
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_data_stream({ "dataStreamApiName": "mc_sends__dls",
+  "includeRunHistory": true })
+
+Example result
+{
+  "dataStream": {
+    "dataStreamApiName": "mc_sends__dls",
+    "sourceType": "MarketingCloudEngagement",
+    "dlmApiName": "mc_sends__dlm",
+    "status": "Active"
+  },
+  "runHistory": [
+    { "runId": "JOB_2026-04-29T12:00", "status": "Success",
+      "recordsProcessed": 12450 }
+  ]
+}

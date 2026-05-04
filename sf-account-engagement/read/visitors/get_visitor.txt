@@ -1,0 +1,47 @@
+Tool: get_visitor
+
+Description
+Read a single Visitor by id, with the linked prospect (if
+identified) expanded.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visitors/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `prospect.*`.
+includeRecentActivities (boolean, optional, default false).
+
+Result
+visitor (object): id, prospectId, piVID, companyName, companyDomain,
+  city, state, country, visitCount, pageViewCount, isIdentified,
+  createdAt, updatedAt, etc.
+prospect (object|null).
+recentActivities (array, when includeRecentActivities=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_visitor({ "id": 5512001 })
+
+Example result
+{ "visitor": { "id": 5512001, "piVID": "abc-12345", "isIdentified": false } }

@@ -1,0 +1,51 @@
+Tool: list_member_promotions
+
+Description
+List promotions a member is enrolled in (or has been enrolled in)
+along with progress / status. Backed by the Loyalty Program Process
+"Get Member Promotions". Use `list_eligible_promotions` for
+promotions the member could *still* enroll in.
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Get Member Promotions", "processParameters": { "MemberId": "...", "ProgramName": "..." } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+See above.
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+includeUnenrolled (boolean, optional, default false) - Include
+  promotions with `MembershipStatus = "Unenrolled"`.
+includeCompleted (boolean, optional, default true).
+
+Result
+memberId (string).
+promotions (array) - Each:
+  promotionId (string), promotionName (string),
+  membershipStatus (string) - "Enrolled" | "Unenrolled" | "Completed".
+  enrolledOn (string|null), unenrolledOn (string|null), completedOn (string|null),
+  progress (object|null) - For Cumulative-style promotions: { current, target, unit, percentComplete }.
+  rewardSummary (object|null).
+processStatus (string) - "Success" | "Error".
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROCESS_NOT_FOUND, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+list_member_promotions({ "programName": "MTG_Rewards", "memberId": "0lMQg00000abcDE2" })

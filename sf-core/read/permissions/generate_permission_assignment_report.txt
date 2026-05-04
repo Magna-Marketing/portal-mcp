@@ -1,0 +1,87 @@
+Tool: generate_permission_assignment_report
+
+Description
+Produce a detailed report of permission set and permission set group
+assignments for a chosen set of users. Per user: profile, direct
+permsets, group memberships, expiration dates, totals. Includes summary
+statistics (avg assignments per user, total distinct permsets/groups,
+top users by assignment count). Shaped for HR or change-control
+documentation.
+
+Differs from `audit_permissions` in scope: this is a roster of
+assignments for specific users; `audit_permissions` is org-wide risk.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `PermissionSetAssignment` joined to
+`User`, `PermissionSet`, `PermissionSetGroup`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.IsActive, Assignee.Profile.Name, PermissionSetId, PermissionSet.Name, PermissionSet.Label, PermissionSetGroupId, PermissionSetGroup.DeveloperName, PermissionSetGroup.MasterLabel, ExpirationDate FROM PermissionSetAssignment WHERE AssigneeId IN ({userIds}) ORDER BY Assignee.Name
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+userIds (string[], optional) - User Ids to report on.
+usernames (string[], optional) - User.Username values.
+profileName (string, optional) - All active users with this profile.
+includeInactiveUsers (boolean, optional, default false).
+includeExpired (boolean, optional, default false).
+groupBy (string, optional) - "user" (default) | "permset" | "group" |
+  "profile". Groups the rows accordingly in the response.
+sortBy (string, optional, default "Name").
+
+Result
+generatedAt (string).
+totalUsers (number).
+totalAssignments (number).
+distinctPermsets (number).
+distinctGroups (number).
+rowsPerUser (object|null) - When groupBy=user.
+  Map of userId -> { user, permsets[], groups[], assignmentCount,
+    activePermsetCount, expiringSoon: bool, hasGroup: bool }.
+rowsPerPermset (object|null) - When groupBy=permset.
+rowsPerGroup (object|null) - When groupBy=group.
+rowsPerProfile (object|null) - When groupBy=profile.
+topUsersByAssignmentCount (array) - { userId, name, count }.
+
+Required permissions
+- "View Setup and Configuration" / "Manage Users".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on usernames not in org.
+
+Example request
+
+generate_permission_assignment_report({
+  "profileName": "Standard User",
+  "groupBy": "user"
+})
+
+Example result (truncated)
+
+{
+  "generatedAt": "2026-04-29T16:05:00Z",
+  "totalUsers": 38,
+  "totalAssignments": 142,
+  "distinctPermsets": 27,
+  "distinctGroups": 5,
+  "rowsPerUser": {
+    "005Qg0000020aBcDE": {
+      "user": { "id": "005Qg0000020aBcDE", "name": "Jane Doe", "username": "jane.doe@magnatech.com" },
+      "permsets": [{ "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager", "expirationDate": null }],
+      "groups": [{ "id": "0PGQg00000004abAB", "developerName": "MTG_Delivery_Bundle", "label": "MTG Delivery Bundle" }],
+      "assignmentCount": 2, "activePermsetCount": 2, "expiringSoon": false, "hasGroup": true
+    }
+  },
+  "topUsersByAssignmentCount": [
+    { "userId": "005Qg0000020aBcDE", "name": "Jane Doe", "count": 2 }
+  ]
+}

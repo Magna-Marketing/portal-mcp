@@ -1,0 +1,77 @@
+Tool: process_document_ai_data
+
+Description
+Run synchronous Document AI utilities — extract structured data from
+a single document, or generate a starter schema from a sample
+document. Unifies two Postman endpoints under `subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/document-processing/actions/extract-data       (subOperation="extract")
+POST {instanceUrl}/services/data/v{ver}/ssot/document-processing/actions/generate-schema    (subOperation="generateSchema")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (extract)
+{
+  "configurationApiName": "Invoice_Default",
+  "documentBase64": "JVBERi0xLjcK..."
+}
+
+Body (generateSchema)
+{
+  "documentType": "Invoice",
+  "documentBase64": "JVBERi0xLjcK..."
+}
+
+Input (parameters)
+subOperation (string, required) - "extract" | "generateSchema".
+configurationApiName (string, required for extract).
+documentType (string, required for generateSchema).
+documentBase64 (string, optional) - Inline base64 of the document.
+documentRef (string, optional) - URI to fetch the document from.
+language (string, optional, default "en").
+
+Result
+For "extract":
+  extracted (object) - Field values extracted, keyed by DMO api names.
+  confidence (object) - Per-field confidence scores (0-1).
+  pageCount (number), durationMs (number).
+For "generateSchema":
+  schema (object) - Inferred field list; usable with
+    `manage_document_ai_configuration operation="create"`.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Synchronous; subject to org-level Document AI quota (~100 calls/min).
+- Max document size 25MB.
+
+Errors
+- 413 PAYLOAD_TOO_LARGE, 400 OCR_FAILED, 404 NOT_FOUND
+  (configuration), 422 NO_TEXT_DETECTED.
+
+Example request
+
+process_document_ai_data({
+  "subOperation": "extract",
+  "configurationApiName": "Invoice_Default",
+  "documentBase64": "JVBERi0xLjcK..."
+})
+
+Example result
+{
+  "extracted": {
+    "InvoiceNumber__c": "INV-2026-001",
+    "Amount__c": 199.99,
+    "InvoiceDate__c": "2026-04-29"
+  },
+  "confidence": { "InvoiceNumber__c": 0.99, "Amount__c": 0.97 },
+  "pageCount": 1, "durationMs": 412
+}

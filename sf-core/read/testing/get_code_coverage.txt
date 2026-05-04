@@ -1,0 +1,53 @@
+Tool: get_code_coverage
+
+Description
+Get Apex code coverage for one or more classes / triggers from the
+last available test runs. Returns per-class numLines covered vs
+uncovered, plus a per-line coverage map (which lines weren't hit).
+
+Salesforce API
+Tooling API, v66.0. `ApexCodeCoverage` (per test class -> covered class)
+and `ApexCodeCoverageAggregate` (cumulative across all tests).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage FROM ApexCodeCoverageAggregate WHERE ApexClassOrTrigger.Name IN (...)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+classOrTriggerNames (string[], optional) - Class/trigger API names. Omit for all.
+classOrTriggerIds (string[], optional).
+includePerLineCoverage (boolean, optional, default true).
+includeRecentTestList (boolean, optional, default false) - List the test classes that hit each covered class.
+
+Result
+totalSize (number).
+coverage (array) - Each:
+  apexClassOrTriggerName (string).
+  apexClassOrTriggerId (string).
+  type ("Class"|"Trigger").
+  numLinesCovered (number).
+  numLinesUncovered (number).
+  totalLines (number).
+  percentCovered (number).
+  uncoveredLines (number[], when includePerLineCoverage=true).
+  recentTestClasses (string[], when includeRecentTestList=true).
+
+Required permissions
+- "View All Data" / "Author Apex".
+
+Idempotency & limits
+- Read-only.
+- Coverage data reflects the last test runs; re-run tests for fresh data.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+get_code_coverage({ "classOrTriggerNames": ["ProjectService", "ProjectTriggerHandler"], "includePerLineCoverage": true })

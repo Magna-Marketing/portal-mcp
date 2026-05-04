@@ -1,0 +1,40 @@
+Tool: list_platform_event_channels
+
+Description
+List Platform Event channels (custom channels that bundle Platform
+Events for streaming) and their members.
+
+Salesforce API
+Tooling API, v66.0. `PlatformEventChannel`, `PlatformEventChannelMember`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ChannelType FROM PlatformEventChannel WHERE ChannelType = 'event'
+GET /services/data/v66.0/tooling/query/?q=SELECT EventChannelId, EventChannel.DeveloperName, SelectedEntity, FilterExpression FROM PlatformEventChannelMember
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional).
+includeMembers (boolean, optional, default true).
+
+Result
+totalSize (number).
+platformEventChannels (array) - { id, developerName, masterLabel, channelType "event", members: [{ selectedEntity, filterExpression }] }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_platform_event_channels({ "includeMembers": true })

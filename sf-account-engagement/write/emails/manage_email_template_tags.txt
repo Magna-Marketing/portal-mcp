@@ -1,0 +1,44 @@
+Tool: manage_email_template_tags
+
+Description
+Add or remove tags on an Email Template.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/email-templates/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/email-templates/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Onboarding" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), emailTemplateId (number), tag (string),
+operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_email_template_tags({ "id": 451, "operation": "add", "tag": "Onboarding" })
+
+Example result
+{ "success": true, "emailTemplateId": 451, "tag": "Onboarding", "operation": "add" }

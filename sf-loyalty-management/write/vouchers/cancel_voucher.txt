@@ -1,0 +1,50 @@
+Tool: cancel_voucher
+
+Description
+Cancel one or more vouchers (sets `Status = "Cancelled"`). Wraps the
+Loyalty Connect API endpoint or the Loyalty Program Process "Cancel a
+Voucher".
+
+Salesforce API
+Loyalty Connect API + Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/vouchers/{voucherId}/cancel
+or
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Cancel a Voucher", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "reason": "Issued in error", "comments": "..." }
+
+Input (parameters)
+programName (string, required).
+vouchers (object[], required) - Each: { voucherId | voucherCode, reason (string, optional), comments (string, optional) }.
+allOrNone (boolean, optional, default false).
+externalTransactionId (string, optional, idempotency key).
+
+Result
+results (array) - Per voucher: { voucherId, voucherCode, status ("Cancelled"|"already_cancelled"|"failed"), error }.
+summary (object) - { cancelled, alreadyCancelled, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent (cancelling an already-cancelled voucher returns
+  "already_cancelled").
+
+Errors
+- LOYALTY_VOUCHER_ALREADY_REDEEMED (cannot cancel redeemed vouchers).
+- VOUCHER_NOT_FOUND.
+
+Example request
+
+cancel_voucher({
+  "programName": "MTG_Rewards",
+  "vouchers": [{ "voucherCode": "VC-89231", "reason": "Issued in error" }]
+})

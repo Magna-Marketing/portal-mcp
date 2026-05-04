@@ -1,0 +1,56 @@
+Tool: list_layout_templates
+
+Description
+List Layout Templates (the HTML + CSS shells used to wrap forms and
+landing pages). Each template defines the page chrome (header,
+footer, navigation, fonts).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/layout-templates?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+folderId (number, optional).
+nameContains (string, optional).
+isIncludeDefaultCss (boolean, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,folderId,
+  isIncludeDefaultCss,createdAt,updatedAt,createdById,updatedById,
+  isDeleted).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+layoutTemplates (array) - Each: { id, name, folderId,
+  isIncludeDefaultCss, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_layout_templates({})
+
+Example result
+{
+  "layoutTemplates": [
+    { "id": 71, "name": "Default LP shell", "isIncludeDefaultCss": true }
+  ]
+}

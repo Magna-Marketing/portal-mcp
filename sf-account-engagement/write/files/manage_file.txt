@@ -1,0 +1,73 @@
+Tool: manage_file
+
+Description
+Create, update, or delete a File. Create uploads a binary file via
+multipart, update changes metadata only (folder, tracker, name,
+campaign), delete soft-deletes the row (existing references break
+on delete unless `forceDelete=true`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/files          (create — multipart)
+PATCH  https://{pi-domain}/api/v5/objects/files/:id      (update — JSON)
+DELETE https://{pi-domain}/api/v5/objects/files/:id      (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: multipart/form-data (create) or application/json (update)
+Accept: application/json
+
+Body (create — multipart)
+- file (file): binary content
+- file (string, JSON): { "name": "logo.png", "folderId": 33,
+  "trackerDomainId": 7, "campaignId": 1024, "isTracked": true }
+
+Body (update — JSON)
+{ "folderId": 41, "isTracked": false }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create).
+fileBase64 (string, required for create) - base64-encoded bytes.
+mimeType (string, required for create).
+folderId (number, optional).
+trackerDomainId (number, optional).
+campaignId (number, optional).
+isTracked (boolean, optional).
+forceDelete (boolean, optional, default false) - When true, breaks
+  references in emails / landing pages.
+
+Result
+file (object) - Created/updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Max file size 50MB. Multipart uploads can be retried on `5xx`.
+- Soft-delete by default; `forceDelete=true` is destructive.
+
+Errors
+- 600 file_too_large, 53 mime_type_not_allowed, 20 missing_file_part.
+
+Example request
+
+manage_file({
+  "operation": "create",
+  "name": "logo.png",
+  "mimeType": "image/png",
+  "fileBase64": "iVBORw0KG...",
+  "folderId": 33,
+  "isTracked": true
+})
+
+Example result
+{
+  "file": { "id": 901, "name": "logo.png", "size": 18244,
+    "url": "https://go.magnatech.com/l/.../logo.png" }
+}

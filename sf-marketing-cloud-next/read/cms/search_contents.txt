@@ -1,0 +1,67 @@
+Tool: search_contents
+
+Description
+Search CMS content (emails, templates, images, documents) by title /
+body text, type, language, and workspace. Supports full-text and
+title-only search. Returns a paged list of content envelopes.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/connect/cms/items/search?q={query}&types[]={type}&languages[]={lang}&contentSpaceId={spaceId}
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+query (string, optional) - Full-text query. Omit to list everything.
+titleOnly (boolean, optional, default false) - When true, search
+  only the title field (faster).
+types (string[], optional) - One or more content types:
+  "cms_email__c", "cms_email_template__c", "cms_image",
+  "cms_document".
+languages (string[], optional) - e.g. ["en_US","fr_FR"].
+contentSpaceId (string, optional) - Restrict to a workspace.
+status (string, optional) - "Draft" | "Published" | "Archived".
+limit (number, optional, default 25, max 100).
+nextPageToken (string, optional).
+
+Result
+items (array) - Each: { id, contentKey, title, type, contentSpaceId,
+  status, publishedDate, lastModifiedDate, language, snippet }.
+nextPageToken (string|null).
+total (number) - Approximate total matches.
+
+Required scopes
+- `api`, `cms_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 400 INVALID_FIELD (unknown type), 401 INVALID_SESSION_ID.
+
+Example request
+
+search_contents({
+  "query": "welcome",
+  "types": ["cms_email__c","cms_email_template__c"],
+  "languages": ["en_US"],
+  "limit": 10
+})
+
+Example result
+{
+  "items": [
+    { "id": "0Q0xx000000abcdEAA", "contentKey": "welcome_email_2026",
+      "title": "Welcome 2026", "type": "cms_email__c",
+      "status": "Published", "language": "en_US" }
+  ],
+  "nextPageToken": null,
+  "total": 1
+}

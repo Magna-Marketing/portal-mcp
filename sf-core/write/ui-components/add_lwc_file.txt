@@ -1,0 +1,50 @@
+Tool: add_lwc_file
+
+Description
+Add a new file to an existing LWC bundle. Cannot be used to overwrite
+existing files (use `update_lwc_file`). Cannot add `js` or `js-meta.xml`
+to a bundle that already has them.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/LightningComponentResource
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (resource create)
+{ "MetadataContainerId": "<id>", "LightningComponentBundleId": "<bundleId>", "FilePath": "lwc/{name}/{fileName}", "Format": "css", "Source": "..." }
+
+Input (parameters)
+bundleName (string, required).
+fileName (string, required) - Must include extension.
+source (string, required) - File contents.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+file (object, on success) - { id, fileName, format, sizeBytes }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent — fails if the file already exists.
+
+Errors
+- DUPLICATE_VALUE on existing file.
+- INVALID_FIELD on unsupported file extension.
+- DEPLOY_FAILED with compile errors.
+
+Example request (add CSS)
+
+add_lwc_file({
+  "bundleName": "projectCard",
+  "fileName": "projectCard.css",
+  "source": ":host { display: block; padding: 0.5rem; }"
+})

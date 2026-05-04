@@ -1,0 +1,56 @@
+Tool: manage_email_classic
+
+Description
+Create / update / delete a classic Email Studio email (`Email`). For
+Content Builder HTML / template assets prefer `manage_asset` with the
+`htmlemail` / `templatebasedemail` asset types.
+
+Marketing Cloud API
+SOAP API (`Email` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest with Email.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+emailId (number, optional, required for non-create).
+customerKey (string, optional).
+name (string, required for create).
+subject (string, required for create).
+htmlBody (string, optional).
+textBody (string, optional).
+fromName (string, optional).
+fromEmail (string, optional).
+emailType (string, optional, default "Standard") - "Standard" | "Triggered" | "Welcome".
+folderId (number, optional).
+isHTMLPaste (boolean, optional, default true).
+
+Result
+email (object) - { id, customerKey, name, subject, fromName, fromEmail, emailType, folderId }.
+
+Required scopes
+- `email_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on customerKey.
+
+Example request
+
+manage_email_classic({
+  "operation": "create",
+  "name": "MTG_Welcome",
+  "subject": "Welcome to MTG",
+  "htmlBody": "<html>...</html>",
+  "fromName": "MTG",
+  "fromEmail": "noreply@magnatech.com"
+})

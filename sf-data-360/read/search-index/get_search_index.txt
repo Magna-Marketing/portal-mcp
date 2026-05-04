@@ -1,0 +1,49 @@
+Tool: get_search_index
+
+Description
+Read a single Search Index by api name or id.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/search-index/:searchIndexApiNameOrId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+searchIndexApiNameOrId (string, required).
+
+Result
+searchIndex (object): id, apiName, label, status, sourceDmoApiName,
+  embeddingModel, vectorDimension, fields (array<{ apiName,
+  isIndexed, isFilterable }>), recordCount, lastIndexedDate,
+  createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_search_index({ "searchIndexApiNameOrId": "ProductCatalog__si" })
+
+Example result
+{
+  "searchIndex": {
+    "apiName": "ProductCatalog__si",
+    "sourceDmoApiName": "Product__dlm",
+    "embeddingModel": "openai.text-embedding-3-small",
+    "vectorDimension": 1536
+  }
+}

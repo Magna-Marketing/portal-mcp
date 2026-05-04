@@ -1,0 +1,61 @@
+Tool: list_lists
+
+Description
+List static and dynamic prospect lists. Static lists are populated
+by membership writes; dynamic lists evaluate `criteria` on a
+schedule (hourly).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/lists?fields={fields}&filter[isPublic]=eq,true
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+isDynamic (boolean, optional).
+isPublic (boolean, optional).
+isCrmVisible (boolean, optional).
+folderId (number, optional).
+campaignId (number, optional).
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,description,isPublic,
+  isDynamic,isCrmVisible,folderId,campaignId,createdAt,updatedAt,
+  createdById,updatedById,salesforceId,isDeleted,title).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+lists (array) - Each: { id, name, description, isPublic, isDynamic,
+  isCrmVisible, folderId, campaignId, salesforceId, title,
+  isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_lists({ "isDynamic": true })
+
+Example result
+{
+  "lists": [
+    { "id": 301, "name": "Active customers", "isDynamic": true,
+      "isPublic": true, "campaignId": 1024 }
+  ]
+}

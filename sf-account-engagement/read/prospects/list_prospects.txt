@@ -1,0 +1,77 @@
+Tool: list_prospects
+
+Description
+List Prospect records. Supports filtering on built-in fields and
+any custom-field `apiFieldId` (use `filter[customFields.region__c]=eq,EMEA`).
+Use `fields=` to project relations like `prospectAccount.*` and
+`assignedToUser.*`. For server-side scrolling beyond ~100k rows,
+prefer an export job (`create_export` with object=Prospect).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/prospects?fields={fields}&filter[email]=eq,jane%40example.com
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+email (string, optional) - exact match.
+emailContains (string, optional) - `like` match.
+crmId (string, optional) - SFDC Lead/Contact id.
+campaignId (number, optional).
+listId (number, optional) - Filters via list-membership join.
+assignedToUserId (number, optional).
+assignedToGroupId (number, optional).
+isDoNotEmail (boolean, optional).
+isOptedOut (boolean, optional).
+gradeFrom (string, optional) - e.g. "B" — letter grade comparison.
+scoreMin (number, optional).
+scoreMax (number, optional).
+updatedAfter (string, optional) - ISO-8601.
+createdAfter (string, optional) - ISO-8601.
+fields (string[], optional, default: id,email,firstName,lastName,
+  company,jobTitle,score,grade,salesforceId,campaignId,assignedToUserId,
+  isDoNotEmail,isDoNotCall,isOptedOut,isReviewed,isStarred,createdAt,
+  updatedAt,lastActivityAt,prospectAccountId,salutation,phone,fax,
+  mobilePhone,address1,address2,city,state,zip,country,department,
+  industry,annualRevenue,employees,website,years_in_business,source,
+  notes).
+limit (number, optional, default 50, max 200).
+nextPageToken (string, optional).
+
+Result
+prospects (array) - Each: { id, email, firstName, lastName, company,
+  jobTitle, score, grade, salesforceId, campaignId, assignedToUserId,
+  isDoNotEmail, isDoNotCall, isOptedOut, isReviewed, isStarred,
+  prospectAccountId, address1, address2, city, state, zip, country,
+  industry, annualRevenue, employees, website, source, notes,
+  createdAt, updatedAt, lastActivityAt, customFields (object) }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection, 184 daily_limit_reached.
+
+Example request
+
+list_prospects({ "campaignId": 1024, "scoreMin": 50, "limit": 25 })
+
+Example result
+{
+  "prospects": [
+    { "id": 7745, "email": "jane@example.com", "firstName": "Jane",
+      "score": 75, "grade": "A", "salesforceId": "00Q5800000xyzABC" }
+  ]
+}

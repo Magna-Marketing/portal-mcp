@@ -1,0 +1,57 @@
+Tool: manage_subscriber
+
+Description
+Create / update / delete a Subscriber directly via the SOAP API. Use
+when you need fine-grained control over Subscriber attributes / status
+without going through a list (`manage_list_subscribers`) or the
+Contact Builder model (`create_or_update_contact`).
+
+Marketing Cloud API
+SOAP API (`Subscriber` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest / DeleteRequest on Subscriber with
+SaveOptions (`UpdateAdd` for upsert semantics).
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+subscribers (object[], required) - Each:
+  subscriberKey (string, required).
+  email (string, optional).
+  status (string, optional, default "Active") - "Active" | "Unsubscribed" | "Held" | "Bounced".
+  emailTypePreference (string, optional, default "HTML") - "HTML" | "Text".
+  attributes (object, optional) - Subscriber attribute name -> value.
+  listMemberships (object[], optional) - [{ listId, status }] to set list-level membership in the same call.
+
+Result
+results (array) - { subscriberKey, subscriberId, status ("created"|"updated"|"deleted"|"failed"), errors }.
+summary (object) - { created, updated, deleted, failed, total }.
+
+Required scopes
+- `list_and_subscribers_write`.
+
+Idempotency & limits
+- upsert idempotent on subscriberKey.
+- 200 per call (SOAP).
+
+Errors
+- DUPLICATE_VALUE, SUBSCRIBER_NOT_FOUND.
+
+Example request
+
+manage_subscriber({
+  "operation": "upsert",
+  "subscribers": [{
+    "subscriberKey": "MEM-100023",
+    "email": "jane.doe@example.com",
+    "status": "Active",
+    "attributes": { "FirstName": "Jane", "LastName": "Doe", "TierName": "Gold" }
+  }]
+})

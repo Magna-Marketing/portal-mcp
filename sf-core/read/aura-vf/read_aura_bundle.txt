@@ -1,0 +1,41 @@
+Tool: read_aura_bundle
+
+Description
+Read a single Aura bundle with all its definitions inline:
+.cmp/.app/.evt/.intf, controller (.js), helper (.js), renderer (.js),
+style (.css), documentation (.auradoc), design (.design), svg (.svg).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle/{id}
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DefType, Format, Source FROM AuraDefinition WHERE AuraDefinitionBundleId = '{id}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - Bundle DeveloperName.
+includeBinarySource (boolean, optional, default false) - Return SVG as text.
+
+Result
+bundle (object) - { id, developerName, masterLabel, apiVersion, description, manageableState, namespacePrefix }.
+definitions (array) - { id, defType ("COMPONENT"|"APPLICATION"|"CONTROLLER"|"HELPER"|"STYLE"|"DESIGN"|"SVG"|"DOCUMENTATION"|"RENDERER"|"EVENT"|"INTERFACE"), format ("JS"|"CSS"|"XML"|"SVG"), source (string|null), sizeBytes }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+read_aura_bundle({ "name": "AccountCard" })

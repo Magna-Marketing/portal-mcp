@@ -1,0 +1,61 @@
+Tool: composite_graph
+
+Description
+Submit a directed acyclic graph (DAG) of sub-requests in a single call.
+Each graph is a transactional unit: rollback on any error within the
+graph. Up to 75 sub-requests across multiple graphs per call (vs the
+25-cap of `composite_request`).
+
+Salesforce API
+Composite Graph REST API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/composite/graph
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "graphs": [{
+    "graphId": "g1",
+    "compositeRequest": [
+      { "method": "POST", "url": "/services/data/v66.0/sobjects/Account", "referenceId": "acc1", "body": { "Name": "ACME" } },
+      { "method": "POST", "url": "/services/data/v66.0/sobjects/Contact", "referenceId": "con1", "body": { "LastName": "Doe", "AccountId": "@{acc1.id}" } }
+    ]
+  }]
+}
+
+Input (parameters)
+graphs (object[], required) - Each: { graphId, compositeRequest: [{ method, url, referenceId, body, httpHeaders? }] }.
+allOrNonePerGraph (boolean, optional, default true).
+
+Result
+graphs (array) - Each: { graphId, isSuccessful (boolean), graphResponse: [{ referenceId, statusCode, body, success }] }.
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Up to 75 sub-requests total per call across all graphs.
+- Each graph is its own transaction.
+
+Errors
+- COMPOSITE_GRAPH_VALIDATION_FAILED.
+
+Example request
+
+composite_graph({
+  "graphs": [{
+    "graphId": "g1",
+    "compositeRequest": [
+      { "method": "POST", "referenceId": "acc",
+        "url": "/services/data/v66.0/sobjects/Account",
+        "body": { "Name": "ACME" } },
+      { "method": "POST", "referenceId": "con",
+        "url": "/services/data/v66.0/sobjects/Contact",
+        "body": { "LastName": "Doe", "AccountId": "@{acc.id}" } }
+    ]
+  }]
+})

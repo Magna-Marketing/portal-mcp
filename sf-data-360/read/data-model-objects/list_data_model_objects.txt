@@ -1,0 +1,59 @@
+Tool: list_data_model_objects
+
+Description
+List Data Model Objects (DMOs) — the curated business schema in
+Data Cloud. DMOs are populated from DLOs via mappings; downstream
+segmentation, activation, and Profile API reads run on top of them.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-model-objects
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+category (string, optional) - "Profile" | "Engagement" | "Other" |
+  "Account" | "Contact" | "Lead".
+type (string, optional) - "Standard" | "Custom".
+nameContains (string, optional).
+limit (number, optional, default 200).
+offset (number, optional).
+
+Result
+dataModelObjects (array) - Each: { id, developerName, label,
+  category, type, primaryKeyField, recordCount,
+  fields (array<{ apiName, label, dataType, isPrimaryKey,
+    isExternalId, isRequired, defaultValue, length }>),
+  createdDate, lastModifiedDate }.
+totalSize (number), nextPageUrl (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_model_objects({ "category": "Profile" })
+
+Example result
+{
+  "dataModelObjects": [
+    { "developerName": "UnifiedIndividual__dlm",
+      "label": "Unified Individual",
+      "category": "Profile", "type": "Standard",
+      "primaryKeyField": "Id__c", "recordCount": 482000 }
+  ]
+}

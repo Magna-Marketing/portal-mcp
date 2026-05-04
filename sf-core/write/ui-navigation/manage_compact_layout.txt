@@ -1,0 +1,50 @@
+Tool: manage_compact_layout
+
+Description
+Create / update / delete compact layouts and set per-record-type
+primary assignment.
+
+Salesforce API
+Metadata API (`CompactLayout`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "setPrimary".
+sObject (string, required).
+fullName (string, required) - DeveloperName.
+label (string, required for create).
+fields (string[], optional) - Field API names in display order.
+recordTypeAssignments (array, optional) - [{ recordType, isPrimary }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+compactLayout (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD.
+
+Example request
+
+manage_compact_layout({
+  "operation": "create",
+  "sObject": "Project__c",
+  "fullName": "Project_Highlight",
+  "label": "Project Highlight",
+  "fields": ["Name", "Status__c", "Project_Manager__c", "Due_Date__c"]
+})

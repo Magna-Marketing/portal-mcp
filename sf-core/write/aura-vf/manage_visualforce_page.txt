@@ -1,0 +1,57 @@
+Tool: manage_visualforce_page
+
+Description
+Create / update / delete a Visualforce page (`ApexPage`).
+
+Salesforce API
+Tooling API, v66.0. Uses the container/save pattern.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/ApexPageMember
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+DELETE /services/data/v66.0/tooling/sobjects/ApexPage/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+name (string, required) - Page Name.
+masterLabel (string, required for create).
+apiVersion (number, optional).
+markup (string, required for create/update) - VF source.
+controllerType (string, optional) - "Default" | "StandardController" | "CustomController".
+controllerKey (string, optional).
+isAvailableInTouch (boolean, optional, default false).
+description (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+page (object) - { id, name, masterLabel, apiVersion, controllerType }.
+
+Required permissions
+- "Customize Application" / "Author Apex".
+
+Idempotency & limits
+- upsert idempotent on `name`.
+
+Errors
+- DEPLOY_FAILED on syntax error.
+
+Example request
+
+manage_visualforce_page({
+  "operation": "create",
+  "name": "AccountSummary",
+  "masterLabel": "Account Summary",
+  "apiVersion": 62.0,
+  "markup": "<apex:page standardController=\"Account\"><apex:outputText value=\"{!Account.Name}\"/></apex:page>",
+  "controllerType": "StandardController",
+  "controllerKey": "Account"
+})

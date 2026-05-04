@@ -1,0 +1,42 @@
+Tool: list_templates
+
+Description
+List Content Builder templates (assetType id 207). Convenience wrapper
+around `list_assets` filtered to template-specific asset types.
+
+Marketing Cloud API
+REST API (`/asset/v1/content/assets/query`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/query
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "query": { "property": "assetType.id", "simpleOperator": "in", "value": [4, 5, 6, 207] }, "page": { "page": 1, "pageSize": 50 } }
+
+Input (parameters)
+templateType (string, optional) - "freeform" | "templatebased" | "any" (default).
+categoryId (number, optional).
+namePattern (string, optional).
+page (number, optional, default 1).
+pageSize (number, optional, default 50).
+
+Result
+count (number).
+templates (array) - Same shape as `list_assets.items` but pre-filtered to template types.
+
+Required scopes
+- `email_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+list_templates({ "categoryId": 12345 })

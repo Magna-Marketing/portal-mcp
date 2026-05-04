@@ -1,0 +1,98 @@
+Tool: manage_import
+
+Description
+Create or finalize a Prospect import job. The import lifecycle:
+
+1. `manage_import operation="create"` — POST shell with `state=Open`.
+2. `upload_import_batch` — POST one or more CSV batches.
+3. `manage_import operation="finalize"` — PATCH with `state=Ready`
+   to start processing. The server moves through `Processing → Complete`.
+4. Use `read/imports/get_import` to poll, and
+   `read/imports/download_import_errors` to fetch the error CSV.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+The v5 surface also exposes a multipart **Create with File** variant
+on `POST /api/v5/imports` that lets you submit metadata + the first
+CSV in a single round-trip. The MCP server transparently uses that
+form when `csv` / `csvBase64` is supplied alongside `operation="create"`,
+saving a follow-up `upload_import_batch` call for small one-shot
+imports.
+
+Endpoint
+POST  https://{pi-domain}/api/v5/imports        (operation="create"; JSON or multipart)
+PATCH https://{pi-domain}/api/v5/imports/:id    (operation="finalize" or "update")
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "object": "Prospect",
+  "operation": "Upsert",
+  "campaignId": 1024,
+  "isAllowFieldUpdates": true,
+  "restoreDeleted": false,
+  "isAllowUserToManageProspects": false,
+  "visibility": "public",
+  "isMatchedOnEmailNotIdsAndCrmId": true
+}
+
+Body (finalize)
+{ "state": "Ready" }
+
+Input (parameters)
+operation (string, required) - "create" | "finalize" | "update".
+id (number, required for finalize / update).
+object (string, optional, default "Prospect").
+importOperation (string, required for create) - "Upsert" | "Create".
+campaignId (number, optional).
+isAllowFieldUpdates (boolean, optional, default true) - On Upsert,
+  overwrite blank fields on existing prospects with CSV values.
+restoreDeleted (boolean, optional, default false).
+isAllowUserToManageProspects (boolean, optional, default false).
+isMatchedOnEmailNotIdsAndCrmId (boolean, optional, default true) -
+  Match by email; otherwise match by `id` / `crmId` columns.
+visibility (string, optional) - "public" | "private".
+visibilityListIds (number[], optional).
+trackerDomainId (number, optional).
+csv (string, optional, create-only) - Inline CSV; when supplied,
+  the MCP server uses the multipart "Create with File" variant and
+  uploads the first batch in the same call.
+csvBase64 (string, optional, create-only) - Alternative to `csv`.
+
+Result
+import (object) - Created or updated row. After "finalize", state
+  transitions from `Open` to `Ready` (and shortly to `Processing`).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- 1 import job is idempotent per BU on `(operation, hash-of-batches)`
+  if you skip uploads on retry.
+- Max 50,000 rows per batch; multiple batches per import; cap
+  ~10M rows total per import.
+
+Errors
+- 600 missing_required_field, 53 import_locked (already finalized),
+  20 invalid_state_transition, 59 not_found.
+
+Example request
+
+manage_import({
+  "operation": "create",
+  "object": "Prospect",
+  "importOperation": "Upsert",
+  "campaignId": 1024
+})
+
+Example result
+{
+  "import": { "id": 5512, "object": "Prospect", "operation": "Upsert",
+    "state": "Open" }
+}

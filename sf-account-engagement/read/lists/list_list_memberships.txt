@@ -1,0 +1,56 @@
+Tool: list_list_memberships
+
+Description
+List List Membership rows (the join between Prospect and List).
+Each row has an `optedOut` flag that is **scoped to that list** —
+distinct from a prospect-wide opt-out.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/list-memberships?fields={fields}&filter[listId]=eq,:listId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+listId (number, optional).
+prospectId (number, optional).
+optedOut (boolean, optional).
+createdAfter (string, optional) - ISO-8601.
+fields (string[], optional, default: id,listId,prospectId,optedOut,
+  createdAt,updatedAt,createdById,updatedById).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+listMemberships (array) - Each: { id, listId, prospectId, optedOut,
+  createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_list_memberships({ "listId": 301, "limit": 50 })
+
+Example result
+{
+  "listMemberships": [
+    { "id": 4421001, "listId": 301, "prospectId": 7745,
+      "optedOut": false, "createdAt": "2026-04-01T08:21:00Z" }
+  ]
+}

@@ -1,0 +1,53 @@
+Tool: increment_column
+
+Description
+Atomically increment (or decrement) a numeric column on a single DE
+row, identified by a search key. Used for view counters, click totals,
+points balances. Sync or async path.
+
+Marketing Cloud API
+REST API
+(`/hub/v1/dataevents/key:{key}/rows/{searchKey}:{searchValue}/column/{column}/increment`
+sync, or `/hub/v1/dataeventsasync/...` async).
+
+Endpoint
+PUT https://{tenant}.rest.marketingcloudapis.com/hub/v1/dataevents/key:{customerKey}/rows/{searchField}:{searchValue}/column/{columnName}/increment?step={step}
+PUT https://{tenant}.rest.marketingcloudapis.com/hub/v1/dataeventsasync/key:{customerKey}/rows/{searchField}:{searchValue}/column/{columnName}/increment?step={step}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+None (parameters in URL).
+
+Input (parameters)
+customerKey (string, required) - DE External Key.
+searchField (string, required) - Field used to locate the row (often the PK like Email).
+searchValue (string, required).
+columnName (string, required) - Numeric column to increment.
+step (number, optional, default 1) - Use negative to decrement.
+async (boolean, optional, default false).
+
+Result
+result (object) - { customerKey, searchField, searchValue, columnName, oldValue, newValue, success }.
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Not idempotent — each call applies the step.
+- Atomic at the row level (avoids read-modify-write races).
+
+Errors
+- 30002 row / DE not found, INVALID_FIELD (column not numeric).
+
+Example request
+
+increment_column({
+  "customerKey": "Members_DE",
+  "searchField": "Email",
+  "searchValue": "jane.doe@example.com",
+  "columnName": "FollowerCount",
+  "step": 1
+})

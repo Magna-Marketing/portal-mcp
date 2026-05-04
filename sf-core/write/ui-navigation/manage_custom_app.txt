@@ -1,0 +1,59 @@
+Tool: manage_custom_app
+
+Description
+Create / update / delete Custom Applications (Lightning Apps and Classic
+Apps). Configure default landing page, navigation tabs, utility bar
+items, branding, and (optionally) profile access.
+
+Salesforce API
+Metadata API (`CustomApplication`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+fullName (string, required) - DeveloperName.
+label (string, required for create).
+description (string, optional).
+isLightning (boolean, optional, default true).
+navType (string, optional, default "Standard") - "Standard" | "Console".
+formFactor (string, optional, default "Large") - "Large" | "Small".
+defaultLandingTab (string, optional).
+tabs (string[], optional) - Tab DeveloperNames in nav order.
+utilityBar (object, optional) - { label, items: [{ componentName, label, height, width, startAutomatically, properties }] }.
+brand (object, optional) - { headerColor (hex), logoImageUrl, secondaryColor }.
+profileAccess (array, optional) - [{ profileName, default, visible }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+customApp (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad utility bar.
+
+Example request
+
+manage_custom_app({
+  "operation": "create",
+  "fullName": "MTG_Console",
+  "label": "MTG Console",
+  "isLightning": true,
+  "navType": "Console",
+  "tabs": ["standard-Account", "standard-Opportunity", "Project__c", "MTG_Dashboard"],
+  "brand": { "headerColor": "#0A2540", "logoImageUrl": "/resource/MTG_BrandLogo" }
+})

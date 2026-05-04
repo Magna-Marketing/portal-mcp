@@ -1,0 +1,38 @@
+Tool: list_contact_schemas
+
+Description
+List the Contact Builder schema collection: every entity type (Person,
+behavior, etc.) plus its bound data extensions and contact attributes.
+The schema is the canonical entity model behind Contact Builder.
+
+Marketing Cloud API
+REST API (`/contacts/v1/schema`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/schema
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeRelationships (boolean, optional, default true).
+
+Result
+schemas (array) - Each: { entityName, displayName, dataExtensionId, dataExtensionCustomerKey, attributes (array): [{ name, displayName, dataType, length }], relationships (array, optional): [{ relatedEntityName, fromField, toField, relationshipType }] }.
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_contact_schemas({})

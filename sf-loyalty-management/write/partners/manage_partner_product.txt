@@ -1,0 +1,57 @@
+Tool: manage_partner_product
+
+Description
+Create / update / delete a `LoyaltyPartnerProduct` (a product offered
+by a partner that earns / redeems within the program).
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyPartnerProduct`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyPartnerProduct
+PATCH  /services/data/v66.0/sobjects/LoyaltyPartnerProduct/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyPartnerProduct/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "Hotel_Stay_Standard", "PartnerId": "...", "ProductId": "01tQg00000abcDE", "ProductCategory": "Lodging", "EarnRate": 1.0, "RedemptionRate": 100, "IsActive": true }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+partnerProductId (string, optional, required for non-create).
+partnerId (string, optional, required for create).
+partnerName (string, optional).
+name (string, required for create).
+productId (string, optional).
+productCategory (string, optional).
+earnRate (number, optional).
+redemptionRate (number, optional).
+isActive (boolean, optional).
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+
+Result
+partnerProduct (object) - { id, name, partnerId, productId, isActive, earnRate, redemptionRate }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE, INVALID_FIELD on bad rates.
+
+Example request
+
+manage_partner_product({
+  "operation": "create",
+  "partnerName": "MTG_Hotel_Partner",
+  "name": "Hotel_Stay_Standard",
+  "productCategory": "Lodging",
+  "earnRate": 1.0,
+  "redemptionRate": 100
+})

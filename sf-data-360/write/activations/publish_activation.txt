@@ -1,0 +1,57 @@
+Tool: publish_activation
+
+Description
+Publish (run) a Batch DMO Activation — pushes the latest segment
+snapshot to the configured target. Async; returns a `runId`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId/actions/publish
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "publishType": "FULL" }
+
+Input (parameters)
+activationId (string, required).
+publishType (string, optional, default "FULL") - "FULL" | "INCREMENTAL".
+runIdempotencyKey (string, optional).
+forceSegmentRepublish (boolean, optional, default false).
+
+Result
+runId (string).
+activationId (string), segmentId (string).
+status (string) - "Queued".
+submittedAt (ISO-8601).
+segmentRunId (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight publish per activation.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS, 503 TARGET_UNAVAILABLE.
+
+Example request
+
+publish_activation({
+  "activationId": "0YA580000000001",
+  "publishType": "INCREMENTAL"
+})
+
+Example result
+{
+  "runId": "RUN_ACT_2026-04-29T13",
+  "activationId": "0YA580000000001",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

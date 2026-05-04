@@ -1,0 +1,51 @@
+Tool: list_sharing_rules
+
+Description
+List sharing rules for one or more objects: criteria-based, owner-based, and territory-based. Each rule shows its access level (Read | ReadWrite | TransferAccess | All), the source (group / role / role+sub / queue), and the target group. Use as input to consolidation and audits.
+
+Salesforce API
+Metadata API (`SharingRules` type) per sObject, v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0    (readMetadata SharingRules per sObject)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], required) - sObject API names.
+ruleTypes (string[], optional, default ["criteria","owner","territory"]).
+namePattern (string, optional) - Glob on rule fullName.
+accessLevel (string, optional) - Filter to "Read" | "Edit" | "All".
+
+Result
+totalRules (number).
+sharingRules (array) - Each:
+  sObject (string).
+  ruleType ("CriteriaBasedSharingRule"|"OwnerSharingRule"|"TerritorySharingRule").
+  fullName (string).
+  label (string).
+  description (string|null).
+  accessLevel (string).
+  sharedTo (object) - { type ("group"|"role"|"roleAndSubordinates"|"roleAndSubordinatesInternal"|"queue"|"allInternalUsers"|"allCustomerPortalUsers"|"allPartnerUsers"|"territory"|"territoryAndSubordinates"), name }.
+  sharedFrom (object|null) - For owner-based: same shape as sharedTo.
+  criteria (array, only criteria rules) - [{ field, operation, value }].
+  booleanFilter (string|null).
+  accountSettings (object|null) - For account rules: { caseAccessLevel, contactAccessLevel, opportunityAccessLevel }.
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_sharing_rules({ "sObjects": ["Account", "Opportunity"] })

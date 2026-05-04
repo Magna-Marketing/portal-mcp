@@ -1,0 +1,40 @@
+Tool: get_record_counts
+
+Description
+Get approximate record counts for a list of sObjects (no SOQL
+`COUNT()`; this uses `/limits/recordCount`). Useful for quick
+inventory ("how many Accounts and Opportunities are in the org?")
+without table scans.
+
+Salesforce API
+REST API, v66.0. `GET /limits/recordCount?sObjects=...`.
+
+Endpoint
+GET /services/data/v66.0/limits/recordCount?sObjects={comma-separated sObjects}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], required, max 100) - sObject API names.
+
+Result
+counts (array) - { sObject, count (number) }.
+
+Required permissions
+- "API Enabled" + read on each sObject.
+
+Idempotency & limits
+- Read-only.
+- Counts are platform-cached; may lag actual count by minutes for active write traffic.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+get_record_counts({ "sObjects": ["Account", "Contact", "Opportunity", "Project__c"] })

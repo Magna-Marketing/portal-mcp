@@ -1,0 +1,93 @@
+Tool: manage_debug_logs
+
+Description
+Manage debug log capture for a user: enable (`enable`), disable
+(`disable`), list collected logs (`list`), retrieve a log by Id
+(`get`), or delete logs (`delete`). Salesforce captures debug logs only
+for users that have an active `TraceFlag` configured for a duration
+window; this tool wraps that lifecycle.
+
+Salesforce API
+Tooling API, v66.0.
+- `TraceFlag` and `DebugLevel` for enable/disable.
+- `ApexLog` for list / get / delete.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/DebugLevel        (when enabling and a level needs creating)
+POST /services/data/v66.0/tooling/sobjects/TraceFlag         (enable)
+PATCH /services/data/v66.0/tooling/sobjects/TraceFlag/{id}   (extend / disable)
+DELETE /services/data/v66.0/tooling/sobjects/TraceFlag/{id}  (disable)
+GET   /services/data/v66.0/tooling/query/?q=SELECT Id, Application, Operation, Status, Request, StartTime, DurationMilliseconds, LogLength, Location, LogUserId FROM ApexLog WHERE LogUserId = '{userId}' ORDER BY StartTime DESC LIMIT 50
+GET   /services/data/v66.0/tooling/sobjects/ApexLog/{id}/Body   (raw text)
+DELETE /services/data/v66.0/tooling/sobjects/ApexLog/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+TraceFlag (enable example):
+{
+  "TracedEntityId": "<userId>",
+  "DebugLevelId": "<debugLevelId>",
+  "LogType": "USER_DEBUG",
+  "StartDate": "2026-04-29T12:00:00Z",
+  "ExpirationDate": "2026-04-29T13:00:00Z"
+}
+
+Input (parameters)
+operation (string, required) - "enable" | "disable" | "list" | "get" | "delete".
+userId (string, optional) - Target User Id (default = OAuth running user).
+username (string, optional) - User.Username instead of Id.
+durationMinutes (number, optional, default 60) - When enable; max 24 hours.
+debugLevels (object, optional) - When enable; per-category level. Default:
+  { Apex: "DEBUG", Workflow: "INFO", Db: "INFO", Validation: "INFO",
+    System: "DEBUG", Callout: "INFO", Profiling: "NONE" }.
+logType (string, optional, default "USER_DEBUG") - "USER_DEBUG" | "DEVELOPER_LOG"
+  | "PROFILING_DEBUG" | ...
+logId (string, required for "get" / "delete") - ApexLog Id.
+limit (number, optional, default 50, max 200) - For list.
+sinceMinutes (number, optional, default 60) - For list; only logs from
+  the last N minutes.
+
+Result (enable / disable)
+traceFlag (object) - { id, tracedEntityId, debugLevelId, startDate,
+  expirationDate, isActive (boolean) }.
+
+Result (list)
+logs (array) - Each:
+  id, application, operation, status, request, startTime,
+  durationMilliseconds, logLength (bytes), location ("Default"|"Profiling"),
+  logUserId.
+
+Result (get)
+log (object) - Same fields as list rows plus:
+  body (string) - Full debug log text.
+
+Result (delete)
+deleted (boolean), id (string).
+
+Required permissions
+- "Author Apex" or "Modify All Data" for trace flags on other users.
+- "View All Data" or "Author Apex" to read log bodies.
+
+Idempotency & limits
+- Disable is idempotent.
+- TraceFlag windows max 24 h.
+- ApexLog rows are kept ~24 h before automatic purge.
+
+Errors
+- TRACE_FLAG_LIMIT_EXCEEDED: only one active flag per user per debugLevel.
+- ENTITY_IS_DELETED on get/delete after purge.
+
+Example request (enable for self for 30 min)
+
+manage_debug_logs({
+  "operation": "enable",
+  "durationMinutes": 30,
+  "debugLevels": { "Apex": "DEBUG", "System": "DEBUG" }
+})
+
+Example request (list recent logs)
+
+manage_debug_logs({ "operation": "list", "limit": 10 })

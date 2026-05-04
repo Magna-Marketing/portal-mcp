@@ -1,0 +1,91 @@
+Tool: manage_data_stream
+
+Description
+Create, update, or delete a Data Stream. Create resolves the source
+Connection's schema and produces a Data Lake Object; the DLO must
+then be mapped to a DMO before downstream consumers see data.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-streams                                  (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/data-streams/:recordIdOrDeveloperName         (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-streams/:recordIdOrDeveloperName         (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "developerName": "mc_sends",
+  "label": "MCE Sends",
+  "connectionId": "0Z65800000000ABCAA",
+  "sourceObject": "Send",
+  "refreshMode": "Incremental",
+  "category": "Engagement",
+  "schedule": {
+    "scheduleType": "INTERVAL",
+    "intervalMinutes": 60
+  },
+  "primaryKeyFields": ["ID"],
+  "lastModifiedFieldName": "ModifiedDate",
+  "filter": null
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+recordIdOrDeveloperName (string, required for update / delete).
+developerName (string, required for create).
+label (string, required for create).
+connectionId (string, required for create).
+sourceObject (string, required for create).
+refreshMode (string, optional, default "Incremental") - "Full" |
+  "Incremental" | "Streaming".
+category (string, optional) - "Profile" | "Engagement" | "Other".
+schedule (object, optional) - { scheduleType, intervalMinutes,
+  cronExpression, startDate? }.
+primaryKeyFields (string[], required for "Incremental").
+lastModifiedFieldName (string, required for "Incremental").
+filter (object, optional) - { rootGroup, conditions, nestedGroups }.
+
+Result
+dataStream (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; running jobs are aborted.
+- Creating an Incremental stream without `primaryKeyFields` returns
+  `400 MISSING_PRIMARY_KEY`.
+
+Errors
+- 400 INVALID_FIELD, 404 NOT_FOUND, 409 DUPLICATE_VALUE,
+  502 SOURCE_UNAVAILABLE.
+
+Example request
+
+manage_data_stream({
+  "operation": "create",
+  "developerName": "mc_sends",
+  "label": "MCE Sends",
+  "connectionId": "0Z65800000000ABCAA",
+  "sourceObject": "Send",
+  "refreshMode": "Incremental",
+  "primaryKeyFields": ["ID"],
+  "lastModifiedFieldName": "ModifiedDate"
+})
+
+Example result
+{
+  "dataStream": {
+    "id": "0bcxx0000000001",
+    "developerName": "mc_sends",
+    "status": "Active",
+    "dataLakeObjectName": "mc_sends__dll"
+  }
+}

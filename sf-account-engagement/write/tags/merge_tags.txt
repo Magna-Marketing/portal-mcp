@@ -1,0 +1,57 @@
+Tool: merge_tags
+
+Description
+Merge one or more source tags into a single target tag. All
+`tagged-objects` rows pointing at the source tags are rewritten to
+point at the target, and the source tags are deleted. Use this to
+clean up duplicate or near-duplicate tag names ("Welcome 2026" vs
+"welcome-2026").
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/tags/:id/do/mergeTags
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "sourceTagIds": [212, 213] }
+
+Input (parameters)
+id (number, required) - Target tag id (the survivor).
+sourceTagIds (number[], required) - Tags to absorb into `id`. Up to
+  50 sources per call.
+
+Result
+success (boolean).
+tag (object) - Refreshed target tag (with updated objectCount).
+mergedCount (number) - Number of tagged-object rows rewritten.
+deletedTagIds (number[]) - Source tags that were deleted.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent — merging the same source tags twice is a no-op
+  on the second call (already deleted).
+
+Errors
+- 53 not_permitted, 59 not_found, 600 self_merge (target id appears
+  in sourceTagIds).
+
+Example request
+
+merge_tags({ "id": 211, "sourceTagIds": [212, 213] })
+
+Example result
+{
+  "success": true,
+  "tag": { "id": 211, "name": "Welcome 2026", "objectCount": 41 },
+  "mergedCount": 27,
+  "deletedTagIds": [212, 213]
+}

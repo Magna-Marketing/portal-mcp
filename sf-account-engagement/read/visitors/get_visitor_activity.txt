@@ -1,0 +1,51 @@
+Tool: get_visitor_activity
+
+Description
+Read a single Visitor Activity by id, with the source object (the
+email, form, file, etc.) expanded based on `type`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visitor-activities/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `email.*`, `form.*`,
+  `landingPage.*`, `customRedirect.*`, `file.*` (the relevant ones
+  per type are populated).
+
+Result
+visitorActivity (object): id, prospectId, visitorId, type, typeName,
+  details, campaignId, emailId, formId, formHandlerId, landingPageId,
+  customRedirectId, fileId, listEmailId, createdAt.
+relatedObject (object|null) - The expanded source row.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_visitor_activity({ "id": 99100 })
+
+Example result
+{
+  "visitorActivity": { "id": 99100, "type": 4, "typeName": "Email Open",
+    "prospectId": 7745, "emailId": 99821 },
+  "relatedObject": { "id": 99821, "name": "Welcome", "subject": "Welcome, Jane" }
+}

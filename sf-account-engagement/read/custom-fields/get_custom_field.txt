@@ -1,0 +1,57 @@
+Tool: get_custom_field
+
+Description
+Read a single custom field by id with its full audit trail. The
+field's picklist values are returned **only** when `isUseValues=true`;
+the v5 endpoint doesn't expand them, so the MCP server pages
+`/api/v3/customFields/do/read` (legacy) when `includeValues=true` to
+populate `values[]`.
+
+Salesforce API
+Account Engagement v5 REST API (+ optional v3 fall-through for picklist values).
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/custom-fields/:id?fields={fields}
+GET https://{pi-domain}/api/v3/customFields/do/read/id/:id?format=json   (when includeValues=true)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+includeValues (boolean, optional, default false) - When true and
+  the field's `isUseValues=true`, returns `values[]`.
+
+Result
+customField (object) - { id, name, fieldId, apiFieldId, type,
+  isRequired, isUseValues, isRecordMultipleResponses, isAnalyticsSynced,
+  salesforceId, createdAt, updatedAt, createdBy.*, updatedBy.* }.
+values (array, when includeValues=true) - [{ value, isDefault, sortOrder }].
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_custom_field({ "id": 71, "includeValues": true })
+
+Example result
+{
+  "customField": { "id": 71, "name": "Region", "apiFieldId": "region__c", "type": "DROPDOWN" },
+  "values": [
+    { "value": "NA",   "isDefault": true,  "sortOrder": 0 },
+    { "value": "EMEA", "isDefault": false, "sortOrder": 1 },
+    { "value": "APAC", "isDefault": false, "sortOrder": 2 }
+  ]
+}

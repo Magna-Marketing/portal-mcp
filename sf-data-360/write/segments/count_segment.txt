@@ -1,0 +1,50 @@
+Tool: count_segment
+
+Description
+Return an estimated population count for a Segment without
+running a full publish. Useful for audience-sizing before scheduling
+an activation.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName/actions/count
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{}
+
+Input (parameters)
+segmentApiName (string, required).
+
+Result
+segmentApiName (string).
+estimatedCount (number).
+estimateGeneratedAt (ISO-8601).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-ish (synchronous compute that doesn't update segment state).
+- 1 in-flight count per segment; concurrent calls return
+  `409 ESTIMATE_IN_PROGRESS`.
+
+Errors
+- 404 NOT_FOUND, 400 SEGMENT_INVALID.
+
+Example request
+
+count_segment({ "segmentApiName": "EMEAHighValue" })
+
+Example result
+{
+  "segmentApiName": "EMEAHighValue",
+  "estimatedCount": 18420,
+  "estimateGeneratedAt": "2026-04-29T13:02:11Z"
+}

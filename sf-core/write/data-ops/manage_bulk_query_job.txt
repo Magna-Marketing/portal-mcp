@@ -1,0 +1,63 @@
+Tool: manage_bulk_query_job
+
+Description
+Full Bulk API 2.0 query job lifecycle: create (with SOQL), get status,
+fetch results in CSV pages, abort, delete. Use for SOQL exports above
+the 50k synchronous cap or for parallel-paginated reads. Supports PK
+chunking automatically when configured.
+
+Salesforce API
+Bulk API 2.0, v66.0.
+
+Endpoint
+POST   /services/data/v66.0/jobs/query                                       (create)
+GET    /services/data/v66.0/jobs/query/{jobId}                               (status)
+GET    /services/data/v66.0/jobs/query/{jobId}/results?locator=...&maxRecords=... (results)
+GET    /services/data/v66.0/jobs/query/{jobId}/resultPages                   (parallel results)
+PATCH  /services/data/v66.0/jobs/query/{jobId}                               (abort)
+DELETE /services/data/v66.0/jobs/query/{jobId}                               (delete)
+GET    /services/data/v66.0/jobs/query                                       (list jobs)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+Sforce-Enable-PKChunking: true; chunkSize=200000      (optional)
+
+Body (create)
+{ "operation": "query", "query": "SELECT Id, Name FROM Account", "contentType": "CSV", "lineEnding": "LF", "columnDelimiter": "COMMA" }
+
+Input (parameters)
+operation (string, required) - "create" | "status" | "results" | "abort" | "delete" | "listAll".
+jobId (string, required for non-create/listAll).
+soql (string, required for create).
+queryAll (boolean, optional, default false) - When true, uses `queryAll` (includes deleted records).
+contentType (string, optional, default "CSV").
+columnDelimiter (string, optional, default "COMMA").
+lineEnding (string, optional, default "LF").
+locator (string, optional, for results) - Pagination locator from previous results.
+maxRecords (number, optional, for results) - Cap rows per page.
+enablePkChunking (boolean, optional, default false).
+pkChunkSize (number, optional, default 100000).
+parseResultsAs (string, optional, default "csv") - "csv" | "rows".
+
+Result
+For create: { jobId, state, query, operation, lineEnding, columnDelimiter, contentType }.
+For status: { jobId, state ("UploadComplete"|"InProgress"|"JobComplete"|"Failed"|"Aborted"), numberRecordsProcessed, totalProcessingTime, errorMessage }.
+For results: { jobId, locator (next page or "null"), numberOfRecords, csv (string) | rows (array) }.
+For listAll: { jobs: [...], hasNextPage }.
+
+Required permissions
+- "API Enabled" + read on the queried sObjects.
+
+Idempotency & limits
+- Job state machine; not idempotent.
+- Result files retained 7 days, then purged.
+
+Errors
+- MALFORMED_QUERY, JOB_FAILED.
+
+Example request
+
+manage_bulk_query_job({ "operation": "create", "soql": "SELECT Id, Name, Industry FROM Account" })
+manage_bulk_query_job({ "operation": "status", "jobId": "..." })            // poll until JobComplete
+manage_bulk_query_job({ "operation": "results", "jobId": "...", "maxRecords": 100000 })

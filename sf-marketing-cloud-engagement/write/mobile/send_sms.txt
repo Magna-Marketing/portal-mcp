@@ -1,0 +1,53 @@
+Tool: send_sms
+
+Description
+Send a one-off SMS via MobileConnect (legacy). For modern transactional
+flows prefer `send_transactional_sms`.
+
+Marketing Cloud API
+REST API (`/sms/v1/messageContact/{messageId}/send`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/messageContact/{messageId}/send
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "mobileNumbers": ["+15551234567"],
+  "Subscribe": true,
+  "Resubscribe": true,
+  "keyword": "MTG"
+}
+
+Input (parameters)
+messageId (number, required) - MobileConnect message Id (template).
+mobileNumbers (string[], required) - E.164 phone numbers.
+subscribe (boolean, optional, default true) - Auto-subscribe new numbers.
+resubscribe (boolean, optional, default true).
+keyword (string, optional) - Auto-routing keyword.
+overrideSendTime (string, optional).
+
+Result
+results (array) - { mobileNumber, status, queueTime, errors }.
+totalQueued (number).
+
+Required scopes
+- `mobile_connect_send`.
+
+Idempotency & limits
+- Not idempotent.
+- Subject to short-code throughput.
+
+Errors
+- INVALID_PHONE_NUMBER, MESSAGE_NOT_FOUND.
+
+Example request
+
+send_sms({
+  "messageId": 12345,
+  "mobileNumbers": ["+15551234567"],
+  "keyword": "MTG"
+})

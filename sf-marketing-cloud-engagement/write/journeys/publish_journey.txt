@@ -1,0 +1,42 @@
+Tool: publish_journey
+
+Description
+Publish a journey draft (transitions a Draft version to Published, the
+status that lets contacts enter).
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/publishAsync/{id}?versionNumber={v}`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishAsync/{id}?versionNumber={versionNumber}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+None (parameters in URL).
+
+Input (parameters)
+journeyId (string, optional).
+journeyKey (string, optional).
+  One required.
+versionNumber (number, optional, default = latest draft).
+waitForCompletion (boolean, optional, default true) - Poll until published or failed.
+
+Result
+publication (object) - { statusId, status ("Pending"|"InProgress"|"Published"|"Failed"), errors (array) }.
+journey (object|null, when complete) - { id, key, name, version, status: "Published", lastPublishedDate }.
+
+Required scopes
+- `journeys_write`.
+
+Idempotency & limits
+- Idempotent on already-published version.
+
+Errors
+- VALIDATION_FAILED with errors describing missing trigger / activity.
+
+Example request
+
+publish_journey({ "journeyKey": "MTG_Welcome_Series", "versionNumber": 1 })

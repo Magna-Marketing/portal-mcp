@@ -1,0 +1,50 @@
+Tool: validate_deploy
+
+Description
+Run a validate-only deployment (`checkOnly=true`) — exercises Apex
+compile, tests, and metadata validation **without persisting changes**.
+A successful validation can be quickly turned into an actual deploy
+within 10 days using `deploy_metadata`'s `quickDeploy` option (when
+supported).
+
+Salesforce API
+Metadata API, v66.0. Same as `deploy_metadata` with `checkOnly=true`.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Same as deploy_metadata but with `checkOnly=true`.
+
+Input (parameters)
+zipBase64 (string, required).
+testLevel (string, optional, default "RunLocalTests").
+runTests (string[], optional).
+allowMissingFiles, autoUpdatePackage, ignoreWarnings (boolean, optional).
+waitForCompletion (boolean, optional, default true).
+
+Result
+Same shape as `deploy_metadata` result; `checkOnly=true`. Successful
+validations are eligible for quickDeploy within 10 days.
+quickDeployEligible (boolean) - true when validation succeeded and tests passed.
+validationId (string) - Use as quickDeploy reference.
+
+Required permissions
+- "Modify Metadata Through Metadata API Functions".
+
+Idempotency & limits
+- Validations don't change the org but consume Apex CPU + test time.
+
+Errors
+- DEPLOY_FAILED with componentFailures.
+
+Example request
+
+validate_deploy({
+  "zipBase64": "UEsDB...",
+  "testLevel": "RunLocalTests"
+})

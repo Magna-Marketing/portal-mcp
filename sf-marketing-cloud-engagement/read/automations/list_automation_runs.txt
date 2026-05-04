@@ -1,0 +1,43 @@
+Tool: list_automation_runs
+
+Description
+List the run instances of one or all automations: status, start /
+end times, duration, step-level errors. Use to debug nightly jobs.
+
+Marketing Cloud API
+REST API (`/automation/v1/automations/{id}/instances`) and SOAP
+`AutomationInstance.Retrieve`.
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/instances
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+automationId (string, optional).
+automationKey (string, optional).
+status (string|string[], optional) - "Completed" | "Error" | "Running" | "Stopped" | "Cancelled" | "Skipped".
+sinceDays (number, optional, default 7).
+limit (number, optional, default 100).
+
+Result
+count (number).
+runs (array) - { instanceId, automationId, automationName, status, startTime, endTime, durationSec, completedSteps, totalSteps, errorMessage (string|null) }.
+
+Required scopes
+- `automations_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_automation_runs({ "automationKey": "MTG_Nightly_Member_Sync", "sinceDays": 7 })

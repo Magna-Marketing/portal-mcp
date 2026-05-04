@@ -1,0 +1,55 @@
+Tool: get_campaign
+
+Description
+Read a single campaign by id, with the parent campaign and audit
+relations expanded. Use when an automation refers to a specific
+campaign id and you need name + folder + connected SFDC campaign.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/campaigns/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `parentCampaign.*`,
+  `createdBy.*`, `updatedBy.*`.
+includeChildCount (boolean, optional, default false) - When true,
+  the MCP server runs a second list call (`filter[parentCampaignId]=:id`)
+  and returns `childCount`.
+
+Result
+campaign (object): id, name, folderId, cost, parentCampaignId,
+  salesforceId, isDeleted, createdAt, updatedAt.
+parentCampaign (object|null).
+createdBy (object), updatedBy (object).
+childCount (number, when includeChildCount=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found, 65 invalid_field_projection.
+
+Example request
+
+get_campaign({ "id": 1024, "includeChildCount": true })
+
+Example result
+{
+  "campaign": { "id": 1024, "name": "Welcome 2026", "salesforceId": "7015800000xyz123" },
+  "parentCampaign": null,
+  "childCount": 4
+}

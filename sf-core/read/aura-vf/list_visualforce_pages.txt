@@ -1,0 +1,44 @@
+Tool: list_visualforce_pages
+
+Description
+List Visualforce pages and components (`ApexPage`, `ApexComponent`).
+Returns name, label, API version, controller, masterLabel, and managed-
+state.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ControllerKey, ControllerType, IsAvailableInTouch, ManageableState, Description FROM ApexPage
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ControllerType, ManageableState, Description FROM ApexComponent
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includePages (boolean, optional, default true).
+includeComponents (boolean, optional, default true).
+namePattern (string, optional).
+includeManaged (boolean, optional, default false).
+limit (number, optional, default 200).
+
+Result
+pages (array) - { id, name, masterLabel, apiVersion, controllerType, controllerKey, isAvailableInTouch, manageableState, description }.
+components (array) - { id, name, masterLabel, apiVersion, controllerType, manageableState, description }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_visualforce_pages({ "includeComponents": false })

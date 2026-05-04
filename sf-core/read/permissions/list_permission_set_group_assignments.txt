@@ -1,0 +1,72 @@
+Tool: list_permission_set_group_assignments
+
+Description
+List all users assigned to a permission set group. Same shape as
+`list_permission_set_assignments` but filters on
+`PermissionSetGroupId`. Use to audit who has the bundle and to feed
+`unassign_permission_set_group` (each row's `assignmentId` is the
+PermissionSetAssignment Id you'd remove).
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `PermissionSetAssignment` joined to `User`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, ExpirationDate, SystemModstamp FROM PermissionSetAssignment WHERE PermissionSetGroupId = '{psgId}' ORDER BY Assignee.Name
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+groupName (string, optional) - PSG DeveloperName.
+groupId (string, optional) - PSG Id.
+  One of groupName or groupId is required.
+includeInactiveUsers (boolean, optional, default false).
+includeExpired (boolean, optional, default false).
+limit (number, optional, default 2000, max 50000).
+sortBy (string, optional, default "Name").
+
+Result
+group (object) - { id, developerName, label, status }.
+totalSize (number).
+assignments (array) - Same row shape as
+  list_permission_set_assignments: { assignmentId, userId, name,
+  username, email, isActive, profileName, expirationDate, assignedDate }.
+hasMore (boolean).
+nextRecordsUrl (string, optional).
+
+Required permissions
+- "View Setup and Configuration" or "Manage Users".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND: PSG not found.
+
+Example request
+
+list_permission_set_group_assignments({ "groupName": "MTG_Delivery_Bundle" })
+
+Example result (one row)
+
+{
+  "group": { "id": "0PGQg00000004abAB", "developerName": "MTG_Delivery_Bundle", "label": "MTG Delivery Bundle", "status": "Updated" },
+  "totalSize": 18,
+  "assignments": [
+    {
+      "assignmentId": "0Pa4Q00000xy12abc",
+      "userId": "005Qg0000020aBcDE",
+      "name": "Jane Doe",
+      "username": "jane.doe@magnatech.com",
+      "email": "jane.doe@magnatech.com",
+      "isActive": true,
+      "profileName": "Standard User",
+      "expirationDate": null,
+      "assignedDate": "2026-02-14T18:23:09.000+0000"
+    }
+  ]
+}

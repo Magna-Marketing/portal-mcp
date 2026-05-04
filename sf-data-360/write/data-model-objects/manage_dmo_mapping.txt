@@ -1,0 +1,86 @@
+Tool: manage_dmo_mapping
+
+Description
+Create, delete, or update individual field mappings on a DMO
+mapping. The Postman collection exposes:
+- POST `/data-model-object-mappings` to create the mapping shell.
+- DELETE `/data-model-object-mappings/:name` to delete the entire mapping.
+- DELETE `/data-model-object-mappings/:name/field-mappings` to clear all field mappings.
+- PATCH `/data-model-object-mappings/:name/field-mappings/:fieldName` to update a single field mapping.
+
+This tool unifies them via `subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings                                       (subOperation="create")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings/:objectSourceTargetMapDeveloperName   (subOperation="delete")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings/:objectSourceTargetMapDeveloperName/field-mappings  (subOperation="clearFields")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings/:objectSourceTargetMapDeveloperName/field-mappings/:fieldSourceTargetMapDeveloperName  (subOperation="updateField")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "developerName": "mc_sends_to_send",
+  "sourceObject": "mc_sends__dll",
+  "targetObject": "Send__dlm",
+  "fieldMappings": [
+    { "developerName": "id_to_id",
+      "sourceField": "Id__c", "targetField": "Id__c",
+      "isPrimaryKey": true }
+  ]
+}
+
+Body (updateField)
+{ "transformExpression": "UPPER(sourceField)" }
+
+Input (parameters)
+subOperation (string, required) - "create" | "delete" |
+  "clearFields" | "updateField".
+objectSourceTargetMapDeveloperName (string, required for delete /
+  clearFields / updateField).
+fieldSourceTargetMapDeveloperName (string, required for updateField).
+developerName (string, required for create).
+sourceObject (string, required for create).
+targetObject (string, required for create).
+fieldMappings (array, required for create) - [{ developerName,
+  sourceField, targetField, dataType, transformExpression?,
+  isPrimaryKey?, isExternalId? }].
+transformExpression (string, optional, updateField-only).
+
+Result
+mapping (object, for create / updateField).
+deleted (boolean, for delete / clearFields).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; downstream Data Graphs / Segments may break if they
+  reference the dropped mapping.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_TRANSFORM_EXPRESSION,
+  404 NOT_FOUND.
+
+Example request
+
+manage_dmo_mapping({
+  "subOperation": "create",
+  "developerName": "mc_sends_to_send",
+  "sourceObject": "mc_sends__dll",
+  "targetObject": "Send__dlm",
+  "fieldMappings": [
+    { "developerName": "id_to_id",
+      "sourceField": "Id__c", "targetField": "Id__c",
+      "isPrimaryKey": true }
+  ]
+})
+
+Example result
+{ "mapping": { "developerName": "mc_sends_to_send" } }

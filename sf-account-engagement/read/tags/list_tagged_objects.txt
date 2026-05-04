@@ -1,0 +1,58 @@
+Tool: list_tagged_objects
+
+Description
+List the join rows between Tags and the objects that carry them
+(Prospect, Campaign, Email, Form, etc.). Filter by `tagId` to see
+"what's tagged with X" or by `objectId`+`objectType` to see "what
+tags does Y carry."
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/tagged-objects?fields={fields}&filter[tagId]=eq,:tagId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+tagId (number, optional).
+objectId (number, optional).
+objectType (string, optional) - "Prospect" | "Campaign" | "Email" |
+  "EmailTemplate" | "File" | "Form" | "FormField" | "FormHandler" |
+  "LandingPage" | "LayoutTemplate" | "List" | "Opportunity" | "User" |
+  "CustomField" | "CustomRedirect" | "DynamicContent".
+fields (string[], optional, default: id,tagId,objectId,objectType,
+  createdAt,createdById).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+taggedObjects (array) - Each: { id, tagId, objectId, objectType,
+  createdAt, createdById }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_tagged_objects({ "tagId": 211, "objectType": "Prospect" })
+
+Example result
+{
+  "taggedObjects": [
+    { "id": 9001, "tagId": 211, "objectId": 7745, "objectType": "Prospect" }
+  ]
+}

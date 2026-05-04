@@ -1,0 +1,48 @@
+Tool: get_calculated_insight
+
+Description
+Read a single Calculated Insight by api name. Returns the full
+SQL / formula definition + the latest run status.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/calculated-insights/:apiName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+apiName (string, required).
+dataSpace (string, optional, default "default").
+
+Result
+calculatedInsight (object): id, apiName, label, dataSpace, status,
+  refreshFrequency, sourceDmos, sql, measures, dimensions,
+  lastRunStatus, lastRunDate, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_calculated_insight({ "apiName": "CustomerLTV__cio" })
+
+Example result
+{
+  "calculatedInsight": {
+    "apiName": "CustomerLTV__cio",
+    "sql": "SELECT IndividualId__c, SUM(Amount__c) AS LifetimeValue__c FROM Order__dlm GROUP BY IndividualId__c"
+  }
+}

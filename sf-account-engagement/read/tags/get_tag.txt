@@ -1,0 +1,42 @@
+Tool: get_tag
+
+Description
+Read a single Tag by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/tags/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional).
+
+Result
+tag (object): id, name, objectCount, isDeleted, createdAt,
+  updatedAt, createdBy, updatedBy.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_tag({ "id": 211 })
+
+Example result
+{ "tag": { "id": 211, "name": "Welcome 2026", "objectCount": 14 } }

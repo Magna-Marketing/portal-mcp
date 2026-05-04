@@ -1,0 +1,70 @@
+Tool: manage_report_folder
+
+Description
+Manage report and dashboard folders. Operations: `list`, `describe`,
+`create`, `update`, `delete`, `contents`. Folder type is one of `Report`
+or `Dashboard`. Use to organize reports/dashboards or grant access via
+sharing settings.
+
+Salesforce API
+Analytics REST API + REST API (Folder is an sObject), v66.0.
+- `GET /folders` (Analytics).
+- `Folder` SOQL for sharing details.
+- Metadata API for `Folder.share` updates.
+
+Endpoint
+GET    /services/data/v66.0/folders                                                  (list)
+GET    /services/data/v66.0/folders/{folderId}                                       (describe)
+POST   /services/data/v66.0/folders                                                  (create)
+PATCH  /services/data/v66.0/folders/{folderId}                                       (update)
+DELETE /services/data/v66.0/folders/{folderId}                                       (delete)
+GET    /services/data/v66.0/folders/{folderId}/folderItems                           (contents)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+Content-Type: application/json    (POST/PATCH)
+
+Body (create example)
+{
+  "name": "MTG Sales",
+  "developerName": "MTG_Sales",
+  "type": "Report",
+  "accessType": "Hidden",
+  "shares": [
+    { "sharedTo": "Role:CEO",          "accessLevel": "View" },
+    { "sharedTo": "Group:SalesManagers","accessLevel": "Edit" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "list" | "describe" | "create" | "update" | "delete" | "contents".
+folderId (string, optional) - Required for describe / update / delete / contents.
+type (string, optional) - "Report" | "Dashboard". Required for create and to filter list.
+name (string, required for create / update).
+developerName (string, optional, default = derived from name).
+accessType (string, optional, default "Public") - "Public" | "Hidden" | "PublicInternal".
+shares (array, optional) - { sharedTo (Role:..., Group:..., User:...), accessLevel ("View"|"Edit"|"Manage") }.
+limit, pageToken (optional, list).
+
+Result
+For list: { folders: [{ id, name, type, accessType }], nextPageToken }.
+For describe / read: full folder object including shares.
+For contents: { folderId, items: [{ id, type ("Report"|"Dashboard"|"FolderShare"), name, lastModifiedDate }], hasMore }.
+For create / update: the resulting folder object.
+For delete: { id, deleted: true }.
+
+Required permissions
+- "Manage All Reports and Dashboards" (or "Manage Reports/Dashboards in Public Folders" for public ones).
+- "Modify All Data" for some folder operations.
+
+Idempotency & limits
+- Idempotent for update on equal input.
+- A folder cannot be deleted while it contains items.
+
+Errors
+- INVALID_FOLDER_ID, FOLDER_NOT_EMPTY, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request (list report folders)
+
+manage_report_folder({ "operation": "list", "type": "Report" })

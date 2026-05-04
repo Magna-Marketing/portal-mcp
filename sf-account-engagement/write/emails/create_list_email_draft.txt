@@ -1,0 +1,76 @@
+Tool: create_list_email_draft
+
+Description
+Create a List Email draft (a one-off blast targeting one or more
+lists). v5 only exposes `Create` for list emails (no PATCH /
+DELETE). After creation, fire the send via `send_list_email`
+(legacy v4 — v5 doesn't yet expose `do/send`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/list-emails
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "name": "Spring Promo Send",
+  "subject": "Save 30% this week",
+  "campaignId": 1024,
+  "listIds": [301, 302],
+  "suppressionListIds": [310],
+  "emailTemplateId": 451,
+  "trackerDomainId": 7,
+  "operationalEmail": false,
+  "senderOptions": { "type": "GENERAL_USER", "address": "marketing@magnatech.com", "name": "Magna" },
+  "replyToOptions": { "type": "GENERAL_USER", "address": "marketing@magnatech.com" }
+}
+
+Input (parameters)
+name (string, required).
+subject (string, required if no template).
+campaignId (number, required).
+listIds (number[], required) - At least one target list.
+suppressionListIds (number[], optional) - Recipients on these lists
+  are excluded.
+emailTemplateId (number, optional) - Reuse a template's content.
+htmlMessage (string, optional), textMessage (string, optional).
+trackerDomainId (number, optional).
+folderId (number, optional).
+senderOptions (object, optional).
+replyToOptions (object, optional).
+operationalEmail (boolean, optional, default false) - Mark as
+  operational (ignores list-level opt-outs; use sparingly).
+scheduledTime (string, optional) - ISO-8601; if omitted the email
+  stays Draft until `send_list_email` is called.
+
+Result
+listEmail (object) - Created row in `Draft` status.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- 600 missing_required_field, 53 not_permitted, 59 not_found.
+
+Example request
+
+create_list_email_draft({
+  "name": "Spring Promo Send",
+  "campaignId": 1024,
+  "listIds": [301],
+  "emailTemplateId": 451,
+  "subject": "Save 30% this week"
+})
+
+Example result
+{ "listEmail": { "id": 8821, "name": "Spring Promo Send", "status": "Draft" } }

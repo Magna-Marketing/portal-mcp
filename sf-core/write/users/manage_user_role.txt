@@ -1,0 +1,62 @@
+Tool: manage_user_role
+
+Description
+Manage `UserRole` records: create, update (rename, change parent,
+change opportunity/case/contact access settings), delete (only when no
+users assigned), or move within hierarchy.
+
+Salesforce API
+Metadata API (`Role` type) + REST `UserRole` sObject, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest          (create/update/delete roles via Metadata)
+PATCH /services/data/v66.0/sobjects/UserRole/{id}          (rename, parent move via direct sObject)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A (varies by operation).
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "move".
+fullName (string, required) - Role DeveloperName.
+name (string, required for create) - UI label.
+parentRoleName (string, optional) - DeveloperName of parent (for create / move).
+opportunityAccessForAccountOwner (string, optional) - "None" | "Read" | "Edit".
+caseAccessForAccountOwner (string, optional).
+contactAccessForAccountOwner (string, optional).
+mayForecastManagerShare (boolean, optional).
+description (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object) - Standard Metadata deploy result for create/update/delete.
+role (object, on success) - { id, name, developerName, parentRoleId, parentRoleName, opportunityAccess, caseAccess, contactAccess, userCount }.
+
+Required permissions
+- "Manage Roles" / "Customize Application".
+
+Idempotency & limits
+- Update is idempotent on equal input.
+- Delete refuses when users are still assigned to the role.
+- Move is idempotent on equal input.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME (create), CIRCULAR_DEPENDENCY (move), CANNOT_DELETE_ROLE (users assigned).
+
+Example request (create)
+
+manage_user_role({
+  "operation": "create",
+  "fullName": "MTG_Engineering",
+  "name": "MTG Engineering",
+  "parentRoleName": "MTG_Delivery",
+  "opportunityAccessForAccountOwner": "Read",
+  "caseAccessForAccountOwner": "Read"
+})
+
+Example request (delete)
+
+manage_user_role({ "operation": "delete", "fullName": "MTG_Old_Team" })

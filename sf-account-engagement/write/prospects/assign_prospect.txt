@@ -1,0 +1,75 @@
+Tool: assign_prospect
+
+Description
+Assign or unassign a prospect to a user, group, or role. v5 only
+exposes user assignment via `manage_prospect operation="update"
+{assignedToUserId: ...}`; this tool wraps the **legacy v4**
+`/api/prospect/version/4/do/assign` endpoint, which supports user,
+group, and role targets, plus an explicit `unassign`.
+
+Salesforce API
+Account Engagement v4 (legacy XML).
+
+Endpoint
+POST https://{pi-domain}/api/prospect/version/4/do/assign/id/:id
+POST https://{pi-domain}/api/prospect/version/4/do/unassign/id/:id
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+Body (form-urlencoded — assign by user)
+format=json&user_email=ops@magnatech.com
+
+Body (form-urlencoded — assign by group)
+format=json&group_id=12
+
+Body (form-urlencoded — assign by role)
+format=json&role=Sales
+
+Body (unassign — empty)
+format=json
+
+Input (parameters)
+id (number, required) - Prospect id.
+operation (string, required) - "assign" | "unassign".
+assignType (string, required when assign) - "user" | "group" | "role".
+
+For user assignment:
+  userEmail (string, optional) - Pardot user's email.
+  userId (number, optional) - Pardot user id (alternative to email).
+
+For group assignment:
+  groupId (number, required) - Pardot user-group id.
+
+For role assignment:
+  role (string, required) - "Administrator" | "Marketing" |
+    "SalesManager" | "Sales".
+
+Result
+success (boolean).
+prospect (object) - Refreshed prospect with `assignedToUserId` /
+  `assignedGroupId` populated (or cleared on unassign).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent: re-assigning to the same target is a no-op.
+
+Errors
+- 59 prospect_not_found, 53 user_not_authorized, 4 invalid_user_id.
+
+Example request
+
+assign_prospect({
+  "id": 7745,
+  "operation": "assign",
+  "assignType": "user",
+  "userEmail": "ops@magnatech.com"
+})
+
+Example result
+{ "success": true, "prospect": { "id": 7745, "assignedToUserId": 421 } }

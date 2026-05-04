@@ -1,0 +1,110 @@
+Tool: audit_permissions
+
+Description
+Org-wide permission audit oriented at security/compliance. Reports:
+- High-risk system permission distribution (ModifyAllData, ViewAllData,
+  ManageUsers, ManageProfilesPermissionSets, ManageSession, AuthorApex,
+  CustomizeApplication).
+- Counts by source (profile vs permset vs PSG).
+- Permission sets with no current assignment (cleanup candidates).
+- Permission set groups with `Status != "Updated"` (broken or recalc-pending).
+- Session settings tied to high-risk perms.
+- Optional per-user enumeration for the high-risk perms.
+
+Salesforce API
+REST API + Tooling, v66.0. Composite of:
+- `Profile`/`PermissionSet`/`PermissionSetGroup` queries.
+- `PermissionSetAssignment` aggregations.
+- `find_users_with_permission` for each high-risk perm.
+
+Endpoint
+N/A.
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+highRiskPermissions (string[], optional) - Override the built-in list of
+  system perms to audit. Default: ["ModifyAllData", "ViewAllData",
+  "ManageUsers", "ManageProfilesPermissionSets", "AuthorApex",
+  "CustomizeApplication", "ApiEnabled", "PasswordNeverExpires",
+  "ManageDataIntegrations", "ViewSetup"].
+includeUserLists (boolean, optional, default false) - When true, embed
+  user arrays (names + ids) per high-risk permission. Otherwise just counts.
+includeUnassignedPermsets (boolean, optional, default true).
+includeStaleGroups (boolean, optional, default true).
+includeProfileBreakdown (boolean, optional, default true).
+limitPerSection (number, optional, default 50).
+
+Result
+generatedAt (string) - ISO.
+orgInstanceUrl (string).
+summary (object):
+  totalActiveUsers (number).
+  totalProfiles (number).
+  totalPermissionSets (number).
+  totalPermissionSetGroups (number).
+  totalPermissionSetAssignments (number).
+highRisk (array) - Per permission audited:
+  permission (string).
+  totalUsers (number).
+  bySource (object) - { profile, permset, group } counts.
+  topProfiles (array) - { profileName, userCount }.
+  topPermsets (array) - { name, userCount }.
+  users (array, optional, when includeUserLists=true).
+unassignedPermsets (array, optional) - { id, name, label, createdDate }.
+staleGroups (array, optional) - { id, developerName, status, lastError }.
+profileBreakdown (array, optional) - { profileName, userCount,
+  highRiskPermissionCount }.
+recommendations (string[]) - Heuristic suggestions
+  (e.g. "Move 3 users off ModifyAllData via PSG MTG_Security_Admin").
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Heavy: O(profiles + permsets + groups + users). Run during off-peak
+  for orgs > 5,000 users.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+audit_permissions({ "includeUserLists": true })
+
+Example result (truncated)
+
+{
+  "generatedAt": "2026-04-29T16:00:00Z",
+  "summary": {
+    "totalActiveUsers": 412,
+    "totalProfiles": 14,
+    "totalPermissionSets": 87,
+    "totalPermissionSetGroups": 12,
+    "totalPermissionSetAssignments": 1456
+  },
+  "highRisk": [
+    {
+      "permission": "ModifyAllData",
+      "totalUsers": 4,
+      "bySource": { "profile": 2, "permset": 0, "group": 2 },
+      "topProfiles": [{ "profileName": "System Administrator", "userCount": 2 }],
+      "users": [
+        { "userId": "005Qg0000020aBcAA", "name": "Admin One", "source": ["Profile: System Administrator"] }
+      ]
+    }
+  ],
+  "unassignedPermsets": [
+    { "id": "0PSQg0000004XyZAB", "name": "Old_VPN_Access", "label": "Old VPN Access", "createdDate": "2024-01-12T...0Z" }
+  ],
+  "recommendations": [
+    "5 permission sets are unassigned and were last modified > 6 months ago - candidates for archival.",
+    "Permission Set Group 'MTG_Beta' is in Outdated status - re-save to recalc."
+  ]
+}

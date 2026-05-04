@@ -1,0 +1,53 @@
+Tool: update_translation
+
+Description
+Update translation entries for a target language. Supports labels for
+custom labels, custom apps, custom tabs, fields, picklist values,
+quick actions, record types, validation rules.
+
+Salesforce API
+Metadata API (`Translations`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+language (string, required) - Language code (e.g. "es", "fr_CA").
+operation (string, optional, default "merge") - "merge" | "replace".
+customLabels (object, optional) - Map of label name -> translation.
+customApplications (object, optional).
+fieldLabels (array, optional) - [{ object, field, label, help }].
+picklistValues (array, optional) - [{ object, field, masterLabel, translation }].
+quickActions (array, optional).
+recordTypes (array, optional) - [{ object, name, label, description }].
+validationRules (array, optional) - [{ object, name, errorMessage }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+language (string).
+counts (object) - { customLabels, customApplications, fieldLabels, picklistValues, quickActions, recordTypes, validationRules }.
+
+Required permissions
+- "Manage Translation" + "Customize Application".
+
+Idempotency & limits
+- merge idempotent on equal input.
+
+Errors
+- TRANSLATION_NOT_ENABLED, INVALID_FIELD on bad object/field reference.
+
+Example request
+
+update_translation({
+  "language": "es",
+  "customLabels": { "MTG_Project_Welcome": "Bienvenido a MTG Projects." },
+  "fieldLabels": [{ "object": "Project__c", "field": "Status__c", "label": "Estado" }]
+})

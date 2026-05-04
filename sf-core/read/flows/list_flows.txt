@@ -1,0 +1,99 @@
+Tool: list_flows
+
+Description
+List and filter Flow definitions in the org. Filter by status, process
+type, sObject (for record-triggered flows), DeveloperName pattern, and
+creator/last-modified user. Supports sorting and grouping for inventory
+reports. Returns FlowDefinition rows with their active and latest
+version numbers; pair with `read_flow` to get a single flow's full
+detail or XML.
+
+Salesforce API
+Tooling API, v66.0. Backed by `FlowDefinition` and `Flow` sObjects.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT ... FROM FlowDefinition WHERE ...
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+status (string|string[], optional) - "Active" | "Draft" | "Obsolete" |
+  "InvalidDraft". Defaults to all.
+processType (string|string[], optional) - "Flow" | "AutoLaunchedFlow" |
+  "RecordTrigger" | "ScreenFlow" | "Workflow" | "InvocableProcess" |
+  "PlatformEvent" | "ApprovalProcess".
+sObject (string, optional) - Filter record-triggered/process flows by
+  the sObject they target (matches Flow.ObjectType on the active
+  version).
+namePattern (string, optional) - Glob on DeveloperName.
+createdById (string, optional) - User Id (15/18-char) of creator.
+lastModifiedById (string, optional) - User Id of last modifier.
+modifiedSince (string, optional) - ISO 8601 timestamp.
+sortBy (string, optional, default "MasterLabel") - "MasterLabel" |
+  "DeveloperName" | "LastModifiedDate" | "Status" | "ProcessType".
+sortDirection (string, optional, default "ASC") - "ASC" | "DESC".
+groupBy (string, optional) - When set, response is grouped by this
+  field: "ProcessType" | "Status" | "ObjectType".
+limit (number, optional, default 200, max 2000).
+
+Result (ungrouped)
+totalSize (number).
+flows (array) - Each:
+  definitionId, flowName, label, description, processType, status,
+  activeVersionNumber (number|null), latestVersionNumber (number),
+  objectType (string|null) - Target sObject for record-triggered flows.
+  createdById, createdByName, createdDate,
+  lastModifiedById, lastModifiedByName, lastModifiedDate.
+Result (grouped)
+groups (array) - Each:
+  key (string) - Group value.
+  count (number).
+  flows (array of the same shape).
+
+Required permissions
+- API Enabled.
+- "View All Data" or "Manage Flow" to see all flows.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Tooling SOQL governor limits apply.
+
+Errors
+- INVALID_FIELD: bad sortBy or groupBy.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_flows({
+  "processType": "AutoLaunchedFlow",
+  "status": "Active",
+  "sObject": "Opportunity",
+  "sortBy": "LastModifiedDate",
+  "sortDirection": "DESC",
+  "limit": 50
+})
+
+Example result
+
+{
+  "totalSize": 3,
+  "flows": [
+    {
+      "definitionId": "300Qg000000abcDEF",
+      "flowName": "Opportunity_Stage_Sync",
+      "label": "Opportunity Stage Sync",
+      "processType": "AutoLaunchedFlow",
+      "status": "Active",
+      "activeVersionNumber": 6,
+      "latestVersionNumber": 7,
+      "objectType": "Opportunity",
+      "lastModifiedByName": "Yamin Haji",
+      "lastModifiedDate": "2026-04-22T13:18:09.000+0000"
+    }
+  ]
+}

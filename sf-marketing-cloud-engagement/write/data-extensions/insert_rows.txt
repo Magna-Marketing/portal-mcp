@@ -1,0 +1,53 @@
+Tool: insert_rows
+
+Description
+Insert rows into a Data Extension. For DEs with a primary key, prefer
+`upsert_rows` for idempotency.
+
+Marketing Cloud API
+REST API (`/data/v1/async/dataextensions/key:{key}/rows` for async)
+or `/hub/v1/dataevents/key:{key}/rowset` for sync up to 50 rows; SOAP
+`DataExtensionObject[ExternalKey]` for >50 rows.
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/hub/v1/dataevents/key:{customerKey}/rowset
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+[
+  { "keys": { "MemberId": "MEM-100023" }, "values": { "Email": "jane.doe@example.com", "TierName": "Gold" } }
+]
+
+Input (parameters)
+customerKey (string, required) - DE External Key.
+rows (object[], required) - Each row's field map. Tool wraps as `{ keys, values }` when DE has a PK.
+async (boolean, optional, default = auto-true when rows > 50).
+
+Result
+results (array) - { rowIndex, success, errors }.
+totalProcessed (number).
+totalFailed (number).
+asyncRequestId (string|null) - When async=true.
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Inserts are not idempotent; duplicate inserts on a non-PK DE create
+  duplicate rows. For idempotency, use `upsert_rows` with a primary key.
+- Sync cap: 50 rows per call. Async covers ≥50.
+
+Errors
+- 30002 not found, INVALID_FIELD.
+
+Example request
+
+insert_rows({
+  "customerKey": "Members_DE",
+  "rows": [
+    { "MemberId": "MEM-100023", "Email": "jane.doe@example.com", "TierName": "Gold" }
+  ]
+})

@@ -1,0 +1,41 @@
+Tool: get_engagement_score
+
+Description
+Get Einstein Engagement Scoring per contact: open / click / unsubscribe
+likelihoods, persona, score band. Use to bucket audiences before
+campaign sends.
+
+Marketing Cloud API
+REST API (`/customer/v1/contacts/{contactKey}/engagementScore`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/customer/v1/contacts/{contactKey}/engagementScore
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contactKey (string, optional).
+contactKeys (string[], optional) - Batch up to 1000.
+  One required.
+channel (string, optional, default "Email") - "Email" | "Push".
+
+Result
+items (array) - Each: { contactKey, channel, openLikelihood (number 0..1), clickLikelihood (number 0..1), unsubLikelihood (number 0..1), persona ("Loyalist"|"Potential Loyalist"|"Window Shopper"|"Selective Subscriber"|"Inactive"|"Dormant"|"Winback"), engagementBand ("High"|"Medium"|"Low"), lastUpdated (string) }.
+
+Required scopes
+- `audiences_read` + Einstein license.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 403 unauthorized (no Einstein entitlement).
+
+Example request
+
+get_engagement_score({ "contactKey": "MEM-100023" })

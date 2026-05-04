@@ -1,0 +1,53 @@
+Tool: list_data_action_targets
+
+Description
+List Data Action Targets — the destinations a Data Action can fire
+to (Webhook, MuleSoft endpoint, AWS Lambda, etc.).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-action-targets
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+targetType (string, optional) - "Webhook" | "MuleSoft" |
+  "AmazonEventBridge" | "GoogleCloudPubSub" | "AzureEventGrid".
+status (string, optional) - "Active" | "Paused" | "Failed".
+limit (number, optional, default 100).
+
+Result
+dataActionTargets (array) - Each: { apiName, label, targetType,
+  endpointUrl, status, signingKeyConfigured (boolean), authType,
+  createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_action_targets({ "targetType": "Webhook" })
+
+Example result
+{
+  "dataActionTargets": [
+    { "apiName": "WebhookTarget__dat", "label": "Marketing webhook",
+      "targetType": "Webhook",
+      "endpointUrl": "https://hooks.magnatech.com/cdp",
+      "signingKeyConfigured": true }
+  ]
+}

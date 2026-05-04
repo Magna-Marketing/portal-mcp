@@ -1,0 +1,51 @@
+Tool: get_list
+
+Description
+Read a single List by id with audit relations expanded. The
+prospect count isn't returned by v5; for that, run
+`list_list_memberships?listId=:id&limit=0` and read the page
+metadata `total` (or use B2BMA dashboards).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/lists/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `folder.*`,
+  `campaign.*`, `createdBy.*`, `updatedBy.*`.
+
+Result
+list (object): id, name, description, isPublic, isDynamic,
+  isCrmVisible, folderId, campaignId, salesforceId, title, isDeleted,
+  createdAt, updatedAt.
+folder (object|null), campaign (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_list({ "id": 301 })
+
+Example result
+{
+  "list": { "id": 301, "name": "Active customers",
+    "isDynamic": true, "campaignId": 1024 }
+}

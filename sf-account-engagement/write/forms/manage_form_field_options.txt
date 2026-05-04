@@ -1,0 +1,86 @@
+Tool: manage_form_field_options
+
+Description
+Manage the picklist values, dependents, and progressive-profiling
+config on a Form Field. The v5 API exposes three separate sub-
+actions; this tool unifies them under `subOperation`:
+
+- `addValue` — append a picklist value (Dropdown / Radio / Multi /
+  Checkbox fields).
+- `addDependent` — add a child field that's shown only when this
+  field has a specific value.
+- `addProgressive` — add a progressive-profiling rule that swaps
+  this field for another on subsequent visits.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/form-fields/:id/do/addValue
+POST https://{pi-domain}/api/v5/objects/form-fields/:id/do/addDependent
+POST https://{pi-domain}/api/v5/objects/form-fields/:id/do/addProgressive
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (addValue)
+{ "value": "EMEA", "isDefault": false, "sortOrder": 1 }
+
+Body (addDependent)
+{ "dependentFormFieldId": 53, "triggerValue": "EMEA" }
+
+Body (addProgressive)
+{ "replacementProspectApiFieldId": "industry__c", "sortOrder": 0 }
+
+Input (parameters)
+id (number, required) - Form field id.
+subOperation (string, required) - "addValue" | "addDependent" |
+  "addProgressive".
+
+For addValue:
+  value (string, required).
+  isDefault (boolean, optional, default false).
+  sortOrder (number, optional).
+
+For addDependent:
+  dependentFormFieldId (number, required) - The field shown when
+    triggerValue is selected.
+  triggerValue (string, required).
+
+For addProgressive:
+  replacementProspectApiFieldId (string, required) - Field shown on
+    return visits.
+  sortOrder (number, optional).
+
+Result
+success (boolean).
+formField (object) - Refreshed form-field row.
+addedValue (object, addValue only) - { value, isDefault, sortOrder }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- `addValue` is idempotent on (formFieldId, value).
+- `addDependent` / `addProgressive` accumulate — repeated calls
+  add duplicate rules.
+
+Errors
+- 20 invalid_input, 53 not_permitted, 59 not_found.
+
+Example request
+
+manage_form_field_options({
+  "id": 53, "subOperation": "addValue",
+  "value": "EMEA", "isDefault": false
+})
+
+Example result
+{
+  "success": true,
+  "formField": { "id": 53, "hasValues": true },
+  "addedValue": { "value": "EMEA", "isDefault": false }
+}

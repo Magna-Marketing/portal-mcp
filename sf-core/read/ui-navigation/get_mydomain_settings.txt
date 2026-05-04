@@ -1,0 +1,45 @@
+Tool: get_mydomain_settings
+
+Description
+Read the org's MyDomain configuration: domain name, deploy status, login policy, redirect policy, embedded login disabled flag, partial login policy, branding domain, and the org's instance URL aliases.
+
+Salesforce API
+Metadata API (`MyDomainSettings`, `DomainSettings`), v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0   (readMetadata MyDomainSettings)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Domain, OptionsHstsPreload, HttpsOption, CnameTarget FROM Domain
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+domain (string) - "mtg.my.salesforce.com".
+deployStatus (string) - "InProgress" | "Deployed" | "Failed".
+loginPolicy (string) - "All" | "MyDomainOnly".
+redirectPolicy (string) - "Disabled" | "Warning" | "Frame" | "Redirect".
+disableEmbeddedLogin (boolean).
+partialLoginPolicy (string).
+useNativeBrowserForLogin (boolean).
+domains (array) - [{ domain, optionsHstsPreload, httpsOption, cnameTarget }].
+brandingDomain (string|null).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+get_mydomain_settings({})

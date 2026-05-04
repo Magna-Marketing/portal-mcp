@@ -1,0 +1,76 @@
+Tool: manage_connection
+
+Description
+Create, update (PATCH or PUT), or delete a Connection. PATCH is a
+partial update; PUT replaces the connection with the provided
+config (preserving id). Delete is permanent — Data Streams that
+reference the connection break.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/connections                                  (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId                    (operation="update")
+PUT    {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId                    (operation="replace")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId                    (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "MTG_MCE",
+  "label": "MTG Marketing Cloud Engagement",
+  "connectorType": "MarketingCloudEngagement",
+  "additionalProperties": {
+    "subdomain": "mc7xxxxxxxxxxx",
+    "memberId": 5001234,
+    "clientId": "{{ClientId}}",
+    "clientSecret": "{{ClientSecret}}"
+  }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "replace" | "delete".
+connectionId (string, required for update / replace / delete).
+name (string, required for create) - Developer name.
+label (string, required for create).
+connectorType (string, required for create) - See `list_connectors`.
+description (string, optional).
+additionalProperties (object, optional / required for create) -
+  Connector-type-specific config (see `get_connector_metadata`).
+isDefaultConnection (boolean, optional).
+
+Result
+connection (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; no soft restore.
+- One default connection per `connectorType`.
+
+Errors
+- 409 DUPLICATE_VALUE (name collision), 400 INVALID_CONNECTOR_CONFIG,
+  502 SOURCE_UNAVAILABLE (auth probe to source failed), 404 NOT_FOUND.
+
+Example request
+
+manage_connection({
+  "operation": "create",
+  "name": "MTG_MCE",
+  "label": "MTG Marketing Cloud Engagement",
+  "connectorType": "MarketingCloudEngagement",
+  "additionalProperties": { "subdomain": "mc7xxxxxxxxxxx", "memberId": 5001234 }
+})
+
+Example result
+{
+  "connection": { "id": "0Z65800000000ABCAA", "name": "MTG_MCE",
+    "connectorType": "MarketingCloudEngagement", "status": "Active" }
+}

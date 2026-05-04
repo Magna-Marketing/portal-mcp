@@ -1,0 +1,66 @@
+Tool: run_clean_room_query
+
+Description
+Execute a pre-approved query template inside a Data Clean Room
+collaboration. Async; returns a `jobId` that's poll-able via
+`list_query_jobs`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/actions/run
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "templateApiName": "OverlapAudience",
+  "parameters": { "minOverlapCount": 1000 },
+  "outputDmoApiName": "PartnerXOverlap__dlm"
+}
+
+Input (parameters)
+collaborationIdOrApiName (string, required).
+templateApiName (string, required).
+parameters (object, optional) - Per-template parameter map.
+outputDmoApiName (string, optional) - When supplied, the result is
+  materialized into this DMO.
+runIdempotencyKey (string, optional).
+
+Result
+jobId (string).
+collaborationId (string).
+templateApiName (string).
+status (string) - "Queued" | "AwaitingApproval".
+submittedAt (ISO-8601).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- Requires partner approval if the template's clauses reach into
+  partner data.
+
+Errors
+- 404 NOT_FOUND, 409 NOT_AUTHORIZED (template not approved by partner),
+  400 INVALID_PARAMETERS.
+
+Example request
+
+run_clean_room_query({
+  "collaborationIdOrApiName": "MTG_PartnerX",
+  "templateApiName": "OverlapAudience",
+  "parameters": { "minOverlapCount": 1000 }
+})
+
+Example result
+{
+  "jobId": "JOB_DCR_2026-04-29T13",
+  "collaborationId": "0YC580000000001",
+  "status": "AwaitingApproval"
+}

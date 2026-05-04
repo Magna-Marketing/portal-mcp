@@ -1,0 +1,56 @@
+Tool: list_folders
+
+Description
+List folders. Folders are typed-by-object (Email Templates have
+their own folder hierarchy distinct from Files), but the v5
+`/objects/folders` collection returns all of them; filter by
+`parentFolderId` and / or by traversing `path`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/folders?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+parentFolderId (number, optional) - 0/null for top-level folders.
+nameContains (string, optional).
+pathContains (string, optional) - Match the slashy `/A/B/C` path.
+fields (string[], optional, default: id,name,parentFolderId,path,
+  createdAt,updatedAt,createdById,updatedById).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+folders (array) - Each: { id, name, parentFolderId, path,
+  createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_folders({ "parentFolderId": 0 })
+
+Example result
+{
+  "folders": [
+    { "id": 1, "name": "Marketing", "parentFolderId": null, "path": "/Marketing" },
+    { "id": 2, "name": "Sales",     "parentFolderId": null, "path": "/Sales" }
+  ]
+}

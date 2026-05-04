@@ -1,0 +1,50 @@
+Tool: get_dmo_relationships
+
+Description
+Read the DMO-to-DMO relationships defined on a DMO. Relationships
+power Profile API child reads and downstream Data Graphs / Segment
+joins.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName/relationships
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataModelObjectName (string, required).
+
+Result
+relationships (array) - Each: { name, label, fromDmo, fromField,
+  toDmo, toField, cardinality ("OneToOne" | "OneToMany" | "ManyToMany"),
+  isRequired }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_dmo_relationships({ "dataModelObjectName": "UnifiedIndividual__dlm" })
+
+Example result
+{
+  "relationships": [
+    { "name": "EngagementHistory",
+      "fromDmo": "UnifiedIndividual__dlm", "fromField": "Id__c",
+      "toDmo": "EngagementHistory__dlm", "toField": "IndividualId__c",
+      "cardinality": "OneToMany" }
+  ]
+}

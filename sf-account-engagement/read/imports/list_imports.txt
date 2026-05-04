@@ -1,0 +1,64 @@
+Tool: list_imports
+
+Description
+List Prospect import jobs (CSV uploads). An import is a multi-batch
+async ingest pipeline. Each row tracks status (`Open`,
+`Ready`, `Processing`, `Complete`, `Error`, `Cancelled`), error count,
+and the operation (`upsert` vs `create`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/imports?fields={fields}&filter[state]=eq,Processing
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+state (string, optional) - "Open" | "Ready" | "Processing" |
+  "Complete" | "Error" | "Cancelled".
+operation (string, optional) - "Upsert" | "Create".
+createdAfter (string, optional) - ISO-8601.
+createdBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,object,operation,state,
+  errorRef,batchProgress,createdAt,updatedAt,createdById,updatedById,
+  campaignId,restoreDeleted,isAllowFieldUpdates,visitorId,
+  isAllowUserToManageProspects,isMatchedOnEmailNotIdsAndCrmId,
+  visibilityListIds,trackerDomainId,visibility).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+imports (array) - Each: { id, object, operation, state, errorRef,
+  batchProgress (object), campaignId, restoreDeleted, isAllowFieldUpdates,
+  visibility, visibilityListIds, isAllowUserToManageProspects,
+  isMatchedOnEmailNotIdsAndCrmId, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_imports({ "state": "Processing" })
+
+Example result
+{
+  "imports": [
+    { "id": 5512, "object": "Prospect", "operation": "Upsert",
+      "state": "Processing",
+      "batchProgress": { "totalBatches": 5, "completedBatches": 3 } }
+  ]
+}

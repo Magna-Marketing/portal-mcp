@@ -1,0 +1,57 @@
+Tool: manage_mobile_subscriber
+
+Description
+Subscribe a phone number to a MobileConnect keyword (opt-in / pending
+double-opt-in), update their record, or query subscription status.
+For one-call status checks, use `read/mobile/list_sms_subscription_status`.
+
+Marketing Cloud API
+REST API (`/sms/v1/contacts/subscriptions` for status; opt-in flows
+via `/sms/v1/message/optin` or `manage_optin_message` write tool).
+For opt-out, fire a Stop / Unsubscribe keyword via `send_sms` or use
+the SOAP `MobileSubscription` object.
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/contacts/subscriptions          (status query in body, returns opt-in record)
+POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/message/optin                   (trigger opt-in flow)
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx                          (SOAP MobileSubscription Create / Update / Delete)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json (REST) or text/xml (SOAP)
+
+Body
+For status: { "mobileNumbers": ["+15551234567"], "keywords": [{ "keyword": "MTG", "shortCode": "12345", "countryCode": "US" }] }
+
+Input (parameters)
+operation (string, required) - "subscribe" | "unsubscribe" | "update" | "checkStatus".
+mobileNumber (string, optional) - E.164.
+mobileNumbers (string[], optional) - Bulk for checkStatus.
+keyword (string, optional).
+shortCode (string, optional).
+countryCode (string, optional, default "US").
+contactKey (string, optional).
+locale (string, optional).
+optInMessageId (number, optional, for subscribe via message-driven opt-in).
+
+Result
+For subscribe / unsubscribe / update: subscription (object) - { id, mobileNumber, contactKey, codeId, keywordId, subscriptionStatus, subscribedDate }.
+For checkStatus: subscriptions (array) - [{ mobileNumber, keyword, shortCode, status ("Active"|"Pending"|"Unsubscribed"), subscribedDate, unsubscribedDate }].
+
+Required scopes
+- `sms_send` (subscribe) / `sms_read` (status).
+
+Idempotency & limits
+- subscribe idempotent for already-active number.
+
+Errors
+- INVALID_PHONE_NUMBER.
+
+Example request (status check)
+
+manage_mobile_subscriber({
+  "operation": "checkStatus",
+  "mobileNumbers": ["+15551234567"],
+  "keyword": "MTG",
+  "shortCode": "12345"
+})

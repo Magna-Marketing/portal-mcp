@@ -1,0 +1,55 @@
+Tool: update_report
+
+Description
+Update an existing report's metadata. Only the fields you provide are
+updated; existing fields not in the request are left as-is. Filters,
+columns, groupings, name, description, folder are all editable. Use
+`describe_report` to see the current shape.
+
+Salesforce API
+Analytics REST API, v66.0. `PATCH /analytics/reports/{reportId}`.
+
+Endpoint
+PATCH /services/data/v66.0/analytics/reports/{reportId}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (any subset of these)
+{
+  "reportMetadata": {
+    "name": "Pipeline This Quarter (v2)",
+    "reportFilters": [
+      { "column": "AMOUNT", "operator": "greaterOrEqual", "value": "100000" }
+    ]
+  }
+}
+
+Input (parameters)
+reportId (string, required) - 18-char Report Id.
+reportMetadata (object, required) - Partial reportMetadata object with
+  the fields to change. Same shape as `create_report` (all optional inside).
+moveToFolderId (string, optional) - Convenience: PATCH `folderId`.
+
+Result
+report (object) - Same shape as `create_report` result.
+modifiedFields (string[]) - Names of metadata fields that were updated.
+
+Required permissions
+- "API Enabled" + "Edit My Reports" (or "Manage All Reports" for others').
+- Write access on source and destination folder when moving.
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- INVALID_REPORT_ID.
+- INSUFFICIENT_FOLDER_ACCESS on moveToFolderId.
+
+Example request
+
+update_report({
+  "reportId": "00OQg0000004aBcDE",
+  "reportMetadata": { "name": "Pipeline This Quarter (v2)", "showGrandTotal": true }
+})

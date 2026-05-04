@@ -1,0 +1,54 @@
+Tool: get_email_template
+
+Description
+Read a single Email Template by id. Returns the HTML / text bodies
+and the sender / reply-to options that will apply when the template
+is used in a list send or auto-responder.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/email-templates/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `htmlMessage`,
+  `textMessage`, `folder.*`.
+
+Result
+emailTemplate (object): id, name, subject, htmlMessage, textMessage,
+  type, isOneToOneEmail, isAutoResponderEmail, isDripEmail, isListEmail,
+  isDeleted, folderId, campaignId, trackerDomainId, senderOptions,
+  replyToOptions, tagReplacementLanguage, createdAt, updatedAt.
+folder (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_email_template({ "id": 451 })
+
+Example result
+{
+  "emailTemplate": {
+    "id": 451, "name": "Welcome", "subject": "Welcome to {{Recipient.FirstName}}",
+    "htmlMessage": "<html>...</html>",
+    "isAutoResponderEmail": true
+  }
+}

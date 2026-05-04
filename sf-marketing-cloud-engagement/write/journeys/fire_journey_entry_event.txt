@@ -1,0 +1,51 @@
+Tool: fire_journey_entry_event
+
+Description
+Fire a single entry event into a Journey from outside (e.g. a custom
+business event). Wraps `/interaction/v1/events` with shape suitable for
+one event at a time. Equivalent to a one-row `inject_contacts_into_journey`
+but optimized for single-fire latency.
+
+Marketing Cloud API
+REST API (`/interaction/v1/events`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/events
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "ContactKey": "MEM-100023",
+  "EventDefinitionKey": "APIEvent-Order-Confirmed",
+  "Data": { "OrderId": "ORD-12345", "OrderTotal": 250.50 }
+}
+
+Input (parameters)
+eventDefinitionKey (string, required).
+contactKey (string, required).
+data (object, optional) - Per-event payload that the journey can reference.
+
+Result
+eventInstanceId (string).
+status (string) - "Queued" | "Processed" | "Failed".
+errors (array, optional).
+
+Required scopes
+- `journeys_execute`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- 10000 invalid eventDefinitionKey.
+
+Example request
+
+fire_journey_entry_event({
+  "eventDefinitionKey": "APIEvent-Order-Confirmed",
+  "contactKey": "MEM-100023",
+  "data": { "OrderId": "ORD-12345", "OrderTotal": 250.50 }
+})

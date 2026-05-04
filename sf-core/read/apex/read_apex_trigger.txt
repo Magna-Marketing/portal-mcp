@@ -1,0 +1,111 @@
+Tool: read_apex_trigger
+
+Description
+Read Apex trigger source, metadata, or list triggers by pattern. Like
+`read_apex` but for triggers (Tooling API `ApexTrigger`). Modes mirror
+`read_apex`:
+1. Single trigger: pass `name` to get full Body, status, IsValid, target
+   sObject (TableEnumOrId), and event flags.
+2. Pattern: pass `pattern` to enumerate; metadata-only by default.
+
+Use this with `describe_object` to confirm the trigger's target sObject.
+Use `write_apex_trigger` to create or update.
+
+Salesforce API
+Tooling API, v66.0.
+- `GET /tooling/query/?q=SELECT ... FROM ApexTrigger WHERE ...`
+- `GET /tooling/sobjects/ApexTrigger/{id}`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=...
+GET /services/data/v66.0/tooling/sobjects/ApexTrigger/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+name (string, optional) - Exact trigger API name. Mutually exclusive
+  with `pattern`.
+pattern (string, optional) - Glob to match (`Project*Trigger`, `*Trigger`).
+sObject (string, optional) - Filter by target sObject API name (matches
+  `TableEnumOrId`).
+includeBody (boolean, optional, default true with `name`, false with `pattern`).
+includeInactive (boolean, optional, default true) - Include triggers
+  with Status != "Active".
+namespacePrefix (string, optional).
+limit (number, optional, default 100, max 2000).
+
+Result
+For `name`:
+  apexTrigger (object):
+    id, name, namespacePrefix, apiVersion (number),
+    tableEnumOrId (string) - Target sObject API name.
+    status ("Active"|"Inactive"|"Deleted"),
+    isValid (boolean),
+    body (string) - Full source.
+    bodyCrc (number),
+    lengthWithoutComments (number),
+    manageableState (string),
+    usageBeforeInsert, usageAfterInsert, usageBeforeUpdate, usageAfterUpdate,
+    usageBeforeDelete, usageAfterDelete, usageAfterUndelete (boolean) -
+      Which DML events the trigger handles.
+    usageIsBulk (boolean).
+    createdById, createdDate, lastModifiedById, lastModifiedDate.
+For `pattern`:
+  totalSize (number).
+  apexTriggers (array; no body unless includeBody=true).
+
+Required permissions
+- API Enabled.
+- "View All Data" or "Author Apex" to read Body.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Salesforce caps trigger source at ~1 MB.
+
+Errors
+- NOT_FOUND: trigger `name` not found.
+- INSUFFICIENT_ACCESS_OR_READONLY: cannot read Body.
+
+Example request
+
+read_apex_trigger({ "sObject": "Project__c", "includeBody": false })
+
+Example result
+
+{
+  "totalSize": 2,
+  "apexTriggers": [
+    {
+      "id": "01q4Q00000Xy12abc",
+      "name": "ProjectTrigger",
+      "tableEnumOrId": "Project__c",
+      "apiVersion": 62.0,
+      "status": "Active",
+      "isValid": true,
+      "usageBeforeInsert": true,
+      "usageAfterInsert": true,
+      "usageBeforeUpdate": true,
+      "usageAfterUpdate": true,
+      "usageBeforeDelete": false,
+      "usageAfterDelete": false,
+      "usageAfterUndelete": false,
+      "usageIsBulk": true
+    },
+    {
+      "id": "01q4Q00000Xy12def",
+      "name": "ProjectAssignmentTrigger",
+      "tableEnumOrId": "Project_Assignment__c",
+      "status": "Active",
+      "isValid": true,
+      "usageBeforeInsert": true,
+      "usageAfterInsert": false,
+      "usageBeforeUpdate": false,
+      "usageAfterUpdate": true
+    }
+  ]
+}

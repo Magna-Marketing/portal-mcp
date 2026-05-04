@@ -1,0 +1,85 @@
+Tool: create_lwc_bundle
+
+Description
+Create a brand-new Lightning Web Component bundle. Two modes:
+1. **Template**: pass `template` to scaffold (`basic`, `record`, `list`,
+   `datatable`, `form`). The MCP server fills in idiomatic boilerplate
+   (HTML, JS, CSS, meta XML) tuned for the chosen target. Useful for
+   quickly stamping out new components.
+2. **Custom**: provide `files` with each file's contents.
+
+The bundle is created via the Tooling API container/save pattern.
+
+Salesforce API
+Tooling API, v66.0.
+- `POST /tooling/sobjects/MetadataContainer`.
+- `POST /tooling/sobjects/LightningComponentBundle` for new bundles.
+- `POST /tooling/sobjects/LightningComponentResource` per file (Source).
+- `POST /tooling/sobjects/ContainerAsyncRequest` to save and validate.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/LightningComponentBundle
+POST /services/data/v66.0/tooling/sobjects/LightningComponentResource
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A (multi-step internal flow).
+
+Input (parameters)
+name (string, required) - LWC bundle name. Must start with lowercase
+  letter, then alphanumeric only, max 40 chars (e.g. "projectCard").
+label (string, required) - Master label.
+description (string, optional).
+apiVersion (number, optional, default = org's current API version).
+isExposed (boolean, optional, default false).
+template (string, optional) - "basic" | "record" | "list" | "datatable"
+  | "form". Mutually exclusive with `files`.
+templateOptions (object, optional) - Per-template variables (e.g.
+  `objectApiName: "Project__c"` for `record`/`list`/`form`,
+  `fields: ["Name","Status__c"]` for `datatable`).
+files (object[], optional) - When not using a template:
+  fileName (string, required) - "<name>.js", "<name>.html",
+    "<name>.css", "<name>.js-meta.xml", "<name>.svg".
+  source (string, required) - File contents.
+targets (string[], optional) - Lightning targets when isExposed=true:
+  "lightning__RecordPage" | "lightning__AppPage" | "lightning__HomePage"
+  | "lightning__Tab" | "lightningCommunity__Page" | etc. Adds to
+  meta-xml when using template; required to be embedded already in
+  meta-xml when using files.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object) - { containerId, state, errorMessage,
+  componentSuccesses, componentFailures }.
+bundle (object, on success) - { id, name, label, apiVersion, isExposed,
+  files: [{ id, fileName, format, sizeBytes }] }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Create is **not** idempotent (fails on duplicate name).
+- Bundle name unique per namespace.
+- Each file source ≤ 1 MB.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME on existing bundle.
+- INVALID_FIELD on bad apiVersion.
+- DEPLOY_FAILED with line/column on JS / HTML compile errors.
+
+Example request (template)
+
+create_lwc_bundle({
+  "name": "projectCard",
+  "label": "Project Card",
+  "apiVersion": 62.0,
+  "isExposed": true,
+  "template": "record",
+  "templateOptions": { "objectApiName": "Project__c", "fields": ["Name", "Status__c"] },
+  "targets": ["lightning__RecordPage"]
+})

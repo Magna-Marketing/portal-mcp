@@ -1,0 +1,58 @@
+Tool: manage_list_subscribers
+
+Description
+Add subscribers to a list, remove them, or update their list-membership
+status. The Subscriber must already exist; this tool wires the
+`ListSubscriber` join.
+
+Marketing Cloud API
+SOAP API (`Subscriber` Create / Update with `Lists[]`) +
+`ListSubscriber` for fine-grained membership.
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP UpdateRequest on Subscriber with Lists[] / SaveOptions.
+
+Input (parameters)
+operation (string, required) - "add" | "remove" | "updateStatus".
+listId (number, optional).
+listName (string, optional).
+customerKey (string, optional) - List external key.
+  One required.
+subscribers (object[], required) - Each:
+  subscriberKey (string, optional) - Or email.
+  email (string, optional).
+  status (string, optional, default "Active") - "Active" | "Unsubscribed" | "Held" | "Bounced". Used by updateStatus.
+  attributes (object, optional) - Subscriber attribute updates.
+allOrNone (boolean, optional, default false).
+skipIfAlreadyOnList (boolean, optional, default true).
+
+Result
+results (array) - { subscriberKey, listId, status ("added"|"removed"|"updated"|"already_on_list"|"failed"), error }.
+summary (object) - { added, removed, updated, alreadyOnList, failed, total }.
+
+Required scopes
+- `list_and_subscribers_write`.
+
+Idempotency & limits
+- add idempotent with `skipIfAlreadyOnList=true`.
+- 200-row batch cap; tool batches.
+
+Errors
+- LIST_NOT_FOUND, SUBSCRIBER_NOT_FOUND.
+
+Example request
+
+manage_list_subscribers({
+  "operation": "add",
+  "listName": "Q3_Newsletter",
+  "subscribers": [
+    { "subscriberKey": "MEM-100023", "email": "jane.doe@example.com" }
+  ]
+})

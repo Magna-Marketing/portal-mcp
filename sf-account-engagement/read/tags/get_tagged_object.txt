@@ -1,0 +1,43 @@
+Tool: get_tagged_object
+
+Description
+Read a single Tagged Object row by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/tagged-objects/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `tag.*`.
+
+Result
+taggedObject (object): id, tagId, objectId, objectType, createdAt,
+  createdById.
+tag (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_tagged_object({ "id": 9001 })
+
+Example result
+{ "taggedObject": { "id": 9001, "tagId": 211, "objectId": 7745, "objectType": "Prospect" } }

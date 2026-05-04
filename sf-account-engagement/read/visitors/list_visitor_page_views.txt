@@ -1,0 +1,58 @@
+Tool: list_visitor_page_views
+
+Description
+List individual page views recorded by the Pardot tracking pixel.
+One row per page hit; grouped into Visits via `visitId`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visitor-page-views?fields={fields}&filter[visitId]=eq,:visitId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+visitId (number, optional).
+visitorId (number, optional).
+prospectId (number, optional).
+campaignId (number, optional).
+urlContains (string, optional) - `like` filter on `url`.
+createdAfter (string, optional) - ISO-8601.
+fields (string[], optional, default: id,visitId,visitorId,prospectId,
+  url,title,campaignId,durationInSeconds,createdAt).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+visitorPageViews (array) - Each: { id, visitId, visitorId, prospectId,
+  url, title, campaignId, durationInSeconds, createdAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_visitor_page_views({ "visitId": 11001 })
+
+Example result
+{
+  "visitorPageViews": [
+    { "id": 22101, "visitId": 11001, "url": "/pricing",
+      "title": "Pricing", "durationInSeconds": 88,
+      "createdAt": "2026-04-29T13:01:11Z" }
+  ]
+}

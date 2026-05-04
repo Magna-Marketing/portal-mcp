@@ -1,0 +1,86 @@
+Tool: create_report
+
+Description
+Create a new Salesforce report via the Analytics REST API. Supply the
+report type (use `list_report_types` to discover), the report format
+(tabular / summary / matrix), columns, filters, groupings, and folder
+assignment. The new report is saved and ready to run with
+`run_report`.
+
+Salesforce API
+Analytics REST API, v66.0. `POST /analytics/reports`.
+
+Endpoint
+POST /services/data/v66.0/analytics/reports
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "reportMetadata": {
+    "name": "Pipeline This Quarter",
+    "developerName": "Pipeline_This_Quarter",
+    "reportType": { "type": "Opportunity" },
+    "reportFormat": "MATRIX",
+    "folderId": "00lQg0000008abcAB",
+    "detailColumns": ["NAME", "ACCOUNT.NAME", "AMOUNT", "STAGE_NAME"],
+    "aggregates": ["RowCount", "s!AMOUNT"],
+    "groupingsAcross": [{ "name": "STAGE_NAME", "sortOrder": "Asc" }],
+    "groupingsDown": [{ "name": "OWNER.NAME", "sortOrder": "Asc" }],
+    "reportFilters": [
+      { "column": "STAGE_NAME", "operator": "notEqual", "value": "Closed Lost" }
+    ],
+    "standardDateFilter": { "column": "CLOSE_DATE", "durationValue": "THIS_QUARTER" }
+  }
+}
+
+Input (parameters)
+name (string, required) - Display name.
+developerName (string, optional) - DeveloperName; auto-generated when omitted.
+description (string, optional).
+reportType (object, required) - { type (string, e.g. "Opportunity",
+  "AccountList", or a custom report type developer name) }.
+reportFormat (string, required) - "TABULAR" | "SUMMARY" | "MATRIX" | "JOINED".
+folderId (string, optional, default = the running user's "Private" folder).
+detailColumns (string[], required for non-empty TABULAR/SUMMARY/MATRIX).
+aggregates (string[], optional) - "RowCount", "s!Amount" (sum), "a!Amount" (avg), etc.
+groupingsAcross (array, optional) - For MATRIX: { name, sortOrder, dateGranularity }.
+groupingsDown (array, optional) - { name, sortOrder, dateGranularity }.
+reportFilters (array, optional) - { column, operator, value }.
+standardDateFilter (object, optional) - { column, durationValue, startDate, endDate }.
+reportBooleanFilter (string, optional) - e.g. "(1 OR 2) AND 3".
+showSubtotals, showGrandTotal, hasDetailRows, hasRecordCount (boolean, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+report (object) - { id, name, developerName, format, folderId, ownerId,
+  createdDate, modifiedDate, describeUrl, instancesUrl }.
+
+Required permissions
+- "API Enabled" + "Create and Customize Reports".
+- Write access on the destination folder.
+
+Idempotency & limits
+- Not idempotent: a second call creates a second report.
+- Folder must allow the running user to write.
+
+Errors
+- INVALID_REPORT_TYPE.
+- INSUFFICIENT_FOLDER_ACCESS.
+- INVALID_FILTER_VALUE.
+
+Example request
+
+create_report({
+  "name": "Pipeline This Quarter",
+  "reportType": { "type": "Opportunity" },
+  "reportFormat": "MATRIX",
+  "folderId": "00lQg0000008abcAB",
+  "detailColumns": ["NAME","ACCOUNT.NAME","AMOUNT","STAGE_NAME"],
+  "aggregates": ["RowCount","s!AMOUNT"],
+  "groupingsDown": [{ "name": "OWNER.NAME", "sortOrder": "Asc" }],
+  "reportFilters": [{ "column": "STAGE_NAME", "operator": "notEqual", "value": "Closed Lost" }],
+  "standardDateFilter": { "column": "CLOSE_DATE", "durationValue": "THIS_QUARTER" }
+})

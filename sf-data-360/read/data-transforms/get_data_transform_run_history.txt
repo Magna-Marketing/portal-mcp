@@ -1,0 +1,57 @@
+Tool: get_data_transform_run_history
+
+Description
+Read the recent run history of a Data Transform — start / end
+times, status, records processed / failed, error references.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/run-history
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataTransformNameOrId (string, required).
+status (string, optional) - "Success" | "Failed" | "Running" |
+  "Cancelled" | "Queued".
+startedAfter (string, optional) - ISO-8601.
+limit (number, optional, default 25, max 200).
+
+Result
+runs (array) - Each: { runId, status, startedAt, completedAt,
+  durationMs, recordsProcessed, recordsRejected, triggerType
+  ("Scheduled" | "Manual" | "Retry"), errorMessage, errorRef }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_transform_run_history({
+  "dataTransformNameOrId": "build_unified_individual",
+  "limit": 5
+})
+
+Example result
+{
+  "runs": [
+    { "runId": "RUN_2026-04-29T08", "status": "Success",
+      "startedAt": "2026-04-29T08:00:00Z",
+      "completedAt": "2026-04-29T08:14:32Z",
+      "recordsProcessed": 482000 }
+  ]
+}

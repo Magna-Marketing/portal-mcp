@@ -1,0 +1,71 @@
+Tool: get_lwc_bundle_info
+
+Description
+Get the complete description of an LWC bundle in one call: bundle
+metadata, the parsed `js-meta.xml` (targets, exposure, capabilities),
+file list with sizes, dependency hints (SLDS modules, lwc imports,
+Apex controller wires), and the API version.
+
+Use this when you need to "understand the component without reading
+files yet". Pair with `read_lwc_comprehensive` if you also need the
+file source.
+
+Salesforce API
+Tooling API, v66.0. `LightningComponentBundle` +
+`LightningComponentResource` + parsed `*.js-meta.xml`.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/LightningComponentBundle/{id}
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
+GET /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}     (for the .js-meta.xml content)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - DeveloperName.
+includeImports (boolean, optional, default true) - Parse the .js to
+  extract `import` statements (lwc, lightning, c, @salesforce/...).
+
+Result
+bundle (object) - id, name, label, apiVersion, isExposed,
+  namespacePrefix, manageableState, description, createdDate,
+  lastModifiedDate, lastModifiedById.
+metaXml (object) - Parsed .js-meta.xml:
+  apiVersion (number).
+  isExposed (boolean).
+  description (string|null).
+  masterLabel (string|null).
+  targets (string[]) - e.g. ["lightning__RecordPage", "lightning__AppPage"].
+  targetConfigs (array) - Per-target config:
+    target (string).
+    objects (string[]) - sObjects supported (RecordPage targets).
+    properties (array) - { name, type, label, default, datasource }.
+    actionConfig, channels, etc. as set.
+  capabilities (string[]).
+  packageVersion (object|null).
+files (array) - { id, fileName, format, sizeBytes }.
+imports (object, when includeImports=true) - Aggregated imports parsed
+  from all .js files:
+  lwc (string[]).
+  lightning (string[]) - Standard Lightning components.
+  c (string[]) - Custom components in default namespace.
+  salesforceModules (string[]) - "@salesforce/apex/...", "@salesforce/schema/...", "@salesforce/label/...".
+  externalModules (string[]) - any non-standard imports.
+
+Required permissions
+- "Customize Application" / "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+get_lwc_bundle_info({ "name": "projectCard" })

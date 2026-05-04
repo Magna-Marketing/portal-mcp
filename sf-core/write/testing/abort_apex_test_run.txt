@@ -1,0 +1,38 @@
+Tool: abort_apex_test_run
+
+Description
+Abort an in-progress async Apex test run by job Id. Updates the
+`AsyncApexJob.Status` to "Aborted" and any pending `ApexTestQueueItem`
+rows to "Aborted".
+
+Salesforce API
+Tooling API, v66.0. PATCH `ApexTestQueueItem`.
+
+Endpoint
+PATCH /services/data/v66.0/tooling/sobjects/ApexTestQueueItem/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Status": "Aborted" }
+
+Input (parameters)
+jobId (string, required) - AsyncApexJob Id of the test run.
+
+Result
+job (object) - { id, status: "Aborted", queueItemsAborted (number), queueItemsAlreadyComplete (number) }.
+
+Required permissions
+- "Author Apex" / "Modify All Data".
+
+Idempotency & limits
+- Idempotent (already-aborted job: no-op).
+
+Errors
+- NOT_FOUND on jobId.
+
+Example request
+
+abort_apex_test_run({ "jobId": "707Qg00000abcDE" })

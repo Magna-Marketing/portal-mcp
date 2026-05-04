@@ -1,0 +1,45 @@
+Tool: list_experience_site_members
+
+Description
+List members of an Experience site (`NetworkMember`). Each member is a
+user with a profile assigned to the site. Returns user identity, profile,
+last login, and member type.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `NetworkMember`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, NetworkId, Network.Name, MemberId, Member.Name, Member.Username, Member.IsActive, Member.Profile.Name, LastChatterActivityDate FROM NetworkMember WHERE NetworkId = '{networkId}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+siteId (string, optional).
+siteName (string, optional).
+  One required.
+isActiveOnly (boolean, optional, default true).
+sinceLastLoginHours (number, optional).
+limit (number, optional, default 200).
+
+Result
+network (object) - { id, name }.
+totalSize (number).
+members (array) - { id, memberId, memberName, memberUsername, memberIsActive, memberProfile, lastChatterActivityDate }.
+
+Required permissions
+- "Create and Set Up Experiences".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+list_experience_site_members({ "siteName": "Customer_Hub" })

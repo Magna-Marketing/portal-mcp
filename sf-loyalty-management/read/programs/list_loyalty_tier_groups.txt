@@ -1,0 +1,41 @@
+Tool: list_loyalty_tier_groups
+
+Description
+List `LoyaltyTierGroup` records: the buckets that hold tiers (e.g.
+"Status Tiers", "Lifetime Tiers"). A program can have multiple tier
+groups; each member is in one tier per group.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `LoyaltyTierGroup`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, ProgramId, Program.Name, IsPrimary, IsActive, ResetAfterDays FROM LoyaltyTierGroup WHERE Program.Name = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, optional).
+programId (string, optional).
+includeTierCount (boolean, optional, default true).
+
+Result
+totalSize (number).
+tierGroups (array) - { id, name, description, programId, programName, isPrimary, isActive, resetAfterDays, tierCount (when includeTierCount=true) }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND.
+
+Example request
+
+list_loyalty_tier_groups({ "programName": "MTG_Rewards" })

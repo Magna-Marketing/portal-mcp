@@ -1,0 +1,39 @@
+Tool: list_apex_managed_sharing
+
+Description
+List Apex Managed Sharing reasons and the records that use them. Apex managed sharing uses custom RowCauses defined per sObject (Metadata `ApexSharingRule` is unrelated; the actual cause is `ApexSharingReason` for object-level + the `RowCause` field on each `*Share` row). Use to audit programmatic sharing logic.
+
+Salesforce API
+Metadata API (`SharingReason`) + REST API SOQL on `*Share` rows, v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0   (readMetadata SharingReason per sObject)
+GET /services/data/v66.0/query/?q=SELECT COUNT() FROM AccountShare WHERE RowCause = '<reasonName>__c'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], required).
+reasonNames (string[], optional) - Restrict by SharingReason DeveloperName (without `__c`).
+includeRowCounts (boolean, optional, default true).
+
+Result
+sharingReasons (array) - Each: { sObject, fullName (e.g. "Project__c.Manager_Sharing__c"), label, rowCount (when includeRowCounts=true) }.
+
+Required permissions
+- "View All Data" + "View Setup and Configuration" (read on `*Share`).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on missing sObject.
+
+Example request
+
+list_apex_managed_sharing({ "sObjects": ["Project__c"] })

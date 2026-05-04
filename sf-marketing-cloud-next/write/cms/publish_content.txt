@@ -1,0 +1,70 @@
+Tool: publish_content
+
+Description
+Publish or unpublish one or more CMS content rows (emails, email
+templates, images, or documents). Publishing transitions the
+content's status from `Draft` → `Published` and makes it usable for
+sends / activations. Unpublishing reverses that and removes
+downstream references at the next render.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/connect/cms/contents/publish     (operation="publish")
+POST {instanceUrl}/services/data/v{ver}/connect/cms/contents/unpublish   (operation="unpublish")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "contentKeys": ["welcome_email_2026", "welcome_template_2026"],
+  "scheduledAt": "2026-05-01T09:00:00Z"
+}
+
+Input (parameters)
+operation (string, required) - "publish" | "unpublish".
+contentKeys (string[], optional) - One or more content keys.
+contentIds (string[], optional) - Alternative to contentKeys; either
+  may be supplied.
+variantIds (string[], optional) - Restrict to specific variants;
+  default publishes all variants on each content row.
+scheduledAt (string, optional, publish-only) - ISO-8601; when set,
+  publish is queued for that time. Omit for immediate.
+
+Result
+results (array) - Per content row:
+  { contentKey | contentId, success (boolean), publishedDate
+    (ISO-8601, on success), errors (array, on failure) }.
+summary (object) - { requested, succeeded, failed, scheduled }.
+
+Required scopes
+- `cms_api`.
+
+Idempotency & limits
+- Idempotent: re-publishing an already-published content is a no-op
+  (returns success with the existing `publishedDate`).
+- 100 publish actions per minute per workspace.
+
+Errors
+- 404 NOT_FOUND (contentKey unknown), 409 PUBLISH_IN_PROGRESS,
+  400 INVALID_DATE (scheduledAt in the past).
+
+Example request
+
+publish_content({
+  "operation": "publish",
+  "contentKeys": ["welcome_email_2026"]
+})
+
+Example result
+{
+  "results": [
+    { "contentKey": "welcome_email_2026", "success": true,
+      "publishedDate": "2026-04-29T13:02:11Z" }
+  ],
+  "summary": { "requested": 1, "succeeded": 1, "failed": 0, "scheduled": 0 }
+}

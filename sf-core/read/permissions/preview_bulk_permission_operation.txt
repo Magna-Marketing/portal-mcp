@@ -1,0 +1,98 @@
+Tool: preview_bulk_permission_operation
+
+Description
+Dry-run a `bulk_assign_permissions` / `bulk_remove_permissions` /
+`bulk_update_permissions` request. Returns:
+- The exact list of users that would be touched (by criteria).
+- The current and would-be state for each affected user (added,
+  removed, kept).
+- Estimated number of metadata API operations.
+- License-availability check (would the assignment fit under the
+  permission-set license caps).
+- Risk flags ("user would lose Object.delete on Opportunity").
+
+This tool **never** mutates anything. Always run before
+`bulk_assign_permissions` / `bulk_remove_permissions` /
+`bulk_update_permissions` in a production org.
+
+Salesforce API
+REST API + Tooling, v66.0. The same selection SOQL the bulk write
+tools use, plus license/permset license queries.
+
+Endpoint
+N/A.
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+operation (string, required) - "assign" | "remove" | "update".
+selection (object, required) - User selection criteria (any combination):
+  userIds (string[]).
+  usernames (string[]).
+  profileNames (string[]).
+  roleNames (string[]).
+  department (string).
+  isActiveOnly (boolean, default true).
+  customSoql (string) - WHERE clause appended to a base User query.
+permissionSetNames (string[], optional) - Permsets in scope.
+permissionSetGroupNames (string[], optional) - PSGs in scope.
+expirationDate (string, optional) - ISO date for assignments
+  (assign/update only).
+includeUserDetail (boolean, optional, default true) - Include the per-user
+  current/proposed state. False returns only counts.
+
+Result
+operation (string).
+selectedUserCount (number).
+estimatedOperationCount (number) - Sum of (users) * (permsets/groups added/removed).
+license (object):
+  permsetLicenses (array) - { id, name, totalLicenses, usedLicenses,
+    wouldUse, wouldExceed (bool) }.
+  estimatedFailures (number) - Users that wouldn't fit due to license.
+plan (array, when includeUserDetail=true) - Each user:
+  userId, name, username, profileName, isActive,
+  currentPermsets (string[]).
+  currentGroups (string[]).
+  toAddPermsets (string[]).
+  toAddGroups (string[]).
+  toRemovePermsets (string[]).
+  toRemoveGroups (string[]).
+  riskFlags (string[]) - e.g. "loses Opportunity.delete via permset removal".
+warnings (string[]).
+
+Required permissions
+- "View Setup and Configuration" + read on the metadata sObjects.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Big selections (10k+ users) are expensive but safe.
+
+Errors
+- INVALID_REQUEST: missing required selection criteria.
+
+Example request
+
+preview_bulk_permission_operation({
+  "operation": "assign",
+  "selection": { "profileNames": ["Standard User"], "department": "Engineering" },
+  "permissionSetGroupNames": ["MTG_Delivery_Bundle"]
+})
+
+Example result (skeleton)
+
+{
+  "operation": "assign",
+  "selectedUserCount": 28,
+  "estimatedOperationCount": 28,
+  "license": {
+    "permsetLicenses": [],
+    "estimatedFailures": 0
+  },
+  "plan": [ { "userId": "...", "name": "...", "currentGroups": [], "toAddGroups": ["MTG_Delivery_Bundle"], "riskFlags": [] } ],
+  "warnings": []
+}

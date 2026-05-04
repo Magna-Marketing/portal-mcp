@@ -1,0 +1,84 @@
+Tool: assign_permission_set
+
+Description
+Assign a permission set to one or more users. Uses the standard
+`PermissionSetAssignment` sObject — fast, no metadata deploy. Supports
+optional expiration date for time-bound access.
+
+For permission set groups, see `assign_permission_set_group`.
+For mass operations using selection criteria (profile, role, dept), see
+`bulk_assign_permissions`.
+
+Salesforce API
+REST API (Data), v66.0.
+- Single: `POST /sobjects/PermissionSetAssignment`.
+- Bulk: `POST /composite/sobjects` with PermissionSetAssignment rows
+  (≤200 per call).
+
+Endpoint
+POST /services/data/v66.0/sobjects/PermissionSetAssignment            (single)
+POST /services/data/v66.0/composite/sobjects                          (bulk)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (single)
+{
+  "AssigneeId": "005Qg0000020aBcDE",
+  "PermissionSetId": "0PSQg0000004ZyAA",
+  "ExpirationDate": "2026-12-31T23:59:59.000Z"
+}
+
+Body (bulk via composite/sobjects)
+{
+  "allOrNone": false,
+  "records": [
+    { "attributes": { "type": "PermissionSetAssignment" }, "AssigneeId": "005Qg0000020aBcDE", "PermissionSetId": "0PSQg0000004ZyAA" }
+  ]
+}
+
+Input (parameters)
+permissionSetName (string, optional) - PermissionSet.Name.
+permissionSetId (string, optional) - PermissionSet Id.
+  One of permissionSetName or permissionSetId required.
+userIds (string[], optional) - User Ids.
+usernames (string[], optional) - User.Username values.
+  One of userIds or usernames is required.
+expirationDate (string, optional) - ISO 8601; assignment auto-removed
+  after this. Org must have "Assign Permission Sets with Expiration Date"
+  enabled.
+allOrNone (boolean, optional, default false).
+skipIfAlreadyAssigned (boolean, optional, default true) - Skip rather
+  than fail when the user already has this permset.
+
+Result
+permissionSet (object) - { id, name, label }.
+results (array) - One per requested user:
+  userId, username, status ("created"|"already_assigned"|"failed"),
+  assignmentId (string|null), error (string|null).
+summary (object) - { created, alreadyAssigned, failed, total }.
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users" (for cross-user assignment).
+- "Manage Profiles and Permission Sets" for permsets containing
+  Standard Object permissions.
+
+Idempotency & limits
+- Idempotent when `skipIfAlreadyAssigned=true`.
+- License caps: failures with INSUFFICIENT_PERMSET_LICENSE if the
+  permset uses a Permission Set License the org has exhausted.
+- Composite: ≤200 per call; tool batches above that.
+
+Errors
+- DUPLICATE_VALUE: user already has the permset (when skip=false).
+- INSUFFICIENT_PERMSET_LICENSE.
+- INVALID_CROSS_REFERENCE_KEY: bad userId or permsetId.
+
+Example request
+
+assign_permission_set({
+  "permissionSetName": "MTG_Project_Manager",
+  "usernames": ["jane.doe@magnatech.com", "john.smith@magnatech.com"],
+  "expirationDate": "2026-12-31T23:59:59Z"
+})

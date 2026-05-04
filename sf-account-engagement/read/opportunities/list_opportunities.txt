@@ -1,0 +1,60 @@
+Tool: list_opportunities
+
+Description
+List Opportunity records mirrored into Account Engagement from the
+connected Salesforce org. Read-only via Account Engagement APIs;
+write opportunities in SFDC and let the connector sync them in.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/opportunities?fields={fields}&filter[stage]=eq,Closed Won
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+stage (string, optional).
+status (string, optional) - "Won" | "Lost" | "Open".
+campaignId (number, optional).
+salesforceId (string, optional).
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,value,probability,
+  stage,status,closedAt,salesforceId,campaignId,createdAt,updatedAt,
+  createdById,updatedById,isDeleted,type,prospectIds).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+opportunities (array) - Each: { id, name, value (number), probability,
+  stage, status, closedAt, salesforceId, campaignId, type,
+  prospectIds (number[]), isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_opportunities({ "status": "Won" })
+
+Example result
+{
+  "opportunities": [
+    { "id": 1101, "name": "Acme renewal", "value": 50000, "probability": 100,
+      "stage": "Closed Won", "status": "Won", "campaignId": 1024 }
+  ]
+}

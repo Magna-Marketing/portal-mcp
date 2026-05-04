@@ -1,0 +1,76 @@
+Tool: manage_dynamic_content
+
+Description
+Create or "manage" a Dynamic Content block. v5 supports `Create`
+only on dynamic content (no PATCH / DELETE on the parent block);
+this tool exposes `create` and "soft delete via tag" as the
+practical update operations. To replace a block, create a new one
+and update the consumers (emails, landing pages) to point at the
+new id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/dynamic-contents
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "name": "Region greeting",
+  "folderId": 33,
+  "basedOn": "PROSPECT_FIELD",
+  "basedOnProspectApiFieldId": "region__c",
+  "trackerDomainId": 7,
+  "baseContent": "<p>Hello!</p>",
+  "tagReplacementLanguage": "ENGLISH"
+}
+
+Input (parameters)
+operation (string, required) - "create" only at this time.
+name (string, required).
+folderId (number, optional).
+basedOn (string, required) - "PROSPECT_FIELD" | "TAG" | "GRADE" |
+  "SCORE".
+basedOnProspectApiFieldId (string, optional) - Required when
+  basedOn=PROSPECT_FIELD.
+trackerDomainId (number, optional).
+baseContent (string, required) - Default HTML.
+embedCode (string, optional) - Override; defaults to a generated
+  `<script>` tag pointing at the tracker domain.
+tagReplacementLanguage (string, optional, default "ENGLISH") -
+  "ENGLISH" | "FRENCH" | "GERMAN" | "JAPANESE" | "DUTCH" | etc.
+
+Result
+dynamicContent (object) - Created row.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent — repeated calls create duplicates.
+
+Errors
+- 20 invalid_input, 53 not_permitted.
+
+Example request
+
+manage_dynamic_content({
+  "operation": "create",
+  "name": "Region greeting",
+  "basedOn": "PROSPECT_FIELD",
+  "basedOnProspectApiFieldId": "region__c",
+  "baseContent": "<p>Hello!</p>"
+})
+
+Example result
+{
+  "dynamicContent": { "id": 41, "name": "Region greeting",
+    "basedOn": "PROSPECT_FIELD",
+    "embedUrl": "https://go.magnatech.com/dc/41" }
+}

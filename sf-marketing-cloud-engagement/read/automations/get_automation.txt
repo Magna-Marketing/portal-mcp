@@ -1,0 +1,42 @@
+Tool: get_automation
+
+Description
+Get a single automation with its steps and activities. Each step has
+an ordered set of activities (SQL Query, Filter, Import, Send Email,
+Verification, Data Extract, File Transfer, Wait, etc.).
+
+Marketing Cloud API
+REST API (`/automation/v1/automations/{id}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+automationId (string, optional).
+automationKey (string, optional).
+  One required.
+includeActivities (boolean, optional, default true).
+includeRunHistory (boolean, optional, default false).
+
+Result
+automation (object) - { id, key, name, description, statusId, status, schedule (object|null), scheduledTime, lastRunTime, lastRunStatus, categoryId, steps (array, when includeActivities=true): [{ stepNumber, name, activities: [{ id, key, name, activityObjectId, displayOrder, type ("DataExtract"|"Import"|"FileTransfer"|"Filter"|"Query"|"SendEmail"|"Verification"|"Wait"|"Refresh"|"ScriptActivity"|"Transfer") }] }], runHistory (array, optional) }.
+
+Required scopes
+- `automations_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_automation({ "automationKey": "MTG_Nightly_Member_Sync" })

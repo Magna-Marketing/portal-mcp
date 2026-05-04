@@ -1,0 +1,49 @@
+Tool: list_translations
+
+Description
+List translation entries (Salesforce Translation Workbench). Returns
+labels translated per language for custom labels, custom fields, picklist
+values, custom buttons, validation messages, and quick actions.
+
+Salesforce API
+Metadata API (`Translations`), v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0   (readMetadata Translations per language)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+languages (string[], optional) - Default = all enabled translation languages.
+sObjects (string[], optional) - Restrict to translations for these sObjects.
+sections (string[], optional) - "customLabels" | "customApplications" | "customTabs" | "fieldLabels" | "fieldHelp" | "picklistValues" | "quickActions" | "recordTypes" | "validationRules" | etc.
+
+Result
+totalSize (number).
+translations (array) - Each:
+  language (string) - e.g. "es", "fr".
+  customLabels (array) - [{ name, label }].
+  customApplications (array) - [{ name, label }].
+  fieldLabels (array) - [{ object, field, label, help }].
+  picklistValues (array) - [{ object, field, masterLabel, translation }].
+  recordTypes (array) - [{ object, name, label, description }].
+  validationRules (array) - [{ object, name, errorMessage }].
+  ... (depending on `sections`).
+
+Required permissions
+- "View Setup and Configuration", "Manage Translation".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- TRANSLATION_NOT_ENABLED if Translation Workbench is off.
+
+Example request
+
+list_translations({ "languages": ["es"], "sObjects": ["Project__c"] })

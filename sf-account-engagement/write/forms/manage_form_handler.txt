@@ -1,0 +1,81 @@
+Tool: manage_form_handler
+
+Description
+Create, update, or delete a Form Handler. Form Handlers receive
+POSTs from externally-hosted forms and create / update prospects.
+Each handler exposes an `embedUrl` to point your form's `action`
+attribute at.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/form-handlers       (create)
+PATCH  https://{pi-domain}/api/v5/objects/form-handlers/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/form-handlers/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "Marketo replacement",
+  "campaignId": 1024,
+  "folderId": 33,
+  "trackerDomainId": 7,
+  "successLocation": "https://magnatech.com/thanks",
+  "errorLocation": "https://magnatech.com/error",
+  "isDataForwarded": false,
+  "isCookielessTracking": false,
+  "isAlwaysEmail": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create).
+campaignId (number, required for create).
+folderId (number, optional).
+trackerDomainId (number, optional).
+successLocation (string, optional) - Redirect on success.
+errorLocation (string, optional) - Redirect on validation failure.
+isDataForwarded (boolean, optional, default false) - Forward POST
+  to a separate `dataForwardLocation` URL.
+dataForwardLocation (string, optional).
+isCookielessTracking (boolean, optional, default false).
+isAlwaysEmail (boolean, optional, default false) - Always send the
+  associated auto-responder.
+isKioskMode (boolean, optional, default false) - Don't cookie the
+  visitor (shared device).
+
+Result
+formHandler (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Hard delete on form handlers; the URL stops accepting POSTs
+  immediately.
+
+Errors
+- 53 not_permitted, 600 missing_campaign, 59 not_found.
+
+Example request
+
+manage_form_handler({
+  "operation": "create",
+  "name": "Marketo replacement",
+  "campaignId": 1024,
+  "successLocation": "https://magnatech.com/thanks"
+})
+
+Example result
+{
+  "formHandler": { "id": 8101, "name": "Marketo replacement",
+    "embedUrl": "https://go.magnatech.com/l/.../forms/8101" }
+}

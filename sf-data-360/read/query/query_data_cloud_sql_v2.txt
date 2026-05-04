@@ -1,0 +1,75 @@
+Tool: query_data_cloud_sql_v2
+
+Description
+Run an ANSI-SQL query against Data 360 with cursor-based pagination
+(Query API v2). The first response includes the first chunk plus
+`nextBatchId` if more data is available; subsequent chunks are
+fetched by passing `nextBatchId` back in.
+
+Salesforce API
+Connect plane (default — `/ssot/queryv2`) or runtime plane (when
+`plane="runtime"` — `/api/v2/query`).
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/queryv2                                  (plane="connect", first chunk)
+GET  {instanceUrl}/services/data/v{ver}/ssot/queryv2/:nextBatchId                     (plane="connect", subsequent chunks)
+POST {cdpTenantUrl}/api/v2/query                                                      (plane="runtime", first chunk)
+GET  {cdpTenantUrl}/api/v2/query/:nextBatchId                                         (plane="runtime", subsequent chunks)
+
+Headers
+Authorization: Bearer <core_access_token>      (connect)
+Authorization: Bearer <data_cloud_token>       (runtime)
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "sql": "SELECT Id__c, EmailAddress__c FROM UnifiedIndividual__dlm WHERE LastModifiedDate__c >= '2026-04-01'"
+}
+
+Input (parameters)
+plane (string, optional, default "runtime").
+sql (string, required for first chunk).
+nextBatchId (string, optional) - Cursor from a previous response.
+dataSpace (string, optional, default "default").
+rowLimit (number, optional, default 100000, max 1000000).
+
+Result
+data (array<array>) - Row-major rows.
+metadata (object) - { columns: [{ name, type }] } (first chunk only).
+done (boolean) - false when more chunks available.
+nextBatchId (string|null).
+queryId (string).
+rowCount (number) - Rows in this chunk.
+
+Required scopes
+- `api` (connect) or `cdp_query_api_read` (runtime).
+
+Idempotency & limits
+- Read-only.
+- Cursor TTL: 5 minutes between chunk requests.
+
+Errors
+- 400 INVALID_QUERY, 408 CURSOR_EXPIRED (cursor TTL exceeded),
+  401 invalid_token.
+
+Example request
+
+query_data_cloud_sql_v2({
+  "sql": "SELECT Id__c, EmailAddress__c FROM UnifiedIndividual__dlm",
+  "rowLimit": 100000
+})
+
+Example result
+{
+  "data": [
+    ["IND_001","jane@example.com"]
+  ],
+  "metadata": { "columns": [
+    { "name": "Id__c", "type": "TEXT" },
+    { "name": "EmailAddress__c", "type": "TEXT" }
+  ] },
+  "done": false,
+  "nextBatchId": "BATCH_abc123",
+  "rowCount": 100000
+}

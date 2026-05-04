@@ -1,0 +1,39 @@
+Tool: abort_scheduled_job
+
+Description
+Abort a scheduled Apex job by `CronTrigger` Id (or job name). Equivalent
+to `System.abortJob(jobId)`.
+
+Salesforce API
+Tooling API + Anonymous Apex, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody=System.abortJob('07cQg00000abcDE');
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+cronTriggerId (string, optional).
+jobName (string, optional).
+  One required.
+
+Result
+result (object) - { cronTriggerId, jobName, state ("Deleted"), aborted: true }.
+
+Required permissions
+- "Author Apex" / "Modify All Data".
+
+Idempotency & limits
+- Idempotent (already-aborted: no-op).
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+abort_scheduled_job({ "jobName": "MTG Daily Project Recalc" })

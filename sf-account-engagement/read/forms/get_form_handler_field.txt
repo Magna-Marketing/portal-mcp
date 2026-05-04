@@ -1,0 +1,46 @@
+Tool: get_form_handler_field
+
+Description
+Read a single Form Handler field by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/form-handler-fields/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional).
+
+Result
+formHandlerField (object): id, formHandlerId, name,
+  prospectApiFieldId, dataFormat, errorMessage, isRequired,
+  isMaintainInitialValue, sortOrder, createdAt, updatedAt.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_form_handler_field({ "id": 1101 })
+
+Example result
+{
+  "formHandlerField": { "id": 1101, "name": "email",
+    "prospectApiFieldId": "email", "isRequired": true }
+}

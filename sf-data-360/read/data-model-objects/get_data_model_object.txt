@@ -1,0 +1,55 @@
+Tool: get_data_model_object
+
+Description
+Read a single DMO by developer name with full field definitions
+and record count.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataModelObjectName (string, required) - Developer name including
+  suffix (e.g. "UnifiedIndividual__dlm").
+includeRelationships (boolean, optional, default false) - When
+  true, also runs `get_dmo_relationships` and inlines the result.
+
+Result
+dataModelObject (object): id, developerName, label, category, type,
+  primaryKeyField, fields (array), recordCount, createdDate,
+  lastModifiedDate.
+relationships (array, when includeRelationships=true).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_model_object({ "dataModelObjectName": "UnifiedIndividual__dlm",
+  "includeRelationships": true })
+
+Example result
+{
+  "dataModelObject": {
+    "developerName": "UnifiedIndividual__dlm",
+    "primaryKeyField": "Id__c",
+    "fields": [
+      { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true }
+    ]
+  }
+}

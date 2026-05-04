@@ -1,0 +1,56 @@
+Tool: list_data_lake_objects
+
+Description
+List Data Lake Objects (DLOs) — the raw / staged storage produced
+by Data Streams. DLOs are the inputs to DMOs via mappings.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-lake-objects
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataStreamId (string, optional) - Filter to DLOs produced by a
+  specific Data Stream.
+nameContains (string, optional).
+category (string, optional) - "Profile" | "Engagement" | "Other".
+limit (number, optional, default 100).
+offset (number, optional).
+
+Result
+dataLakeObjects (array) - Each: { id, developerName, label,
+  category, recordCount, sourceDataStreamId, fields (array<{
+  apiName, label, dataType }>), createdDate, lastModifiedDate }.
+totalSize (number), nextPageUrl (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_lake_objects({ "category": "Engagement" })
+
+Example result
+{
+  "dataLakeObjects": [
+    { "id": "0bdxx0000000001",
+      "developerName": "mc_sends__dll",
+      "label": "MCE Sends (Raw)",
+      "sourceDataStreamId": "0bcxx0000000001",
+      "recordCount": 12450 }
+  ]
+}

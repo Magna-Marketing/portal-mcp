@@ -1,0 +1,59 @@
+Tool: list_ingest_jobs
+
+Description
+List Bulk Ingestion jobs (Data Cloud's CSV upload jobs that feed
+DLOs / DMOs). Each job moves through `Open → UploadComplete →
+JobComplete` (or `Failed | Aborted`).
+
+Salesforce API
+Data Cloud Bulk Ingestion API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/ingest/jobs
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+state (string, optional) - "Open" | "UploadComplete" |
+  "InProgress" | "JobComplete" | "Aborted" | "Failed".
+sourceApiName (string, optional) - Filter to one Data Stream source.
+objectApiName (string, optional) - Filter to one ingest target object.
+operation (string, optional) - "upsert" | "insert" | "delete".
+createdAfter (string, optional) - ISO-8601.
+limit (number, optional, default 50, max 1000).
+nextPageToken (string, optional).
+
+Result
+jobs (array) - Each: { id, sourceApiName, objectApiName, operation,
+  state, contentType ("CSV" | "JSON"), columnDelimiter,
+  lineEnding, createdById, createdDate, systemModstamp,
+  jobType ("FullRefresh" | "Incremental"), errorMessage,
+  recordsProcessed, recordsRejected }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_ingest_jobs({ "state": "JobComplete", "sourceApiName": "mc_sends" })
+
+Example result
+{
+  "jobs": [
+    { "id": "JOB_001", "sourceApiName": "mc_sends",
+      "objectApiName": "Send__c", "operation": "upsert",
+      "state": "JobComplete", "recordsProcessed": 12450 }
+  ]
+}

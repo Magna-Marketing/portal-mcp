@@ -1,0 +1,63 @@
+Tool: manage_list_membership
+
+Description
+Add a prospect to a list, change the per-list opt-out flag, or
+remove a prospect from a list. Only meaningful on **static** lists;
+dynamic lists ignore writes (membership is derived from criteria).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/list-memberships       (create)
+PATCH  https://{pi-domain}/api/v5/objects/list-memberships/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/list-memberships/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create — add prospect to list)
+{ "listId": 301, "prospectId": 7745, "optedOut": false }
+
+Body (update — opt prospect out of this list only)
+{ "optedOut": true }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete) - List-membership row id.
+listId (number, required for create).
+prospectId (number, required for create).
+optedOut (boolean, optional, default false).
+
+Result
+listMembership (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent on (listId, prospectId): repeated `create` calls return
+  the existing row with `code: 600 already_member` masked into a
+  success response.
+
+Errors
+- 53 list_is_dynamic (cannot write to dynamic list memberships),
+  59 not_found, 600 prospect_already_in_list (when not masked).
+
+Example request
+
+manage_list_membership({
+  "operation": "create",
+  "listId": 301,
+  "prospectId": 7745,
+  "optedOut": false
+})
+
+Example result
+{
+  "listMembership": { "id": 4421001, "listId": 301, "prospectId": 7745, "optedOut": false }
+}

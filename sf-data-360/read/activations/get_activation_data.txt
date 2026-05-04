@@ -1,0 +1,52 @@
+Tool: get_activation_data
+
+Description
+Read the materialized Audience-DMO records produced by an Activation
+(the rows that were sent to the target on the last run). Useful for
+auditing what got pushed.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId/data
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+activationId (string, required).
+limit (number, optional, default 100, max 1000).
+offset (number, optional).
+fields (string[], optional).
+
+Result
+records (array<object>) - Each: contact-point fields as projected
+  by the activation.
+totalSize (number).
+nextPageUrl (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_activation_data({ "activationId": "0YA580000000001", "limit": 5 })
+
+Example result
+{
+  "records": [
+    { "EmailAddress__c": "jane@example.com", "FirstName__c": "Jane" }
+  ],
+  "totalSize": 18420
+}

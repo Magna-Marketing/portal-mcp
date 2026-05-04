@@ -1,0 +1,63 @@
+Tool: claim_game_reward
+
+Description
+Record a member's playthrough of a game and apply the resulting
+reward. Wraps the Loyalty Connect API endpoint for game participation
+(or, where unavailable in the org's release, an Apex action behind the
+scenes). The platform does the random/weighted draw against the
+`GameReward` probability table and writes a `GameParticipantReward`
+plus a `TransactionJournal` for any points/voucher reward.
+
+Salesforce API
+Loyalty Connect API + REST (Data), v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/games/{gameDefinitionId}/play
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "memberId": "0lMQg00000abcDE2",
+  "participationChannel": "Web",
+  "externalTransactionId": "GAME-2026-04-001"
+}
+
+Input (parameters)
+programName (string, required).
+gameDefinitionId (string, optional).
+gameName (string, optional).
+  One required.
+memberId (string, optional).
+membershipNumber (string, optional).
+  One required.
+participationChannel (string, optional, default "Web").
+externalTransactionId (string, optional, idempotency key).
+
+Result
+participantId (string).
+participationStatus (string) - "Won" | "Lost" | "Skipped".
+reward (object|null) - { rewardId, rewardName, rewardType, rewardValue, voucherId (when issued), badgeId (when awarded), journalId (for Points) }.
+isSuccess (boolean).
+errors (array, optional).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Idempotent on `externalTransactionId`.
+- Subject to `GameDefinition.MaxParticipationCount` per member.
+
+Errors
+- GAME_NOT_AVAILABLE, MAX_PARTICIPATION_EXCEEDED.
+
+Example request
+
+claim_game_reward({
+  "programName": "MTG_Rewards",
+  "gameName": "Spin_The_Wheel_Q3",
+  "memberId": "0lMQg00000abcDE2",
+  "externalTransactionId": "GAME-2026-04-001"
+})

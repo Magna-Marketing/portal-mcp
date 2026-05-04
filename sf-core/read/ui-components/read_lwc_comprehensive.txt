@@ -1,0 +1,63 @@
+Tool: read_lwc_comprehensive
+
+Description
+Read a single LWC bundle or a set of bundles by pattern, returning
+metadata plus the full source of every file in each bundle (HTML, JS,
+CSS, XML, SVG). Use when you need the entire component for review,
+diffing, or cloning. For a single file use `read_lwc_file`. For just
+metadata use `read_lwc` or `get_lwc_bundle_info`.
+
+Salesforce API
+Tooling API, v66.0. `LightningComponentBundle` +
+`LightningComponentResource` (Source field).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed FROM LightningComponentBundle WHERE DeveloperName LIKE '...'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId IN (...)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, optional) - Exact DeveloperName for a single bundle.
+pattern (string, optional) - Glob for bulk listing (e.g. "project*").
+  Mutually exclusive with `name`.
+includeBinarySource (boolean, optional, default false) - When true, SVG
+  source is returned as text (it is already text). When false, SVG is
+  returned with `source: null` and only `sizeBytes` to keep payloads small.
+limit (number, optional, default 50, max 200) - Bundle count cap when
+  using pattern.
+
+Result (single bundle)
+bundle (object):
+  id, name, label, apiVersion, isExposed, namespacePrefix,
+  manageableState, lastModifiedDate.
+  files (array) - Each:
+    id (string).
+    fileName (string).
+    format (string).
+    filePath (string).
+    sizeBytes (number).
+    source (string|null) - File contents or null (see includeBinarySource).
+Result (pattern)
+totalSize (number).
+bundles (array of single shape).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Big bundles can return >200 KB; pattern with includeBinarySource
+  off keeps payloads reasonable.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+read_lwc_comprehensive({ "name": "projectCard" })

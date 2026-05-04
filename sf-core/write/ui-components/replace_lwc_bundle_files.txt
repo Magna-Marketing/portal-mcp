@@ -1,0 +1,63 @@
+Tool: replace_lwc_bundle_files
+
+Description
+Replace files in an existing LWC bundle in a single deploy. Provide an
+array of files; each is created (if missing) or updated (if present).
+Files not listed are left untouched. Useful when deploying multiple
+file changes at once (HTML + JS + CSS) so users see a consistent state.
+
+For a single file, use `update_lwc_file`. For brand-new bundles use
+`create_lwc_bundle`.
+
+Salesforce API
+Tooling API, v66.0. Container/save pattern.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/LightningComponentResource     (per new file)
+PATCH /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}     (per existing)
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+bundleName (string, required) - LWC bundle name.
+files (object[], required) - Each:
+  fileName (string, required).
+  source (string, required) - New file contents.
+  format (string, optional) - Inferred from extension when omitted.
+deleteMissing (boolean, optional, default false) - When true, files in
+  the bundle that are not in the input list are deleted (except `js`
+  and `js-meta.xml` which are required).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+bundle (object) - { id, name, label, apiVersion }.
+fileChanges (array) - [{ fileName, action ("created"|"updated"|"deleted"|"unchanged"), sizeBytes }].
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal input.
+- Each file ≤ 1 MB; bundle total ≤ 5 MB.
+
+Errors
+- NOT_FOUND on bundleName.
+- DEPLOY_FAILED with file/line/column on compile errors.
+
+Example request
+
+replace_lwc_bundle_files({
+  "bundleName": "projectCard",
+  "files": [
+    { "fileName": "projectCard.html", "source": "<template><lightning-card title=\"Project\"></lightning-card></template>" },
+    { "fileName": "projectCard.css",  "source": ":host { display: block; }" }
+  ]
+})

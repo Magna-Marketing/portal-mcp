@@ -1,0 +1,57 @@
+Tool: list_segments
+
+Description
+List Data Cloud Segments — saved population queries against a
+Profile DMO that can be published to a refreshed result set and
+then activated downstream.
+
+Salesforce API
+Data Cloud Segmentation API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/segments
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
+publishStatus (string, optional) - "Published" | "Publishing" |
+  "Stale" | "NotPublished".
+nameContains (string, optional).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+segments (array) - Each: { id, name, label, description,
+  publishStatus, status, dmoApiName ("UnifiedIndividual__dlm" etc.),
+  populationCount (number), schedule (object), lastPublishedAt,
+  lastPublishStatus, createdDate, lastModifiedDate, createdById }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_segment_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_segments({ "publishStatus": "Published", "limit": 25 })
+
+Example result
+{
+  "segments": [
+    { "id": "SEG_HIGH_VALUE_EMEA", "label": "High-value EMEA",
+      "publishStatus": "Published", "populationCount": 18420,
+      "lastPublishedAt": "2026-04-29T08:00:00Z" }
+  ]
+}

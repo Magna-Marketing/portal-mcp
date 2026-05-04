@@ -1,0 +1,57 @@
+Tool: get_transaction_ledger_summary
+
+Description
+Get per-currency ledger summary for a member: opening balance, points
+credited / debited / expired in the period, ending balance, and per-
+sub-type breakouts. Useful for monthly statements and accounting.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/members/{memberId}/transactions/transaction-ledger-summary?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&programCurrencyName=Points
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+startDate (string, required) - YYYY-MM-DD.
+endDate (string, required) - YYYY-MM-DD.
+programCurrencyName (string, optional) - Defaults to "all currencies on this member".
+
+Result
+memberId (string).
+periodStart (string), periodEnd (string).
+ledgerSummary (array) - One entry per programCurrency:
+  programCurrencyName (string).
+  openingBalance (number).
+  pointsCredited (number).
+  pointsDebited (number).
+  pointsExpired (number).
+  pointsAdjusted (number).
+  closingBalance (number).
+  byJournalSubType (array) - [{ journalSubTypeName, points, count }].
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, INVALID_DATE_RANGE.
+
+Example request
+
+get_transaction_ledger_summary({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "startDate": "2026-04-01",
+  "endDate": "2026-04-30"
+})

@@ -1,0 +1,58 @@
+Tool: manage_reporting_snapshot
+
+Description
+Create / update / delete / schedule a Reporting Snapshot
+(`AnalyticSnapshot`). Snapshots take a report's results on a schedule
+and write them to a custom object for trending.
+
+Salesforce API
+REST API (Data) + Metadata API (`AnalyticSnapshot`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest         (CRUD via Metadata)
+POST /services/data/v66.0/sobjects/AnalyticSnapshot      (alternative)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "schedule" | "unschedule".
+fullName (string, required) - DeveloperName.
+name (string, required for create).
+description (string, optional).
+sourceReportId (string, required for create).
+targetObject (string, required for create) - sObject API name.
+fieldMappings (array, required for create) - [{ sourceField, targetField }].
+runningUserId (string, optional).
+groupName (string, optional).
+schedule (object, optional, for schedule) - { frequency ("hourly"|"daily"|"weekly"|"monthly"), startTime, daysOfWeek, daysOfMonth }.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object|null).
+snapshot (object) - { id, name, sourceReportId, targetObject, scheduled (boolean), nextRunDate }.
+
+Required permissions
+- "Manage Reporting Snapshots".
+
+Idempotency & limits
+- update / schedule idempotent.
+
+Errors
+- INVALID_FIELD on bad mappings.
+
+Example request
+
+manage_reporting_snapshot({
+  "operation": "create",
+  "fullName": "MTG_Pipeline_Trend",
+  "name": "MTG Pipeline Trend",
+  "sourceReportId": "00OQg0000004aBcDE",
+  "targetObject": "Pipeline_Snapshot__c",
+  "fieldMappings": [{ "sourceField": "Stage", "targetField": "Stage__c" }, { "sourceField": "Amount", "targetField": "Amount__c" }],
+  "schedule": { "frequency": "daily", "startTime": "09:00:00" }
+})

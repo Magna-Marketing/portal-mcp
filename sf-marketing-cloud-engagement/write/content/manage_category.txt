@@ -1,0 +1,47 @@
+Tool: manage_category
+
+Description
+Create / update / move / delete a Content Builder category (folder).
+
+Marketing Cloud API
+REST API (`/asset/v1/content/categories`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories
+PATCH  https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "name": "...", "parentId": 12345, "categoryType": "asset" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "move" | "delete".
+categoryId (number, optional, required for non-create).
+name (string, required for create).
+description (string, optional).
+parentId (number, optional, required for create / move).
+categoryType (string, optional, default "asset") - "asset" | "asset-shared".
+
+Result
+category (object) - { id, name, parentId, categoryType }.
+
+Required scopes
+- `email_write`.
+
+Idempotency & limits
+- update / move idempotent.
+
+Errors
+- 30002 not found, FOLDER_NOT_EMPTY (delete).
+
+Example request
+
+manage_category({
+  "operation": "create",
+  "name": "MTG Q3 Campaigns",
+  "parentId": 12345
+})

@@ -1,0 +1,91 @@
+Tool: view_permission_set_group
+
+Description
+View a permission set group (PSG) and the permission sets it bundles.
+Returns identity, status (calculation state), member permission sets,
+muting permset (if any), description, and current assignment count. Use
+to confirm what a PSG actually grants before assigning it. For users
+assigned to the group use `list_permission_set_group_assignments`. For
+the effective permission union use `analyze_user_permissions_from_groups`
+on a representative user.
+
+Salesforce API
+REST API (Data), v66.0.
+- Identity: SOQL on `PermissionSetGroup`.
+- Members: SOQL on `PermissionSetGroupComponent` joined to `PermissionSet`.
+- Assignment count: SOQL `COUNT()` on `PermissionSetAssignment WHERE
+  PermissionSetGroupId = '{psgId}'`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, Description, Status FROM PermissionSetGroup WHERE DeveloperName = '{name}' OR Id = '{id}'
+GET /services/data/v66.0/query/?q=SELECT PermissionSet.Id, PermissionSet.Name, PermissionSet.Label, PermissionSet.IsCustom FROM PermissionSetGroupComponent WHERE PermissionSetGroupId = '{psgId}'
+GET /services/data/v66.0/query/?q=SELECT COUNT() FROM PermissionSetAssignment WHERE PermissionSetGroupId = '{psgId}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+name (string, optional) - PSG DeveloperName.
+id (string, optional) - 18-char PSG Id.
+  One of `name` or `id` required.
+includeUserCount (boolean, optional, default true).
+includeMutingPermset (boolean, optional, default true) - PSGs may have
+  a paired muting permset (PermissionSetGroupComponent with `Muting=true`).
+
+Result
+group (object):
+  id (string).
+  developerName (string).
+  label (string).
+  description (string|null).
+  status (string) - "Updated" | "Outdated" | "Updating" | "Failed".
+    "Updating" means the org is recalculating effective permissions; new
+    assignments may take a few seconds to propagate. "Failed" requires
+    re-saving the group.
+  members (array) - Each:
+    permissionSetId (string).
+    name (string).
+    label (string).
+    isCustom (boolean).
+  mutingPermset (object|null) - When attached: { id, name, label }.
+  userCount (number, optional).
+
+Required permissions
+- "View Setup and Configuration".
+- Read on `PermissionSetGroup`, `PermissionSetGroupComponent`,
+  `PermissionSetAssignment`.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- PSG `Status` reflects an asynchronous recalculation; treat
+  "Updating"/"Outdated" as transient.
+
+Errors
+- NOT_FOUND: PSG not found.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+view_permission_set_group({ "name": "MTG_Delivery_Bundle" })
+
+Example result
+
+{
+  "group": {
+    "id": "0PGQg00000004abAB",
+    "developerName": "MTG_Delivery_Bundle",
+    "label": "MTG Delivery Bundle",
+    "description": "Project delivery base perms",
+    "status": "Updated",
+    "members": [
+      { "permissionSetId": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager", "isCustom": true },
+      { "permissionSetId": "0PSQg0000004ZyBB", "name": "MTG_Time_Logger", "label": "MTG Time Logger", "isCustom": true }
+    ],
+    "mutingPermset": null,
+    "userCount": 18
+  }
+}

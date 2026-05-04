@@ -1,0 +1,53 @@
+Tool: manage_partner_promotion
+
+Description
+Link / unlink a `LoyaltyProgramPartner` to a `Promotion` via
+`LoyaltyPgmPartnerPromotion`.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyPgmPartnerPromotion
+PATCH  /services/data/v66.0/sobjects/LoyaltyPgmPartnerPromotion/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyPgmPartnerPromotion/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "LoyaltyProgramPartnerId": "...", "PromotionId": "...", "IsActive": true, "EffectiveStartDate": "2026-07-01", "EffectiveEndDate": "2026-09-30" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+partnerPromotionId (string, optional, required for non-create).
+partnerId (string, optional).
+partnerName (string, optional).
+promotionId (string, optional).
+promotionName (string, optional).
+isActive (boolean, optional).
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+
+Result
+partnerPromotion (object) - { id, partnerId, partnerName, promotionId, promotionName, isActive }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on (partnerId, promotionId).
+
+Example request
+
+manage_partner_promotion({
+  "operation": "create",
+  "partnerName": "MTG_Hotel_Partner",
+  "promotionName": "Q3_Earn_Double_Points",
+  "effectiveStartDate": "2026-07-01",
+  "effectiveEndDate": "2026-09-30"
+})

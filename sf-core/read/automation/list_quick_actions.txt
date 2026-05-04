@@ -1,0 +1,44 @@
+Tool: list_quick_actions
+
+Description
+List Quick Actions (object-specific and global). For each action: target object, label, type (Create | Update | LogACall | SendEmail | VisualforcePage | LightningComponent | Flow | InvocableAction | CustomVisualforce), associated record type, fields displayed.
+
+Salesforce API
+Tooling API + REST API, v66.0. `QuickActionDefinition` (Tooling) and `/sobjects/{sObject}/quickActions` (REST).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, Label, Type, EntityDefinitionId, OptionsCreateFeedItem, IconUrl, Description FROM QuickActionDefinition
+GET /services/data/v66.0/sobjects/{sObject}/quickActions/                 (per-sObject runtime list)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, optional) - Limit to one sObject; "Global" for global actions.
+type (string|string[], optional) - Filter by quick action type.
+namePattern (string, optional).
+includeFields (boolean, optional, default false) - Include the action's layout fields.
+
+Result
+totalSize (number).
+quickActions (array) - Each:
+  id, name, label, type, sObject ("Global" for global), description, iconUrl, recordTypeId (when applicable).
+  fields (array, when includeFields=true) - [{ fieldName, isRequired, defaultValue }].
+  invocableAction (object|null) - For Flow / InvocableAction types: { actionName, actionType, namespace }.
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_quick_actions({ "sObject": "Account", "includeFields": true })

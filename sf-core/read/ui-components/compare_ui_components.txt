@@ -1,0 +1,63 @@
+Tool: compare_ui_components
+
+Description
+Compare two UI components of the same type to identify differences in
+metadata, file contents, exposure settings, and references. Useful for
+deduplication ("are projectCard and projectCardV2 actually the same?")
+and consolidation analysis. Outputs a structured diff grouped by file
+plus metadata-level diffs.
+
+Salesforce API
+Tooling API, v66.0. Reads each component fully (LWC bundle files via
+`LightningComponentResource`, Aura defs via `AuraDefinition`, VF via
+`ApexPage`, FlexiPage XML via `FlexiPage`).
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/{type}/{id}
+GET /services/data/v66.0/tooling/query/?q=SELECT Source, FilePath, Format FROM LightningComponentResource WHERE LightningComponentBundleId = '{id}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, required) - "lwc" | "aura" | "visualforce" | "flexipage".
+componentA (string, required) - Name (DeveloperName / Name) of first.
+componentB (string, required) - Name of second.
+includeFileDiff (boolean, optional, default true) - Show file-by-file
+  textual diff.
+diffFormat (string, optional, default "unified") - "unified" | "split" |
+  "summary".
+
+Result
+type (string).
+componentA (object) - { id, name, label, apiVersion, isExposed, lastModifiedDate }.
+componentB (object) - same shape.
+metadataDiff (array) - Each:
+  field (string) - apiVersion | isExposed | label | description | namespacePrefix | targets[] (FlexiPage type, etc.).
+  a, b (any) - Values. null when one side missing.
+fileDiff (array, optional) - Each:
+  fileName (string).
+  inA (boolean), inB (boolean) - Existence.
+  identical (boolean).
+  diff (string|null) - Unified diff text when not identical.
+  size (object) - { a: bytes, b: bytes }.
+similarity (number) - 0..1, computed across files (Jaccard on tokens).
+recommendations (string[]) - "consider deprecating B in favor of A" etc.
+
+Required permissions
+- "Customize Application" / "View All Setup".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Heavy for bundles >50 files; use `diffFormat: "summary"` for fast pass.
+
+Errors
+- NOT_FOUND on either component name.
+
+Example request
+
+compare_ui_components({ "type": "lwc", "componentA": "projectCard", "componentB": "projectCardV2" })

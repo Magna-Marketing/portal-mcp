@@ -1,0 +1,50 @@
+Tool: manage_keyword
+
+Description
+Create / update / delete a MobileConnect keyword (the SMS keyword that
+routes inbound messages to a flow / opt-in process).
+
+Marketing Cloud API
+REST API (`/sms/v1/keyword`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/sms/v1/keyword
+PATCH  https://{tenant}.rest.marketingcloudapis.com/sms/v1/keyword/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/sms/v1/keyword/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/sms/v1/keyword/{keyword}/{shortCode}/{country}      (delete by keyword text)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "keyword": "MTG", "codeId": 12345, "keywordType": "Information", "restriction": "None" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+keywordId (number, optional, required for non-create).
+keyword (string, required for create) - Up to 12 chars uppercase.
+codeId (number, required for create) - Short-code Id.
+keywordType (string, required for create) - "Information" | "Help" | "Stop" | "MO" | "MT".
+restriction (string, optional, default "None").
+
+Result
+keyword (object) - { id, keyword, codeId, keywordType, restriction }.
+
+Required scopes
+- `mobile_connect_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_KEYWORD.
+
+Example request
+
+manage_keyword({
+  "operation": "create",
+  "keyword": "MTG",
+  "codeId": 12345,
+  "keywordType": "Information"
+})

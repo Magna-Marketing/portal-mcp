@@ -1,0 +1,51 @@
+Tool: list_members
+
+Description
+List Loyalty Program Members. Filter by program, membership status,
+membership type, account/contact, tier, enrollment date, custom SOQL.
+Returns identity plus tier and primary currency balance summary.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `LoyaltyProgramMember`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, MembershipNumber, MemberStatus, MembershipType, EnrollmentDate, ProgramId, Program.Name, AccountId, Account.Name, ContactId, Contact.Name, MemberClass, ReferredByMemberId, EnrollmentChannel, MembershipExpirationDate, MembershipEndDate, MembershipLastActivityDate, TransactionJournalCount FROM LoyaltyProgramMember
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, optional).
+programId (string, optional).
+status (string|string[], optional) - "Active" | "Lapsed" | "Suspended" | "Cancelled" | "Pending".
+membershipType (string, optional) - "Individual" | "Corporate".
+accountId (string, optional).
+contactId (string, optional).
+membershipNumber (string, optional).
+enrolledSinceDays (number, optional).
+namePattern (string, optional) - Glob on Account.Name or Contact.Name.
+customWhere (string, optional) - Extra WHERE appended.
+limit (number, optional, default 200, max 50000).
+sortBy (string, optional, default "EnrollmentDate") - "EnrollmentDate" | "MembershipNumber" | "MembershipLastActivityDate".
+
+Result
+totalSize (number).
+members (array) - { id, membershipNumber, memberStatus, membershipType, enrollmentDate, programId, programName, accountId, accountName, contactId, contactName, memberClass, referredByMemberId, enrollmentChannel, expirationDate, endDate, lastActivityDate, transactionJournalCount }.
+hasMore (boolean), nextRecordsUrl (string, optional).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_members({ "programName": "MTG_Rewards", "status": "Active", "enrolledSinceDays": 30 })

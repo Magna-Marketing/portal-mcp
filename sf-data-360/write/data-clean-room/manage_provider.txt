@@ -1,0 +1,63 @@
+Tool: manage_provider
+
+Description
+Register a new Data Clean Room provider with the org. Postman
+exposes only `Create` on providers; updates and deletes go through
+Setup.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/providers
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "name": "MTG_Snowflake_DCR",
+  "label": "MTG Snowflake Data Clean Room",
+  "providerType": "Snowflake",
+  "configuration": {
+    "account": "magnatech-dcr",
+    "warehouse": "DCR_WH",
+    "role": "DCR_USER"
+  }
+}
+
+Input (parameters)
+operation (string, required) - "create" only.
+name (string, required) - Developer name.
+label (string, required).
+providerType (string, required) - "Snowflake" | "AwsCleanRooms" |
+  "Habu" | "InfoSum" | "DataCloud".
+configuration (object, required) - Provider-type-specific config.
+
+Result
+provider (object) - Created row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `name`.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_PROVIDER_CONFIG,
+  502 PROVIDER_UNAVAILABLE.
+
+Example request
+
+manage_provider({
+  "operation": "create",
+  "name": "MTG_Snowflake_DCR",
+  "label": "MTG Snowflake DCR",
+  "providerType": "Snowflake",
+  "configuration": { "account": "magnatech-dcr" }
+})
+
+Example result
+{ "provider": { "id": "0YP580000000001", "name": "MTG_Snowflake_DCR", "status": "Active" } }

@@ -1,0 +1,1303 @@
+{
+  "info": {
+    "_postman_id": "2cc18ddf-aa89-4a61-ad28-97ba60e19f0b",
+    "name": "Salesforce Marketing Cloud Next APIs",
+    "description": "## Salesforce Marketing Cloud Next API Collection\n\nThis collection provides API requests for managing Marketing Cloud Next (MCN) content including workspaces, emails, and email templates.\n\nFor complete API reference and guides, see the [Marketing Cloud Growth documentation](https://developer.salesforce.com/docs/marketing/marketing-cloud-growth/overview).\n\n### Getting Started\n\n1. Set `clientId`, `clientSecret`, and `apiBaseUrl` in the collection variables.\n2. Get a new token on the **Authorization** tab.\n3. Start with **Workspace > Retrieve all workspaces** to get a workspace ID, then create content from there.\n\n### Base URL\n\n`{apiBaseUrl}{apiBasePath}`\n\n**Example:** `https://your-org.my.salesforce.com/services/data/v65.0`\n\n> **Note:** The API version in `{apiBasePath}` can be updated to match your org's supported version (e.g., v66.0, v67.0).\n\n### What's Included\n\nThis collection covers:\n- **Workspaces**: Create and manage content containers\n- **Search**: Find and filter content across workspaces\n- **Emails**: Create, update, publish, and delete emails\n- **Email Templates**: Create, update, publish, and delete reusable templates\n\n### Key Concepts\n\n| Term | Description |\n| --- | --- |\n| `contentSpaceOrFolderId` | The ID of the workspace or folder (required when creating content) |\n| `contentKey` / `apiName` | Unique 28-character identifier for a content record |\n| `managedContentVariantId` | The variant-level ID (required for update, delete, and publish operations) |\n| `contentType` | The type of content (`sfdc_cms__email` or `sfdc_cms__emailTemplate`) |\n\n### Typical Workflow\n\n1. **Find a workspace**: Use Search requests to list workspaces and get the workspace `id`.\n2. **Create content**: Use the workspace `id` to create emails or templates.\n3. **Update content**: Modify existing content using the `managedContentVariantId`.\n4. **Publish content**: Make draft content live.\n\n### Authentication\n\nThis collection uses **OAuth 2.0 Client Credentials** at the collection level. Postman handles token acquisition automatically. Set `clientId` and `clientSecret` in the collection variables and all requests inherit authentication.\n\n### Important Notes\n\n1. **No partial updates**: All update operations require the full `contentBody`. Omitted fields will be cleared.\n2. **Draft by default**: All newly created content starts in Draft status. A separate publish request makes it live.\n3. **Two content models**: HTML-only emails use `rawHtml`, component-based emails use `sfdc_cms:block` structure.\n4. **Collection automation**: Pre-request scripts generate UUIDs automatically. Post-response scripts capture IDs for reuse.\n\n### Collection Scripts\n\nThe collection includes automated scripts that run on every request:\n\n- **Pre-request script**: Replaces `\"GENERATE_UUID\"` placeholders with unique identifiers\n- **Post-response script**: Automatically captures `{variantId}` and `{contentSpaceOrFolderId}` from responses\n\nAccess these scripts via the Scripts tab in collection settings.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "13684448",
+    "_collection_link": "https://go.postman.co/collection/53596347-2cc18ddf-aa89-4a61-ad28-97ba60e19f0b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Content",
+      "item": [
+        {
+          "name": "Search",
+          "item": [
+            {
+              "name": "Search content in workspace",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/items/search?queryTerm=*&scope=All&pageSize=250&contentSpaceOrFolderIds={{contentSpaceOrFolderId}}",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "items",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "queryTerm",
+                      "value": "*"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "All"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "250"
+                    },
+                    {
+                      "key": "contentSpaceOrFolderIds",
+                      "value": "{{contentSpaceOrFolderId}}"
+                    }
+                  ]
+                },
+                "description": "## Search for Content\n\n`GET /connect/cms/items/search`\n\nReturns all content items within a specified workspace or folder. Use this request to discover emails, email templates, and other content.\n\n### Query Parameters\n\n| Parameter | Value | Description |\n| --- | --- | --- |\n| `queryTerm` | `*` | Wildcard to return all content |\n| `contentSpaceOrFolderIds` | `{contentSpaceOrFolderId}` | Required. The workspace or folder ID to search |\n| `scope` | `All` | Search across all fields (use `TitleOnly` to search titles only) |\n| `pageSize` | `250` | Number of results per page (max 250) |\n\n### Example Response\n\n```json\n{\n  \"count\": 49,\n  \"currentPageUri\": \"/services/data/v65.0/connect/cms/items/search?page=0&pageSize=250\",\n  \"nextPageUri\": \"/services/data/v65.0/connect/cms/items/search?page=1&pageSize=250\",\n  \"items\": [\n    {\n      \"id\": \"9PsQZ00000072oH0AQ\",\n      \"contentKey\": \"MCNUSLTYAES5CLRKYWXFUXDXW2BM\",\n      \"title\": \"Email_20260323_145319\",\n      \"status\": \"Draft\",\n      \"contentType\": {\n        \"developerName\": \"sfdc_cms__email\",\n        \"label\": \"Email\"\n      },\n      \"managedContentId\": \"20YQZ0000007G3F2AU\",\n      \"managedContentSpaceId\": \"0ZuQZ0000003xWc0AI\"\n    }\n  ]\n}\n```\n\n### Notes\n\n1. The `contentSpaceOrFolderIds` parameter is required.\n2. Use `queryTerm=*` as a wildcard to retrieve all items.\n3. The maximum `pageSize` is 250. Use `nextPageUri` to paginate through additional results.\n4. Each result includes a `contentKey` which can be used to retrieve the full content record."
+              },
+              "response": []
+            },
+            {
+              "name": "Search by title only",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/items/search?queryTerm=*&scope=TitleOnly&pageSize=250&contentSpaceOrFolderIds={{contentSpaceOrFolderId}}",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "items",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "queryTerm",
+                      "value": "*"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "TitleOnly"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "250"
+                    },
+                    {
+                      "key": "contentSpaceOrFolderIds",
+                      "value": "{{contentSpaceOrFolderId}}"
+                    }
+                  ]
+                },
+                "description": "## Search Content by Title\n\n`GET /connect/cms/items/search`\n\nSearches for content by matching terms in the title field only. Use `scope=TitleOnly` to limit the search to content titles.\n\n### Query Parameters\n\n| Parameter | Value | Description |\n| --- | --- | --- |\n| `queryTerm` | `*` | Search term or wildcard to match against titles |\n| `contentSpaceOrFolderIds` | `{contentSpaceOrFolderId}` | Required. The workspace or folder ID to search |\n| `scope` | `TitleOnly` | Limits search to content titles only |\n| `pageSize` | `250` | Number of results per page (max 250) |\n\n### Example Response\n\n```json\n{\n  \"count\": 49,\n  \"currentPageUri\": \"/services/data/v65.0/connect/cms/items/search?page=0&pageSize=250\",\n  \"nextPageUri\": \"/services/data/v65.0/connect/cms/items/search?page=1&pageSize=250\",\n  \"items\": [\n    {\n      \"id\": \"9PsQZ00000072oH0AQ\",\n      \"contentKey\": \"MCNUSLTYAES5CLRKYWXFUXDXW2BM\",\n      \"title\": \"Email_20260323_145319\",\n      \"status\": \"Draft\",\n      \"contentType\": {\n        \"developerName\": \"sfdc_cms__email\",\n        \"label\": \"Email\"\n      }\n    }\n  ]\n}\n```\n\n### Notes\n\n1. The `scope=TitleOnly` parameter restricts the search to content titles.\n2. Use a specific search term instead of `*` to find content by name.\n3. The maximum `pageSize` is 250. Use `nextPageUri` to paginate through additional results."
+              },
+              "response": []
+            },
+            {
+              "name": "Filter by content type",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/items/search?queryTerm=*&scope=All&pageSize=250&contentSpaceOrFolderIds={{contentSpaceOrFolderId}}&contentTypeFQN=sfdc_cms__email",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "items",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "queryTerm",
+                      "value": "*"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "All"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "250"
+                    },
+                    {
+                      "key": "contentSpaceOrFolderIds",
+                      "value": "{{contentSpaceOrFolderId}}"
+                    },
+                    {
+                      "key": "contentTypeFQN",
+                      "value": "sfdc_cms__email"
+                    }
+                  ]
+                },
+                "description": "## Search Content by Type\n\n`GET /connect/cms/items/search`\n\nFilters search results to a specific content type. Use the `contentTypeFQN` parameter to return only emails, email templates, or other content types.\n\n### Query Parameters\n\n| Parameter | Value | Description |\n| --- | --- | --- |\n| `queryTerm` | `*` | Wildcard to return all content |\n| `contentSpaceOrFolderIds` | `{contentSpaceOrFolderId}` | Required. The workspace or folder ID to search |\n| `scope` | `All` | Search across all fields (use `TitleOnly` to search titles only) |\n| `pageSize` | `250` | Number of results per page (max 250) |\n| `contentTypeFQN` | `sfdc_cms__email` | Filter by content type (e.g., `sfdc_cms__email`, `sfdc_cms__emailTemplate`) |\n\n### Example Response\n\n```json\n{\n  \"count\": 25,\n  \"currentPageUri\": \"/services/data/v65.0/connect/cms/items/search?page=0&pageSize=250\",\n  \"items\": [\n    {\n      \"id\": \"9PsQZ00000072oH0AQ\",\n      \"contentKey\": \"MCNUSLTYAES5CLRKYWXFUXDXW2BM\",\n      \"title\": \"Email_20260323_145319\",\n      \"status\": \"Draft\",\n      \"contentType\": {\n        \"developerName\": \"sfdc_cms__email\",\n        \"label\": \"Email\"\n      }\n    }\n  ]\n}\n```\n\n### Notes\n\n1. Use `contentTypeFQN=sfdc_cms__email` to return only emails.\n2. Use `contentTypeFQN=sfdc_cms__emailTemplate` to return only email templates.\n3. The maximum `pageSize` is 250. Use `nextPageUri` to paginate through additional results."
+              },
+              "response": []
+            },
+            {
+              "name": "Filter by language",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/items/search?queryTerm=*&scope=All&pageSize=250&contentSpaceOrFolderIds={{contentSpaceOrFolderId}}&languages=en_US",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "items",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "queryTerm",
+                      "value": "*"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "All"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "250"
+                    },
+                    {
+                      "key": "contentSpaceOrFolderIds",
+                      "value": "{{contentSpaceOrFolderId}}"
+                    },
+                    {
+                      "key": "languages",
+                      "value": "en_US"
+                    }
+                  ]
+                },
+                "description": "## Search Content by Language\n\n`GET /connect/cms/items/search`\n\nFilters search results to a specific language locale. Use the `languages` parameter to return content in a particular language.\n\n### Query Parameters\n\n| Parameter | Value | Description |\n| --- | --- | --- |\n| `queryTerm` | `*` | Wildcard to return all content |\n| `contentSpaceOrFolderIds` | `{contentSpaceOrFolderId}` | Required. The workspace or folder ID to search |\n| `scope` | `All` | Search across all fields (use `TitleOnly` to search titles only) |\n| `pageSize` | `250` | Number of results per page (max 250) |\n| `languages` | `en_US` | Filter by language locale (e.g., `en_US`, `es_MX`, `fr_FR`) |\n\n### Example Response\n\n```json\n{\n  \"count\": 15,\n  \"currentPageUri\": \"/services/data/v65.0/connect/cms/items/search?page=0&pageSize=250\",\n  \"items\": [\n    {\n      \"id\": \"9PsQZ00000072oH0AQ\",\n      \"contentKey\": \"MCNUSLTYAES5CLRKYWXFUXDXW2BM\",\n      \"title\": \"Email_20260323_145319\",\n      \"status\": \"Draft\",\n      \"language\": {\n        \"displayLabel\": \"English (default)\",\n        \"locale\": \"en_US\"\n      },\n      \"contentType\": {\n        \"developerName\": \"sfdc_cms__email\",\n        \"label\": \"Email\"\n      }\n    }\n  ]\n}\n```\n\n### Notes\n\n1. Use standard locale codes (e.g., `en_US` for English, `es_MX` for Spanish).\n2. Only content matching the specified language will be returned.\n3. The maximum `pageSize` is 250. Use `nextPageUri` to paginate through additional results."
+              },
+              "response": []
+            }
+          ],
+          "description": "## Search Overview\n\nThis folder contains requests for searching and filtering content within Marketing Cloud Next (MCN) workspaces. Use these requests to discover emails and email templates based on various criteria.\n\n### Requests in This Folder\n\n| Request | Purpose |\n| --- | --- |\n| Search content in workspace | Returns all content in a specified workspace or folder |\n| Search by title only | Searches content titles using the `TitleOnly` scope |\n| Filter by content type | Filters results to specific content types (e.g., `sfdc_cms__email`) |\n| Filter by language | Filters results by language locale (e.g., `en_US`) |\n\n### How Search Works\n\nAll search requests use the `/connect/cms/items/search` endpoint with different query parameters:\n\n- `queryTerm`: The search term (`*` for wildcard to return all content)\n- `contentSpaceOrFolderIds`: Required. The workspace or folder ID to search within\n- `scope`: Controls where to search (`All` or `TitleOnly`)\n- `pageSize`: Number of results per page (maximum 250)\n\n### Common Parameters\n\n| Parameter | Example Value | Description |\n| --- | --- | --- |\n| `queryTerm` | `*` | Wildcard to return all content |\n| `contentSpaceOrFolderIds` | `{contentSpaceOrFolderId}` | The workspace or folder ID to search |\n| `scope` | `All` or `TitleOnly` | Where to search for the query term |\n| `pageSize` | `250` | Number of results per page (max 250) |\n| `contentTypeFQN` | `sfdc_cms__email` | Filter by content type |\n| `languages` | `en_US` | Filter by language locale |\n\n### Notes\n\n1. The `contentSpaceOrFolderIds` parameter is required for all search requests.\n2. Use `queryTerm=*` as a wildcard to retrieve all content in a workspace.\n3. Results are paginated. Use `nextPageUri` from the response to fetch additional pages.\n4. Each result includes a `contentKey` which can be used to retrieve the full content record."
+        },
+        {
+          "name": "Workspace",
+          "item": [
+            {
+              "name": "Create a workspace",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"MCN Workspace Example\",\n  \"description\": \"Content for MCN Workspace Example\",\n  \"defaultLanguage\": \"en_US\",\n  \"spaceType\": \"Marketing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/spaces",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "spaces"
+                  ]
+                },
+                "description": "## Create a Workspace\n\n`POST /connect/cms/spaces`\n\nCreates a new workspace to organize and store content such as emails and email templates.\n\n### Request Body\n\n```json\n{\n  \"name\": \"MCN Workspace\",\n  \"description\": \"Content for MCN Workspace\",\n  \"defaultLanguage\": \"en_US\",\n  \"spaceType\": \"Marketing\",\n  \"apiName\": \"MCN_Workspace\"\n}\n```\n\n| Field | Required | Description |\n| --- | --- | --- |\n| `name` | Yes | The workspace name |\n| `description` | No | A description of the workspace purpose |\n| `defaultLanguage` | No | Default language locale (e.g., `en_US`) |\n| `spaceType` | No | Type of workspace (`Marketing` or `Content`) |\n| `apiName` | No | API name for the workspace |\n\n### Notes\n\n1. Only the `name` field is required.\n2. The `apiName` field will return `null` in the response initially. The value is populated and retrievable via a GET request.\n3. Valid `spaceType` values are `Marketing` or `Content`.\n4. The collection automatically captures the workspace `id` as `{contentSpaceOrFolderId}` after successful creation."
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve a workspace by id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/spaces/:contentSpaceOrFolderId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "spaces",
+                    ":contentSpaceOrFolderId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "contentSpaceOrFolderId",
+                      "value": "{{contentSpaceOrFolderId}}",
+                      "description": "The workspace or folder ID"
+                    }
+                  ]
+                },
+                "description": "## Retrieve a Workspace by ID\n\n`GET /connect/cms/spaces/{contentSpaceOrFolderId}`\n\nReturns details for a specific workspace using its ID.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `contentSpaceOrFolderId` | The workspace ID |\n\n### Example Response\n\n```json\n{\n  \"apiName\": \"MCN_Workspace\",\n  \"createdBy\": \"005QZ000004x1CHYAY\",\n  \"createdDate\": \"2026-03-23T18:01:08.000Z\",\n  \"defaultLanguage\": \"en_US\",\n  \"description\": \"Content for MCN Workspace\",\n  \"fullyQualifiedName\": \"MCN_Workspace--marketing\",\n  \"id\": \"0ZuQZ0000004YSv0AM\",\n  \"isEnhancedSpace\": true,\n  \"isFlowOrchestrationEnabled\": true,\n  \"lastModifiedBy\": \"005QZ000004x1CHYAY\",\n  \"lastModifiedDate\": \"2026-03-23T23:47:36.000Z\",\n  \"name\": \"MCN Workspace\",\n  \"rootFolderId\": \"9PuQZ0000004bLx0AI\",\n  \"spaceType\": {\n    \"apiName\": \"marketing\"\n  }\n}\n```\n\n### Notes\n\n1. The `id` field is used as `contentSpaceOrFolderId` when creating content in this workspace.\n2. The `rootFolderId` identifies the root folder where content can be organized."
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve a workspace by name",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/spaces/?nameFragment=example-workspace&pageSize=250",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "spaces",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "nameFragment",
+                      "value": "example-workspace"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "250",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "description": "## Retrieve a Workspace by Name\n\n`GET /connect/cms/spaces?nameFragment={name}`\n\nSearches for workspaces using a name fragment. Returns a list of workspaces matching the search term.\n\n### Query Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `nameFragment` | Partial or full workspace name to search for |\n| `pageSize` | Optional. Number of results per page (max 250) |\n\n### Example Response\n\n```json\n{\n  \"spaces\": [\n    {\n      \"apiName\": \"MCN_Workspace\",\n      \"createdBy\": \"005QZ000004x1CHYAY\",\n      \"createdDate\": \"2026-03-23T18:01:08.000Z\",\n      \"defaultLanguage\": \"en_US\",\n      \"description\": \"Content for MCN Workspace\",\n      \"id\": \"0ZuQZ0000004YSv0AM\",\n      \"name\": \"MCN Workspace\",\n      \"rootFolderId\": \"9PuQZ0000004bLx0AI\",\n      \"spaceType\": {\n        \"apiName\": \"marketing\"\n      }\n    }\n  ]\n}\n```\n\n### Notes\n\n1. The response returns an array of matching workspaces.\n2. Use the `id` field from results as `contentSpaceOrFolderId` when creating content.\n3. Partial name matching is supported (e.g., searching \"MCN\" will find \"MCN Workspace\")."
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve all workspaces",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/spaces",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "spaces"
+                  ]
+                },
+                "description": "## Retrieve All Workspaces\n\n`GET /connect/cms/spaces`\n\nReturns a list of all workspaces in your organization.\n\n### Query Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `pageSize` | Optional. Number of results per page (max 250) |\n\n### Example Response\n\n```json\n{\n  \"spaces\": [\n    {\n      \"apiName\": \"MoC_API_Workspace\",\n      \"createdBy\": \"005QZ000004x1CHYAY\",\n      \"createdDate\": \"2026-01-14T22:00:54.000Z\",\n      \"defaultLanguage\": \"en_US\",\n      \"description\": \"Content for MoC API Workspace\",\n      \"fullyQualifiedName\": \"MoC_API_Workspace--marketing\",\n      \"id\": \"0ZuQZ000000412L0AQ\",\n      \"isEnhancedSpace\": true,\n      \"isFlowOrchestrationEnabled\": null,\n      \"lastModifiedBy\": \"005QZ000004x1CHYAY\",\n      \"lastModifiedDate\": \"2026-01-14T22:00:56.000Z\",\n      \"name\": \"MoC API Workspace\",\n      \"rootFolderId\": \"9PuQZ00000043wz0AA\",\n      \"spaceType\": {\n        \"apiName\": \"marketing\"\n      }\n    }\n  ]\n}\n```\n\n### Notes\n\n1. The `id` field from each workspace is used as `contentSpaceOrFolderId` when creating content.\n2. The `rootFolderId` identifies the root folder where content can be organized.\n3. Use this request to find available workspaces before creating content."
+              },
+              "response": []
+            },
+            {
+              "name": "Update a workspace",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"default-workspace-name-modified\",\n  \"description\": \"the default workspace name can be modified easily using the API\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/spaces/:contentSpaceOrFolderId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "spaces",
+                    ":contentSpaceOrFolderId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "contentSpaceOrFolderId",
+                      "value": "{{contentSpaceOrFolderId}}",
+                      "description": "The workspace or folder ID"
+                    }
+                  ]
+                },
+                "description": "## Update a Workspace\n\n`PATCH /connect/cms/spaces/{contentSpaceOrFolderId}`\n\nUpdates an existing workspace's name or description.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `contentSpaceOrFolderId` | The workspace ID |\n\n### Request Body\n\n```json\n{\n  \"name\": \"Updated Workspace Name\",\n  \"description\": \"Updated description for the workspace\"\n}\n```\n\n| Field | Description |\n| --- | --- |\n| `name` | The new workspace name |\n| `description` | The new workspace description |\n\n### Notes\n\n1. Only the fields you want to update need to be included in the request body.\n2. The workspace `id` cannot be changed.\n3. Use PATCH method for partial updates (only send fields you want to change)."
+              },
+              "response": []
+            }
+          ],
+          "description": "## Workspace Overview\n\nThis folder contains requests for managing Marketing Cloud Next (MCN) workspaces. Workspaces are containers that organize and store content such as emails and email templates.\n\n### Requests in This Folder\n\n| Request | Purpose |\n| --- | --- |\n| Create a workspace | Creates a new workspace with specified settings |\n| Retrieve a workspace by id | Gets details for a specific workspace using its ID |\n| Retrieve a workspace by name | Searches for workspaces using a name fragment |\n| Retrieve all workspaces | Lists all workspaces in your org |\n| Update a workspace | Modifies workspace name or description |\n\n### Key Concepts\n\n**Workspace ID**: The unique identifier for a workspace. Use this value as `{contentSpaceOrFolderId}` when creating or searching for content.\n\n### Common Use Cases\n\n1. **Find a workspace**: Use \"Retrieve all workspaces\" to list available workspaces and copy the `id`.\n2. **Create content**: Pass the workspace `id` as `contentSpaceOrFolderId` when creating emails or templates.\n3. **Organize content**: Use workspaces to separate content by campaign, brand, or region.\n\n### Notes\n\n1. The workspace `id` field is required when creating content in that workspace.\n2. The `rootFolderId` identifies the root folder where content can be organized.\n3. The `apiName` field may return `null` immediately after creation but will be populated on subsequent GET requests.\n4. When creating or retrieving a single workspace, the collection automatically stores the workspace `id` as `{contentSpaceOrFolderId}` for use in content operations."
+        },
+        {
+          "name": "Email",
+          "item": [
+            {
+              "name": "Create an email with html",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentSpaceOrFolderId\": \"{{contentSpaceOrFolderId}}\",\n  \"contentType\": \"sfdc_cms__email\",\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more — take a look at what's ready.\",\n    \"rawHtml\": \"<h1>Welcome Back</h1><p>We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.</p><a href='https://ex.com/welcome'>Get Started</a>\",\n    \"sfdc_cms:title\": \"Sample Custom HTML Email\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents"
+                  ]
+                },
+                "description": "## Create an Email with HTML\n\n`POST /connect/cms/contents`\n\nCreates a new email using raw HTML content. Use this approach for simple HTML emails without drag-and-drop components.\n\n### Request Body\n\n```json\n{\n  \"contentSpaceOrFolderId\": \"{contentSpaceOrFolderId}\",\n  \"contentType\": \"sfdc_cms__email\",\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more\",\n    \"rawHtml\": \"<h1>Welcome</h1><p>Content here</p>\",\n    \"sfdc_cms:title\": \"Sample HTML Email\",\n    \"subjectLine\": \"What's New\"\n  }\n}\n```\n\n| Field | Required | Description |\n| --- | --- | --- |\n| `contentSpaceOrFolderId` | Yes | The workspace ID where the email will be created |\n| `contentType` | Yes | Must be `sfdc_cms__email` |\n| `contentBody.sfdc_cms:title` | Yes | The email title |\n| `contentBody.subjectLine` | Yes | The email subject line |\n| `contentBody.preheader` | No | Preview text shown before the email body |\n| `contentBody.messagePurpose` | No | Purpose of the email (e.g., `promotional`, `transactional`) |\n| `contentBody.rawHtml` | Yes | The HTML content of the email |\n\n### Notes\n\n1. The email is created in Draft status by default. Use the Publish request to make it live.\n2. The `rawHtml` field contains the full HTML content without component structure.\n3. The collection automatically captures `{variantId}` and `{managedContentId}` after successful creation.\n4. Once created with HTML, you cannot switch to component-based structure."
+              },
+              "response": []
+            },
+            {
+              "name": "Create an email with components",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentSpaceOrFolderId\": \"{{contentSpaceOrFolderId}}\",\n  \"contentType\": \"sfdc_cms__email\",\n  \"contentBody\": {\n    \"backgroundColor\": \"#ffffff\",\n    \"lightning:brandSource\": {\n      \"defaultBrandOption\": \"sfdcBrand\"\n    },\n    \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n    \"lightning:dataProviders\": [\n      {\n        \"attributes\": {\n          \"objectApiName\": \"UnifiedIndividual__dlm\"\n        },\n        \"definition\": \"sfdc_cms__unifiedIndividualDataProvider\",\n        \"sfdcExpressionKey\": \"$unifiedIndividual\"\n      }\n    ],\n    \"lightning:padding\": \"{!$brand.spacing.none}\",\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more - take a look at what's ready.\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": [\n        {\n          \"attributes\": {\n            \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n            \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n            \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n            \"lightning:margin\": \"{!$brand.spacing.none}\",\n            \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n            \"stackOnMobile\": true,\n            \"lightning:backgroundImage\": {\n              \"repeat\": \"no-repeat\",\n              \"position\": \"center center\",\n              \"size\": \"cover\"\n            }\n          },\n          \"definition\": \"lightning/section\",\n          \"id\": \"GENERATE_UUID\",\n          \"type\": \"block\",\n          \"children\": [\n            {\n              \"attributes\": {\n                \"columnWidth\": 12.0,\n                \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n                \"lightning:margin\": \"{!$brand.spacing.none}\",\n                \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n                \"lightning:verticalAlignment\": \"top\",\n                \"lightning:backgroundImage\": {\n                  \"repeat\": \"no-repeat\",\n                  \"position\": \"center center\",\n                  \"size\": \"cover\"\n                }\n              },\n              \"definition\": \"lightning/column\",\n              \"id\": \"GENERATE_UUID\",\n              \"type\": \"block\",\n              \"children\": [\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"level\": 1.0,\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.spacing.none}\",\n                    \"lightning:typography\": \"{!$brand.typography.heading.heading1}\",\n                    \"text\": \"Welcome Back\"\n                  },\n                  \"definition\": \"lightning/heading\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": {\n                      \"bottom\": {\n                        \"unit\": \"px\",\n                        \"value\": 16.0\n                      },\n                      \"left\": {\n                        \"unit\": \"px\",\n                        \"value\": 0.0\n                      },\n                      \"right\": {\n                        \"unit\": \"px\",\n                        \"value\": 0.0\n                      },\n                      \"top\": {\n                        \"unit\": \"px\",\n                        \"value\": 16.0\n                      }\n                    },\n                    \"lightning:typography\": \"{!$brand.typography.paragraph.paragraph1}\",\n                    \"text\": \"We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.<br />\"\n                  },\n                  \"definition\": \"lightning/paragraph\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"lightning:borderRadius\": \"{!$brand.buttonStyleGroup.primary.lightning:borderRadius}\",\n                    \"lightning:borderWidth\": \"{!$brand.buttonStyleGroup.primary.lightning:borderWidth}\",\n                    \"lightning:buttonColorGroup\": \"{!$brand.buttonStyleGroup.primary.lightning:buttonColorGroup}\",\n                    \"lightning:click\": {\n                      \"actions\": [\n                        {\n                          \"attributes\": {\n                            \"openInNewTab\": false,\n                            \"url\": \"https://ex.com/welcome\"\n                          },\n                          \"definition\": \"sfdc_cms__navigateToUrlAction\",\n                          \"generatedUrl\": \"https://ex.com/welcome\"\n                        }\n                      ]\n                    },\n                    \"lightning:horizontalAlignment\": \"left\",\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.buttonStyleGroup.primary.lightning:padding}\",\n                    \"lightning:typography\": \"{!$brand.buttonStyleGroup.primary.lightning:typography}\",\n                    \"sfdc_cms:styleGroup\": \"{!$brand.buttonStyleGroup.primary}\",\n                    \"text\": \"Get Started\",\n                    \"width\": \"auto\"\n                  },\n                  \"definition\": \"lightning/actionButton\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    \"sfdc_cms:title\": \"Sample Component Email\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents"
+                  ]
+                },
+                "description": "## Create an Email with Components\n\n`POST /connect/cms/contents`\n\nCreates a new email using drag-and-drop components. Use this approach for emails built with the visual component structure.\n\n### Request Body\n\nThe request body includes a `sfdc_cms:block` structure with nested components. The collection's pre-request script automatically replaces `\"GENERATE_UUID\"` with unique IDs.\n\n```json\n{\n  \"contentSpaceOrFolderId\": \"{contentSpaceOrFolderId}\",\n  \"contentType\": \"sfdc_cms__email\",\n  \"contentBody\": {\n    \"sfdc_cms:title\": \"Sample Component Email\",\n    \"subjectLine\": \"What's New\",\n    \"preheader\": \"Updates and resources\",\n    \"messagePurpose\": \"promotional\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": []\n    }\n  }\n}\n```\n\n| Field | Required | Description |\n| --- | --- | --- |\n| `contentSpaceOrFolderId` | Yes | The workspace ID where the email will be created |\n| `contentType` | Yes | Must be `sfdc_cms__email` |\n| `contentBody.sfdc_cms:title` | Yes | The email title |\n| `contentBody.subjectLine` | Yes | The email subject line |\n| `contentBody.sfdc_cms:block` | Yes | The component block structure |\n\n### Notes\n\n1. The email is created in Draft status by default. Use the Publish request to make it live.\n2. Each block node requires a unique `id`. Use `\"GENERATE_UUID\"` and the collection will replace it automatically.\n3. The collection automatically captures `{variantId}` and `{managedContentId}` after successful creation.\n4. Once created with components, you cannot switch to HTML-only structure."
+              },
+              "response": []
+            },
+            {
+              "name": "Update an html email",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more — take a look at what's ready.\",\n    \"rawHtml\": \"<h1>Welcome Back</h1><p>We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.</p><a href='https://ex.com/welcome-back'>Get Started</a>\",\n    \"sfdc_cms:title\": \"Sample Custom HTML Email\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/variants/:variantId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "variants",
+                    ":variantId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "variantId",
+                      "value": "{{variantId}}",
+                      "description": "The managedContentVariantId of the content"
+                    }
+                  ]
+                },
+                "description": "## Update an HTML Email\n\n`PUT /connect/cms/contents/variants/{variantId}`\n\nUpdates an existing HTML-based email. Requires the full content body.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Request Body\n\n```json\n{\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updated preview text\",\n    \"rawHtml\": \"<h1>Updated Content</h1><p>New content here</p>\",\n    \"sfdc_cms:title\": \"Updated Email Title\",\n    \"subjectLine\": \"Updated Subject\"\n  }\n}\n```\n\n### Notes\n\n1. The full `contentBody` must be provided. Omitted fields will be cleared.\n2. Only `contentBody` is sent. Do not include `contentType` or `contentSpaceOrFolderId`.\n3. The email remains in its current status (Draft or Published). Use the Publish request to change status.\n4. You cannot switch from HTML to component structure during an update."
+              },
+              "response": []
+            },
+            {
+              "name": "Update a component email",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentBody\": {\n    \"backgroundColor\": \"#ffffff\",\n    \"lightning:brandSource\": {\n      \"defaultBrandOption\": \"sfdcBrand\"\n    },\n    \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n    \"lightning:dataProviders\": [\n      {\n        \"attributes\": {\n          \"objectApiName\": \"UnifiedIndividual__dlm\"\n        },\n        \"definition\": \"sfdc_cms__unifiedIndividualDataProvider\",\n        \"sfdcExpressionKey\": \"$unifiedIndividual\"\n      }\n    ],\n    \"lightning:padding\": \"{!$brand.spacing.none}\",\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more - take a look at what's ready.\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": [\n        {\n          \"attributes\": {\n            \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n            \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n            \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n            \"lightning:margin\": \"{!$brand.spacing.none}\",\n            \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n            \"stackOnMobile\": true,\n            \"lightning:backgroundImage\": {\n              \"repeat\": \"no-repeat\",\n              \"position\": \"center center\",\n              \"size\": \"cover\"\n            }\n          },\n          \"definition\": \"lightning/section\",\n          \"id\": \"GENERATE_UUID\",\n          \"type\": \"block\",\n          \"children\": [\n            {\n              \"attributes\": {\n                \"columnWidth\": 12.0,\n                \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n                \"lightning:margin\": \"{!$brand.spacing.none}\",\n                \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n                \"lightning:verticalAlignment\": \"top\",\n                \"lightning:backgroundImage\": {\n                  \"repeat\": \"no-repeat\",\n                  \"position\": \"center center\",\n                  \"size\": \"cover\"\n                }\n              },\n              \"definition\": \"lightning/column\",\n              \"id\": \"GENERATE_UUID\",\n              \"type\": \"block\",\n              \"children\": [\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"level\": 1.0,\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.spacing.none}\",\n                    \"lightning:typography\": \"{!$brand.typography.heading.heading1}\",\n                    \"text\": \"Welcome Back\"\n                  },\n                  \"definition\": \"lightning/heading\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": {\n                      \"bottom\": {\n                        \"unit\": \"px\",\n                        \"value\": 16.0\n                      },\n                      \"left\": {\n                        \"unit\": \"px\",\n                        \"value\": 0.0\n                      },\n                      \"right\": {\n                        \"unit\": \"px\",\n                        \"value\": 0.0\n                      },\n                      \"top\": {\n                        \"unit\": \"px\",\n                        \"value\": 16.0\n                      }\n                    },\n                    \"lightning:typography\": \"{!$brand.typography.paragraph.paragraph1}\",\n                    \"text\": \"We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.<br />\"\n                  },\n                  \"definition\": \"lightning/paragraph\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"lightning:borderRadius\": \"{!$brand.buttonStyleGroup.primary.lightning:borderRadius}\",\n                    \"lightning:borderWidth\": \"{!$brand.buttonStyleGroup.primary.lightning:borderWidth}\",\n                    \"lightning:buttonColorGroup\": \"{!$brand.buttonStyleGroup.primary.lightning:buttonColorGroup}\",\n                    \"lightning:click\": {\n                      \"actions\": [\n                        {\n                          \"attributes\": {\n                            \"openInNewTab\": false,\n                            \"url\": \"https://ex.com/welcome-back\"\n                          },\n                          \"definition\": \"sfdc_cms__navigateToUrlAction\",\n                          \"generatedUrl\": \"https://ex.com/welcome-back\"\n                        }\n                      ]\n                    },\n                    \"lightning:horizontalAlignment\": \"left\",\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.buttonStyleGroup.primary.lightning:padding}\",\n                    \"lightning:typography\": \"{!$brand.buttonStyleGroup.primary.lightning:typography}\",\n                    \"sfdc_cms:styleGroup\": \"{!$brand.buttonStyleGroup.primary}\",\n                    \"text\": \"Get Started\",\n                    \"width\": \"auto\"\n                  },\n                  \"definition\": \"lightning/actionButton\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    \"sfdc_cms:title\": \"Sample Component Email\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/variants/:variantId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "variants",
+                    ":variantId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "variantId",
+                      "value": "{{variantId}}",
+                      "description": "The managedContentVariantId of the content"
+                    }
+                  ]
+                },
+                "description": "## Update a Component Email\n\n`PUT /connect/cms/contents/variants/{variantId}`\n\nUpdates an existing component-based email. Requires the full content body including the complete block structure.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Request Body\n\nThe request body must include the full `sfdc_cms:block` structure with all components.\n\n```json\n{\n  \"contentBody\": {\n    \"sfdc_cms:title\": \"Updated Component Email\",\n    \"subjectLine\": \"Updated Subject\",\n    \"preheader\": \"Updated preview text\",\n    \"messagePurpose\": \"promotional\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": []\n    }\n  }\n}\n```\n\n### Notes\n\n1. The full `contentBody` must be provided. Omitted fields or components will be cleared.\n2. Each block node requires a unique `id`. Use `\"GENERATE_UUID\"` for automatic generation.\n3. The email remains in its current status (Draft or Published). Use the Publish request to change status.\n4. You cannot switch from component to HTML structure during an update."
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve an email by id or key",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/:contentKey",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    ":contentKey"
+                  ],
+                  "variable": [
+                    {
+                      "key": "contentKey",
+                      "value": "{{contentKey}}",
+                      "description": "The unique content key or apiName"
+                    }
+                  ]
+                },
+                "description": "## Retrieve an Email\n\n`GET /connect/cms/contents/{contentKey}`\n\nReturns the full details of an email including its content body, status, and metadata.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `contentKey` | The unique 28-character identifier or `apiName` for the email |\n\n### Example Response\n\n```json\n{\n  \"contentKey\": \"MCNUSLTYAES5CLRKYWXFUXDXW2BM\",\n  \"managedContentId\": \"20YQZ0000007G3F2AU\",\n  \"managedContentVariantId\": \"9PsQZ00000072oH0AQ\",\n  \"title\": \"Sample Email\",\n  \"status\": \"Draft\",\n  \"contentType\": \"sfdc_cms__email\",\n  \"contentBody\": {\n    \"sfdc_cms:title\": \"Sample Email\",\n    \"subjectLine\": \"Email Subject\",\n    \"preheader\": \"Preview text\",\n    \"rawHtml\": \"<h1>Content</h1>\"\n  },\n  \"contentSpace\": {\n    \"id\": \"0ZuQZ0000003xWc0AI\"\n  }\n}\n```\n\n### Notes\n\n1. The `managedContentVariantId` from the response is required for update, delete, and publish operations.\n2. The collection automatically captures `{variantId}` and `{managedContentId}` from this response.\n3. The `contentBody` structure differs based on whether the email uses HTML or components."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete an email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "packages": {},
+                    "exec": [
+                      "pm.environment.set('variantId', '')",
+                      "pm.environment.set('managedContentId', '')",
+                      "pm.environment.set('contentKey', '')"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/variants/:variantId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "variants",
+                    ":variantId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "variantId",
+                      "value": "{{variantId}}",
+                      "description": "The managedContentVariantId of the content"
+                    }
+                  ]
+                },
+                "description": "## Delete an Email\n\n`DELETE /connect/cms/contents/variants/{variantId}`\n\nPermanently deletes an email by its variant ID.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Response\n\nA successful deletion returns a `204 No Content` status with no response body.\n\n### Notes\n\n1. This action is permanent and cannot be undone.\n2. Both Draft and Published emails can be deleted.\n3. Ensure you have the correct `variantId` before deleting."
+              },
+              "response": []
+            },
+            {
+              "name": "Publish an email",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"description\": \"Publish an email via the API\",\n    \"contentIds\": [\"{{managedContentId}}\"]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/publish",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "publish"
+                  ]
+                },
+                "description": "## Publish an Email\n\n`POST /connect/cms/contents/variants/{variantId}/publish`\n\nPublishes a draft email to make it live and available for use.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Response\n\nReturns the updated email details with status changed to `Published`.\n\n### Notes\n\n1. Only emails in Draft status can be published.\n2. Once published, the email is available for use in campaigns and sends.\n3. Use the Unpublish request to revert a published email back to draft status."
+              },
+              "response": []
+            },
+            {
+              "name": "Unpublish an email",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"description\": \"Publish an email via the API\",\n    \"contentIds\": [\"{{managedContentId}}\"]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/unpublish",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "unpublish"
+                  ]
+                },
+                "description": "## Unpublish an Email\n\n`POST /connect/cms/contents/variants/{variantId}/unpublish`\n\nReverts a published email back to draft status.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Response\n\nReturns the updated email details with status changed to `Draft`.\n\n### Notes\n\n1. Only emails in Published status can be un-published.\n2. Unpublishing removes the email from active use.\n3. The email content is not deleted and can be re-published later."
+              },
+              "response": []
+            },
+            {
+              "name": "Clone an email",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/:contentKey/clone",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    ":contentKey",
+                    "clone"
+                  ],
+                  "variable": [
+                    {
+                      "key": "contentKey",
+                      "value": "{{contentKey}}",
+                      "description": "The unique content key or apiName"
+                    }
+                  ]
+                },
+                "description": "## Clone an Email\n\n`POST /connect/cms/contents/{contentKey}/clone`\n\nCreates a copy of an existing email. The cloned email is created in Draft status.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `contentKey` | The unique content key or apiName of the content to clone |\n\n### Response\n\nReturns the new email details including a new `managedContentVariantId` and `contentKey`.\n\n### Notes\n\n1. The cloned email is always created in Draft status regardless of the source email's status.\n2. The clone includes all content body fields and structure from the original.\n3. The collection automatically captures the new `{variantId}` and `{managedContentId}` after successful cloning.\n4. You may want to update the cloned email's title to differentiate it from the original."
+              },
+              "response": []
+            }
+          ],
+          "description": "## Email Overview\n\nThis folder contains requests for managing emails in Marketing Cloud Next (MCN). Emails are content records that can be created using either raw HTML or drag-and-drop components.\n\n### Requests in This Folder\n\n| Request | Purpose |\n| --- | --- |\n| Create an email with html | Creates an email using raw HTML in the `rawHtml` field |\n| Create an email with components | Creates an email using the component block structure |\n| Update an html email | Updates an existing HTML-based email |\n| Update a component email | Updates an existing component-based email |\n| Retrieve an email by id or key | Gets full details for a specific email |\n| Delete an email | Permanently deletes an email by variant ID |\n| Publish an email | Publishes a draft email to make it live |\n| Unpublish an email | Reverts a published email back to draft status |\n| Clone an email | Creates a copy of an existing email |\n\n### Key Concepts\n\n**Content Type**: All emails use `sfdc_cms__email` as the `contentType`.\n\n**Two Creation Approaches**:\n1. **HTML emails**: Use the `rawHtml` field for simple HTML content\n2. **Component emails**: Use the `sfdc_cms:block` structure for drag-and-drop components\n\n**Variant ID**: The `managedContentVariantId` is required for update, delete, publish, and unpublish operations.\n\n### Notes\n\n1. All newly created emails start in **Draft** status. Use the Publish request to make them live.\n2. Update operations require the full `contentBody`. Partial updates are not supported.\n3. The collection automatically captures `{variantId}` and `{managedContentId}` after successful create or retrieve operations.\n4. You cannot switch between HTML and component structures after creation. Choose the approach before creating the email."
+        },
+        {
+          "name": "Email Template",
+          "item": [
+            {
+              "name": "Create an email template with components",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentSpaceOrFolderId\": \"{{contentSpaceOrFolderId}}\",\n  \"contentType\": \"sfdc_cms__emailTemplate\",\n  \"contentBody\": {\n    \"backgroundColor\": \"#ffffff\",\n    \"lightning:brandSource\": {\n      \"defaultBrandOption\": \"sfdcBrand\"\n    },\n    \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n    \"lightning:dataProviders\": [\n      {\n        \"attributes\": {\n          \"objectApiName\": \"UnifiedIndividual__dlm\"\n        },\n        \"definition\": \"sfdc_cms__unifiedIndividualDataProvider\",\n        \"sfdcExpressionKey\": \"$unifiedIndividual\"\n      }\n    ],\n    \"lightning:padding\": \"{!$brand.spacing.none}\",\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more - take a look at what's ready.\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": [\n        {\n          \"attributes\": {\n            \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n            \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n            \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n            \"lightning:margin\": \"{!$brand.spacing.none}\",\n            \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n            \"sfdc_cms:schema\": {\n              \"readOnly\": true\n            },\n            \"stackOnMobile\": true,\n            \"lightning:backgroundImage\": {\n              \"repeat\": \"no-repeat\",\n              \"position\": \"center center\",\n              \"size\": \"cover\"\n            }\n          },\n          \"definition\": \"lightning/section\",\n          \"id\": \"GENERATE_UUID\",\n          \"type\": \"block\",\n          \"children\": [\n            {\n              \"attributes\": {\n                \"columnWidth\": 12.0,\n                \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n                \"lightning:margin\": \"{!$brand.spacing.none}\",\n                \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n                \"lightning:verticalAlignment\": \"top\",\n                \"sfdc_cms:schema\": {\n                  \"readOnly\": true\n                },\n                \"lightning:backgroundImage\": {\n                  \"repeat\": \"no-repeat\",\n                  \"position\": \"center center\",\n                  \"size\": \"cover\"\n                }\n              },\n              \"definition\": \"lightning/column\",\n              \"id\": \"GENERATE_UUID\",\n              \"type\": \"block\",\n              \"children\": [\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"level\": 1.0,\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.spacing.none}\",\n                    \"lightning:typography\": \"{!$brand.typography.heading.heading1}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": false\n                    },\n                    \"text\": \"Welcome Back\"\n                  },\n                  \"definition\": \"lightning/heading\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": {\n                      \"bottom\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.5\n                      },\n                      \"left\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.0\n                      },\n                      \"right\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.0\n                      },\n                      \"top\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.5\n                      }\n                    },\n                    \"lightning:typography\": \"{!$brand.typography.paragraph.paragraph1}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": true\n                    },\n                    \"text\": \"We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.<br />\"\n                  },\n                  \"definition\": \"lightning/paragraph\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"lightning:borderRadius\": \"{!$brand.buttonStyleGroup.primary.lightning:borderRadius}\",\n                    \"lightning:borderWidth\": \"{!$brand.buttonStyleGroup.primary.lightning:borderWidth}\",\n                    \"lightning:buttonColorGroup\": \"{!$brand.buttonStyleGroup.primary.lightning:buttonColorGroup}\",\n                    \"lightning:click\": {\n                      \"actions\": [\n                        {\n                          \"attributes\": {\n                            \"openInNewTab\": false,\n                            \"url\": \"https://ex.com/get-started\"\n                          },\n                          \"definition\": \"sfdc_cms__navigateToUrlAction\",\n                          \"generatedUrl\": \"https://ex.com/get-started\"\n                        }\n                      ]\n                    },\n                    \"lightning:horizontalAlignment\": \"center\",\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.buttonStyleGroup.primary.lightning:padding}\",\n                    \"lightning:typography\": \"{!$brand.buttonStyleGroup.primary.lightning:typography}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": false\n                    },\n                    \"sfdc_cms:styleGroup\": \"{!$brand.buttonStyleGroup.primary}\",\n                    \"text\": \"Get Started\",\n                    \"width\": \"auto\"\n                  },\n                  \"definition\": \"lightning/actionButton\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    \"sfdc_cms:schema\": {\n      \"readOnly\": true\n    },\n    \"sfdc_cms:title\": \"Sample Email Template\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents"
+                  ]
+                },
+                "description": "## Create an Email Template with Components\n\n`POST /connect/cms/contents`\n\nCreates a new email template using drag-and-drop components. Use this approach for templates built with the visual component structure.\n\n### Request Body\n\nThe request body includes a `sfdc_cms:block` structure with nested components. The collection's pre-request script automatically replaces `\"GENERATE_UUID\"` with unique IDs.\n\n```json\n{\n  \"contentSpaceOrFolderId\": \"{contentSpaceOrFolderId}\",\n  \"contentType\": \"sfdc_cms__emailTemplate\",\n  \"contentBody\": {\n    \"sfdc_cms:title\": \"Sample Component Email Template\",\n    \"subjectLine\": \"What's New\",\n    \"preheader\": \"Updates and resources\",\n    \"messagePurpose\": \"promotional\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": []\n    }\n  }\n}\n```\n\n| Field | Required | Description |\n| --- | --- | --- |\n| `contentSpaceOrFolderId` | Yes | The workspace ID where the template will be created |\n| `contentType` | Yes | Must be `sfdc_cms__emailTemplate` |\n| `contentBody.sfdc_cms:title` | Yes | The template title |\n| `contentBody.subjectLine` | Yes | The default subject line |\n| `contentBody.sfdc_cms:block` | Yes | The component block structure |\n\n### Notes\n\n1. The template is created in Draft status by default. Use the Publish request to make it live.\n2. Each block node requires a unique `id`. Use `\"GENERATE_UUID\"` and the collection will replace it automatically.\n3. The collection automatically captures `{variantId}` and `{managedContentId}` after successful creation.\n4. Once created with components, you cannot switch to HTML-only structure."
+              },
+              "response": []
+            },
+            {
+              "name": "Create an email template with html",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentSpaceOrFolderId\": \"{{contentSpaceOrFolderId}}\",\n  \"contentType\": \"sfdc_cms__emailTemplate\",\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more — take a look at what's ready.\",\n    \"rawHtml\": \"<html>\\n  <head>\\n    <title>Sample HTML Email</title>\\n  </head>\\n  <body>\\n    <h1>Welcome Back</h1>\\n    <p>We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.</p>\\n    <a href=\\\"https://ex.com/get-started\\\">Get Started</a>\\n  </body>\\n</html>\",\n    \"sfdc_cms:title\": \"Sample Custom HTML Email Template\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents"
+                  ]
+                },
+                "description": "## Create an Email Template with HTML\n\n`POST /connect/cms/contents`\n\nCreates a new email template using raw HTML content. Use this approach for simple HTML templates without drag-and-drop components.\n\n### Request Body\n\n```json\n{\n  \"contentSpaceOrFolderId\": \"{contentSpaceOrFolderId}\",\n  \"contentType\": \"sfdc_cms__emailTemplate\",\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more\",\n    \"rawHtml\": \"<h1>Welcome</h1><p>Content here</p>\",\n    \"sfdc_cms:title\": \"Sample HTML Email Template\",\n    \"subjectLine\": \"What's New\"\n  }\n}\n```\n\n| Field | Required | Description |\n| --- | --- | --- |\n| `contentSpaceOrFolderId` | Yes | The workspace ID where the template will be created |\n| `contentType` | Yes | Must be `sfdc_cms__emailTemplate` |\n| `contentBody.sfdc_cms:title` | Yes | The template title |\n| `contentBody.subjectLine` | Yes | The default subject line |\n| `contentBody.rawHtml` | Yes | The HTML content |\n\n### Notes\n\n1. The template is created in Draft status by default. Use the Publish request to make it live.\n2. Use `rawHtml` for simple HTML templates. For component-based templates, use the components request.\n3. The collection automatically captures `{variantId}` and `{managedContentId}` after successful creation.\n4. Once created with HTML, you cannot switch to component structure."
+              },
+              "response": []
+            },
+            {
+              "name": "Update a component email template",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"contentBody\": {\n    \"backgroundColor\": \"#ffffff\",\n    \"lightning:brandSource\": {\n      \"defaultBrandOption\": \"sfdcBrand\"\n    },\n    \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n    \"lightning:dataProviders\": [\n      {\n        \"attributes\": {\n          \"objectApiName\": \"UnifiedIndividual__dlm\"\n        },\n        \"definition\": \"sfdc_cms__unifiedIndividualDataProvider\",\n        \"sfdcExpressionKey\": \"$unifiedIndividual\"\n      }\n    ],\n    \"lightning:padding\": \"{!$brand.spacing.none}\",\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more - take a look at what's ready.\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": [\n        {\n          \"attributes\": {\n            \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n            \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n            \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n            \"lightning:margin\": \"{!$brand.spacing.none}\",\n            \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n            \"sfdc_cms:schema\": {\n              \"readOnly\": true\n            },\n            \"stackOnMobile\": true,\n            \"lightning:backgroundImage\": {\n              \"repeat\": \"no-repeat\",\n              \"position\": \"center center\",\n              \"size\": \"cover\"\n            }\n          },\n          \"definition\": \"lightning/section\",\n          \"id\": \"GENERATE_UUID\",\n          \"type\": \"block\",\n          \"children\": [\n            {\n              \"attributes\": {\n                \"columnWidth\": 12.0,\n                \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n                \"lightning:margin\": \"{!$brand.spacing.none}\",\n                \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n                \"lightning:verticalAlignment\": \"top\",\n                \"sfdc_cms:schema\": {\n                  \"readOnly\": true\n                },\n                \"lightning:backgroundImage\": {\n                  \"repeat\": \"no-repeat\",\n                  \"position\": \"center center\",\n                  \"size\": \"cover\"\n                }\n              },\n              \"definition\": \"lightning/column\",\n              \"id\": \"GENERATE_UUID\",\n              \"type\": \"block\",\n              \"children\": [\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"level\": 1.0,\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.spacing.none}\",\n                    \"lightning:typography\": \"{!$brand.typography.heading.heading1}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": false\n                    },\n                    \"text\": \"Welcome Back\"\n                  },\n                  \"definition\": \"lightning/heading\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": {\n                      \"bottom\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.5\n                      },\n                      \"left\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.0\n                      },\n                      \"right\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.0\n                      },\n                      \"top\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.5\n                      }\n                    },\n                    \"lightning:typography\": \"{!$brand.typography.paragraph.paragraph1}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": true\n                    },\n                    \"text\": \"We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.<br />\"\n                  },\n                  \"definition\": \"lightning/paragraph\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"lightning:borderRadius\": \"{!$brand.buttonStyleGroup.primary.lightning:borderRadius}\",\n                    \"lightning:borderWidth\": \"{!$brand.buttonStyleGroup.primary.lightning:borderWidth}\",\n                    \"lightning:buttonColorGroup\": \"{!$brand.buttonStyleGroup.primary.lightning:buttonColorGroup}\",\n                    \"lightning:click\": {\n                      \"actions\": [\n                        {\n                          \"attributes\": {\n                            \"openInNewTab\": false,\n                            \"url\": \"https://ex.com/get-started-now\"\n                          },\n                          \"definition\": \"sfdc_cms__navigateToUrlAction\",\n                          \"generatedUrl\": \"https://ex.com/get-started-now\"\n                        }\n                      ]\n                    },\n                    \"lightning:horizontalAlignment\": \"center\",\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.buttonStyleGroup.primary.lightning:padding}\",\n                    \"lightning:typography\": \"{!$brand.buttonStyleGroup.primary.lightning:typography}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": false\n                    },\n                    \"sfdc_cms:styleGroup\": \"{!$brand.buttonStyleGroup.primary}\",\n                    \"text\": \"Get Started\",\n                    \"width\": \"auto\"\n                  },\n                  \"definition\": \"lightning/actionButton\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    \"sfdc_cms:schema\": {\n      \"readOnly\": true\n    },\n    \"sfdc_cms:title\": \"Sample Email Template\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/variants/:variantId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "variants",
+                    ":variantId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "variantId",
+                      "value": "{{variantId}}",
+                      "description": "The managedContentVariantId of the content"
+                    }
+                  ]
+                },
+                "description": "## Update a Component Email Template\n\n`PUT /connect/cms/contents/variants/{variantId}`\n\nUpdates an existing component-based email template. Requires the full content body including the complete block structure.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Request Body\n\nThe request body must include the full `sfdc_cms:block` structure with all components.\n\n```json\n{\n  \"contentBody\": {\n    \"sfdc_cms:title\": \"Updated Component Template\",\n    \"subjectLine\": \"Updated Subject\",\n    \"preheader\": \"Updated preview text\",\n    \"messagePurpose\": \"promotional\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": []\n    }\n  }\n}\n```\n\n### Notes\n\n1. The full `contentBody` must be provided. Omitted fields or components will be cleared.\n2. Each block node requires a unique `id`. Use `\"GENERATE_UUID\"` for automatic generation.\n3. The template remains in its current status (Draft or Published). Use the Publish request to change status.\n4. You cannot switch from component to HTML structure during an update."
+              },
+              "response": []
+            },
+            {
+              "name": "Update an html email template",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"contentBody\": {\n    \"backgroundColor\": \"#ffffff\",\n    \"lightning:brandSource\": {\n      \"defaultBrandOption\": \"sfdcBrand\"\n    },\n    \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n    \"lightning:dataProviders\": [\n      {\n        \"attributes\": {\n          \"objectApiName\": \"UnifiedIndividual__dlm\"\n        },\n        \"definition\": \"sfdc_cms__unifiedIndividualDataProvider\",\n        \"sfdcExpressionKey\": \"$unifiedIndividual\"\n      }\n    ],\n    \"lightning:padding\": \"{!$brand.spacing.none}\",\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updates, resources, and more - take a look at what's ready.\",\n    \"sfdc_cms:block\": {\n      \"definition\": \"sfdc_cms/rootContentBlock\",\n      \"id\": \"GENERATE_UUID\",\n      \"type\": \"block\",\n      \"children\": [\n        {\n          \"attributes\": {\n            \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n            \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n            \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n            \"lightning:margin\": \"{!$brand.spacing.none}\",\n            \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n            \"sfdc_cms:schema\": {\n              \"readOnly\": true\n            },\n            \"stackOnMobile\": true,\n            \"lightning:backgroundImage\": {\n              \"repeat\": \"no-repeat\",\n              \"position\": \"center center\",\n              \"size\": \"cover\"\n            }\n          },\n          \"definition\": \"lightning/section\",\n          \"id\": \"GENERATE_UUID\",\n          \"type\": \"block\",\n          \"children\": [\n            {\n              \"attributes\": {\n                \"columnWidth\": 12.0,\n                \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                \"lightning:colorScheme\": \"{!$brand.colorScheme}\",\n                \"lightning:margin\": \"{!$brand.spacing.none}\",\n                \"lightning:padding\": \"{!$brand.spacing.xSmall}\",\n                \"lightning:verticalAlignment\": \"top\",\n                \"sfdc_cms:schema\": {\n                  \"readOnly\": true\n                },\n                \"lightning:backgroundImage\": {\n                  \"repeat\": \"no-repeat\",\n                  \"position\": \"center center\",\n                  \"size\": \"cover\"\n                }\n              },\n              \"definition\": \"lightning/column\",\n              \"id\": \"GENERATE_UUID\",\n              \"type\": \"block\",\n              \"children\": [\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"level\": 1.0,\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.spacing.none}\",\n                    \"lightning:typography\": \"{!$brand.typography.heading.heading1}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": false\n                    },\n                    \"text\": \"Welcome Back\"\n                  },\n                  \"definition\": \"lightning/heading\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"align\": \"left\",\n                    \"lightning:borderRadius\": \"{!$brand.borderRadius.square}\",\n                    \"lightning:borderWidth\": \"{!$brand.borderWeight.none}\",\n                    \"lightning:colorGroup\": {\n                      \"backgroundColor\": \"{!$brand.colorScheme.root}\",\n                      \"borderColor\": \"{!$brand.colorScheme.neutral}\",\n                      \"linkColor\": \"{!$brand.colorScheme.primaryAccent}\",\n                      \"textColor\": \"{!$brand.colorScheme.contrast}\"\n                    },\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": {\n                      \"bottom\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.5\n                      },\n                      \"left\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.0\n                      },\n                      \"right\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.0\n                      },\n                      \"top\": {\n                        \"unit\": \"rem\",\n                        \"value\": 0.5\n                      }\n                    },\n                    \"lightning:typography\": \"{!$brand.typography.paragraph.paragraph1}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": true\n                    },\n                    \"text\": \"We have updates, resources, and new content ready for you. Explore what's new and make the most of everything available to you.<br />\"\n                  },\n                  \"definition\": \"lightning/paragraph\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                },\n                {\n                  \"attributes\": {\n                    \"lightning:borderRadius\": \"{!$brand.buttonStyleGroup.primary.lightning:borderRadius}\",\n                    \"lightning:borderWidth\": \"{!$brand.buttonStyleGroup.primary.lightning:borderWidth}\",\n                    \"lightning:buttonColorGroup\": \"{!$brand.buttonStyleGroup.primary.lightning:buttonColorGroup}\",\n                    \"lightning:click\": {\n                      \"actions\": [\n                        {\n                          \"attributes\": {\n                            \"openInNewTab\": false,\n                            \"url\": \"https://ex.com/get-started-now\"\n                          },\n                          \"definition\": \"sfdc_cms__navigateToUrlAction\",\n                          \"generatedUrl\": \"https://ex.com/get-started-now\"\n                        }\n                      ]\n                    },\n                    \"lightning:horizontalAlignment\": \"center\",\n                    \"lightning:margin\": \"{!$brand.spacing.none}\",\n                    \"lightning:padding\": \"{!$brand.buttonStyleGroup.primary.lightning:padding}\",\n                    \"lightning:typography\": \"{!$brand.buttonStyleGroup.primary.lightning:typography}\",\n                    \"sfdc_cms:schema\": {\n                      \"readOnly\": false\n                    },\n                    \"sfdc_cms:styleGroup\": \"{!$brand.buttonStyleGroup.primary}\",\n                    \"text\": \"Get Started\",\n                    \"width\": \"auto\"\n                  },\n                  \"definition\": \"lightning/actionButton\",\n                  \"id\": \"GENERATE_UUID\",\n                  \"type\": \"block\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    },\n    \"sfdc_cms:schema\": {\n      \"readOnly\": true\n    },\n    \"sfdc_cms:title\": \"Sample Email Template\",\n    \"subjectLine\": \"What's New for You\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/variants/:variantId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "variants",
+                    ":variantId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "variantId",
+                      "value": "{{variantId}}",
+                      "description": "The managedContentVariantId of the content"
+                    }
+                  ]
+                },
+                "description": "## Update an HTML Email Template\n\n`PUT /connect/cms/contents/variants/{variantId}`\n\nUpdates an existing HTML-based email template. Requires the full content body.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Request Body\n\n```json\n{\n  \"contentBody\": {\n    \"messagePurpose\": \"promotional\",\n    \"preheader\": \"Updated preview text\",\n    \"rawHtml\": \"<h1>Updated Content</h1><p>New content here</p>\",\n    \"sfdc_cms:title\": \"Updated Template Title\",\n    \"subjectLine\": \"Updated Subject\"\n  }\n}\n```\n\n### Notes\n\n1. The full `contentBody` must be provided. Omitted fields will be cleared.\n2. Only `contentBody` is sent. Do not include `contentType` or `contentSpaceOrFolderId`.\n3. The template remains in its current status (Draft or Published). Use the Publish request to change status.\n4. You cannot switch from HTML to component structure during an update."
+              },
+              "response": []
+            },
+            {
+              "name": "Retrieve an email template by id or key",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/:contentKey",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    ":contentKey"
+                  ],
+                  "variable": [
+                    {
+                      "key": "contentKey",
+                      "value": "{{contentKey}}",
+                      "description": "The unique content key or apiName"
+                    }
+                  ]
+                },
+                "description": "## Retrieve an Email Template\n\n`GET /connect/cms/contents/{contentKey}`\n\nReturns the full details of an email template including its content body, status, and metadata.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `contentKey` | The unique 28-character identifier or `apiName` for the template |\n\n### Example Response\n\n```json\n{\n  \"contentKey\": \"MCNUSLTYAES5CLRKYWXFUXDXW2BM\",\n  \"managedContentId\": \"20YQZ0000007G3F2AU\",\n  \"managedContentVariantId\": \"9PsQZ00000072oH0AQ\",\n  \"title\": \"Sample Template\",\n  \"status\": \"Draft\",\n  \"contentType\": \"sfdc_cms__emailTemplate\",\n  \"contentBody\": {\n    \"sfdc_cms:title\": \"Sample Template\",\n    \"subjectLine\": \"Template Subject\",\n    \"preheader\": \"Preview text\",\n    \"rawHtml\": \"<h1>Content</h1>\"\n  },\n  \"contentSpace\": {\n    \"id\": \"0ZuQZ0000003xWc0AI\"\n  }\n}\n```\n\n### Notes\n\n1. The `managedContentVariantId` from the response is required for update, delete, and publish operations.\n2. The collection automatically captures `{variantId}` and `{managedContentId}` from this response.\n3. The `contentBody` structure differs based on whether the template uses HTML or components."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete an email template",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "packages": {},
+                    "exec": [
+                      "pm.environment.set('variantId', '')",
+                      "pm.environment.set('managedContentId', '')",
+                      "pm.environment.set('contentKey', '')"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/variants/:variantId",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "variants",
+                    ":variantId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "variantId",
+                      "value": "{{variantId}}",
+                      "description": "The managedContentVariantId of the content"
+                    }
+                  ]
+                },
+                "description": "## Delete an Email Template\n\n`DELETE /connect/cms/contents/variants/{variantId}`\n\nPermanently deletes an email template by its variant ID.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Response\n\nA successful deletion returns a `204 No Content` status with no response body.\n\n### Notes\n\n1. This action is permanent and cannot be undone.\n2. Both Draft and Published templates can be deleted.\n3. Ensure you have the correct `variantId` before deleting."
+              },
+              "response": []
+            },
+            {
+              "name": "Publish an email template",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"description\": \"Publish an email via the API\",\n    \"contentIds\": [\"{{managedContentId}}\"]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/publish",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "publish"
+                  ]
+                },
+                "description": "## Publish an Email Template\n\n`POST /connect/cms/contents/variants/{variantId}/publish`\n\nPublishes a draft email template to make it live and available for use.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Response\n\nReturns the updated template details with status changed to `Published`.\n\n### Notes\n\n1. Only templates in Draft status can be published.\n2. Once published, the template is available for use in campaigns and sends.\n3. Use the Unpublish request to revert a published template back to draft status."
+              },
+              "response": []
+            },
+            {
+              "name": "Unpublish an email template",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"description\": \"Publish an email via the API\",\n    \"contentIds\": [\"{{managedContentId}}\"]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/unpublish",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    "unpublish"
+                  ]
+                },
+                "description": "## Unpublish an Email Template\n\n`POST /connect/cms/contents/variants/{variantId}/unpublish`\n\nReverts a published email template back to draft status.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `variantId` | The `managedContentVariantId` |\n\n### Response\n\nReturns the updated template details with status changed to `Draft`.\n\n### Notes\n\n1. Only templates in Published status can be un-published.\n2. Unpublishing removes the template from active use.\n3. The template content is not deleted and can be re-published later."
+              },
+              "response": []
+            },
+            {
+              "name": "Clone an email template",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiBaseUrl}}{{apiBasePath}}/connect/cms/contents/:contentKey/clone",
+                  "host": [
+                    "{{apiBaseUrl}}{{apiBasePath}}"
+                  ],
+                  "path": [
+                    "connect",
+                    "cms",
+                    "contents",
+                    ":contentKey",
+                    "clone"
+                  ],
+                  "variable": [
+                    {
+                      "key": "contentKey",
+                      "value": "{{contentKey}}",
+                      "description": "The unique content key or apiName"
+                    }
+                  ]
+                },
+                "description": "## Clone an Email Template\n\n`POST /connect/cms/contents/{contentKey}/clone`\n\nCreates a copy of an existing email template. The cloned template is created in Draft status.\n\n### Path Parameters\n\n| Parameter | Description |\n| --- | --- |\n| `contentKey` | The unique content key or apiName of the template to clone |\n\n### Response\n\nReturns the new template details including a new `managedContentVariantId` and `contentKey`.\n\n### Notes\n\n1. The cloned template is always created in Draft status regardless of the source template's status.\n2. The clone includes all content body fields and structure from the original.\n3. The collection automatically captures the new `{variantId}` and `{managedContentId}` after successful cloning.\n4. You may want to update the cloned template's title to differentiate it from the original."
+              },
+              "response": []
+            }
+          ],
+          "description": "## Email Template Overview\n\nThis folder contains requests for managing email templates in Marketing Cloud Next (MCN). Email templates are reusable content records that can be created using either raw HTML or drag-and-drop components.\n\n### Requests in This Folder\n\n| Request | Purpose |\n| --- | --- |\n| Create an email template with components | Creates a template using the component block structure |\n| Create an email template with html | Creates a template using raw HTML in the `rawHtml` field |\n| Update a component email template | Updates an existing component-based template |\n| Update an html email template | Updates an existing HTML-based template |\n| Retrieve an email template by id or key | Gets full details for a specific template |\n| Delete an email template | Permanently deletes a template by variant ID |\n| Publish an email template | Publishes a draft template to make it live |\n| Unpublish an email template | Reverts a published template back to draft status |\n| Clone an email template | Creates a copy of an existing template |\n\n### Key Concepts\n\n**Content Type**: All email templates use `sfdc_cms__emailTemplate` as the `contentType`.\n\n**Two Creation Approaches**:\n1. **HTML templates**: Use the `rawHtml` field for simple HTML content\n2. **Component templates**: Use the `sfdc_cms:block` structure for drag-and-drop components\n\n**Variant ID**: The `managedContentVariantId` is required for update, delete, publish, and unpublish operations.\n\n### Notes\n\n1. All newly created templates start in **Draft** status. Use the Publish request to make them live.\n2. Update operations require the full `contentBody`. Partial updates are not supported.\n3. The collection automatically captures `{variantId}` and `{managedContentId}` after successful create or retrieve operations.\n4. You cannot switch between HTML and component structures after creation. Choose the approach before creating the template."
+        }
+      ],
+      "description": "## Content Overview\n\nThis folder contains requests for managing Marketing Cloud Next (MCN) content including workspaces, emails, and email templates. All requests within this folder work with the CMS Connect API.\n\n### What's Inside\n\nThe Content folder is organized into four sections:\n\n| Folder | Purpose |\n| --- | --- |\n| **Search** | Search and filter content across workspaces |\n| **Workspace** | Create and manage workspaces (containers for content) |\n| **Email** | Create, update, publish, and manage emails |\n| **Email Template** | Create, update, publish, and manage reusable email templates |\n\n### Content Types\n\nMarketing Cloud Next supports two content types:\n\n1. **Emails** (`sfdc_cms__email`): Individual email content records\n2. **Email Templates** (`sfdc_cms__emailTemplate`): Reusable template content records\n\nBoth types can be created using either raw HTML or drag-and-drop components.\n\n### Common Workflow\n\n1. Use **Search** to find an existing workspace or use **Workspace** to create a new one.\n2. Copy the workspace `id` to use when creating content.\n3. Use **Email** or **Email Template** requests to create content in that workspace.\n4. Content starts in Draft status. Use publish requests to make it live.\n\n### Key Concepts\n\n**Workspace ID**: The unique identifier for a workspace. Required when creating emails or templates.\n\n**Variant ID**: The `managedContentVariantId` required for updating, deleting, or publishing content.\n\n**Draft vs Published**: All content starts as Draft. A separate publish action is required to make content live.\n\n### Notes\n\n1. The collection automatically captures IDs from responses for reuse in subsequent requests.\n2. Update operations require the full content body. Partial updates are not supported.\n3. Refer to individual folder descriptions for detailed request information."
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "grant_type",
+        "value": "client_credentials",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      },
+      {
+        "key": "client_authentication",
+        "value": "body",
+        "type": "string"
+      },
+      {
+        "key": "clientSecret",
+        "value": "{{clientSecret}}",
+        "type": "string"
+      },
+      {
+        "key": "clientId",
+        "value": "{{clientId}}",
+        "type": "string"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "{{apiBaseUrl}}/services/oauth2/token",
+        "type": "string"
+      },
+      {
+        "key": "tokenName",
+        "value": "access_token",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "/*",
+          "  Collection-level Pre-Request Script",
+          "",
+          "  Runs automatically before every request in this collection. Scans the raw",
+          "  request body for the placeholder string \"GENERATE_UUID\" and replaces each",
+          "  occurrence with a freshly generated UUID v4 at send time.",
+          "",
+          "  Usage:",
+          "    In any request body, use the literal string \"GENERATE_UUID\" (with quotes)",
+          "    as the value for any field that requires a unique identifier — for example,",
+          "    a block \"id\" field. Each placeholder is replaced independently, so multiple",
+          "    fields in the same request will each receive a different UUID.",
+          "*/",
+          "",
+          "function generateUUID() {",
+          "  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {",
+          "    var r = (Math.random() * 16) | 0",
+          "    var v = c === 'x' ? r : (r & 0x3) | 0x8",
+          "    return v.toString(16)",
+          "  })",
+          "}",
+          "",
+          "const rawBody = pm.request.body?.raw",
+          "if (!rawBody) return",
+          "",
+          "pm.request.body.raw = rawBody.replace(/\"GENERATE_UUID\"/g, function () {",
+          "  return '\"' + generateUUID() + '\"'",
+          "})",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "/*",
+          "  Collection-level Post-Response Script",
+          "",
+          "  Runs automatically after every request in this collection. When a successful",
+          "  JSON response contains content identifiers, this script extracts and stores",
+          "  them as variables so subsequent requests can reference them without manual",
+          "  copy-pasting.",
+          "",
+          "  Variables set:",
+          "    - variantId                 — the managedContentVariantId of the returned content",
+          "    - managedContentId         — the managedContentId of the returned content",
+          "    - contentKey                — the contentKey of the returned content",
+          "    - contentSpaceOrFolderId  — the content space ID the content belongs to",
+          "",
+          "  Each variable is set independently — a field is only written if it is present",
+          "  in the response. This ensures that a response containing only some of these",
+          "  fields (e.g. managedContentId without managedContentVariantId) still captures",
+          "  what is available without blocking the others.",
+          "",
+          "  contentSpaceOrFolderId is resolved from two mutually exclusive sources:",
+          "    - Content responses:   json.contentSpace.id",
+          "    - Workspace responses: json.id (discriminated by presence of json.rootFolderId)",
+          "  These two shapes never appear in the same response, so there is no collision risk.",
+          "",
+          "  The script exits silently if the response is not JSON, the status code indicates",
+          "  a failure, or the expected fields are absent — making it safe to run globally",
+          "  across all requests, including auth and non-content endpoints.",
+          "*/",
+          "",
+          "const contentType = pm.response.headers.get('Content-Type') || ''",
+          "if (!contentType.includes('application/json')) return",
+          "if (pm.response.code < 200 || pm.response.code >= 300) {",
+          "  console.warn('Request failed with status:', pm.response.code)",
+          "  return",
+          "}",
+          "let json",
+          "try {",
+          "  json = pm.response.json()",
+          "} catch (e) {",
+          "  console.error('Response is not valid JSON:', e.message)",
+          "  return",
+          "}",
+          "const context = pm.environment.name ? pm.environment : pm.collectionVariables",
+          "const managedContentVariantId = json.managedContentVariantId",
+          "const managedContentId = json.managedContentId",
+          "const contentKey = json.contentKey",
+          "const contentSpaceOrFolderId = json.contentSpace?.id",
+          "const workspaceId = json.rootFolderId && json.id ? json.id : undefined",
+          "const resolvedSpaceId = contentSpaceOrFolderId || workspaceId",
+          "const apiName = json.apiName",
+          "",
+          "console.log('apiName:', apiName)",
+          "",
+          "if (managedContentVariantId) {",
+          "  context.set('variantId', managedContentVariantId)",
+          "  console.log('managedContentVariantId:', managedContentVariantId)",
+          "}",
+          "",
+          "if (managedContentId) {",
+          "  context.set('managedContentId', managedContentId)",
+          "  console.log('managedContentId:', managedContentId)",
+          "}",
+          "",
+          "if (contentKey) {",
+          "  context.set('contentKey', contentKey)",
+          "  console.log('contentKey:', contentKey)",
+          "}",
+          "",
+          "if (resolvedSpaceId) {",
+          "  context.set('contentSpaceOrFolderId', resolvedSpaceId)",
+          "  console.log('contentSpaceOrFolderId:', resolvedSpaceId)",
+          "}",
+          "",
+          "if (!managedContentVariantId && !resolvedSpaceId) {",
+          "  console.warn('Missing expected fields:', { managedContentVariantId, resolvedSpaceId })",
+          "}",
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "clientId",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "clientSecret",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "apiBaseUrl",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "apiBasePath",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "variantId",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "contentSpaceOrFolderId",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "managedContentId",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "contentKey",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

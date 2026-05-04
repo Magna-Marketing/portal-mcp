@@ -1,0 +1,38 @@
+Tool: update_contact_key
+
+Description
+Update a contact's `ContactKey` (rename / re-key the contact's stable
+identifier). Use sparingly — every downstream system that references
+the old key must update too.
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts/{contactKey}/key`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contactkeys
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "values": [{ "oldValue": "MEM-100023", "newValue": "MEM-200023" }] }
+
+Input (parameters)
+updates (object[], required) - Each: { oldKey, newKey }.
+
+Result
+results (array) - { oldKey, newKey, status ("updated"|"not_found"|"failed"), error }.
+
+Required scopes
+- `audiences_write`.
+
+Idempotency & limits
+- Not idempotent if newKey already exists (DUPLICATE_VALUE).
+
+Errors
+- 30002 not found, DUPLICATE_VALUE.
+
+Example request
+
+update_contact_key({ "updates": [{ "oldKey": "MEM-100023", "newKey": "MEM-200023" }] })

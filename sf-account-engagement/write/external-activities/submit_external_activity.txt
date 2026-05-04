@@ -1,0 +1,80 @@
+Tool: submit_external_activity
+
+Description
+Submit a single External Activity event to Account Engagement (a
+"Webinar Attended", "Form Submitted on partner site", etc.). Once
+ingested, the event becomes a `VisitorActivity` row that
+Engagement Studio rules and scoring can reference.
+
+The external activity type (`extensionSalesforceId`) is configured
+in Setup → Marketing Setup → External Activities.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/external-activities
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "extension": "0Wx5800000abc123",
+  "type": "Webinar Attended",
+  "value": "Spring 2026 Webinar",
+  "email": "jane@example.com",
+  "externalId": "WEB-2026-04-22-S1",
+  "activityDate": "2026-04-22T15:00:00Z"
+}
+
+Input (parameters)
+extensionSalesforceId (string, required) - 18-char SFDC id (`0Wx...`)
+  of the External Activity Type extension.
+typeName (string, required) - Configured external-activity type name.
+prospectId (number, optional) - Pardot prospect id.
+prospectFid (string, optional) - Prospect FID (Pardot legacy id).
+prospectEmail (string, optional) - Resolved server-side; one of
+  `prospectId | prospectFid | prospectEmail` required.
+externalId (string, required) - Unique key for the event. Idempotency
+  is enforced on `(extensionSalesforceId, externalId)`.
+value (string, optional) - Free-form payload.
+activityDate (string, optional) - ISO-8601; defaults to now.
+
+Result
+externalActivity (object) - Ingested row with `id` populated.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent on `(extensionSalesforceId, externalId)`. Repeated
+  posts return the existing row.
+- Up to 1,000 events / minute per BU.
+
+Errors
+- 20 invalid_input (missing prospect resolver), 38 user_not_verified,
+  53 not_permitted (extension not enabled), 59 not_found
+  (extension does not exist).
+
+Example request
+
+submit_external_activity({
+  "extensionSalesforceId": "0Wx5800000abc123",
+  "typeName": "Webinar Attended",
+  "prospectEmail": "jane@example.com",
+  "externalId": "WEB-2026-04-22-S1",
+  "value": "Spring 2026 Webinar",
+  "activityDate": "2026-04-22T15:00:00Z"
+})
+
+Example result
+{
+  "externalActivity": {
+    "id": 4421, "typeName": "Webinar Attended",
+    "prospectId": 7745, "externalId": "WEB-2026-04-22-S1"
+  }
+}

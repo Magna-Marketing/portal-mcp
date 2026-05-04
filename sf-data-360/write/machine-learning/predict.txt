@@ -1,0 +1,77 @@
+Tool: predict
+
+Description
+Score one or more records against a Configured Model. Synchronous;
+returns predictions + per-record explanation when supported by the
+model.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/machine-learning/predict
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "configuredModelApiName": "ChurnPredictor",
+  "records": [
+    {
+      "EngagementCount__c": 4,
+      "DaysSinceLastPurchase__c": 30,
+      "LifetimeValue__c": 1200
+    }
+  ],
+  "options": { "includeExplanations": true }
+}
+
+Input (parameters)
+configuredModelApiName (string, required).
+records (object[], required) - Up to 200 records per call. Each
+  record matches the model's `inputSchema`.
+options (object, optional):
+  includeExplanations (boolean, default false).
+  threshold (number, default null) - Override classification cutoff.
+
+Result
+predictions (array) - One per input record:
+  { prediction (any), score (number, 0-1 for classification),
+    explanations (array<{ feature, contribution }>) }.
+modelVersion (string).
+durationMs (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on identical input.
+- 200 records per call. Max 50 calls/sec/model.
+
+Errors
+- 404 NOT_FOUND, 400 SCHEMA_MISMATCH, 503 MODEL_UNAVAILABLE
+  (artifact missing / training in progress).
+
+Example request
+
+predict({
+  "configuredModelApiName": "ChurnPredictor",
+  "records": [
+    { "EngagementCount__c": 4, "DaysSinceLastPurchase__c": 30 }
+  ]
+})
+
+Example result
+{
+  "predictions": [
+    { "prediction": "WillChurn", "score": 0.78,
+      "explanations": [
+        { "feature": "DaysSinceLastPurchase__c", "contribution": 0.42 }
+      ] }
+  ],
+  "modelVersion": "1.2.0",
+  "durationMs": 24
+}

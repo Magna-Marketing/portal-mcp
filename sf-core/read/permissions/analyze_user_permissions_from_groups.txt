@@ -1,0 +1,105 @@
+Tool: analyze_user_permissions_from_groups
+
+Description
+For one user, enumerate every permission they receive transitively via
+the permission set groups they're assigned to. Returns one row per group
+with its member permission sets and the union of effective system /
+object / field permissions. Use this to explain "why does this user
+have ModifyAllData?" when the answer might be hiding inside a PSG.
+
+Pair with `analyze_user_permissions` (which adds the profile baseline +
+direct permission sets) for a complete effective view.
+
+Salesforce API
+REST API (Data) + Tooling, v66.0. The MCP server stitches together:
+- `PermissionSetAssignment WHERE AssigneeId = '<userId>' AND PermissionSetGroupId != NULL`.
+- For each PSG, `PermissionSetGroupComponent`.
+- Union of `ObjectPermissions` / `FieldPermissions` / system perms over
+  the underlying permission sets.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT PermissionSetGroupId, PermissionSetGroup.DeveloperName, PermissionSetGroup.MasterLabel FROM PermissionSetAssignment WHERE AssigneeId = '{userId}' AND PermissionSetGroupId != NULL
+
+(Plus the queries documented in view_permission_set_group and view_permission_set, called per group.)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET requests).
+
+Input (parameters)
+userId (string, optional) - 18-char User Id.
+username (string, optional) - User.Username (e.g. user@example.com).
+  One of userId or username is required.
+includeFieldPermissions (boolean, optional, default false) - Heavy in
+  big orgs; off by default.
+includeObjectPermissions (boolean, optional, default true).
+onlyTrueSystemPerms (boolean, optional, default true) - When true, omit
+  Permissions* flags that are false.
+
+Result
+user (object) - { id, name, username, profileName }.
+groupCount (number).
+totalEffectiveSystemPermissions (number) - Distinct system perms set
+  to true across all groups.
+groups (array) - Each:
+  groupId (string).
+  developerName (string).
+  label (string).
+  status (string).
+  permissionSets (array) - Each: { id, name, label, isCustom }.
+  systemPermissions (object) - Map of perm name -> true (only).
+  objectPermissions (array, optional) - Per sObject row union (read,
+    create, edit, delete, viewAll, modifyAll all OR-ed across members).
+  fieldPermissions (array, optional) - Per { sObject, field } row union.
+unionAcrossGroups (object) - Same fields as a single group's union but
+  across all groups: systemPermissions, objectPermissions,
+  fieldPermissions.
+
+Required permissions
+- "View Setup and Configuration" or "Manage Users".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Heavy when a user has many groups; total query count ~= 1 + 2*groupCount.
+
+Errors
+- NOT_FOUND: user not found / inactive without includeInactiveUsers.
+
+Example request
+
+analyze_user_permissions_from_groups({
+  "username": "jane.doe@magnatech.com",
+  "includeFieldPermissions": false
+})
+
+Example result (truncated)
+
+{
+  "user": { "id": "005Qg0000020aBcDE", "name": "Jane Doe", "username": "jane.doe@magnatech.com", "profileName": "Standard User" },
+  "groupCount": 1,
+  "totalEffectiveSystemPermissions": 14,
+  "groups": [
+    {
+      "groupId": "0PGQg00000004abAB",
+      "developerName": "MTG_Delivery_Bundle",
+      "label": "MTG Delivery Bundle",
+      "status": "Updated",
+      "permissionSets": [
+        { "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager", "isCustom": true }
+      ],
+      "systemPermissions": { "ApiEnabled": true, "RunReports": true },
+      "objectPermissions": [
+        { "sObject": "Project__c", "read": true, "create": true, "edit": true, "delete": false, "viewAll": false, "modifyAll": false }
+      ]
+    }
+  ],
+  "unionAcrossGroups": {
+    "systemPermissions": { "ApiEnabled": true, "RunReports": true },
+    "objectPermissions": [
+      { "sObject": "Project__c", "read": true, "create": true, "edit": true, "delete": false, "viewAll": false, "modifyAll": false }
+    ]
+  }
+}

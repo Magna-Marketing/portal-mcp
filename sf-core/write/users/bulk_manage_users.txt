@@ -1,0 +1,61 @@
+Tool: bulk_manage_users
+
+Description
+Mass-update users selected by criteria (profile, role, department,
+custom SOQL). Common operations: deactivate, freeze, change profile,
+change manager, change time zone. Always run
+`preview_bulk_permission_operation`-equivalent semantics: tool produces
+a count + sample of impacted users when `dryRun=true`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `User` to select, then
+`composite/sobjects` PATCH in batches of 200.
+
+Endpoint
+GET  /services/data/v66.0/query/?q=SELECT Id, Username, Name FROM User WHERE ...
+PATCH /services/data/v66.0/composite/sobjects
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "allOrNone": false,
+  "records": [{ "attributes": { "type": "User" }, "Id": "...", "IsActive": false }, ...]
+}
+
+Input (parameters)
+selection (object, required) - { userIds, usernames, profileNames, roleNames, department, isActiveOnly, customSoql }.
+operation (string, required) - "deactivate" | "activate" | "freeze" | "unfreeze" | "changeProfile" | "changeRole" | "changeManager" | "changeTimeZone" | "patch".
+profileName (string, optional) - For changeProfile.
+roleName (string, optional) - For changeRole.
+managerUsername (string, optional) - For changeManager.
+timeZoneSidKey (string, optional) - For changeTimeZone.
+patch (object, optional) - For "patch" arbitrary fields ({ Department, Title, ... }).
+dryRun (boolean, optional, default false).
+batchSize (number, optional, default 200).
+allOrNone (boolean, optional, default false).
+
+Result
+selection (object).
+operationCount (number).
+results (array) - { userId, username, status, change, error }.
+summary (object) - { updated, skipped, failed, total, durationMs }.
+
+Required permissions
+- "Manage Internal Users".
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, LICENSE_LIMIT_EXCEEDED on profile change.
+
+Example request
+
+bulk_manage_users({
+  "selection": { "department": "Old Team", "isActiveOnly": true },
+  "operation": "deactivate",
+  "dryRun": true
+})

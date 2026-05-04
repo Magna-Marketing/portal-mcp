@@ -1,0 +1,46 @@
+Tool: control_journey
+
+Description
+Control a journey's running state: stop, pause, resume, unschedule,
+unpublish.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/{op}`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/stop/{id}?versionNumber={v}
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/pause/{id}?versionNumber={v}
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/resume/{id}?versionNumber={v}
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/unpublish/{id}?versionNumber={v}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+journeyId (string, optional).
+journeyKey (string, optional).
+versionNumber (number, optional, default = latest published).
+action (string, required) - "stop" | "pause" | "resume" | "unpublish" | "unschedule".
+extendWaitEndDate (string, optional) - For resume; extends wait activity end dates.
+
+Result
+journey (object) - { id, version, status, lastPublishedDate }.
+action (string).
+durationMs (number).
+
+Required scopes
+- `journeys_write`.
+
+Idempotency & limits
+- All operations idempotent on the resulting state.
+
+Errors
+- INVALID_STATE_TRANSITION (e.g. stop a Draft).
+
+Example request
+
+control_journey({ "journeyKey": "MTG_Welcome_Series", "action": "pause" })

@@ -1,0 +1,61 @@
+Tool: list_calculated_insights
+
+Description
+List Calculated Insight Objects (CIOs) — derived metrics computed
+from DMOs (e.g. lifetime value, propensity scores, engagement
+recency). CIOs are queryable via SQL like DMOs.
+
+Salesforce API
+Data Cloud Calculated Insights API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/insight/objects
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Inactive" | "Failed".
+nameContains (string, optional).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+calculatedInsights (array) - Each: { ciApiName, label, dataSpace,
+  status, refreshFrequency ("Hourly" | "Daily" | "OnDemand"),
+  measures (array<{ apiName, label, dataType, aggregation }>),
+  dimensions (array<{ apiName, label, dataType }>),
+  sourceDmos (array), lastRunStatus, lastRunDate,
+  createdDate, lastModifiedDate }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_calculated_insight_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_calculated_insights({ "status": "Active" })
+
+Example result
+{
+  "calculatedInsights": [
+    { "ciApiName": "CustomerLTV__cio", "label": "Customer LTV",
+      "status": "Active", "refreshFrequency": "Daily",
+      "measures": [
+        { "apiName": "LifetimeValue__c", "dataType": "DECIMAL",
+          "aggregation": "SUM" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+Tool: list_game_rewards
+
+Description
+List `GameReward` records — the rewards configured for a game (points,
+vouchers, badges, custom prizes) with probabilities and per-segment
+caps. Use to inspect / audit prize pools before launch.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `GameReward`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, GameDefinitionId, GameDefinition.Name, RewardType, RewardValue, ProbabilityPercent, MaxRedemptionCount, RedemptionCount, VoucherDefinitionId, ProgramCurrencyId, BadgeId, IsActive, CreatedDate FROM GameReward
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+gameDefinitionId (string, optional).
+gameName (string, optional).
+rewardType (string|string[], optional) - "Points" | "Voucher" | "Badge" | "Custom".
+isActive (boolean, optional).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+rewards (array) - { id, name, gameDefinitionId, gameName, rewardType, rewardValue, probabilityPercent, maxRedemptionCount, redemptionCount, voucherDefinitionId, programCurrencyId, badgeId, isActive }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_game_rewards({ "gameName": "Spin_The_Wheel_Q3" })

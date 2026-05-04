@@ -1,0 +1,57 @@
+Tool: manage_data_space
+
+Description
+Create or update a Data Space. Data Spaces can't be deleted via the
+API (do that in Setup). Use `upsert_data_space_members` to manage
+which DMOs / segments / activations belong.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST  {instanceUrl}/services/data/v{ver}/ssot/data-spaces            (operation="create")
+PATCH {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName  (operation="update")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "EMEA",
+  "label": "EMEA Brand",
+  "description": "EMEA brand assets and segments",
+  "isDefault": false
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update".
+idOrName (string, required for update).
+name (string, required for create) - Developer name.
+label (string, required for create).
+description (string, optional).
+isDefault (boolean, optional).
+
+Result
+dataSpace (object) - Created / updated row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `name` for create.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND.
+
+Example request
+
+manage_data_space({
+  "operation": "create",
+  "name": "EMEA",
+  "label": "EMEA Brand"
+})
+
+Example result
+{ "dataSpace": { "id": "0a0xx0000000002", "name": "EMEA" } }

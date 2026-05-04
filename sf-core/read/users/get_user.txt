@@ -1,0 +1,45 @@
+Tool: get_user
+
+Description
+Get a single user with everything reasonable to know in one call: profile, role, manager, license, active state, last login, mobile/phone, time zone/locale/language, federation Id, time-tracking flags, plus a count of permission set + group assignments. For deep effective permissions use `analyze_user_permissions`. For login history use `list_login_history`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `User`. Optional `PermissionSetAssignment COUNT()` for the assignment summary.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, ... FROM User WHERE Id = '...' OR Username = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+userId (string, optional) - 18-char Id.
+username (string, optional).
+  One required.
+includeAssignmentSummary (boolean, optional, default true) - Adds permset + group counts.
+includeManager (boolean, optional, default true).
+includeManagerChain (boolean, optional, default false) - Walk Manager.Manager.Manager up to 5 levels.
+
+Result
+user (object) - Same fields as `list_users` row plus:
+  managerChain (array, optional) - [{ id, name, username }] from direct manager up.
+  permissionSetCount (number, optional).
+  permissionSetGroupCount (number, optional).
+  hasPermissionSetExpiringSoon (boolean, optional) - Any assignment with ExpirationDate within 30 days.
+
+Required permissions
+- "View All Users" or "Manage Users".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+get_user({ "username": "jane.doe@magnatech.com", "includeManagerChain": true })

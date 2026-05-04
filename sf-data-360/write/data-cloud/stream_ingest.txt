@@ -1,0 +1,73 @@
+Tool: stream_ingest
+
+Description
+Stream one or more records into a Data 360 Streaming Ingestion
+endpoint. Records flow through the Data Stream into a DLO and
+(per mappings) into the corresponding DMO in near real-time. Use
+for transactional events, web pixels, IoT, CDC.
+
+For >2k records / sec, prefer Bulk Ingest (`manage_bulk_ingest_job`
++ `upload_bulk_ingest_data`).
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+POST {cdpTenantUrl}/api/v1/ingest/sources/:sourceApiName/:objectApiName
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "data": [
+    {
+      "Id__c": "ORDER-100023",
+      "OrderDate__c": "2026-04-29T13:02:11Z",
+      "CustomerEmail__c": "jane@example.com",
+      "Amount__c": 199.99
+    }
+  ]
+}
+
+Input (parameters)
+sourceApiName (string, required) - Data Stream source name.
+objectApiName (string, required) - Source-side object name.
+data (object[], required) - Up to 200 records per call.
+
+Result
+acceptedCount (number) - Records accepted for downstream async processing.
+rejectedCount (number) - Rejected at API boundary (schema / type).
+errors (array) - { index, code, message }.
+ingestId (string).
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Not idempotent — dedupe via DMO primary key.
+- 200 records / call. Up to 200 calls / sec / source.
+- 1MB max per call.
+
+Errors
+- 400 INVALID_FIELD, 413 PAYLOAD_TOO_LARGE, 404 NOT_FOUND
+  (source / object), 429 REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+stream_ingest({
+  "sourceApiName": "ecommerce",
+  "objectApiName": "Order",
+  "data": [
+    { "Id__c": "ORDER-100023", "Amount__c": 199.99 }
+  ]
+})
+
+Example result
+{
+  "acceptedCount": 1,
+  "rejectedCount": 0,
+  "ingestId": "ING_abc123"
+}

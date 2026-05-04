@@ -1,0 +1,72 @@
+Tool: get_content
+
+Description
+Retrieve a single CMS content row (an email, email template, image,
+or document) by its `contentKey` (a stable string developer key) or
+its 18-char content id. Returns the content envelope plus all
+language / channel variants. Pass `variantId` to drill into a
+specific variant.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/connect/cms/contents/:contentKey
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contentKey (string, required) - Either the developer key or the
+  18-char content id.
+variantId (string, optional) - Restrict the response to a single
+  variant.
+language (string, optional) - e.g. "en_US"; restrict to one
+  language variant.
+
+Result
+content (object):
+  id (string), contentKey (string), title (string).
+  type (string) - "cms_email__c" | "cms_email_template__c" |
+    "cms_image" | "cms_document".
+  contentSpaceId (string) - The owning workspace.
+  status (string) - "Draft" | "Scheduled" | "Published" | "Archived".
+  publishedDate (ISO-8601 | null), createdDate (ISO-8601),
+    lastModifiedDate (ISO-8601).
+  variants (array) - Each:
+    { id, language, channel, status, body, htmlBody, components,
+      subject, fromName, fromAddress, replyToAddress, preheader,
+      lastModifiedDate }.
+
+Required scopes
+- `api`, `cms_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 INVALID_SESSION_ID, 403 INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+get_content({ "contentKey": "welcome_email_2026" })
+
+Example result
+{
+  "content": {
+    "id": "0Q0xx000000abcdEAA",
+    "contentKey": "welcome_email_2026",
+    "title": "Welcome 2026",
+    "type": "cms_email__c",
+    "status": "Published",
+    "variants": [
+      { "id": "0Q1xx000000xyzABC", "language": "en_US",
+        "subject": "Welcome to Magna",
+        "htmlBody": "<html>...</html>" }
+    ]
+  }
+}

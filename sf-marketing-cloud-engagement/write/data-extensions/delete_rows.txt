@@ -1,0 +1,45 @@
+Tool: delete_rows
+
+Description
+Delete rows from a Data Extension by primary key. For wiping all rows
+without dropping the DE schema, use `truncate_data_extension`.
+
+Marketing Cloud API
+SOAP API (`DataExtensionObject[ExternalKey]` Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP DeleteRequest.
+
+Input (parameters)
+customerKey (string, required).
+keys (object[], required) - Each: PK field values.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - { keys, success, errors }.
+totalDeleted (number), totalFailed (number).
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Idempotent — deleting an already-missing key returns success
+  with no rows affected.
+- 200-row batch cap.
+
+Errors
+- 30002 not found, NO_PRIMARY_KEY.
+
+Example request
+
+delete_rows({
+  "customerKey": "Members_DE",
+  "keys": [{ "MemberId": "MEM-100023" }]
+})

@@ -1,0 +1,56 @@
+Tool: manage_benefit_action
+
+Description
+Create / update / delete a `BenefitAction` — the executable / Flow /
+Apex callable invoked when a benefit is granted or redeemed (e.g.
+issue voucher, send email, post to external system). Deployed via
+Metadata API.
+
+Salesforce API
+Metadata API (`BenefitAction`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+fullName (string, required) - DeveloperName.
+masterLabel (string, required for create).
+description (string, optional).
+benefitTypeName (string, optional).
+actionType (string, required for create) - "Flow" | "Apex" | "InvocableAction".
+actionTarget (string, required for create) - Flow API name, Apex class name, or invocable action name.
+parameters (array, optional) - [{ name, type, defaultValue, isRequired }].
+isActive (boolean, optional, default true).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object) - Standard Metadata deploy result.
+benefitAction (object) - { id, fullName, masterLabel, actionType, actionTarget, isActive }.
+
+Required permissions
+- "Customize Application" + `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad actionTarget.
+
+Example request
+
+manage_benefit_action({
+  "operation": "create",
+  "fullName": "Issue_Lounge_Pass",
+  "masterLabel": "Issue Lounge Pass",
+  "actionType": "Flow",
+  "actionTarget": "Issue_Lounge_Pass_Flow",
+  "parameters": [{ "name": "MemberId", "type": "String", "isRequired": true }]
+})

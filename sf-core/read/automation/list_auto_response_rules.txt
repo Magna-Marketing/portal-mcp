@@ -1,0 +1,44 @@
+Tool: list_auto_response_rules
+
+Description
+List auto-response rules for Lead and Case. Each rule has entries that match incoming records and send an email template back to the submitter.
+
+Salesforce API
+Metadata API (`AutoResponseRules` per sObject), v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0   (readMetadata AutoResponseRules)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], optional, default ["Lead", "Case"]).
+includeInactive (boolean, optional, default true).
+
+Result
+autoResponseRules (array) - Each:
+  sObject, fullName, active.
+  ruleEntries (array) - Each:
+    sortOrder, criteriaItems[], formula, booleanFilter,
+    senderEmail (string), senderName (string),
+    replyTo (string|null),
+    template (string) - Email template developer name,
+    notifyCcRecipients (boolean).
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_auto_response_rules({ "sObjects": ["Lead"] })

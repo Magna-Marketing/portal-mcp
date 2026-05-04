@@ -1,0 +1,53 @@
+Tool: get_activation
+
+Description
+Read a single Activation by id. Returns the source segment, target
+config, contact-point mapping, and recent run history.
+
+Salesforce API
+Data Cloud Activation API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/activations/:activationId
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+activationId (string, required).
+dataSpace (string, optional, default "default").
+includeRunHistory (boolean, optional, default false).
+
+Result
+activation (object) - Same shape as `list_activations` rows plus
+  full `targetConfig` and `contactPoints` arrays.
+runHistory (array, when includeRunHistory=true) -
+  [{ runId, startedAt, completedAt, status, populationCount,
+     errorRef }].
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_activation({ "activationId": "ACT_EMEA_TO_MC" })
+
+Example result
+{
+  "activation": {
+    "id": "ACT_EMEA_TO_MC", "label": "EMEA -> MC Engagement",
+    "segmentId": "SEG_HIGH_VALUE_EMEA",
+    "targetType": "MarketingCloudEngagement",
+    "targetConfig": { "memberId": 5001234, "dataExtensionExternalKey": "DE_EMEA_HIGH_VALUE" }
+  }
+}

@@ -1,0 +1,43 @@
+Tool: get_send_time_optimization
+
+Description
+Get Einstein Send Time Optimization (STO) results for a contact / DE
+of contacts: the predicted best hour-of-day to send for engagement.
+
+Marketing Cloud API
+REST API (`/sts/v1/timezone` and Einstein STO endpoints).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/sts/v1/persona/contact/{contactKey}
+GET https://{tenant}.rest.marketingcloudapis.com/sts/v1/persona/de/{deCustomerKey}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contactKey (string, optional).
+dataExtensionCustomerKey (string, optional) - Bulk lookup against an entire DE of contacts.
+  One required.
+channel (string, optional, default "Email") - "Email" | "Push" | "SMS".
+
+Result
+For contactKey: { contactKey, channel, recommendedHourLocal, confidence, persona ("Morning"|"Afternoon"|"Evening"|"Night") }.
+For DE: { dataExtensionCustomerKey, items: [{ contactKey, recommendedHourLocal, confidence, persona }], totalCount }.
+
+Required scopes
+- `audiences_read` + Einstein license.
+
+Idempotency & limits
+- Read-only.
+- Requires Einstein STO entitlement; returns 403 otherwise.
+
+Errors
+- 403 unauthorized (no STO entitlement), 30002 not found.
+
+Example request
+
+get_send_time_optimization({ "contactKey": "MEM-100023" })

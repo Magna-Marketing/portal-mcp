@@ -1,0 +1,107 @@
+Tool: query_records
+
+Description
+Run an arbitrary SOQL query against the org's data. Supports parent (dot
+notation up to 5 levels: `Account.Owner.Name`) and child (subquery:
+`(SELECT Id, Email FROM Contacts)`) relationship traversal. Use this when
+the user wants raw rows for any object. For aggregate functions
+(`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `GROUP BY`, `HAVING`) prefer
+`aggregate_query` because it's tuned for that response shape. For
+free-text search across multiple objects use `search_all` (SOSL). For
+discovering object/field names use `search_objects` and `describe_object`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL is executed by `GET /query` (or `/queryAll`
+when `includeDeleted=true`) at `/services/data/v66.0/`.
+
+Endpoint
+GET https://{instance}.my.salesforce.com/services/data/v66.0/query/?q={SOQL}
+GET https://{instance}.my.salesforce.com/services/data/v66.0/queryAll/?q={SOQL}    (when includeDeleted=true)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+Sforce-Query-Options: batchSize=2000   (optional; raises default 200)
+
+Body
+None (GET request).
+
+Input (parameters)
+soql (string, required) - The full SELECT statement, no surrounding quotes.
+  Example: SELECT Id, Name, StageName FROM Opportunity WHERE IsClosed = false
+  ORDER BY CloseDate DESC LIMIT 50.
+includeDeleted (boolean, optional, default false) - When true, hits
+  /queryAll and includes records in the Recycle Bin (IsDeleted = true).
+batchSize (number, optional, 200..2000) - Sets Sforce-Query-Options for
+  large result sets. Server-side pagination still applies; the tool
+  follows nextRecordsUrl until done.
+allRows (boolean, optional, default false) - When true, the tool follows
+  nextRecordsUrl pagination and returns all rows; when false, returns
+  only the first page (caller can repaginate explicitly).
+
+Result
+totalSize (number) - Total number of rows matched by the query.
+done (boolean) - true if all rows were returned in this response.
+records (array) - Array of records; each record has:
+  attributes.type (string) - sObject API name.
+  attributes.url (string) - REST URL to the record.
+  <field>: <value> - Each selected field (parent fields nested when dotted,
+    child fields under the relationship name with attributes/url/records/done).
+nextRecordsUrl (string, optional) - Path for the next page when done=false.
+
+Required permissions
+- "API Enabled" on the running user's profile.
+- Field-level read on every selected field.
+- Object read on every traversed object (parent and child).
+- "View All" / "Modify All" only required for cross-org views.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- 50,000 records per transaction (paginated by Salesforce).
+- Per-row payload <12 MB.
+- Aggregate queries are limited to 2,000 grouping rows; use aggregate_query
+  for those.
+- Counts toward DailyApiRequests.
+
+Errors
+- MALFORMED_QUERY: SOQL syntax error (line/column included in message).
+- INVALID_FIELD: field doesn't exist or caller can't see it (FLS).
+- INVALID_TYPE: sObject doesn't exist or caller can't see it.
+- INVALID_QUERY_LOCATOR: nextRecordsUrl expired (>15 minutes).
+- REQUEST_LIMIT_EXCEEDED: org daily API limit hit.
+
+Example request
+
+GET /services/data/v66.0/query/?q=SELECT+Id,Name,StageName,Account.Name,Owner.Email+FROM+Opportunity+WHERE+IsClosed=false+AND+CloseDate=THIS_QUARTER+ORDER+BY+Amount+DESC+LIMIT+10
+
+Example result
+
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "url": "/services/data/v66.0/sobjects/Opportunity/006Qg00000Dkc4RIAR"
+      },
+      "Id": "006Qg00000Dkc4RIAR",
+      "Name": "MITER | Phase 2",
+      "StageName": "Negotiation",
+      "Account": {
+        "attributes": { "type": "Account", "url": "/services/data/v66.0/sobjects/Account/0011U00001abcDEFAB" },
+        "Name": "MITER"
+      },
+      "Owner": {
+        "attributes": { "type": "User", "url": "/services/data/v66.0/sobjects/User/005Qg0000020aBcDE" },
+        "Email": "owner@example.com"
+      }
+    }
+  ]
+}
+
+Example with subquery (parent-to-child)
+
+soql: SELECT Id, Name, (SELECT Id, Email FROM Contacts WHERE IsDeleted = false) FROM Account WHERE Id = '0011U00001abcDEFAB'
+
+records[0].Contacts.records[].Id / Email is the child collection.

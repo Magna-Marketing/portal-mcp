@@ -1,0 +1,43 @@
+Tool: list_bounces
+
+Description
+List `BounceEvent` rows — every bounce returned by the receiving
+mail server (Soft / Hard / Block / Technical).
+
+Marketing Cloud API
+SOAP API (`BounceEvent.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on BounceEvent.
+
+Input (parameters)
+sinceDays (number, optional, default 1).
+sendId (number, optional).
+subscriberKey (string, optional).
+bounceCategory (string, optional) - "Hard" | "Soft" | "Block" | "Technical" | "Undetermined".
+limit (number, optional, default 1000).
+
+Result
+totalSize (number).
+bounces (array) - { sendId, subscriberKey, subscriberId, eventDate, bounceCategory, bounceCategoryId, smtpCode, smtpReason, bounceType }.
+hasMore (boolean), continueRequestId (string|null).
+
+Required scopes
+- `tracking_events_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_bounces({ "bounceCategory": "Hard", "sinceDays": 7 })

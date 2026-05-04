@@ -1,0 +1,70 @@
+Tool: get_unified_profile
+
+Description
+Read a single Profile record by primary key from a Profile-category
+DMO (typically `UnifiedIndividual__dlm` or `UnifiedAccount__dlm`).
+Optionally expand related DMOs (engagement, transactions,
+calculated insights) in one round-trip via `relationships`.
+
+Salesforce API
+Data Cloud Profile API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/profile/:dmoApiName/:recordId
+GET {cdpInstanceUrl}/api/v1/profile/:dmoApiName/:recordId/:relationshipName    (related-record reads)
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dmoApiName (string, required) - e.g. "UnifiedIndividual__dlm".
+recordId (string, required) - Primary-key value of the profile.
+dataSpace (string, optional, default "default").
+fields (string[], optional) - Subset of DMO fields to return.
+relationships (string[], optional) - Each relationship name expands
+  into its own related-records call. Example:
+  ["EngagementHistory","Calculated_Insight_LTV__cio"].
+relationshipLimit (number, optional, default 50) - Per relationship.
+
+Result
+profile (object) - Field map keyed by DMO `apiName`.
+relatedRecords (object, when relationships supplied) - Keyed by
+  relationship name; each value is an array of related rows.
+
+Required scopes
+- `cdp_profile_api_read`.
+
+Idempotency & limits
+- Read-only. Per-relationship cap: 1000 rows.
+
+Errors
+- 404 NOT_FOUND (record), 400 INVALID_FIELD (unknown field /
+  relationship), 401 invalid_token.
+
+Example request
+
+get_unified_profile({
+  "dmoApiName": "UnifiedIndividual__dlm",
+  "recordId": "IND_001",
+  "fields": ["Id__c","FirstName__c","EmailAddress__c","LastEngagedAt__c"],
+  "relationships": ["EngagementHistory"]
+})
+
+Example result
+{
+  "profile": {
+    "Id__c": "IND_001",
+    "FirstName__c": "Jane",
+    "EmailAddress__c": "jane@example.com",
+    "LastEngagedAt__c": "2026-04-29T13:01:11Z"
+  },
+  "relatedRecords": {
+    "EngagementHistory": [
+      { "EventType__c": "EmailOpen", "EventTimestamp__c": "2026-04-29T13:05:12Z" }
+    ]
+  }
+}

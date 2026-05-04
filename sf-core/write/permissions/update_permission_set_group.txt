@@ -1,0 +1,61 @@
+Tool: update_permission_set_group
+
+Description
+Update a permission set group's membership: add, remove, or both in a
+single deploy. Optionally update label/description. After the deploy,
+Salesforce schedules an async recalculation. The tool polls until
+`Status="Updated"` (default) or the timeout.
+
+For full replacement use `operation: "set"`.
+
+Salesforce API
+Metadata API (`PermissionSetGroup` type), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (add)
+{
+  "operation": "add",
+  "fullName": "MTG_Delivery_Bundle",
+  "permissionSets": ["MTG_Time_Logger"]
+}
+
+Input (parameters)
+operation (string, required) - "add" | "remove" | "set".
+fullName (string, required) - PSG DeveloperName.
+label (string, optional) - Update label.
+description (string, optional).
+permissionSets (string[], optional) - For `add`/`remove` the delta;
+  for `set` the new full membership.
+mutingPermissionSets (string[], optional) - Same semantics as permissionSets.
+waitForRecalc (boolean, optional, default true).
+checkOnly (boolean, optional, default false).
+
+Result
+Standard deploy result, plus:
+group (object) - { id, fullName, label, status, members, addedMembers,
+  removedMembers, recalcMs }.
+
+Required permissions
+- "Manage Profiles and Permission Sets".
+
+Idempotency & limits
+- `add`/`remove` are idempotent.
+- `set` idempotent on equal input.
+
+Errors
+- NOT_FOUND on fullName or any referenced permset.
+- PERMISSION_SET_GROUP_RECALC_FAILED.
+
+Example request (remove a permset)
+
+update_permission_set_group({
+  "operation": "remove",
+  "fullName": "MTG_Delivery_Bundle",
+  "permissionSets": ["MTG_Time_Logger"]
+})

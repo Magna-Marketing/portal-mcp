@@ -1,0 +1,49 @@
+Tool: get_dynamic_content_variation
+
+Description
+Read a single Dynamic Content variation by id, with the parent
+Dynamic Content block expanded.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/dynamic-content-variations/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `dynamicContent.*`.
+
+Result
+variation (object): id, dynamicContentId, comparison, operator,
+  value1, value2, content.
+dynamicContent (object): id, name, basedOn, basedOnProspectApiFieldId,
+  trackerDomainId, isDeleted.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_dynamic_content_variation({ "id": 92 })
+
+Example result
+{
+  "variation": { "id": 92, "comparison": "is", "operator": "EQUAL",
+    "value1": "EMEA", "content": "<p>Bonjour!</p>" },
+  "dynamicContent": { "id": 41, "name": "Region greeting", "basedOn": "PROSPECT_FIELD" }
+}

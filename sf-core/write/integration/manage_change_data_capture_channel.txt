@@ -1,0 +1,48 @@
+Tool: manage_change_data_capture_channel
+
+Description
+Add / remove sObjects to/from a Change Data Capture (CDC) channel
+(default `ChangeEvents` or a custom CDC channel). Supports adding
+enriched fields (those propagated even when unchanged).
+
+Salesforce API
+Metadata API + Tooling, v66.0. `PlatformEventChannel` (channelType=data) +
+`PlatformEventChannelMember`.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "addEntity" | "removeEntity" | "updateEnrichedFields" | "createCustomChannel" | "deleteCustomChannel".
+channelName (string, optional, default "ChangeEvents") - Custom channel DeveloperName when not the default.
+sObjects (string[], optional) - For addEntity/removeEntity.
+enrichedFields (object[], optional) - For updateEnrichedFields: [{ sObject, fields: [field API names] }].
+masterLabel (string, optional, for createCustomChannel).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+channel (object) - { fullName, members: [{ selectedEntity, enrichedFields }] }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- addEntity / removeEntity idempotent.
+
+Errors
+- INVALID_TYPE, CDC_NOT_ENABLED on the org.
+
+Example request
+
+manage_change_data_capture_channel({
+  "operation": "addEntity",
+  "sObjects": ["Account", "Opportunity", "Project__c"]
+})

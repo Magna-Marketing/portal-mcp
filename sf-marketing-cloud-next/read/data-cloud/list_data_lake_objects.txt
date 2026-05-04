@@ -1,0 +1,54 @@
+Tool: list_data_lake_objects
+
+Description
+List Data Lake Objects (DLOs) — the raw / staged storage produced
+by Data Streams. DLOs are the inputs to DMOs via mappings; for
+end-user analytics, query DMOs / CIOs instead.
+
+Salesforce API
+Data Cloud Metadata API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/metadata?entityType=DataLakeObject
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+sourceDataStream (string, optional) - Filter to DLOs produced by a
+  specific Data Stream.
+nameContains (string, optional).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+dlos (array) - Each: { dloApiName, label, sourceDataStream, fields
+  (array<{ apiName, label, dataType }>), recordCount,
+  createdDate, lastModifiedDate }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_data_lake_objects({ "sourceDataStream": "mc_sends__dls" })
+
+Example result
+{
+  "dlos": [
+    { "dloApiName": "mc_sends__dll", "label": "MC Sends (Raw)",
+      "sourceDataStream": "mc_sends__dls", "recordCount": 12450 }
+  ]
+}

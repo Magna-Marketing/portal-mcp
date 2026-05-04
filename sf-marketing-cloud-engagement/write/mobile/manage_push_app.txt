@@ -1,0 +1,55 @@
+Tool: manage_push_app
+
+Description
+Create / update / delete a MobilePush application registration.
+
+Marketing Cloud API
+REST API (`/push/v1/application/`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/push/v1/application
+PATCH  https://{tenant}.rest.marketingcloudapis.com/push/v1/application/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/push/v1/application/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "name": "MTG_iOS", "applicationType": "iOS", "bundleIdentifier": "com.magnatech.mtg", "locationEnabled": true, "analyticsEnabled": true }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+applicationId (string, optional, required for non-create).
+name (string, required for create).
+description (string, optional).
+applicationType (string, required for create) - "iOS" | "Android" | "FireOS".
+bundleIdentifier (string, required for create).
+locationEnabled (boolean, optional).
+analyticsEnabled (boolean, optional).
+iconBadgeEnabled (boolean, optional).
+iosCertContent (string, optional, base64) - iOS .p8 / .p12 cert.
+iosCertPassword (string, optional).
+gcmSenderId (string, optional) - For Android.
+fcmServiceAccountKey (string, optional) - JSON service account.
+
+Result
+application (object) - { id, name, applicationType, bundleIdentifier, certExpirationDate, status }.
+
+Required scopes
+- `push_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_BUNDLE_ID.
+
+Example request
+
+manage_push_app({
+  "operation": "create",
+  "name": "MTG_iOS",
+  "applicationType": "iOS",
+  "bundleIdentifier": "com.magnatech.mtg"
+})

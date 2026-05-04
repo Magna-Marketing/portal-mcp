@@ -1,0 +1,48 @@
+Tool: manage_global_value_set
+
+Description
+Create / update / delete a Global Value Set or modify its values.
+
+Salesforce API
+Metadata API (`GlobalValueSet`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addValues" | "removeValues" | "deactivateValues".
+fullName (string, required) - GVS DeveloperName.
+masterLabel (string, required for create).
+description (string, optional).
+sorted (boolean, optional, default false).
+values (object[], optional) - For create / addValues / removeValues / deactivateValues:
+  fullName (string), label (string), default (boolean), isActive (boolean).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+globalValueSet (object) - Updated identity + values count.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- addValues / removeValues idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD.
+
+Example request
+
+manage_global_value_set({
+  "operation": "addValues",
+  "fullName": "MTG_Project_Status",
+  "values": [{ "fullName": "On Hold", "label": "On Hold", "default": false }]
+})

@@ -1,0 +1,69 @@
+Tool: list_list_emails
+
+Description
+List the BU's `ListEmail` records. A List Email is a one-off send to
+one or more lists; each row tracks the campaign, sender, send time,
+and aggregate counters (`sent`, `deliveries`, `opens`, `clicks`,
+`bounces`, `unsubscribes`, `optOuts`, `spamComplaints`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/list-emails?fields={fields}&filter[campaignId]=eq,1024
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+campaignId (number, optional).
+listIds (number[], optional) - Filter where `lists` contains any.
+sentAfter (string, optional) - ISO-8601 on `sentAt`.
+sentBefore (string, optional) - ISO-8601.
+status (string, optional) - "Draft" | "Scheduled" | "Sent" | "Sending" | "Cancelled".
+fields (string[], optional, default: id,name,subject,sentAt,
+  scheduledTime,status,campaignId,senderOptions,replyToOptions,
+  trackerDomainId,emailTemplateId,operationalEmail,createdAt,updatedAt,
+  createdById,updatedById,sentCount,deliveredCount,uniqueOpenCount,
+  totalOpenCount,uniqueClickCount,totalClickCount,bounceCount,
+  unsubscribeCount,spamComplaintCount,optOutCount,deliveryRate,
+  openRate,clickRate).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+listEmails (array) - Each: { id, name, subject, status, sentAt,
+  scheduledTime, campaignId, senderOptions, replyToOptions,
+  trackerDomainId, emailTemplateId, operationalEmail (boolean),
+  sentCount, deliveredCount, uniqueOpenCount, totalOpenCount,
+  uniqueClickCount, totalClickCount, bounceCount, unsubscribeCount,
+  spamComplaintCount, optOutCount, deliveryRate, openRate, clickRate,
+  createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_list_emails({ "status": "Sent", "limit": 10 })
+
+Example result
+{
+  "listEmails": [
+    { "id": 8821, "name": "Spring Promo Send", "status": "Sent",
+      "sentAt": "2026-04-21T15:00:00Z", "sentCount": 12450,
+      "deliveredCount": 12300, "uniqueOpenCount": 4521, "openRate": 36.7 }
+  ]
+}

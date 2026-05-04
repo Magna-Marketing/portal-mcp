@@ -1,0 +1,54 @@
+Tool: manage_tier_group
+
+Description
+Create / update / delete a `LoyaltyTierGroup`. A program can have
+multiple tier groups (e.g. "Status Tiers" and "Lifetime Tiers"); each
+member is in one tier per group.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyTierGroup`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyTierGroup
+PATCH  /services/data/v66.0/sobjects/LoyaltyTierGroup/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyTierGroup/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "Lifetime Tiers", "ProgramId": "...", "IsPrimary": false, "IsActive": true, "ResetAfterDays": null }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+tierGroupId (string, optional, required for non-create).
+programName (string, optional, required for create).
+programId (string, optional).
+name (string, required for create).
+description (string, optional).
+isPrimary (boolean, optional).
+isActive (boolean, optional).
+resetAfterDays (number|null, optional) - For status tiers, days until tier resets (null = no reset).
+
+Result
+tierGroup (object) - { id, name, programId, isPrimary, isActive, resetAfterDays }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+- Cannot delete a tier group with active tiers.
+
+Errors
+- DUPLICATE_VALUE, DELETE_FAILED.
+
+Example request
+
+manage_tier_group({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "Lifetime_Tiers",
+  "isPrimary": false
+})

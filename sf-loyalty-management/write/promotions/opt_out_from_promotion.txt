@@ -1,0 +1,60 @@
+Tool: opt_out_from_promotion
+
+Description
+Opt members out of a promotion they're enrolled in. Wraps the Loyalty
+Program Process "Opt Out from a Promotion". Use for member-requested
+opt-outs, GDPR / preference-center flows, or when a member becomes
+ineligible.
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Opt Out from a Promotion", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Opt Out from a Promotion",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "PromotionId": "0M3Qg00000abcDE2",
+    "Members": [{ "MemberId": "0lMQg00000abcDE2" }],
+    "Reason": "Member request"
+  }
+}
+
+Input (parameters)
+programName (string, required).
+promotionId (string, optional).
+promotionName (string, optional).
+members (object[], required) - { memberId | membershipNumber }.
+reason (string, optional).
+optOutDate (string, optional, default today).
+
+Result
+processResult (object) - { isSuccess, processStatus }.
+results (array) - Per member: { memberId, status ("opted_out"|"not_enrolled"|"failed"), error }.
+summary (object) - { optedOut, notEnrolled, failed, total }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- LOYALTY_PROMOTION_NOT_FOUND, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+opt_out_from_promotion({
+  "programName": "MTG_Rewards",
+  "promotionName": "Q3_Earn_Double_Points",
+  "members": [{ "memberId": "0lMQg00000abcDE2" }],
+  "reason": "Member preference center update"
+})

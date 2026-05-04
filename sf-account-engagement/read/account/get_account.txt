@@ -1,0 +1,70 @@
+Tool: get_account
+
+Description
+Retrieve the Account Engagement business unit's Account record:
+company name, level/edition, address, primary admin, daily API call
+quota and how much of it has been used today, plugin (default)
+campaign id, audit fields. There is a single Account row per BU
+(`/objects/account` resolves to that row — no `:id` segment needed).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/account?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+fields (string[], optional) - Field projection. Default:
+  ["id","company","level","website","addressOne","addressTwo","city",
+   "state","zip","territory","country","phone","fax","adminId",
+   "createdAt","updatedAt","maximumDailyApiCalls","apiCallsUsed",
+   "pluginCampaignId","admin.id","admin.email","admin.firstName",
+   "admin.lastName","admin.role"].
+includeAuditUsers (boolean, optional, default false) - When true,
+  also includes `createdBy.*` and `updatedBy.*` relations.
+
+Result
+account (object):
+  id (number).
+  company (string), level (string) - "Pro" | "Plus" | "Advanced" | "Premium".
+  website (string), phone (string), fax (string).
+  addressOne, addressTwo, city, state, zip, territory, country (strings).
+  adminId (number), admin (object) - Admin user.
+  pluginCampaignId (number) - Default campaign for new prospects.
+  maximumDailyApiCalls (number) - Daily quota (e.g. 25000).
+  apiCallsUsed (number) - Quota consumed today; resets at midnight UTC.
+  createdAt (ISO-8601), updatedAt (ISO-8601).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. Costs 1 API call against `apiCallsUsed`.
+
+Errors
+- 4 invalid_business_unit_id, 38 user_not_verified, 184 daily_limit_reached.
+
+Example request
+
+get_account({})
+
+Example result
+{
+  "account": {
+    "id": 5821,
+    "company": "Magna Technology Group",
+    "level": "Advanced",
+    "maximumDailyApiCalls": 100000,
+    "apiCallsUsed": 14238,
+    "pluginCampaignId": 1024,
+    "admin": { "id": 421, "email": "ops@magnatech.com", "role": "Administrator" }
+  }
+}

@@ -1,0 +1,41 @@
+Tool: list_external_data_sources
+
+Description
+List External Data Sources (Salesforce Connect) and the External
+Objects defined under each. External objects appear like sObjects
+(suffix `__x`) but live in another system (OData, Cross-Org adapter,
+custom Apex Connector).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Endpoint, Type, Protocol, Repository, ManageableState, NamespacePrefix FROM ExternalDataSource
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, optional) - "OData2" | "OData4" | "AcrossOrgs" | "DataDotCom" | "GoogleDrive" | "Custom".
+includeExternalObjects (boolean, optional, default false).
+
+Result
+totalSize (number).
+externalDataSources (array) - { id, developerName, masterLabel, endpoint, type, protocol, repository, externalObjects (array, optional): [{ qualifiedApiName, label }] }.
+
+Required permissions
+- "Customize Application" / "Manage External Connections".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_external_data_sources({ "includeExternalObjects": true })

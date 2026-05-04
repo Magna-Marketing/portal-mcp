@@ -1,0 +1,45 @@
+Tool: list_sms_subscription_status
+
+Description
+Bulk-check the SMS subscription status for one or more phone numbers
+against one or more keywords / short-codes. Returns active / pending /
+unsubscribed for each combination.
+
+Marketing Cloud API
+REST API (`/sms/v1/contacts/subscriptions`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/contacts/subscriptions
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "mobileNumbers": ["+15551234567"],
+  "keywords": [{ "keyword": "MTG", "shortCode": "12345", "countryCode": "US" }]
+}
+
+Input (parameters)
+mobileNumbers (string[], required) - E.164.
+keywords (object[], required) - [{ keyword, shortCode, countryCode (default "US") }].
+
+Result
+subscriptions (array) - [{ mobileNumber, keyword, shortCode, status ("Active"|"Pending"|"Unsubscribed"), subscribedDate, unsubscribedDate }].
+
+Required scopes
+- `sms_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_PHONE_NUMBER.
+
+Example request
+
+list_sms_subscription_status({
+  "mobileNumbers": ["+15551234567"],
+  "keywords": [{ "keyword": "MTG", "shortCode": "12345", "countryCode": "US" }]
+})

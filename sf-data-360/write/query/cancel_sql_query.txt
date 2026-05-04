@@ -1,0 +1,43 @@
+Tool: cancel_sql_query
+
+Description
+Cancel an in-flight async SQL query started via
+`get_async_sql_query subOperation="submit"`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+DELETE {instanceUrl}/services/data/v{ver}/ssot/query-sql/:queryId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+queryId (string, required).
+
+Result
+success (boolean).
+queryId (string).
+status (string) - "Cancelled".
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent: cancelling an already-terminal query is a no-op
+  (returns the existing terminal status).
+
+Errors
+- 404 NOT_FOUND, 409 ALREADY_COMPLETE.
+
+Example request
+
+cancel_sql_query({ "queryId": "Q_async_2026-04-29" })
+
+Example result
+{ "success": true, "queryId": "Q_async_2026-04-29", "status": "Cancelled" }

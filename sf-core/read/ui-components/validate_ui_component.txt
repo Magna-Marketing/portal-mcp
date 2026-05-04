@@ -1,0 +1,74 @@
+Tool: validate_ui_component
+
+Description
+Validate a UI component's configuration. Static checks include:
+- Required files present (LWC must have js + js-meta.xml; Aura must have
+  .cmp + .cmp-meta.xml).
+- Metadata XML wellformed.
+- API version not below the org's minimum.
+- For LWCs: `isExposed=true` requires at least one `target`.
+- For FlexiPages: regions referenced have unique IDs and exist.
+- VF pages: controller exists if specified.
+- Static-resource references resolve.
+Issues are categorized error / warning / info.
+
+Use this before a deploy or after edits to catch obvious metadata
+mistakes that the platform would otherwise reject.
+
+Salesforce API
+Tooling API, v66.0. Reads the component (no validation endpoint exists;
+checks are run client-side by the MCP server).
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/{type}/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, required) - "lwc" | "aura" | "visualforce" | "flexipage".
+name (string, required) - Component DeveloperName / Name.
+strict (boolean, optional, default false) - Treat warnings as errors in
+  the returned summary.
+
+Result
+component (object) - { id, name, type, label, apiVersion }.
+summary (object) - { errors, warnings, infos } counts; valid (bool, true
+  iff zero errors).
+issues (array) - Each:
+  severity ("error"|"warning"|"info").
+  code (string) - "missing_meta_xml", "missing_target_for_exposed",
+    "stale_api_version", "broken_static_resource_ref",
+    "duplicate_region_id", "missing_controller", etc.
+  fileName (string|null).
+  line (number|null).
+  message (string).
+  suggestion (string|null).
+
+Required permissions
+- "Customize Application" / "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+validate_ui_component({ "type": "lwc", "name": "projectCard", "strict": false })
+
+Example result
+
+{
+  "component": { "id": "0Rb4Q00000abcDE", "name": "projectCard", "type": "LightningComponentBundle", "label": "Project Card", "apiVersion": 62.0 },
+  "summary": { "errors": 0, "warnings": 1, "infos": 1, "valid": true },
+  "issues": [
+    { "severity": "warning", "code": "stale_api_version", "fileName": "projectCard.js-meta.xml", "message": "API version 56.0 is older than org minimum 58.0; consider upgrading." },
+    { "severity": "info", "code": "no_targets", "fileName": "projectCard.js-meta.xml", "message": "isExposed=false but lightning__RecordPage target listed; target ignored." }
+  ]
+}

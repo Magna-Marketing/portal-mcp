@@ -1,0 +1,55 @@
+Tool: list_lifecycle_stages
+
+Description
+List Lifecycle Stages — the configured funnel steps a prospect can
+move through (e.g. Lead → MQL → SQL → Opportunity). Read-only at
+this time; stages are configured in Setup.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/lifecycle-stages?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+matchType (string, optional) - "all" | "any".
+isLocked (boolean, optional).
+fields (string[], optional, default: id,name,position,matchType,
+  isLocked,isDeleted,createdAt,updatedAt,createdById,updatedById).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+lifecycleStages (array) - Each: { id, name, position (number),
+  matchType, isLocked, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_lifecycle_stages({})
+
+Example result
+{
+  "lifecycleStages": [
+    { "id": 1, "name": "Lead",        "position": 0 },
+    { "id": 2, "name": "MQL",         "position": 1 },
+    { "id": 3, "name": "Opportunity", "position": 2 }
+  ]
+}

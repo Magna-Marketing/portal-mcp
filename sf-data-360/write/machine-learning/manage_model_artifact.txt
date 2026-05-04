@@ -1,0 +1,54 @@
+Tool: manage_model_artifact
+
+Description
+Update or delete a Model Artifact. The Postman collection exposes
+`Update` and `Delete` only — new artifacts are uploaded via the
+Einstein Studio UI / SDK; this tool manages registered artifacts.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-artifacts/:modelArtifactIdOrName    (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-artifacts/:modelArtifactIdOrName    (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (update)
+{
+  "status": "Archived",
+  "label": "Churn Artifact v1.2 (deprecated)"
+}
+
+Input (parameters)
+operation (string, required) - "update" | "delete".
+modelArtifactIdOrName (string, required).
+label (string, optional).
+status (string, optional) - "Active" | "Archived" | "Failed".
+
+Result
+modelArtifact (object) - Updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; Configured Models referencing the artifact fail.
+
+Errors
+- 404 NOT_FOUND, 409 IN_USE.
+
+Example request
+
+manage_model_artifact({
+  "operation": "update",
+  "modelArtifactIdOrName": "ChurnArtifact_v12",
+  "status": "Archived"
+})
+
+Example result
+{ "modelArtifact": { "apiName": "ChurnArtifact_v12", "status": "Archived" } }

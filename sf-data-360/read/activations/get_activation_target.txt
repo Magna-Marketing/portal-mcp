@@ -1,0 +1,45 @@
+Tool: get_activation_target
+
+Description
+Read a single Activation Target by id.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/activation-targets/:activationTargetId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+activationTargetId (string, required).
+
+Result
+activationTarget (object): id, name, label, targetType, status,
+  targetConfig, externalPlatformName, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_activation_target({ "activationTargetId": "0YT580000000001" })
+
+Example result
+{
+  "activationTarget": {
+    "id": "0YT580000000001", "name": "MTG_MCE_DE_EMEA",
+    "targetType": "MarketingCloudEngagement"
+  }
+}

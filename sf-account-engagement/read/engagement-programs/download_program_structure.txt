@@ -1,0 +1,55 @@
+Tool: download_program_structure
+
+Description
+Download the YAML structure of an Engagement Studio program (the
+graph of steps: rules, actions, triggers, email sends, branches).
+The same YAML can be modified and re-uploaded as a brand-new program
+via `upload_engagement_studio_program` (v5 doesn't expose update).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/engagement-studio-programs/:id/download-program-structure
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/x-yaml, text/yaml, application/octet-stream
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+asBase64 (boolean, optional, default false) - When true, the YAML
+  is returned base64-encoded (`programStructureBase64`); otherwise
+  inline as `programStructureYaml`.
+
+Result
+engagementProgramId (number).
+filename (string) - Suggested filename (e.g. "Onboarding-2026.yaml").
+programStructureYaml (string, when asBase64=false).
+programStructureBase64 (string, when asBase64=true).
+contentType (string) - Always "application/x-yaml".
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found, 53 not_permitted.
+
+Example request
+
+download_program_structure({ "id": 311 })
+
+Example result
+{
+  "engagementProgramId": 311,
+  "filename": "Onboarding-2026.yaml",
+  "programStructureYaml": "schedule: continuous\nsteps:\n  - id: 1\n    type: ActionEmail\n    ...",
+  "contentType": "application/x-yaml"
+}

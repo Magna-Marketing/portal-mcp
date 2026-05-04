@@ -1,0 +1,70 @@
+Tool: update_flow
+
+Description
+Update an existing Flow. Each save creates a new draft version (the
+current active version is unaffected unless you also activate the new
+version with `deploy_flow`). To replace the active version, follow up
+with `deploy_flow` action `activate` on the new version number returned
+here.
+
+Salesforce API
+Metadata API (`Flow` type), v66.0. Deploy via `metadata/deployRequest`.
+The Metadata API saves the new XML as a new version under the same
+FlowDefinition.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "fullName": "Account_Trigger_Flow",
+  "label": "Account Trigger Flow",
+  "description": "Sets default region on Account create (v5: NA region)",
+  "processType": "AutoLaunchedFlow",
+  "apiVersion": 62.0,
+  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Flow xmlns=\"http://soap.sforce.com/2006/04/metadata\">...</Flow>"
+}
+
+Input (parameters)
+fullName (string, required) - Existing Flow API name.
+xml (string, required) - Full <Flow> XML for the new version.
+label (string, optional) - When you also want to update the FlowDefinition's master label.
+description (string, optional).
+processType (string, optional) - Cannot change once set; supplied only for validation.
+apiVersion (number, optional).
+runInMode (string, optional).
+deactivateOldVersions (boolean, optional, default false) - Mark prior
+  active versions Obsolete after this version is activated.
+activateAfterDeploy (boolean, optional, default false) - When true, also
+  run `deploy_flow` with `activate` on the new version.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy result fields plus:
+flow (object) - { id, definitionId, fullName, latestVersionNumber,
+  latestVersionStatus ("Draft"|"Active") }.
+
+Required permissions
+- "Manage Flow" + "Customize Application".
+
+Idempotency & limits
+- Each successful update bumps `latestVersionNumber` by one. Re-running
+  with the same XML still creates a new version.
+- Max 50 versions per Flow; use Salesforce's UI to purge old versions.
+
+Errors
+- NOT_FOUND: fullName doesn't exist.
+- INVALID_FLOW_DEFINITION on bad XML.
+
+Example request
+
+update_flow({
+  "fullName": "Account_Trigger_Flow",
+  "xml": "<?xml version=\"1.0\" ... ?><Flow ...>...</Flow>",
+  "activateAfterDeploy": true,
+  "deactivateOldVersions": true
+})

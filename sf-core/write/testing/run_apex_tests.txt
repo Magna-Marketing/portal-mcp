@@ -1,0 +1,75 @@
+Tool: run_apex_tests
+
+Description
+Run Apex tests synchronously or asynchronously. Synchronous mode is
+fastest for a small set; asynchronous returns a job Id that can be
+polled with `get_apex_test_run_status`. Selection options: by class
+list, by suite list, by namespace, by individual test methods, or all
+local tests / all tests in org.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/tooling/runTestsSynchronous
+POST /services/data/v66.0/tooling/runTestsAsynchronous
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (sync)
+{
+  "tests": [
+    { "className": "ProjectServiceTest", "testMethods": ["testCreate","testUpdate"] }
+  ],
+  "maxFailedTests": 0
+}
+
+Body (async)
+{
+  "classNames": "ProjectServiceTest,ProjectTriggerHandlerTest",
+  "testLevel": "RunSpecifiedTests"
+}
+
+Input (parameters)
+mode (string, required) - "sync" | "async".
+classNames (string[], optional).
+classIds (string[], optional).
+suiteNames (string[], optional).
+testMethods (object[], optional) - [{ className, methodName }].
+testLevel (string, optional, default "RunSpecifiedTests" sync, "RunLocalTests" async) - "RunSpecifiedTests" | "RunLocalTests" | "RunAllTestsInOrg".
+maxFailedTests (number, optional) - For sync; abort after N failures (-1 = unlimited).
+skipCodeCoverage (boolean, optional, default false) - For async.
+
+Result (sync)
+results (array) - { id, methodName, outcome, runTime, message, stackTrace }.
+codeCoverage (array) - Per-class coverage.
+codeCoverageWarnings (array) - { name, message }.
+totalTime (number).
+numTestsRun (number), numFailures (number).
+
+Result (async)
+jobId (string) - Use `get_apex_test_run_status` to poll.
+testRunId (string).
+
+Required permissions
+- "Author Apex".
+- "Run Tests" if running tests not authored by self.
+
+Idempotency & limits
+- Each run is independent (not idempotent).
+- Sync runs: 10 min wall-clock, results returned in one response.
+- Async: governor limits per test method.
+
+Errors
+- INVALID_TYPE on bad class/suite name.
+- TEST_RUN_FAILED with details.
+
+Example request (sync, single class)
+
+run_apex_tests({ "mode": "sync", "classNames": ["ProjectServiceTest"] })
+
+Example request (async, all local)
+
+run_apex_tests({ "mode": "async", "testLevel": "RunLocalTests" })

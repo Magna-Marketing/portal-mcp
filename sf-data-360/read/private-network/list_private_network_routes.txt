@@ -1,0 +1,52 @@
+Tool: list_private_network_routes
+
+Description
+List Private Network Routes — VPC / PrivateLink / private-DNS
+routes that allow Data 360 to reach customer-controlled networks
+(VPC-private databases, on-prem APIs, private S3 endpoints).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/private-network-routes
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Active" | "Pending" | "Failed".
+networkType (string, optional) - "AwsPrivateLink" |
+  "AzurePrivateEndpoint" | "GcpPrivateServiceConnect" | "VpnTunnel".
+limit (number, optional, default 100).
+
+Result
+routes (array) - Each: { id, name, label, networkType, status,
+  endpoint, vpcEndpointId (string|null), region, createdDate,
+  lastModifiedDate }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_private_network_routes({ "status": "Active" })
+
+Example result
+{
+  "routes": [
+    { "id": "0YN580000000001", "name": "MTG_Snowflake_PL",
+      "networkType": "AwsPrivateLink", "status": "Active",
+      "endpoint": "snowflake.mtg.internal" }
+  ]
+}

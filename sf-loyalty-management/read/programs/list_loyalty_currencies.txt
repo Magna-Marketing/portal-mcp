@@ -1,0 +1,45 @@
+Tool: list_loyalty_currencies
+
+Description
+List `LoyaltyProgramCurrency` records (the points types within a
+program — e.g. "Points", "Miles", "Status Points"). Use to pick a
+`programCurrencyName` for `credit_points` / `debit_points` /
+`get_member_points_balance`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `LoyaltyProgramCurrency` and
+`LoyaltyPgmCurrencySubtype`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, ProgramId, Program.Name, IsPrimary, Description, IsActive FROM LoyaltyProgramCurrency WHERE Program.Name = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, Name, LoyaltyProgramCurrencyId, Type FROM LoyaltyPgmCurrencySubtype WHERE LoyaltyProgramCurrency.Program.Name = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, optional) - Filter to one program.
+programId (string, optional).
+includeSubtypes (boolean, optional, default false) - Include `LoyaltyPgmCurrencySubtype` rows.
+includeInactive (boolean, optional, default false).
+
+Result
+totalSize (number).
+currencies (array) - { id, name, programId, programName, isPrimary, isActive, description, subtypes (array, optional): [{ id, name, type }] }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND.
+
+Example request
+
+list_loyalty_currencies({ "programName": "MTG_Rewards", "includeSubtypes": true })

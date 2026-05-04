@@ -1,0 +1,50 @@
+Tool: list_data_spaces
+
+Description
+List Data Spaces — tenant-within-tenant scopes that isolate DMOs,
+segments, calculated insights, and activations (e.g. one Data Space
+per brand or geography). All DMO-scoped APIs honor a `dataSpace`
+query parameter.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+limit (number, optional, default 100).
+offset (number, optional).
+
+Result
+dataSpaces (array) - Each: { id, name, label, description,
+  isDefault, memberCount, createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_spaces({})
+
+Example result
+{
+  "dataSpaces": [
+    { "id": "0a0xx0000000001", "name": "default", "label": "Default", "isDefault": true },
+    { "id": "0a0xx0000000002", "name": "EMEA",    "label": "EMEA Brand", "isDefault": false }
+  ]
+}

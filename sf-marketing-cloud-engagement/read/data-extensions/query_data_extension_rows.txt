@@ -1,0 +1,56 @@
+Tool: query_data_extension_rows
+
+Description
+Query rows from a Data Extension synchronously. Supports SOAP-style
+filters (SimpleFilterPart, ComplexFilterPart) and field projection.
+For very large result sets switch to `start_async_retrieve` (write side
+since it spawns a job).
+
+Marketing Cloud API
+REST API (`/data/v1/customobjectdata/key/{key}/rowset`) for simple
+filters, or SOAP `DataExtensionObject[ExternalKey].Retrieve` for
+advanced filters.
+
+Endpoint
+GET  https://{tenant}.rest.marketingcloudapis.com/data/v1/customobjectdata/key/{customerKey}/rowset
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx     (when filters needed)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json (REST) or text/xml (SOAP)
+
+Body
+SOAP variant: RetrieveRequest with Filter.
+
+Input (parameters)
+customerKey (string, required) - DE External Key.
+fields (string[], optional) - Project specific fields. Default: all.
+filter (object, optional) - { property, simpleOperator ("equals"|"notEquals"|"isNull"|"isNotNull"|"greaterThan"|"lessThan"|"in"|"like"|"between"), value, secondValue (for between) }.
+filterAnd (object, optional) - { left, operator ("AND"|"OR"), right }.
+top (number, optional, default 1000) - Page size.
+page (number, optional, default 1).
+orderBy (string, optional).
+
+Result
+rowsetCount (number).
+rows (array) - Each row is a JSON object mapping field name -> value.
+hasMore (boolean), nextPage (number, optional).
+
+Required scopes
+- `data_extensions_read`.
+
+Idempotency & limits
+- Read-only.
+- 100,000 rows per Retrieve (SOAP). For larger, use async.
+
+Errors
+- 30002 not found, INVALID_FILTER.
+
+Example request (simple filter)
+
+query_data_extension_rows({
+  "customerKey": "Members_DE",
+  "fields": ["MemberId","Email","TierName"],
+  "filter": { "property": "TierName", "simpleOperator": "equals", "value": "Gold" },
+  "top": 1000
+})

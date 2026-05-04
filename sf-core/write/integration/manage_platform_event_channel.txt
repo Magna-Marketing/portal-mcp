@@ -1,0 +1,53 @@
+Tool: manage_platform_event_channel
+
+Description
+Create / update / delete custom Platform Event channels and add /
+remove members. Custom channels let you bundle multiple Platform
+Events for a single subscription.
+
+Salesforce API
+Tooling API + Metadata API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addMember" | "removeMember".
+fullName (string, required).
+masterLabel (string, required for create).
+channelType (string, optional, default "event") - "event" | "data".
+description (string, optional).
+members (object[], optional) - For addMember/removeMember:
+  selectedEntity (string, required) - Platform Event API name (with `__e`) or sObject for CDC.
+  filterExpression (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+channel (object) - { id, fullName, masterLabel, channelType, members }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update / addMember / removeMember idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_platform_event_channel({
+  "operation": "create",
+  "fullName": "MTG_Project_Stream",
+  "masterLabel": "MTG Project Stream",
+  "channelType": "event",
+  "members": [{ "selectedEntity": "Project_Status_Update__e" }]
+})

@@ -1,0 +1,43 @@
+Tool: restore_contact
+
+Description
+Restore a contact previously soft-deleted (within the suppression
+window). When the deletion job has completed (`Complete` status), the
+restore window is typically 30 days; after that the data is purged.
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts/actions/restore`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/actions/restore?type=keys
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "values": ["MEM-100023"] }
+
+Input (parameters)
+contactKeys (string[], optional).
+contactIds (number[], optional).
+  One required.
+
+Result
+operationId (string).
+status (string).
+counts (object) - { requested, queued, failed, alreadyActive }.
+
+Required scopes
+- `audiences_write`.
+
+Idempotency & limits
+- Idempotent for already-active contacts.
+- Restore window: 30 days from delete.
+
+Errors
+- 30002 not found, RESTORE_WINDOW_EXPIRED.
+
+Example request
+
+restore_contact({ "contactKeys": ["MEM-100023"] })

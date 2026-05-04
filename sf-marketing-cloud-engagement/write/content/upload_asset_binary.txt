@@ -1,0 +1,51 @@
+Tool: upload_asset_binary
+
+Description
+Upload a binary asset (image, PDF, etc.) to Content Builder. Wraps the
+multipart upload + asset creation into one call.
+
+Marketing Cloud API
+REST API (`/asset/v1/content/assets` with multipart body).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+
+Body
+Multipart with `metadata` JSON part + `file` binary part.
+
+Input (parameters)
+fileName (string, required).
+contentType (string, required) - MIME type.
+base64 (string, required) - Base64-encoded body.
+assetTypeId (number, required) - e.g. 23 (image) | 28 (pdf) | 39 (mp4).
+categoryId (number, required).
+name (string, optional, default = fileName without extension).
+description (string, optional).
+customerKey (string, optional).
+
+Result
+asset (object) - { id, customerKey, name, fileProperties: { fileName, sizeBytes, fileExtension, publishedURL }, assetType, category }.
+
+Required scopes
+- `documents_and_images_write`.
+
+Idempotency & limits
+- Not idempotent.
+- File size up to 50 MB depending on tenant settings.
+
+Errors
+- FILE_TOO_LARGE, INVALID_CONTENT_TYPE.
+
+Example request
+
+upload_asset_binary({
+  "fileName": "mtg-banner.png",
+  "contentType": "image/png",
+  "base64": "iVBORw0KG...",
+  "assetTypeId": 23,
+  "categoryId": 12345
+})

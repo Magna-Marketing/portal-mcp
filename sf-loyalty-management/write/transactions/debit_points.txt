@@ -1,0 +1,66 @@
+Tool: debit_points
+
+Description
+Debit points from a member. Wraps the Loyalty Program Process
+"Debit Points from Members". Use for redemptions outside the standard
+voucher / journal flow, or to claw back erroneous credits.
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Debit Points from Members", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Debit Points from Members",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "ProgramCurrencyName": "Points",
+    "Debits": [
+      { "MemberId": "0lMQg00000abcDE2", "Points": 200, "ExternalTransactionId": "REDEEM-2026-04-009", "Comments": "Manual redemption" }
+    ]
+  }
+}
+
+Input (parameters)
+programName (string, required).
+programCurrencyName (string, required).
+debits (object[], required) - Each:
+  memberId (string, optional).
+  membershipNumber (string, optional).
+  points (number, required) - Positive number; tool enforces sign.
+  externalTransactionId (string, optional, recommended).
+  comments (string, optional).
+  allowOverdraw (boolean, optional, default false) - When true, allows negative balance (rarely used).
+
+Result
+processResult (object) - { isSuccess, processStatus }.
+results (array) - Per debit: { memberId, points, journalId, status, remainingBalance, error }.
+summary (object) - { debited, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent on `externalTransactionId`.
+- `LOYALTY_INSUFFICIENT_POINTS` when balance is below the debit and
+  allowOverdraw=false.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, LOYALTY_INSUFFICIENT_POINTS, DUPLICATE_VALUE.
+
+Example request
+
+debit_points({
+  "programName": "MTG_Rewards",
+  "programCurrencyName": "Points",
+  "debits": [
+    { "memberId": "0lMQg00000abcDE2", "points": 200, "externalTransactionId": "REDEEM-2026-04-009" }
+  ]
+})

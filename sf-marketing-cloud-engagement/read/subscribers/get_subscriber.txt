@@ -1,0 +1,45 @@
+Tool: get_subscriber
+
+Description
+Get a single subscriber by SubscriberKey or Email. Returns identity,
+overall status, list memberships, attributes, and ACK / unsubscribe
+metadata.
+
+Marketing Cloud API
+SOAP API (`Subscriber.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve filtered by SubscriberKey or EmailAddress.
+
+Input (parameters)
+subscriberKey (string, optional).
+email (string, optional).
+subscriberId (number, optional).
+  One required.
+includeListMemberships (boolean, optional, default true).
+includeAttributes (boolean, optional, default true).
+
+Result
+subscriber (object) - { subscriberKey, subscriberId, emailAddress, status ("Active"|"Unsubscribed"|"Held"|"Bounced"), unsubscribedDate, emailTypePreference ("HTML"|"Text"), createdDate, modifiedDate }.
+attributes (object, when includeAttributes=true) - Map of attribute name -> value.
+listMemberships (array, when includeListMemberships=true) - [{ listId, listName, status, dateJoined, dateUnsubscribed }].
+
+Required scopes
+- `list_and_subscribers_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- SUBSCRIBER_NOT_FOUND.
+
+Example request
+
+get_subscriber({ "email": "jane.doe@example.com" })

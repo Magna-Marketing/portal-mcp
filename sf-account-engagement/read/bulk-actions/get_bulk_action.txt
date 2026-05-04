@@ -1,0 +1,67 @@
+Tool: get_bulk_action
+
+Description
+Read a single Bulk Action by id. Returns the same envelope as
+`list_bulk_actions`, plus `percentComplete` and an `errorsRef` URL
+that points at a downloadable error CSV (when `errorCount > 0`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/bulk-actions/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default includes percentComplete and
+  errorsRef.
+
+Result
+bulkAction (object):
+  id (number).
+  object (string), bulkAction (string).
+  status (string) - "Pending" | "Running" | "Complete" | "Error".
+  origin (string) - "API" | "UI" | "EngagementStudio".
+  count (number) - Total target records.
+  processedCount (number).
+  percentComplete (number) - 0-100.
+  errorCount (number).
+  errorsRef (string|null) - Pre-signed S3 URL valid for 1 hour;
+    download with HTTP GET.
+  fileName (string|null) - Source CSV name (when uploaded by a UI op).
+  createdAt, updatedAt (ISO-8601), createdById (number).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. Poll on a 5-15s interval until `status` is terminal.
+
+Errors
+- 59 not_found, 4 invalid_business_unit_id.
+
+Example request
+
+get_bulk_action({ "id": 88421 })
+
+Example result
+{
+  "bulkAction": {
+    "id": 88421,
+    "object": "Prospect",
+    "bulkAction": "AddToList",
+    "status": "Complete",
+    "count": 12450,
+    "processedCount": 12450,
+    "percentComplete": 100,
+    "errorCount": 0
+  }
+}

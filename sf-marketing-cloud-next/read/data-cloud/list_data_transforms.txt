@@ -1,0 +1,57 @@
+Tool: list_data_transforms
+
+Description
+List Data Transforms — SQL-based transformations that shape DLO
+data into curated DMO-ready datasets. Each transform has a target
+DMO (or DLO), a SQL definition, and a schedule.
+
+Salesforce API
+Data Cloud Metadata API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/metadata?entityType=DataTransform
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Paused" | "Error".
+nameContains (string, optional).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+dataTransforms (array) - Each: { transformApiName, label,
+  type ("Batch" | "Streaming"), targetDmoApiName, sourceDmoApiNames
+  (array), sql (string), schedule (object), status, lastRunStatus,
+  lastRunDate, createdDate, lastModifiedDate }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_data_transforms({ "status": "Active" })
+
+Example result
+{
+  "dataTransforms": [
+    { "transformApiName": "build_unified_individual__dt",
+      "label": "Build Unified Individual",
+      "type": "Batch",
+      "targetDmoApiName": "UnifiedIndividual__dlm",
+      "status": "Active", "lastRunStatus": "Success" }
+  ]
+}

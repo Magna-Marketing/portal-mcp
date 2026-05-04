@@ -1,0 +1,42 @@
+Tool: list_categories
+
+Description
+List folders (`Category` REST API) inside Content Builder. Folders
+organize assets, blocks, and templates. For other folder spaces (Email,
+DE, Triggered Send, Automation) use `read/folders/list_folders`.
+
+Marketing Cloud API
+REST API (`/asset/v1/content/categories`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+parentId (number, optional) - Restrict to direct children.
+namePattern (string, optional).
+page (number, optional, default 1).
+pageSize (number, optional, default 100).
+
+Result
+count (number).
+items (array) - { id, parentId, name, categoryType, description, createdDate, modifiedDate }.
+
+Required scopes
+- `email_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+list_categories({ "parentId": 12345 })

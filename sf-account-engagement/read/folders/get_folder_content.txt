@@ -1,0 +1,54 @@
+Tool: get_folder_content
+
+Description
+Read a single Folder Contents join row by id. The row links one
+object (Email, Form, File, Landing Page, etc.) to its containing
+folder; expand `folder.*` to get the parent folder. Use this when
+you have a `folderContents.id` (e.g. from `list_folder_contents`)
+and need the full envelope.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/folder-contents/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `folder.*` and
+  `createdBy.*`/`updatedBy.*`.
+
+Result
+folderContent (object): id, objectType, objectId, folderId, name,
+  isDeleted, createdAt, updatedAt, createdById, updatedById.
+folder (object|null) - { id, name, parentFolderId, path }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_folder_content({ "id": 9001 })
+
+Example result
+{
+  "folderContent": {
+    "id": 9001, "objectType": "Email", "objectId": 99821,
+    "folderId": 33, "name": "Welcome", "isDeleted": false
+  },
+  "folder": { "id": 33, "name": "Spring 2026", "path": "/Marketing/Spring 2026" }
+}

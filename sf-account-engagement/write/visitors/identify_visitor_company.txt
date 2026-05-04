@@ -1,0 +1,69 @@
+Tool: identify_visitor_company
+
+Description
+Override or set the inferred company on an anonymous Visitor.
+By default, Visitors are enriched via reverse-IP firmographics
+(Visitor Insight, license-gated). Use this tool to manually attach
+or override the company attribution — for example, when an
+authoritative source (CRM lookup) identifies the company.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/visitors/:id/do/identifyCompany
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "companyName": "Acme",
+  "companyDomain": "acme.com",
+  "city": "Boston",
+  "state": "MA",
+  "country": "US"
+}
+
+Input (parameters)
+id (number, required) - Visitor id.
+companyName (string, required).
+companyDomain (string, optional).
+city (string, optional).
+state (string, optional).
+country (string, optional).
+latitude (number, optional).
+longitude (number, optional).
+
+Result
+success (boolean).
+visitor (object) - Refreshed row with `companyName` etc. populated.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent on `companyName` — repeat calls with the same payload
+  return the same row.
+
+Errors
+- 59 not_found, 20 invalid_input.
+
+Example request
+
+identify_visitor_company({
+  "id": 5512001,
+  "companyName": "Acme",
+  "companyDomain": "acme.com",
+  "country": "US"
+})
+
+Example result
+{
+  "success": true,
+  "visitor": { "id": 5512001, "companyName": "Acme",
+    "companyDomain": "acme.com", "country": "US" }
+}

@@ -1,0 +1,61 @@
+Tool: list_folder_contents
+
+Description
+List the *contents* of a folder regardless of the contained object
+type. Returns one row per item with the `objectType` discriminator —
+useful when you need a flat "what's in this folder" view across
+emails, files, forms, etc.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/folder-contents?fields={fields}&filter[folderId]=eq,:folderId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+folderId (number, required).
+objectType (string, optional) - "Email" | "EmailTemplate" |
+  "ListEmail" | "Form" | "FormHandler" | "LandingPage" |
+  "LayoutTemplate" | "DynamicContent" | "File" | "Campaign" |
+  "EngagementStudioProgram" | "List" | "Tag" | "CustomField" |
+  "CustomRedirect".
+nameContains (string, optional).
+fields (string[], optional, default: id,objectType,objectId,
+  folderId,name,isDeleted,createdAt,updatedAt).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+folderContents (array) - Each: { id, objectType, objectId, folderId,
+  name, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found (folder), 65 invalid_field_projection.
+
+Example request
+
+list_folder_contents({ "folderId": 33 })
+
+Example result
+{
+  "folderContents": [
+    { "id": 9001, "objectType": "Email",         "objectId": 99821, "name": "Welcome" },
+    { "id": 9002, "objectType": "LandingPage",   "objectId": 4421,  "name": "Spring LP" },
+    { "id": 9003, "objectType": "File",          "objectId": 901,   "name": "logo.png" }
+  ]
+}

@@ -1,0 +1,57 @@
+Tool: manage_loyalty_partner
+
+Description
+Create / update / activate / deactivate / delete a `LoyaltyProgramPartner`
+(B2B partner row attached to a program).
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyProgramPartner`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyProgramPartner
+PATCH  /services/data/v66.0/sobjects/LoyaltyProgramPartner/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyProgramPartner/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "MTG_Hotel_Partner", "ProgramId": "...", "AccountId": "...", "PartnerType": "Travel", "Status": "Active", "EffectiveStartDate": "2026-05-01", "CurrencyConversionRate": 0.5 }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+partnerId (string, optional, required for non-create).
+programName (string, optional, required for create).
+programId (string, optional).
+name (string, required for create).
+accountId (string, required for create).
+contactId (string, optional).
+partnerType (string, optional).
+status (string, optional) - "Active" | "Inactive".
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+currencyConversionRate (number, optional).
+
+Result
+partner (object) - { id, name, programId, programName, accountId, accountName, partnerType, status }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE.
+
+Example request
+
+manage_loyalty_partner({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "MTG_Hotel_Partner",
+  "accountId": "0014Q00000abcDE",
+  "partnerType": "Travel",
+  "status": "Active"
+})

@@ -1,0 +1,53 @@
+Tool: get_form_handler
+
+Description
+Read a single Form Handler by id. Combine with
+`list_form_handler_fields` to inspect inbound→prospect field mapping.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/form-handlers/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional).
+includeFields (boolean, optional, default false) - Returns
+  `formHandlerFields[]`.
+
+Result
+formHandler (object): id, name, campaignId, folderId, trackerDomainId,
+  embedUrl, errorLocation, successLocation, isDataForwarded,
+  isCookielessTracking, isAlwaysEmail, isKioskMode, salesforceId,
+  isDeleted, createdAt, updatedAt.
+formHandlerFields (array, when includeFields=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_form_handler({ "id": 8101, "includeFields": true })
+
+Example result
+{
+  "formHandler": { "id": 8101, "name": "Marketo replacement" },
+  "formHandlerFields": [
+    { "id": 1101, "name": "email", "prospectApiFieldId": "email", "isRequired": true }
+  ]
+}

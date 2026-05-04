@@ -1,0 +1,64 @@
+Tool: list_form_fields
+
+Description
+List the fields on a Form. Each field maps to a Prospect built-in
+field or custom field via `prospectApiFieldId`. Use this to inspect
+ordering, required-ness, hidden / read-only flags, and progressive
+profiling configuration.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/form-fields?fields={fields}&filter[formId]=eq,:formId&orderBy=sortOrder asc
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+formId (number, required).
+isRequired (boolean, optional).
+type (string, optional) - "Text" | "TextArea" | "Email" | "Number" |
+  "RadioButton" | "Checkbox" | "Dropdown" | "MultiSelect" | "Hidden" |
+  "Date" | "CrmUser".
+fields (string[], optional, default: id,formId,prospectApiFieldId,
+  type,name,label,isRequired,isAlwaysDisplay,isMaintainInitialValue,
+  isUseValuesPreFromField,sortOrder,errorMessage,cssClasses,
+  hasDependents,hasProgressiveProfiling,hasValues,createdAt,updatedAt).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+formFields (array) - Each: { id, formId, prospectApiFieldId, type, name,
+  label, isRequired, isAlwaysDisplay, isMaintainInitialValue,
+  isUseValuesPreFromField, sortOrder, errorMessage, cssClasses,
+  hasDependents, hasProgressiveProfiling, hasValues, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found, 65 invalid_field_projection.
+
+Example request
+
+list_form_fields({ "formId": 4421 })
+
+Example result
+{
+  "formFields": [
+    { "id": 51, "name": "Email", "prospectApiFieldId": "email",
+      "type": "Email", "isRequired": true, "sortOrder": 0 },
+    { "id": 52, "name": "FirstName", "prospectApiFieldId": "first_name",
+      "type": "Text", "sortOrder": 1 }
+  ]
+}

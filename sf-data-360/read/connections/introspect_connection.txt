@@ -1,0 +1,83 @@
+Tool: introspect_connection
+
+Description
+Run a live introspection call against a Connection — list the
+databases, schemas, objects, fields, or preview rows from the
+source system at runtime (not the cached schema). The Postman
+collection exposes these as several POST endpoints under one
+introspection family; this tool unifies them with `subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/databases             (subOperation="databases")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/database-schemas      (subOperation="schemas")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/objects               (subOperation="objects")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/objects/:resourceName/fields  (subOperation="fields")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/objects/:resourceName/preview (subOperation="preview")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (databases / schemas / objects)
+{ "database": "PROD_DB", "schema": "MARKETING" }
+
+Body (preview)
+{ "limit": 10 }
+
+Input (parameters)
+connectionId (string, required).
+subOperation (string, required) - "databases" | "schemas" | "objects" |
+  "fields" | "preview".
+database (string, optional) - For schemas / objects (when source has
+  databases).
+schema (string, optional) - For objects (when source has schemas).
+resourceName (string, required for "fields" / "preview") - The
+  source-side object name.
+limit (number, optional, default 10, max 100, preview-only).
+
+Result
+For databases / schemas:
+  items (array) - { name, label, recordCountEstimate? }.
+For objects:
+  objects (array) - [{ name, label, recordCountEstimate, isPickable }].
+For fields:
+  fields (array) - [{ apiName, dataType, isPrimaryKey, isExternalId,
+    isRequired }].
+For preview:
+  rows (array<object>) - First N rows from the source object.
+  fields (array) - Resolved field metadata for the rows.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only at the API boundary, but each call hits the source
+  system. Subject to source-side rate limits.
+
+Errors
+- 401 INVALID_SESSION_ID, 502 SOURCE_UNAVAILABLE (source down /
+  credentials expired), 404 NOT_FOUND.
+
+Example request
+
+introspect_connection({
+  "connectionId": "0Z65800000000ABCAA",
+  "subOperation": "preview",
+  "resourceName": "Send",
+  "limit": 5
+})
+
+Example result
+{
+  "rows": [
+    { "ID": 12345, "EmailName": "Welcome Send", "SentDate": "2026-04-29T13:02:11Z" }
+  ],
+  "fields": [
+    { "apiName": "ID",        "dataType": "NUMBER", "isPrimaryKey": true },
+    { "apiName": "EmailName", "dataType": "TEXT" }
+  ]
+}

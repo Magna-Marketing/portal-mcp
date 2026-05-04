@@ -1,0 +1,55 @@
+Tool: list_data_actions
+
+Description
+List Data Actions — declarative rules that fire payloads to a
+Data Action Target when a Data Cloud event matches a condition.
+Used for low-latency triggered orchestration (e.g. send a webhook
+when LTV crosses a threshold).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-actions
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Active" | "Paused" | "Failed".
+targetApiName (string, optional).
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+dataActions (array) - Each: { id, apiName, label, status,
+  sourceDmo, eventType, condition (object), targetApiName,
+  payloadTemplate (string), createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_actions({ "status": "Active" })
+
+Example result
+{
+  "dataActions": [
+    { "id": "0YD580000000001", "apiName": "ltv_threshold_alert",
+      "status": "Active",
+      "targetApiName": "WebhookTarget__dat",
+      "eventType": "DmoUpdate" }
+  ]
+}

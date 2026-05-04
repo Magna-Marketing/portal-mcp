@@ -1,0 +1,64 @@
+Tool: manage_public_group
+
+Description
+Manage Public Groups: create, update name/description, add/remove
+members, delete. Members can be Users, other Groups, Roles, or
+Roles+Subordinates.
+
+Salesforce API
+REST API (Data), v66.0. SOQL `Group` (Type='Regular') + `GroupMember`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/Group                          (create)
+PATCH  /services/data/v66.0/sobjects/Group/{id}                     (update)
+DELETE /services/data/v66.0/sobjects/Group/{id}                     (delete)
+POST   /services/data/v66.0/sobjects/GroupMember                    (add member)
+DELETE /services/data/v66.0/sobjects/GroupMember/{id}               (remove member)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Group: { "Name": "MTG Sales Region NA", "DeveloperName": "MTG_Sales_NA", "DoesIncludeBosses": true }
+GroupMember: { "GroupId": "...", "UserOrGroupId": "..." }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addMembers" | "removeMembers" | "setMembers".
+fullName (string, required for non-create) - DeveloperName.
+groupId (string, optional) - Resolved from fullName.
+name (string, required for create).
+developerName (string, optional, default = name normalized).
+description (string, optional).
+doesIncludeBosses (boolean, optional, default true) - Hierarchy bosses inherit access.
+doesSendEmailToMembers (boolean, optional, default false).
+members (object[], optional) - Each:
+  type (string, required) - "User" | "Group" | "Role" | "RoleAndSubordinates" | "RoleAndSubordinatesInternal".
+  id (string, optional) - User/Group/Role Id.
+  username (string, optional) - For User type.
+  groupName (string, optional) - For Group/Role types.
+checkOnly (boolean, optional, default false).
+
+Result
+group (object) - { id, name, developerName, type, doesIncludeBosses }.
+memberChanges (object) - { added: [], removed: [], unchanged: [] }.
+
+Required permissions
+- "Manage Users".
+
+Idempotency & limits
+- create not idempotent. Other ops idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+manage_public_group({
+  "operation": "addMembers",
+  "fullName": "MTG_Sales_NA",
+  "members": [
+    { "type": "User", "username": "alice@magnatech.com" },
+    { "type": "Role", "groupName": "MTG_Sales" }
+  ]
+})

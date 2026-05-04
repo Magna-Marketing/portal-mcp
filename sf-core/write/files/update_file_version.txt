@@ -1,0 +1,47 @@
+Tool: update_file_version
+
+Description
+Add a new `ContentVersion` to an existing `ContentDocument` — this is
+how Salesforce Files "uploads a new version" of a file. Existing
+sharing links continue to point at the latest version automatically.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+POST /services/data/v66.0/sobjects/ContentVersion       (multipart with `ContentDocumentId` to attach as new version)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+
+Body
+JSON metadata: { ContentDocumentId, PathOnClient, Title, ReasonForChange (optional) } + binary VersionData.
+
+Input (parameters)
+contentDocumentId (string, required).
+fileName (string, required) - Updated file name + extension.
+title (string, optional, default = fileName).
+reasonForChange (string, optional).
+base64 (string, required).
+
+Result
+file (object) - { contentDocumentId, contentVersionId, versionNumber, title, contentSize }.
+
+Required permissions
+- File Collaborator access (share type "C") or owner.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, FILE_TOO_LARGE.
+
+Example request
+
+update_file_version({
+  "contentDocumentId": "069Qg0000004ZyAA",
+  "fileName": "MTG_Project_Brief_v2.pdf",
+  "reasonForChange": "Updated scope section",
+  "base64": "JVBERi0xLjQK..."
+})

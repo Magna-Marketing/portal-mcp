@@ -1,0 +1,107 @@
+Tool: manage_field
+
+Description
+Create or update a custom field on a Salesforce object via the Metadata
+API. Use to add fields, change labels/help text, expand picklists,
+modify formula bodies, or change required/unique flags. Standard fields
+support a narrower set of properties; the tool surfaces the platform's
+errors for unsupported edits.
+
+After a field is created, callers usually also want to grant FLS — see
+`manage_field_permissions`.
+
+Salesforce API
+Metadata API (`CustomField` inside `CustomObject`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (create example)
+{
+  "operation": "create",
+  "object": "Project__c",
+  "fullName": "Project_Status__c",
+  "label": "Project Status",
+  "type": "Picklist",
+  "valueSet": {
+    "valueSetDefinition": {
+      "sorted": false,
+      "value": [
+        { "fullName": "Not Started", "default": true, "label": "Not Started" },
+        { "fullName": "In Progress", "default": false, "label": "In Progress" },
+        { "fullName": "Complete",    "default": false, "label": "Complete" }
+      ]
+    }
+  },
+  "required": false,
+  "trackHistory": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+object (string, required) - sObject API name (e.g. "Project__c").
+fullName (string, required) - Field API name (e.g. "Project_Status__c"
+  or "Status__c"; namespace prefix added by platform).
+label (string, required for create).
+type (string, required for create) - Salesforce field type:
+  "Text" | "TextArea" | "LongTextArea" | "Html" | "Number" | "Currency"
+  | "Percent" | "Date" | "DateTime" | "Time" | "Email" | "Phone"
+  | "Url" | "Checkbox" | "Picklist" | "MultiselectPicklist"
+  | "Lookup" | "MasterDetail" | "Hierarchy" | "Formula" | "Summary"
+  | "AutoNumber" | "EncryptedText" | "Location" | "ExternalLookup"
+  | "IndirectLookup".
+length, precision, scale, byteLength (number, optional) - Field-type-specific.
+required (boolean, optional, default false).
+unique (boolean, optional, default false).
+externalId (boolean, optional, default false).
+description, inlineHelpText (string, optional).
+defaultValue (string, optional) - Formula expression for default.
+formula (string, optional) - For Formula type. Use Salesforce formula syntax.
+formulaTreatBlanksAs (string, optional) - "BlankAsZero" | "BlankAsBlank".
+referenceTo (string, optional) - For Lookup/MasterDetail target sObject.
+relationshipName (string, optional) - For Lookup/MasterDetail.
+relationshipLabel (string, optional).
+deleteConstraint (string, optional, default "SetNull") - "Restrict" |
+  "SetNull" | "Cascade" (Lookup deletes only).
+valueSet (object, optional) - For Picklist/MultiselectPicklist.
+trackHistory (boolean, optional, default false).
+trackFeedHistory (boolean, optional, default false).
+visibleLines (number, optional) - For Multiselect picklists.
+checkOnly (boolean, optional, default false).
+
+Result
+Same shape as `manage_object`'s deploy result: deployId, status, done,
+numberComponents*, componentSuccesses, componentFailures.
+
+Required permissions
+- "Customize Application", "Modify All Data".
+
+Idempotency & limits
+- `upsert` idempotent on `(object, fullName)`. `create` is not.
+- A field cannot change type after create; type-changes require
+  delete + recreate (data loss).
+- Required-flag flips on existing fields require all rows to have a value.
+- Adding picklist values is non-blocking; renaming values is.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD, FIELD_FILTER_VALIDATION_EXCEPTION
+  (on bad valueSet), CIRCULAR_DEPENDENCY (formula).
+
+Example request (add lookup field)
+
+manage_field({
+  "operation": "create",
+  "object": "Project__c",
+  "fullName": "Account__c",
+  "label": "Account",
+  "type": "Lookup",
+  "referenceTo": "Account",
+  "relationshipName": "Projects",
+  "relationshipLabel": "Projects",
+  "deleteConstraint": "SetNull",
+  "required": false
+})

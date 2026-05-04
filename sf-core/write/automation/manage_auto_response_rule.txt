@@ -1,0 +1,51 @@
+Tool: manage_auto_response_rule
+
+Description
+Manage Lead/Case auto-response rules: rule entries that match incoming
+records and send an email template back to the submitter.
+
+Salesforce API
+Metadata API (`AutoResponseRules`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+sObject (string, required) - "Lead" | "Case".
+fullName (string, required for non-create).
+label (string, required for create).
+active (boolean, optional, default false).
+ruleEntries (array, optional) - [{ sortOrder, criteriaItems, formula, booleanFilter, senderEmail, senderName, replyTo, template, notifyCcRecipients }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+rule (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on bad criteria.
+
+Example request
+
+manage_auto_response_rule({
+  "operation": "create",
+  "sObject": "Lead",
+  "fullName": "Web_Form_AutoReply",
+  "label": "Web Form Auto-Reply",
+  "active": true,
+  "ruleEntries": [{ "sortOrder": 1, "criteriaItems": [{ "field": "Lead.LeadSource", "operation": "equals", "value": "Web" }], "senderEmail": "noreply@magnatech.com", "senderName": "MTG", "template": "MTG_Lead_Auto_Reply" }]
+})

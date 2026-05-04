@@ -1,0 +1,54 @@
+Tool: list_data_kits
+
+Description
+List Data Kits — packaged collections of Data Cloud assets (DMOs,
+DLOs, Calculated Insights, Segments, Data Streams, mappings) that
+can be installed / uninstalled together. Used for Industry Cloud,
+ISV solutions, and inter-org migration.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-kits
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Installed" | "Available" | "Updating" |
+  "Failed".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+dataKits (array) - Each: { dataKitDevName, label, description,
+  version, status, publisher, componentCount, installedDate,
+  lastUpdatedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_kits({ "status": "Installed" })
+
+Example result
+{
+  "dataKits": [
+    { "dataKitDevName": "B2C_Retail_Foundation", "label": "B2C Retail Foundation",
+      "version": "1.5.0", "status": "Installed",
+      "publisher": "Salesforce", "componentCount": 14 }
+  ]
+}

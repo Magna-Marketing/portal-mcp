@@ -1,0 +1,48 @@
+Tool: unassign_permission_set_license
+
+Description
+Remove a Permission Set License assignment from one or more users. Mirrors
+`unassign_permission_set`.
+
+Salesforce API
+REST API (Data), v66.0. `DELETE /sobjects/PermissionSetLicenseAssign/{id}` (single) or `DELETE /composite/sobjects?ids=...` (bulk).
+
+Endpoint
+GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetLicenseAssign WHERE PermissionSetLicenseId = '...' AND AssigneeId IN (...)
+DELETE /services/data/v66.0/composite/sobjects?ids=...
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None.
+
+Input (parameters)
+permissionSetLicenseName (string, optional).
+permissionSetLicenseId (string, optional).
+  One required.
+userIds (string[], optional).
+usernames (string[], optional).
+  One required.
+allOrNone (boolean, optional, default false).
+skipIfNotAssigned (boolean, optional, default true).
+
+Result
+results (array) - { userId, username, status ("removed"|"not_assigned"|"failed"), error }.
+summary (object) - { removed, notAssigned, failed, total }.
+
+Required permissions
+- "Manage Internal Users".
+
+Idempotency & limits
+- Idempotent with `skipIfNotAssigned=true`.
+
+Errors
+- ENTITY_IS_DELETED, INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+unassign_permission_set_license({
+  "permissionSetLicenseName": "Sales_Console_User",
+  "usernames": ["bob@magnatech.com"]
+})

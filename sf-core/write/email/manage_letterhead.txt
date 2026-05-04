@@ -1,0 +1,53 @@
+Tool: manage_letterhead
+
+Description
+Create / update / delete Letterheads (`BrandTemplate`) — the header/footer
+container for HTML email templates.
+
+Salesforce API
+Metadata API (`Letterhead`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+fullName (string, required) - DeveloperName.
+name (string, required for create).
+description (string, optional).
+isActive (boolean, optional, default true).
+header (object, optional) - { logoStaticResource, color, height }.
+footer (object, optional) - { color, content }.
+backgroundColor (string, optional).
+topColor, middleColor, bottomColor (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+letterhead (object).
+
+Required permissions
+- "Manage Public Templates".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_letterhead({
+  "operation": "create",
+  "fullName": "MTG_Brand",
+  "name": "MTG Brand",
+  "header": { "logoStaticResource": "MTG_BrandLogo", "color": "#0A2540" },
+  "backgroundColor": "#FFFFFF"
+})

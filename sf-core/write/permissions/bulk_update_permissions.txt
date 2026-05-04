@@ -1,0 +1,72 @@
+Tool: bulk_update_permissions
+
+Description
+Replace permission set / permission set group assignments for a
+selected user set. The tool removes any current assignments for the
+selected users that are not in the new list, and adds any from the new
+list that they don't already have. Use carefully — this is the
+"declarative state" form and **will remove perms** that aren't in the
+new list.
+
+For incremental adds use `bulk_assign_permissions`. For removals only,
+use `bulk_remove_permissions`.
+
+Always run `preview_bulk_permission_operation` first.
+
+Salesforce API
+REST API (Data), v66.0.
+- Resolve current assignments via SOQL.
+- Compute the diff (toAdd, toRemove).
+- `POST/DELETE /composite/sobjects` in batches.
+
+Endpoint
+GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId, PermissionSetId, PermissionSetGroupId FROM PermissionSetAssignment WHERE AssigneeId IN (...)
+POST   /services/data/v66.0/composite/sobjects        (toAdd)
+DELETE /services/data/v66.0/composite/sobjects?ids=...   (toRemove)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Posts of PermissionSetAssignment rows for additions; query-string ids
+for deletions.
+
+Input (parameters)
+selection (object, required) - Same as bulk_assign_permissions.
+permissionSetNames (string[], optional) - The new full list of permsets
+  the selected users should have at the end.
+permissionSetGroupNames (string[], optional) - Same for PSGs.
+includeOtherPermsets (boolean, optional, default true) - When true,
+  permsets / groups not in the new list but currently held by the user
+  are KEPT (so this becomes "ensure these are present"). When false
+  (default replacement semantics), they are REMOVED.
+expirationDate (string, optional) - For new assignments.
+dryRun (boolean, optional, default false).
+batchSize (number, optional, default 200).
+allOrNone (boolean, optional, default false).
+
+Result
+selection (object).
+operationCount (object) - { added, removed, kept, total }.
+results (object) - { added: [...], removed: [...], failed: [...] }.
+durationMs (number).
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users".
+
+Idempotency & limits
+- Idempotent on equal input given same starting state.
+- Composite cap: 200 per call; tool batches.
+
+Errors
+- INSUFFICIENT_PERMSET_LICENSE during add phase aborts remaining adds.
+- ENTITY_IS_DELETED during remove phase is treated as success.
+
+Example request (replacement semantics)
+
+bulk_update_permissions({
+  "selection": { "profileNames": ["Standard User"], "department": "Sales" },
+  "permissionSetGroupNames": ["MTG_Sales_Bundle"],
+  "permissionSetNames": ["MTG_Reports_Run"]
+})

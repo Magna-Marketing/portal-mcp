@@ -1,0 +1,43 @@
+Tool: get_data_space
+
+Description
+Read a single Data Space by id or name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+idOrName (string, required).
+
+Result
+dataSpace (object): id, name, label, description, isDefault,
+  memberCount, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_space({ "idOrName": "EMEA" })
+
+Example result
+{
+  "dataSpace": { "id": "0a0xx0000000002", "name": "EMEA",
+    "label": "EMEA Brand", "memberCount": 14 }
+}

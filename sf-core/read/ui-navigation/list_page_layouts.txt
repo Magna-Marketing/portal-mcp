@@ -1,0 +1,46 @@
+Tool: list_page_layouts
+
+Description
+List page layouts for an sObject and (optionally) per-record-type assignment per profile. Returns the layout name, related sObject, and the sections / fields / related lists configured.
+
+Salesforce API
+Tooling API + Metadata API, v66.0. `Layout` (Tooling for IDs, Metadata for full body).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, EntityDefinition.QualifiedApiName FROM Layout WHERE EntityDefinition.QualifiedApiName = '{sObject}'
+POST /services/Soap/m/66.0   (readMetadata Layout for full XML)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required).
+includeAssignments (boolean, optional, default false) - Include per-profile + per-record-type assignment.
+includeStructure (boolean, optional, default true) - Sections, fields, related lists, buttons.
+
+Result
+totalSize (number).
+layouts (array) - Each:
+  id, name, sObject.
+  sections (array, when includeStructure=true) - [{ label, columns, style ("OneColumn"|"TwoColumn"|"CustomLinks"), layoutItems: [{ field, behavior ("Edit"|"Required"|"Readonly"), emptySpace }] }].
+  relatedLists (array) - [{ relatedList, fields, sortField, sortOrder, customButtons }].
+  quickActions (array) - Action names included on the layout.
+  customButtons, multilineLayoutFields (array, optional).
+assignments (array, when includeAssignments=true) - [{ layoutName, profileName, recordType }].
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_page_layouts({ "sObject": "Project__c", "includeAssignments": true })

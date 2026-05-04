@@ -1,0 +1,57 @@
+Tool: update_sharing_settings
+
+Description
+Update the org-wide default (OWD) sharing model for one or more
+sObjects. Each sObject can have separate internal/external defaults and
+a flag for hierarchy-based access. Tightening OWD (e.g. ReadWrite ->
+Private) triggers an asynchronous sharing recalculation across all
+affected records — Salesforce queues this and may take hours on big
+orgs.
+
+Salesforce API
+Metadata API (`SharingSettings`) per sObject, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "sObjects": [
+    { "sObject": "Account", "internalSharingModel": "Private", "externalSharingModel": "Private", "grantAccessUsingHierarchies": true }
+  ]
+}
+
+Input (parameters)
+sObjects (object[], required) - Each:
+  sObject (string, required).
+  internalSharingModel (string, required) - "Private"|"Read"|"ReadWrite"|"ReadWriteTransfer"|"FullAccess"|"ControlledByParent".
+  externalSharingModel (string, optional) - Same enum; defaults to internal when external sharing not enabled org-wide.
+  grantAccessUsingHierarchies (boolean, optional, default true).
+checkOnly (boolean, optional, default false).
+waitForRecalc (boolean, optional, default false) - Poll for recalc completion (can be hours).
+
+Result
+deploy (object) - Standard Metadata deploy result.
+sObjects (array) - Updated rows.
+recalcStatus (object|null, when waitForRecalc=true) - { status, percentComplete }.
+
+Required permissions
+- "Customize Application" + "Manage Sharing".
+
+Idempotency & limits
+- Idempotent on equal input.
+- Triggers full recalc; do not change OWD lightly in production.
+
+Errors
+- INVALID_FIELD on bad model value.
+- SHARING_RECALC_IN_PROGRESS (try later).
+
+Example request
+
+update_sharing_settings({
+  "sObjects": [{ "sObject": "Project__c", "internalSharingModel": "Private" }]
+})

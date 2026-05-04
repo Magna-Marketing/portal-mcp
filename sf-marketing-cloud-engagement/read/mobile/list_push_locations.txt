@@ -1,0 +1,40 @@
+Tool: list_push_locations
+
+Description
+List MobilePush location targets (geofences) registered in the BU.
+Each location has a center coordinate, radius, and metadata used to
+trigger location-aware push messages.
+
+Marketing Cloud API
+REST API (`/push/v1/location/`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/location/
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/location/{locationId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+locationId (string, optional) - Get a single location.
+namePattern (string, optional).
+
+Result
+locations (array) - { id, name, description, latitude, longitude, radiusInMeters, address, city, state, country, postalCode, isActive, createdDate, modifiedDate }.
+
+Required scopes
+- `push_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized, 30002 not found.
+
+Example request
+
+list_push_locations({})

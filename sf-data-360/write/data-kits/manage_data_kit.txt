@@ -1,0 +1,72 @@
+Tool: manage_data_kit
+
+Description
+Create, update components in, or delete a Data Kit. Update only
+manages the **components** list (which assets the kit packages);
+the kit's metadata (label, description) is set at create time.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-kits                           (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitDevName           (operation="updateComponents")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitDevName           (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "dataKitDevName": "MTG_Retail_Foundation",
+  "label": "MTG Retail Foundation",
+  "description": "Retail demo kit",
+  "components": [
+    { "componentName": "Order__dlm",            "componentType": "DataModelObject" },
+    { "componentName": "OrderToIndividual_map", "componentType": "Mapping" }
+  ]
+}
+
+Body (updateComponents)
+{
+  "components": [
+    { "componentName": "Order__dlm", "componentType": "DataModelObject" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "updateComponents" | "delete".
+dataKitDevName (string, required).
+label (string, required for create).
+description (string, optional).
+components (array, required for create / updateComponents).
+
+Result
+dataKit (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete. Components themselves remain in the org; only the
+  Data Kit packaging is removed.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_COMPONENT, 404 NOT_FOUND.
+
+Example request
+
+manage_data_kit({
+  "operation": "create",
+  "dataKitDevName": "MTG_Retail_Foundation",
+  "label": "MTG Retail Foundation",
+  "components": [
+    { "componentName": "Order__dlm", "componentType": "DataModelObject" }
+  ]
+})
+
+Example result
+{ "dataKit": { "dataKitDevName": "MTG_Retail_Foundation", "componentCount": 1 } }

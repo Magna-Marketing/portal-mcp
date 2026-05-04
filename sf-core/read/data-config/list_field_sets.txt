@@ -1,0 +1,45 @@
+Tool: list_field_sets
+
+Description
+List Field Sets defined per sObject. Field sets are an admin-controlled
+list of fields used in Visualforce, LWC, and Apex to drive dynamic UIs
+without code changes.
+
+Salesforce API
+REST API + Metadata API, v66.0. Returned in `describe_object` under `fieldSets[]`; this tool surfaces them across many sObjects.
+
+Endpoint
+GET /services/data/v66.0/sobjects/{sObject}/describe                              (extract `fieldSets`)
+POST /services/Soap/m/66.0   (readMetadata FieldSet)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], required).
+namePattern (string, optional).
+includeFields (boolean, optional, default true).
+
+Result
+totalSize (number).
+fieldSets (array) - Each:
+  sObject, fullName (e.g. "Project__c.Editable_Fields"), label, description.
+  availableFields (array, when includeFields=true) - { field, label, type }.
+  displayedFields (array, when includeFields=true) - { field, label, type, isRequired, isFieldManaged }.
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_field_sets({ "sObjects": ["Project__c"] })

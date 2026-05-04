@@ -1,0 +1,62 @@
+Tool: manage_event_subscription
+
+Description
+Manage Event Notification Service (ENS) subscriptions: Marketing Cloud
+pushes engagement events (sends, opens, clicks, bounces, unsubscribes,
+journey events) to a registered callback URL. The callback (HTTPS
+endpoint) is created/maintained by `manage_event_callback`; this tool
+manages which event types each callback receives.
+
+Marketing Cloud API
+REST API (`/platform/v1/ens-subscriptions`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions
+PUT    https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions
+DELETE https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscriptionId}
+GET    https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscriptionId}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "subscriptionId": "...",
+  "callbackId": "...",
+  "filters": [],
+  "subscribedEventCategories": ["TransactionalSendEvents.Email.Sent","EngagementEvents.OpenEvent"],
+  "subscriptionName": "MTG-MainSubscription",
+  "status": "Active"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+subscriptionId (string, optional, required for non-create).
+subscriptionName (string, required for create).
+callbackId (string, required for create) - Existing callback Id; create with `manage_event_callback`.
+subscribedEventCategories (string[], required for create) - e.g. "EngagementEvents.OpenEvent" | "EngagementEvents.ClickEvent" | "EngagementEvents.BounceEvent" | "EngagementEvents.UnsubEvent" | "TransactionalSendEvents.Email.Sent" | "TransactionalSendEvents.SMS.Sent" | "JourneyEvents.JourneyComplete".
+filters (object[], optional) - [{ filterCondition (string), values (string[]) }].
+status (string, optional, default "Active") - "Active" | "Inactive".
+description (string, optional).
+
+Result
+subscription (object) - { subscriptionId, subscriptionName, callbackId, subscribedEventCategories, filters, status, createdDate, lastModifiedDate }.
+
+Required scopes
+- `webhooks_write` (or `event_notifications_write` on newer packages).
+
+Idempotency & limits
+- update / activate / deactivate idempotent.
+
+Errors
+- 30002 callback not found, 401 unauthorized.
+
+Example request
+
+manage_event_subscription({
+  "operation": "create",
+  "subscriptionName": "MTG-Engagement",
+  "callbackId": "abc-1234",
+  "subscribedEventCategories": ["EngagementEvents.OpenEvent","EngagementEvents.ClickEvent","EngagementEvents.UnsubEvent"]
+})

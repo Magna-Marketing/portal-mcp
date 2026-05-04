@@ -1,0 +1,59 @@
+Tool: clone_permission_set
+
+Description
+Clone an existing permission set, optionally overriding label and
+description. Useful for "regional" variants or staging changes
+(create clone -> mutate clone -> swap assignments). The clone gets a
+new fullName and starts with no assignments.
+
+Salesforce API
+Metadata API (`PermissionSet` readMetadata + create), v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0    (readMetadata)
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+The MCP server first reads the source permset, copies its config,
+applies overrides, and submits a `create` deploy.
+
+Input (parameters)
+sourceFullName (string, required) - Source PermissionSet DeveloperName.
+newFullName (string, required) - New PermissionSet DeveloperName.
+newLabel (string, required).
+newDescription (string, optional).
+includeFieldPermissions (boolean, optional, default true).
+includeClassAccesses (boolean, optional, default true).
+includePageAccesses (boolean, optional, default true).
+includeTabSettings (boolean, optional, default true).
+license (string, optional) - Override license; default = source's license.
+checkOnly (boolean, optional, default false).
+
+Result
+Standard deploy result, plus `clonedPermissionSet`: { id, fullName,
+  label, sourceFullName, license, copiedComponents: { systemPermissions,
+  objectPermissions, fieldPermissions, ... } }.
+
+Required permissions
+- "Manage Profiles and Permission Sets".
+
+Idempotency & limits
+- Clone is **not** idempotent (fails on duplicate newFullName).
+- A cloned permset has zero assignments at creation time.
+
+Errors
+- NOT_FOUND on sourceFullName.
+- DUPLICATE_DEVELOPER_NAME on newFullName.
+
+Example request
+
+clone_permission_set({
+  "sourceFullName": "MTG_Project_Manager",
+  "newFullName": "MTG_Project_Manager_EU",
+  "newLabel": "MTG Project Manager (EU)",
+  "newDescription": "EU regional variant - excludes ManageDataIntegrations"
+})

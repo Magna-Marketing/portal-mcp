@@ -1,0 +1,39 @@
+Tool: list_login_ip_ranges
+
+Description
+List Login IP Ranges defined per Profile (and the org-level Trusted IP Ranges). Profiles with restricted ranges only let users log in from those IPs. Trusted ranges skip MFA challenges.
+
+Salesforce API
+Metadata API (`Profile.loginIpRanges`) + Tooling SOQL on `NetworkAccess`, v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0   (readMetadata Profile per profile)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, StartAddress, EndAddress, Description FROM NetworkAccess
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+profileNames (string[], optional) - Restrict to these profiles.
+includeTrustedIps (boolean, optional, default true) - Include org-level trusted ranges.
+
+Result
+profiles (array) - Each: { profileName, ranges: [{ startAddress, endAddress, description }] }.
+trustedIpRanges (array, optional) - [{ id, startAddress, endAddress, description }].
+
+Required permissions
+- "Manage Profiles and Permission Sets" / "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_login_ip_ranges({ "profileNames": ["System Administrator"] })

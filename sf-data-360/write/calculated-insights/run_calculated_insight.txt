@@ -1,0 +1,51 @@
+Tool: run_calculated_insight
+
+Description
+Trigger an on-demand recompute of a Calculated Insight. Async;
+returns a `runId`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/calculated-insights/:apiName/actions/run
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{}
+
+Input (parameters)
+apiName (string, required).
+runIdempotencyKey (string, optional).
+
+Result
+runId (string).
+apiName (string).
+status (string) - "Queued".
+submittedAt (ISO-8601).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight run per CI.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS.
+
+Example request
+
+run_calculated_insight({ "apiName": "CustomerLTV__cio" })
+
+Example result
+{
+  "runId": "RUN_CI_2026-04-29T13",
+  "apiName": "CustomerLTV__cio",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

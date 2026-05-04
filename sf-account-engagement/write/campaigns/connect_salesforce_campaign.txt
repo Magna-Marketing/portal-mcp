@@ -1,0 +1,55 @@
+Tool: connect_salesforce_campaign
+
+Description
+Link a Pardot campaign to a Salesforce Campaign (Connected
+Campaigns feature). Once connected, the two campaigns share an id
+and metrics flow back from Pardot to SFDC. The link is bi-
+directional but is created from Pardot's side.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/campaigns/:id/do/connectSalesforceCampaign
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "salesforceId": "7015800000xyz123" }
+
+Input (parameters)
+id (number, required) - Pardot campaign id.
+salesforceId (string, required) - 18-char SFDC Campaign id.
+
+Result
+success (boolean).
+campaign (object) - Updated campaign row, now with `salesforceId`
+  populated.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent if the same `salesforceId` is supplied. Connecting to
+  a different SFDC id while already connected returns
+  `code: 53 already_connected`.
+
+Errors
+- 53 already_connected, 59 not_found, 20 invalid_input
+  (salesforceId format), 600 connector_inactive (Pardot↔SFDC
+  connector must be Verified).
+
+Example request
+
+connect_salesforce_campaign({ "id": 1024, "salesforceId": "7015800000xyz123" })
+
+Example result
+{
+  "success": true,
+  "campaign": { "id": 1024, "name": "Welcome 2026",
+    "salesforceId": "7015800000xyz123" }
+}

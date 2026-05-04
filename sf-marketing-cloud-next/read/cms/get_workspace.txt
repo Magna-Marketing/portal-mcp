@@ -1,0 +1,60 @@
+Tool: get_workspace
+
+Description
+Retrieve a single CMS Workspace by id (or by name when looked up via
+`list_workspaces`). Returns the workspace envelope plus its enabled
+channels, languages, and (optionally) the top-level folder tree.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/connect/cms/spaces/:contentSpaceOrFolderId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contentSpaceOrFolderId (string, required) - Workspace id or a
+  folder id within a workspace.
+includeFolders (boolean, optional, default false) - Include the
+  top-level folder tree.
+includeContentCounts (boolean, optional, default false) - When true,
+  the MCP server runs `search_contents?contentSpaceId=:id` per type
+  to surface per-type counts.
+
+Result
+workspace (object):
+  id (string), name (string), label (string), description (string),
+  isDefault (boolean), createdDate (ISO-8601),
+  lastModifiedDate (ISO-8601), channels (array), languages (array).
+folders (array, when includeFolders=true).
+contentCounts (object, when includeContentCounts=true) -
+  { cms_email__c, cms_email_template__c, cms_image, cms_document }.
+
+Required scopes
+- `api`, `cms_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 INVALID_SESSION_ID.
+
+Example request
+
+get_workspace({ "contentSpaceOrFolderId": "0Z0xx0000000001AAA" })
+
+Example result
+{
+  "workspace": {
+    "id": "0Z0xx0000000001AAA", "name": "marketing_main",
+    "label": "Marketing Main", "isDefault": true,
+    "channels": ["MarketingCloudNext_Email"],
+    "languages": ["en_US","fr_FR"]
+  }
+}

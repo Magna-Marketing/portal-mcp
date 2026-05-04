@@ -1,0 +1,65 @@
+Tool: deploy_flow
+
+Description
+Activate, deactivate, or validate an existing Flow version. Activation
+makes the chosen version the live one; deactivation transitions the
+active version to `Obsolete`. Validation runs the Metadata API in
+checkOnly mode.
+
+Salesforce API
+Metadata API + Tooling API, v66.0.
+- Activation/deactivation: update `FlowDefinition.ActiveVersionId` via
+  `PATCH /tooling/sobjects/FlowDefinition/{id}`.
+- Validation-only: `metadata/deployRequest` with `checkOnly=true`.
+
+Endpoint
+PATCH /services/data/v66.0/tooling/sobjects/FlowDefinition/{flowDefinitionId}
+POST  /services/data/v66.0/metadata/deployRequest    (checkOnly=true)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (activate)
+{
+  "Metadata": { "activeVersionNumber": 5 }
+}
+
+Input (parameters)
+fullName (string, required) - Flow API name (DeveloperName).
+action (string, required) - "activate" | "deactivate" | "validate".
+versionNumber (number, optional) - Required for activate; defaults to
+  latest. Ignored for deactivate (the current active version is targeted).
+checkOnly (boolean, optional, default true for action="validate", else false).
+testLevel (string, optional, default "NoTestRun") - For validate in
+  production-like environments.
+
+Result
+flow (object):
+  definitionId (string).
+  fullName (string).
+  activeVersionId (string|null).
+  activeVersionNumber (number|null).
+  status (string).
+deployResult (object|null) - When validating: deployId + componentFailures.
+
+Required permissions
+- "Manage Flow" + "Customize Application".
+
+Idempotency & limits
+- Activate of an already-active version is a no-op.
+- Deactivate of a flow with no active version is a no-op.
+- A flow cannot have two active versions; activating v5 deactivates v4.
+
+Errors
+- NOT_FOUND: fullName doesn't exist.
+- INVALID_FLOW_VERSION: versionNumber doesn't exist or has Status="Obsolete".
+- VALIDATION_FAILED with deployResult.componentFailures.
+
+Example request (activate v5)
+
+deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "activate", "versionNumber": 5 })
+
+Example request (validate latest)
+
+deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "validate" })

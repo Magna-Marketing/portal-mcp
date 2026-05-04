@@ -1,0 +1,59 @@
+Tool: manage_asset
+
+Description
+Create / update / copy / delete a Content Builder asset (HTML email,
+template, block, image, document). For binary uploads use
+`upload_asset_binary`.
+
+Marketing Cloud API
+REST API (`/asset/v1/content/assets`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets
+PATCH  https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}
+POST   https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}/copy
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Asset definition: { name, description, customerKey, assetType: { id, name }, category: { id }, content (HTML/Text/Markup), data (object), slots (object), meta (object) }.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "copy" | "delete".
+assetId (number, optional, required for non-create).
+customerKey (string, optional).
+name (string, required for create).
+description (string, optional).
+assetTypeId (number, required for create) - 196 block, 207 template, 208 htmlemail, 209 templatebasedemail, 210 textonlyemail, 213 smscontent, ...
+categoryId (number, required for create).
+content (string, optional) - HTML / text body.
+data (object, optional) - Asset-type-specific data structure (slots, blocks, etc.).
+fileProperties (object, optional) - For file assets.
+copyName (string, optional) - For copy operation.
+copyCategoryId (number, optional) - For copy operation.
+
+Result
+asset (object) - { id, customerKey, name, assetType, category, status, version, createdDate, modifiedDate }.
+
+Required scopes
+- `email_write` (most), `documents_and_images_write` (file types).
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- 30002 not found, INVALID_ASSET_TYPE.
+
+Example request
+
+manage_asset({
+  "operation": "create",
+  "name": "MTG_Welcome_Email",
+  "customerKey": "MTG_Welcome_Email",
+  "assetTypeId": 208,
+  "categoryId": 12345,
+  "content": "<html>...</html>"
+})

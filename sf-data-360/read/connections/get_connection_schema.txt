@@ -1,0 +1,55 @@
+Tool: get_connection_schema
+
+Description
+Read the cached schema (objects + fields) of a Connection. The
+schema is populated by the platform after a successful schema
+discovery; if empty, run `manage_connection_schema operation="upsert"`
+or trigger a discovery via `run_connection_action`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/schema
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+connectionId (string, required).
+
+Result
+schema (object): connectionId, version, objects (array<{ name,
+  label, fields: array<{ apiName, dataType, isPrimaryKey,
+  isExternalId, isRequired }>, isPickable, recordCountEstimate }>),
+  lastDiscoveredDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_connection_schema({ "connectionId": "0Z65800000000ABCAA" })
+
+Example result
+{
+  "schema": {
+    "connectionId": "0Z65800000000ABCAA", "version": 14,
+    "objects": [
+      { "name": "Send", "label": "Send",
+        "fields": [
+          { "apiName": "ID", "dataType": "NUMBER", "isPrimaryKey": true }
+        ] }
+    ]
+  }
+}

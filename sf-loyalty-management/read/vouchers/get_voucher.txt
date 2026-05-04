@@ -1,0 +1,40 @@
+Tool: get_voucher
+
+Description
+Get a single Voucher by Id, voucher code, or external reference.
+Returns identity + status + redemption history. Use before
+`redeem_voucher` / `cancel_voucher` to validate state.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `Voucher`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, VoucherCode, Status, ProgramId, Program.Name, VoucherDefinitionId, VoucherDefinition.Name, FaceValue, DiscountPercent, EffectiveDate, ExpirationDate, RedeemedDate, RedeemedValue, IssuedDate, RedemptionChannel, MemberId, Member.MembershipNumber, PartnerAccountId, ProductId, NotificationStatus, AddOnSourceId, CreatedDate, LastModifiedDate FROM Voucher WHERE Id = '...' OR VoucherCode = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+voucherId (string, optional).
+voucherCode (string, optional).
+  One required.
+
+Result
+voucher (object) - { id, voucherCode, status, programId, programName, voucherDefinitionId, voucherDefinitionName, faceValue, discountPercent, effectiveDate, expirationDate, redeemedDate, redeemedValue, issuedDate, redemptionChannel, memberId, membershipNumber, partnerAccountId, productId, notificationStatus, createdDate, lastModifiedDate }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- VOUCHER_NOT_FOUND.
+
+Example request
+
+get_voucher({ "voucherCode": "VC-89231" })

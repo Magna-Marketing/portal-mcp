@@ -1,0 +1,70 @@
+Tool: manage_data_extension
+
+Description
+Create / update / delete a Data Extension. Schema (fields) is set at
+create time; subsequent field adds / drops use this tool with the
+field-update operations.
+
+Marketing Cloud API
+SOAP API (`DataExtension` Create / Update / Delete) +
+`DataExtensionField` for schema.
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest / DeleteRequest envelopes.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addField" | "removeField" | "renameField".
+customerKey (string, optional, required for non-create) - DE External Key.
+deName (string, optional) - For create.
+description (string, optional).
+folderId (number, optional).
+isSendable (boolean, optional, default false).
+sendableDataExtensionField (string, optional) - Field name flagged as sendable.
+sendableSubscriberField (string, optional, default "Subscriber Key") - Maps to Subscriber.SubscriberKey.
+isTestable (boolean, optional, default false).
+fields (object[], optional) - For create / addField / renameField:
+  name (string, required), fieldType ("Text"|"Number"|"Date"|"Boolean"|"EmailAddress"|"Phone"|"Decimal"|"Locale"), maxLength, scale (for Decimal), isPrimaryKey, isRequired, defaultValue, ordinal, customerKey.
+removeFieldNames (string[], optional, for removeField).
+renameFields (object[], optional, for renameField) - [{ oldName, newName }].
+dataRetentionPeriodLength (number, optional).
+dataRetentionPeriod (string, optional) - "Days" | "Weeks" | "Months" | "Years".
+isDataRetentionEnabled (boolean, optional).
+rowDeletionType (string, optional) - "DeleteIndividualRecords" | "DeleteAllRecords" | "ResetData".
+checkOnly (boolean, optional, default false).
+
+Result
+dataExtension (object) - { id, customerKey, name, isSendable, isTestable, fieldCount, rowCount }.
+fields (array, when applicable) - The DE's resulting field list.
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- update / addField / removeField idempotent.
+- Cannot drop a field that participates in a Filter / Query / Send.
+
+Errors
+- DUPLICATE_VALUE on customerKey, INVALID_FIELD on bad type/scale combos.
+
+Example request (create)
+
+manage_data_extension({
+  "operation": "create",
+  "customerKey": "Members_DE",
+  "deName": "Members",
+  "isSendable": true,
+  "sendableDataExtensionField": "Email",
+  "sendableSubscriberField": "Subscriber Key",
+  "fields": [
+    { "name": "MemberId", "fieldType": "Text", "maxLength": 50, "isPrimaryKey": true, "isRequired": true },
+    { "name": "Email",    "fieldType": "EmailAddress", "isRequired": true },
+    { "name": "TierName", "fieldType": "Text", "maxLength": 50 }
+  ]
+})

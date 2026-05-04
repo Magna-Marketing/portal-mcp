@@ -1,0 +1,60 @@
+Tool: get_member_points_balance
+
+Description
+Get a member's points balance for one or all program currencies. Wraps
+the Standard Invocable Action `GetMemberPoints` for a given
+program/member/currency. For the raw sObject row use the balances
+included in `get_member`.
+
+Salesforce API
+Standard Invocable Action `GetMemberPoints`, v66.0.
+
+Endpoint
+POST /services/data/v66.0/actions/standard/getMemberPoints
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "inputs": [{
+    "ProgramName": "MTG_Rewards",
+    "ProgramCurrencyName": "Points",
+    "LoyaltyProgramMemberId": "0lMQg00000abcDE2"
+  }]
+}
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+programCurrencyName (string, optional) - When omitted, the tool calls
+  the action once per active currency in the program.
+
+Result
+balances (array) - Each:
+  programCurrencyName (string).
+  points (number) - Available balance.
+  escrowPointsBalance (number).
+  expirablePoints (number, optional).
+  nonExpirablePoints (number, optional).
+  isSuccess (boolean).
+  errors (array, optional) - { errorCode, message }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, LOYALTY_PROGRAM_NOT_FOUND, INVALID_CURRENCY_NAME.
+
+Example request
+
+get_member_points_balance({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "programCurrencyName": "Points"
+})

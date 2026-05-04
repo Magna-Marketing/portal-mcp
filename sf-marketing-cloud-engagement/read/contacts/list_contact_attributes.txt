@@ -1,0 +1,42 @@
+Tool: list_contact_attributes
+
+Description
+List attribute definitions in Contact Builder (the Contact Model's
+schema): name, type, attribute set, attribute group, default value,
+data extension binding.
+
+Marketing Cloud API
+REST API (`/contacts/v1/attributes`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/attributes
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+attributeGroup (string, optional).
+attributeSet (string, optional).
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalCount (number).
+attributes (array) - { name, label, dataType, length, isRequired, defaultValue, attributeGroupName, attributeSetName, dataExtensionCustomerKey, dataExtensionFieldName }.
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+list_contact_attributes({ "attributeGroup": "Demographics" })

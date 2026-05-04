@@ -1,0 +1,59 @@
+Tool: get_limits
+
+Description
+Read org-wide REST API limits, including Data 360-specific quotas:
+Data Cloud Streaming Records, Data Cloud Query rows, Data Cloud
+Compute, etc. Surfaces both the Daily Limit and the consumed amount.
+
+Salesforce API
+Connect plane (standard `/limits` REST endpoint).
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/limits
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+limits (object) - Map of limit name -> { Max (number), Remaining (number) }.
+  Notable Data 360 keys:
+    DataCloudCalculatedInsightApiCalls,
+    DataCloudCalculatedInsightObjects,
+    DataCloudComputeUnits,
+    DataCloudIngestApiCalls,
+    DataCloudIngestRows,
+    DataCloudProfileApiCalls,
+    DataCloudQueryApiCalls,
+    DataCloudQueryRowsRetrieved,
+    DataCloudSegmentApiCalls,
+    DataStorageMB, FileStorageMB, DailyApiRequests, etc.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID, 403 INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+get_limits({})
+
+Example result
+{
+  "limits": {
+    "DataCloudIngestRows": { "Max": 100000000, "Remaining": 84500000 },
+    "DataCloudQueryRowsRetrieved": { "Max": 1000000000, "Remaining": 974500000 },
+    "DataCloudComputeUnits": { "Max": 1500, "Remaining": 1124 },
+    "DailyApiRequests": { "Max": 1000000, "Remaining": 962412 }
+  }
+}

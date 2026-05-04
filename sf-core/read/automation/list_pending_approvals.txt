@@ -1,0 +1,46 @@
+Tool: list_pending_approvals
+
+Description
+List `ProcessInstance` rows currently pending approval, optionally scoped to a specific approver, submitter, or sObject. Each row shows the work item that someone needs to act on, the record under approval, and the steps already taken.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `ProcessInstance`, `ProcessInstanceWorkitem`, `ProcessInstanceStep`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, TargetObjectId, TargetObject.Name, Status, ProcessDefinitionId, ProcessDefinition.Name, SubmittedById, SubmittedBy.Name, CreatedDate FROM ProcessInstance WHERE Status = 'Pending'
+GET /services/data/v66.0/query/?q=SELECT Id, ProcessInstanceId, ActorId, Actor.Name, OriginalActorId FROM ProcessInstanceWorkitem WHERE ProcessInstanceId IN (...)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+approverId (string, optional) - Limit to records where this user has a pending workitem.
+approverUsername (string, optional).
+submitterId (string, optional).
+sObject (string, optional) - Restrict by TargetObjectId's sObject.
+processDefinitionName (string, optional).
+sinceHours (number, optional).
+includeSteps (boolean, optional, default false) - Include the audit trail per process instance.
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+pendingApprovals (array) - Each:
+  processInstanceId, status, processDefinitionName, sObject, recordId, recordName, submittedBy, submittedAt, currentApprovers (array of { userId, name, workitemId }), steps (array, optional).
+
+Required permissions
+- "View All Data" or be an actor on the records.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_pending_approvals({ "approverUsername": "jane.doe@magnatech.com" })

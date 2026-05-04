@@ -1,0 +1,75 @@
+Tool: manage_calculated_insight
+
+Description
+Create, update, or delete a Calculated Insight definition.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/calculated-insights              (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/calculated-insights/:apiName     (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/calculated-insights/:apiName     (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "CustomerLTV__cio",
+  "label": "Customer LTV",
+  "dataSpace": "default",
+  "refreshFrequency": "Daily",
+  "sql": "SELECT IndividualId__c, SUM(Amount__c) AS LifetimeValue__c FROM Order__dlm GROUP BY IndividualId__c",
+  "measures": [
+    { "apiName": "LifetimeValue__c", "label": "Lifetime Value", "dataType": "DECIMAL", "aggregation": "SUM" }
+  ],
+  "dimensions": [
+    { "apiName": "IndividualId__c", "label": "Individual",     "dataType": "TEXT" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+apiName (string, required).
+label (string, required for create).
+dataSpace (string, optional, default "default").
+refreshFrequency (string, optional, default "Daily") - "Hourly" |
+  "Daily" | "Weekly" | "OnDemand".
+sql (string, required for create).
+measures (array, required for create).
+dimensions (array, required for create).
+
+Result
+calculatedInsight (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; downstream segments referencing the CI break.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_QUERY (sql), 404 NOT_FOUND.
+
+Example request
+
+manage_calculated_insight({
+  "operation": "create",
+  "apiName": "CustomerLTV__cio",
+  "label": "Customer LTV",
+  "sql": "SELECT IndividualId__c, SUM(Amount__c) AS LifetimeValue__c FROM Order__dlm GROUP BY IndividualId__c",
+  "measures": [{ "apiName": "LifetimeValue__c", "dataType": "DECIMAL", "aggregation": "SUM" }],
+  "dimensions": [{ "apiName": "IndividualId__c", "dataType": "TEXT" }]
+})
+
+Example result
+{
+  "calculatedInsight": {
+    "apiName": "CustomerLTV__cio",
+    "status": "Active", "refreshFrequency": "Daily"
+  }
+}

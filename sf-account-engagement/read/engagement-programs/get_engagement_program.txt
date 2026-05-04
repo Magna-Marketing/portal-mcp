@@ -1,0 +1,52 @@
+Tool: get_engagement_program
+
+Description
+Read a single Engagement Studio program by id, with the recipient
+and suppression lists, business-hours schedule, and program-level
+metrics (member count, current step distribution).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/engagement-studio-programs/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `recipientList.*`,
+  `campaign.*`, `folder.*`, `createdBy.*`, `updatedBy.*`.
+
+Result
+engagementProgram (object): id, name, description, status,
+  recipientListId, suppressionListIds, businessHoursId, scheduleType,
+  campaignId, folderId, isDeleted, publishedAt, startedAt, completedAt,
+  createdAt, updatedAt.
+recipientList (object|null): { id, name, isDynamic, prospectCount }.
+campaign (object|null), folder (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_engagement_program({ "id": 311 })
+
+Example result
+{
+  "engagementProgram": { "id": 311, "name": "Onboarding 2026", "status": "Running" },
+  "recipientList": { "id": 301, "name": "New customers", "prospectCount": 4521 }
+}

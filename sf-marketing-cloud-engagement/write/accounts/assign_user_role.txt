@@ -1,0 +1,49 @@
+Tool: assign_user_role
+
+Description
+Assign or remove a role from a Marketing Cloud user. Roles control the
+granular permissions seen by `list_role_permissions`.
+
+Marketing Cloud API
+SOAP API (`AccountUser` Update with `Roles` collection).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP UpdateRequest with AccountUser.Roles changes.
+
+Input (parameters)
+userId (number, optional).
+username (string, optional).
+  One required.
+operation (string, required) - "add" | "remove" | "set".
+roleIds (number[], optional).
+roleNames (string[], optional).
+  One of roleIds / roleNames required.
+
+Result
+user (object) - { id, username }.
+roles (array) - Final state: [{ id, name }].
+changes (object) - { added, removed, unchanged }.
+
+Required scopes
+- `users_write`.
+
+Idempotency & limits
+- add / remove idempotent.
+
+Errors
+- ROLE_NOT_FOUND, USER_NOT_FOUND.
+
+Example request
+
+assign_user_role({
+  "username": "marketingops@magnatech.com",
+  "operation": "add",
+  "roleNames": ["Content Creator", "Channel Manager"]
+})

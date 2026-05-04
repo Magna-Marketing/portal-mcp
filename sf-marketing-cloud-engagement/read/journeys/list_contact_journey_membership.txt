@@ -1,0 +1,38 @@
+Tool: list_contact_journey_membership
+
+Description
+List the journeys (and the activity step they're currently parked at)
+that a given contact is enrolled in. Use to answer "what journeys is
+this contact in right now?".
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/contactMembership`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/contactMembership
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "ContactKeyList": ["MEM-100023"] }
+
+Input (parameters)
+contactKeys (string[], required) - Up to 1000 per call.
+
+Result
+results (array) - Per contact: { contactKey, journeys: [{ journeyId, journeyName, journeyVersion, status ("Active"|"Completed"|"Stopped"), enteredAt, currentActivityKey, currentActivityName }] }.
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+list_contact_journey_membership({ "contactKeys": ["MEM-100023"] })

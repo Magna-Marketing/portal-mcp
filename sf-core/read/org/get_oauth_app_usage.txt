@@ -1,0 +1,47 @@
+Tool: get_oauth_app_usage
+
+Description
+Get OAuth usage stats for Connected Apps and External Client Apps:
+which apps have accepted users, token activity, last activity time,
+and aggregate API call counts. Use for security audits and to spot
+deprecated apps.
+
+Salesforce API
+REST API (Connect API), v66.0. `/services/data/v66.0/apps/oauth/usage`.
+
+Endpoint
+GET /services/data/v66.0/apps/oauth/usage?page=0&pageSize=100
+GET /services/data/v66.0/apps/oauth/usage/{appId}/users?page=0&pageSize=100
+GET /services/data/v66.0/apps/oauth/usage/{appId}/users/tokens
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+slice (string, optional, default "apps") - "apps" | "appUsers" | "appUserTokens".
+appId (string, optional) - Required for slices "appUsers" / "appUserTokens".
+userId (string, optional) - For "appUserTokens".
+page (number, optional, default 0).
+pageSize (number, optional, default 100, max 200).
+
+Result
+slice (string).
+results (array) - Shape varies per slice. Common keys: { appId, appName, userId, username, lastUsedDate, totalApiCalls, scopes, tokenIds }.
+hasMore (boolean), page (number).
+
+Required permissions
+- "Manage Connected Apps" + "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, INVALID_FIELD on bad slice.
+
+Example request
+
+get_oauth_app_usage({ "slice": "apps" })

@@ -1,0 +1,45 @@
+Tool: get_journey
+
+Description
+Get a journey definition by Id, key, or name + version. Returns the
+full canvas: triggers (entry events), activities (email send, SMS,
+decision split, wait, custom), connections, and goals.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/{id}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/key:{key}
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}?versionNumber=2
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+journeyId (string, optional).
+journeyKey (string, optional).
+  One required.
+versionNumber (number, optional, default = latest).
+includeStats (boolean, optional, default false) - Include entry counts, current population.
+
+Result
+journey (object) - Verbatim journey definition: { id, key, name, description, version, status, workflowApiVersion, triggers (array), goals (array), activities (array): [{ key, name, type, configurationArguments, outcomes (array): [{ next, arguments }] }], lastPublishedDate, createdDate, modifiedDate, entryMode, defaults }.
+stats (object|null, when includeStats=true) - { totalEntries, currentPopulation, lastEntryDate }.
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_journey({ "journeyKey": "MTG_Welcome_Series" })

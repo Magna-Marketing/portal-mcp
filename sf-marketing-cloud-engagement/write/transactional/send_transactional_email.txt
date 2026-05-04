@@ -1,0 +1,61 @@
+Tool: send_transactional_email
+
+Description
+Send a transactional email to one or more recipients via a defined
+Transactional Messaging email definition. Modern, idempotent
+(via `messageKey`), and supports per-recipient attribute overrides.
+
+Marketing Cloud API
+REST API (`/messaging/v1/email/messages/{messageKey}` and bulk variants).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages/{messageKey}        (single)
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages                     (batch)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "definitionKey": "MTG_OrderConfirmation",
+  "recipient": {
+    "contactKey": "MEM-100023",
+    "to": "jane.doe@example.com",
+    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345", "OrderTotal": "250.50" }
+  }
+}
+
+Input (parameters)
+definitionKey (string, required).
+recipients (object[], required) - Each:
+  contactKey (string, required).
+  to (string, required) - Email address.
+  attributes (object, optional) - Personalization values.
+  messageKey (string, optional, recommended) - Stable Id for idempotency.
+
+Result
+results (array) - Per recipient: { messageKey, contactKey, status ("Queued"|"Sent"|"Failed"), errors }.
+summary (object) - { queued, failed, total }.
+
+Required scopes
+- `email_send`.
+
+Idempotency & limits
+- Idempotent on `messageKey` (duplicates rejected).
+- 50 recipients per batch call.
+
+Errors
+- DUPLICATE_MESSAGE_KEY, DEFINITION_INACTIVE.
+
+Example request
+
+send_transactional_email({
+  "definitionKey": "MTG_OrderConfirmation",
+  "recipients": [{
+    "contactKey": "MEM-100023",
+    "to": "jane.doe@example.com",
+    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345" },
+    "messageKey": "ORD-12345-MTG_OrderConfirmation"
+  }]
+})

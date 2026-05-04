@@ -1,0 +1,67 @@
+Tool: manage_private_network_route
+
+Description
+Create or delete a Private Network Route. Updates aren't supported
+by the API; recreate to change the endpoint.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/private-network-routes                  (operation="create")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/private-network-routes/:routeIdOrName   (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create — AWS PrivateLink)
+{
+  "name": "MTG_Snowflake_PL",
+  "label": "MTG Snowflake PrivateLink",
+  "networkType": "AwsPrivateLink",
+  "endpoint": "snowflake.mtg.internal",
+  "region": "us-east-1",
+  "configuration": {
+    "serviceName": "com.amazonaws.vpce.us-east-1.vpce-svc-xxxx",
+    "vpcEndpointDnsEntries": ["vpce-xxxx-xxxx.snowflakecomputing.com"]
+  }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+routeIdOrName (string, required for delete).
+name (string, required for create) - Developer name.
+label (string, required for create).
+networkType (string, required for create).
+endpoint (string, required for create).
+region (string, optional).
+configuration (object, required for create) - Network-type-specific.
+
+Result
+route (object) - Created row in `Pending` status.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; Connections using the route fail at next refresh.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_NETWORK_CONFIG, 404 NOT_FOUND.
+
+Example request
+
+manage_private_network_route({
+  "operation": "create",
+  "name": "MTG_Snowflake_PL",
+  "label": "MTG Snowflake PrivateLink",
+  "networkType": "AwsPrivateLink",
+  "endpoint": "snowflake.mtg.internal",
+  "configuration": { "serviceName": "com.amazonaws.vpce.us-east-1.vpce-svc-xxxx" }
+})
+
+Example result
+{ "route": { "id": "0YN580000000001", "name": "MTG_Snowflake_PL", "status": "Pending" } }

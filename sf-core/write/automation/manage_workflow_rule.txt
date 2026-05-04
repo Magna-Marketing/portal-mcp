@@ -1,0 +1,57 @@
+Tool: manage_workflow_rule
+
+Description
+Manage Workflow Rules and their actions (FieldUpdate, EmailAlert, Task,
+OutboundMessage). Legacy automation; for new builds prefer Flow.
+
+Salesforce API
+Metadata API (`Workflow`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+object (string, required) - sObject API name (Workflow is per-sObject).
+fullName (string, required for non-create) - Rule fullName.
+label (string, required for create).
+active (boolean, optional, default true).
+evaluationCriteria (string, required for create) - "OnAllChanges" | "OnCreateOnly" | "OnCreateOrTriggeringUpdate".
+formula (string, optional).
+criteriaItems (array, optional) - [{ field, operation, value }].
+booleanFilter (string, optional).
+actions (object, optional) - { fieldUpdates: string[], alerts: string[], tasks: string[], outboundMessages: string[], flowTriggers: string[] }.
+timeTriggers (array, optional) - [{ offsetFromField, timeLength, workflowTimeTriggerUnit, actions }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+workflowRule (object) - Updated identity.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on bad criteria.
+
+Example request
+
+manage_workflow_rule({
+  "operation": "create",
+  "object": "Lead",
+  "fullName": "Notify_Owner_On_Hot_Lead",
+  "label": "Notify Owner on Hot Lead",
+  "evaluationCriteria": "OnCreateOrTriggeringUpdate",
+  "criteriaItems": [{ "field": "Lead.Rating", "operation": "equals", "value": "Hot" }],
+  "actions": { "alerts": ["Notify_Owner_Hot_Lead"] }
+})

@@ -1,0 +1,51 @@
+Tool: get_member_tier
+
+Description
+Get a member's current tier per tier group. Wraps the Standard
+Invocable Action `GetMemberTier`. Returns one entry per tier group the
+member belongs to.
+
+Salesforce API
+Standard Invocable Action `GetMemberTier`, v66.0.
+
+Endpoint
+POST /services/data/v66.0/actions/standard/getMemberTier
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "inputs": [{
+    "ProgramName": "MTG_Rewards",
+    "LoyaltyProgramMemberId": "0lMQg00000abcDE2"
+  }]
+}
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+tierGroupName (string, optional) - Filter to one tier group.
+
+Result
+tiers (array) - Each:
+  tierGroupName (string).
+  tierName (string).
+  effectiveFromDate (string).
+  effectiveToDate (string|null).
+  isSuccess (boolean).
+  errors (array, optional).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, LOYALTY_PROGRAM_NOT_FOUND.
+
+Example request
+
+get_member_tier({ "programName": "MTG_Rewards", "memberId": "0lMQg00000abcDE2" })

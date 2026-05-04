@@ -1,0 +1,51 @@
+Tool: get_data_transform_schedule
+
+Description
+Read the schedule for a Data Transform.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/schedule
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataTransformNameOrId (string, required).
+
+Result
+schedule (object): scheduleType ("Cron" | "Interval" | "EventDriven" |
+  "Manual"), cronExpression (string|null), intervalMinutes
+  (number|null), startDate (ISO-8601|null), endDate (ISO-8601|null),
+  timeZone (string), isActive (boolean).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_transform_schedule({
+  "dataTransformNameOrId": "build_unified_individual"
+})
+
+Example result
+{
+  "schedule": {
+    "scheduleType": "Cron",
+    "cronExpression": "0 0 * * * ?",
+    "timeZone": "UTC",
+    "isActive": true
+  }
+}

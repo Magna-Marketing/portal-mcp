@@ -1,0 +1,103 @@
+Tool: read_apex
+
+Description
+Read Apex class source code, metadata, or list classes by pattern.
+Backed by the Tooling API's `ApexClass` sObject. Two modes:
+1. Single class: provide `name` to fetch full Body, Status, ApiVersion,
+   IsValid, LengthWithoutComments, NamespacePrefix, ManageableState.
+2. List/pattern: provide `pattern` (with `*`) to enumerate matching
+   classes (metadata only, no Body unless `includeBody=true`).
+
+Use `read_apex_trigger` for triggers. Use `write_apex` to create/update
+classes. For dependency analysis at component level use
+`get_component_dependencies` (it traverses controller references).
+
+Salesforce API
+Tooling API, v66.0.
+- `GET /tooling/query/?q=SELECT ... FROM ApexClass WHERE ...`
+- `GET /tooling/sobjects/ApexClass/{id}` (full record incl. Body).
+- `GET /tooling/sobjects/ApexClass/describe`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=...
+GET /services/data/v66.0/tooling/sobjects/ApexClass/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+name (string, optional) - Exact class name (e.g. "AccountTriggerHandler").
+  Mutually exclusive with `pattern`.
+pattern (string, optional) - Glob (e.g. "*Handler", "ProjectService*").
+  Returns matching classes. Mutually exclusive with `name`.
+includeBody (boolean, optional, default true when `name`, false when
+  `pattern`) - Include the Body field in the result.
+includeInactive (boolean, optional, default true) - Include classes
+  with Status != "Active" (e.g. "Deleted", "Inactive").
+namespacePrefix (string, optional) - Filter by namespace prefix; pass
+  empty string for the org's default namespace.
+managedOnly (boolean, optional, default false) - Only managed-package
+  classes (`ManageableState in ('installed','released')`).
+limit (number, optional, default 100, max 2000) - Pattern-mode cap.
+
+Result
+For `name`:
+  apexClass (object):
+    id, name, namespacePrefix, apiVersion (number),
+    status ("Active"|"Inactive"|"Deleted"),
+    isValid (boolean) - false if compilation failed.
+    body (string) - Full source.
+    bodyCrc (number).
+    lengthWithoutComments (number).
+    manageableState (string).
+    createdById, createdDate, lastModifiedById, lastModifiedDate.
+    symbolTable (object|null) - Tooling symbol table when available.
+For `pattern`:
+  totalSize (number).
+  apexClasses (array of the above shape; without body when
+    includeBody=false).
+
+Required permissions
+- API Enabled.
+- "View All Data" or "Author Apex" to read class bodies. Without these,
+  the tool returns metadata only (no Body) and adds a warning.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Tooling SOQL counts toward DailyApiRequests.
+- Class Body can be up to 1 MB; pattern mode strips Body unless asked.
+
+Errors
+- INVALID_TYPE: namespace/managed combination invalid.
+- INSUFFICIENT_ACCESS_OR_READONLY: no permission to read class bodies.
+- NOT_FOUND: class with `name` not found in the requested namespace.
+
+Example request (single class with body)
+
+read_apex({ "name": "ProjectTriggerHandler", "includeBody": true })
+
+Example result
+
+{
+  "apexClass": {
+    "id": "01p4Q00000abcDEF",
+    "name": "ProjectTriggerHandler",
+    "namespacePrefix": null,
+    "apiVersion": 62.0,
+    "status": "Active",
+    "isValid": true,
+    "lengthWithoutComments": 4823,
+    "manageableState": "unmanaged",
+    "body": "public with sharing class ProjectTriggerHandler {\n    /* ... */\n}\n",
+    "createdDate": "2025-04-12T15:23:18.000+0000",
+    "lastModifiedDate": "2026-03-04T20:12:45.000+0000"
+  }
+}
+
+Example request (pattern, metadata only)
+
+read_apex({ "pattern": "*Handler", "includeBody": false, "limit": 200 })

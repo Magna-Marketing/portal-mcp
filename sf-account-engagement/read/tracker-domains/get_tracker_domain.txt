@@ -1,0 +1,49 @@
+Tool: get_tracker_domain
+
+Description
+Read a single Tracker Domain by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/tracker-domains/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `defaultCampaign.*`.
+
+Result
+trackerDomain (object): id, domain, isPrimary, defaultCampaignId,
+  validationStatus, sslStatus, sslStatusDetails, trackingCode,
+  vanityUrlStatus, isDeleted, createdAt, updatedAt.
+defaultCampaign (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_tracker_domain({ "id": 7 })
+
+Example result
+{
+  "trackerDomain": {
+    "id": 7, "domain": "go.magnatech.com",
+    "isPrimary": true, "sslStatus": "active"
+  }
+}

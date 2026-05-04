@@ -1,0 +1,130 @@
+Tool: dml_records
+
+Description
+Perform DML (insert / update / delete / upsert) on Salesforce records.
+Supports single-record and collection (multi-record) calls. For >200
+rows the tool transparently switches to the **Composite SObject
+Collections** endpoint (max 200 per call) or **Bulk API 2.0** (for
+>10,000 rows). For idempotent inserts, use `upsert` with an
+`externalIdField`.
+
+Salesforce API
+REST API (Data) + Composite + Bulk API 2.0, v66.0.
+- Single record: `POST/PATCH/DELETE /sobjects/{sObject}[/id]`.
+- Collections (≤200): `POST/PATCH/DELETE /composite/sobjects`.
+- Upsert by external id: `PATCH /sobjects/{sObject}/{externalIdField}/{value}`
+  or `PATCH /composite/sobjects/{sObject}/{externalIdField}`.
+- Bulk: `POST /jobs/ingest` then upload CSV/JSON, then close.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/{sObject}                                  (single insert)
+PATCH  /services/data/v66.0/sobjects/{sObject}/{recordId}                       (single update)
+DELETE /services/data/v66.0/sobjects/{sObject}/{recordId}                       (single delete)
+PATCH  /services/data/v66.0/sobjects/{sObject}/{externalIdField}/{value}        (single upsert)
+POST   /services/data/v66.0/composite/sobjects                                  (collection insert ≤200)
+PATCH  /services/data/v66.0/composite/sobjects                                  (collection update ≤200)
+DELETE /services/data/v66.0/composite/sobjects?ids=...                          (collection delete ≤200)
+PATCH  /services/data/v66.0/composite/sobjects/{sObject}/{externalIdField}      (collection upsert ≤200)
+POST   /services/data/v66.0/jobs/ingest                                         (bulk job)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+Sforce-Auto-Assign: false           (optional; disables Lead/Case assignment rules)
+
+Body (collection insert example)
+{
+  "allOrNone": false,
+  "records": [
+    { "attributes": { "type": "Account" }, "Name": "ACME", "Industry": "Tech" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "insert" | "update" | "delete" | "upsert".
+sObject (string, required for insert/upsert; inferred from records for
+  update/delete) - sObject API name.
+records (object[], required) - For insert/update/upsert: full record
+  objects. For update/upsert each record needs Id (or the externalIdField
+  for upsert). For delete: array of Ids or objects with `Id`.
+externalIdField (string, required when operation="upsert") - External Id
+  field name used as the upsert key.
+allOrNone (boolean, optional, default false) - When true, any single-row
+  failure rolls back the whole call.
+useBulk (boolean, optional, default auto) - Force Bulk API 2.0; default
+  is auto when records > 10,000.
+disableAssignmentRules (boolean, optional, default false).
+disableValidationRules (boolean, optional, default false) - Requires
+  "Bypass Validation Rules" or admin perm.
+batchSize (number, optional, default 200) - Composite batch size; ≤200.
+
+Result (single)
+For insert/upsert: { id (string), success (boolean), errors (array), created (boolean, upsert only) }.
+For update/delete: { id, success, errors }.
+
+Result (collection)
+results (array of single shape, one per input record), in the same order
+as input.
+
+Result (bulk)
+job (object) - { id, state, contentType, operation, object, ... }.
+status (string) - Initial state ("Open"|"UploadComplete"|"InProgress"|
+  "JobComplete"|"Failed"|"Aborted"). The MCP server polls until
+  terminal and surfaces success/failed counts.
+recordsProcessed (number).
+numberRecordsFailed (number).
+failedRecordsUrl (string|null) - Where to download row-by-row errors.
+
+Required permissions
+- API Enabled.
+- Object create/edit/delete and FLS for every field touched.
+- For Bulk: same DML perms; no extra license required for Bulk API 2.0.
+
+Idempotency & limits
+- Insert is **not** idempotent; a retried insert duplicates. Use upsert
+  with an externalIdField for idempotency.
+- Composite collections cap: 200 records per call; 25 sub-requests for
+  /composite/.
+- Bulk v2 ingest: 150 million records / 24 hours.
+- Governor limits in synchronous DML: 100 SOQL, 150 DML, 10 s CPU, 6 MB heap.
+- `allOrNone=false` returns partial success.
+
+Errors
+- INVALID_FIELD / FIELD_CUSTOM_VALIDATION_EXCEPTION.
+- DUPLICATE_VALUE on unique fields.
+- ENTITY_IS_DELETED on update of a recycled record.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- UNABLE_TO_LOCK_ROW (transient; retry once).
+
+Example request (single insert)
+
+dml_records({
+  "operation": "insert",
+  "sObject": "Account",
+  "records": [{ "Name": "ACME", "Industry": "Technology" }]
+})
+
+Example response
+
+{ "results": [{ "id": "0014Q00000abcDE", "success": true, "errors": [] }] }
+
+Example request (upsert by external id)
+
+dml_records({
+  "operation": "upsert",
+  "sObject": "Account",
+  "externalIdField": "External_Account_Id__c",
+  "records": [
+    { "External_Account_Id__c": "EXT-001", "Name": "ACME", "Industry": "Tech" }
+  ]
+})
+
+Response: { "results": [{ "id": "0014Q00000abcDE", "success": true, "created": true, "errors": [] }] }
+
+Example request (bulk update)
+
+dml_records({
+  "operation": "update",
+  "useBulk": true,
+  "records": [ /* >10,000 rows with Id */ ]
+})

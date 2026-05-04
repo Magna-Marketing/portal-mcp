@@ -1,0 +1,62 @@
+Tool: list_data_graphs
+
+Description
+List Data Graphs — pre-joined, denormalized views over a "primary"
+DMO + its related DMOs, optimized for low-latency profile lookups
+(used by Marketing Cloud Next personalization, Agentforce, etc.).
+Each graph captures the primary DMO, the joined related DMOs, the
+cardinality, and the refresh schedule.
+
+Salesforce API
+Connect plane (default) or runtime plane (`plane="runtime"`,
+hits `{cdpTenantUrl}/api/v1/dataGraph/metadata`). Both return
+metadata; pick whichever is closer.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/metadata        (plane="connect", default)
+GET {cdpTenantUrl}/api/v1/dataGraph/metadata                            (plane="runtime")
+
+Headers
+Authorization: Bearer <core_access_token>      (connect)
+Authorization: Bearer <data_cloud_token>       (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+plane (string, optional, default "connect") - "connect" | "runtime".
+dataSpace (string, optional, default "default").
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+dataGraphs (array) - Each: { developerName, label, dataSpace,
+  primaryDmo, includedDmos (array), refreshFrequency, status,
+  recordCount, lastRefreshDate, createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api` (connect) or `cdp_api` (runtime).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID / invalid_token.
+
+Example request
+
+list_data_graphs({})
+
+Example result
+{
+  "dataGraphs": [
+    { "developerName": "UnifiedIndividualGraph",
+      "label": "Unified Individual Graph",
+      "primaryDmo": "UnifiedIndividual__dlm",
+      "includedDmos": ["EngagementHistory__dlm","Order__dlm"],
+      "refreshFrequency": "Hourly", "status": "Active",
+      "recordCount": 482000 }
+  ]
+}

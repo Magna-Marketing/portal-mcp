@@ -1,0 +1,65 @@
+Tool: manage_connection_schema
+
+Description
+Upsert the cached schema (object + field definitions) on a
+Connection. Typically called after a `run_connection_action
+command="discover-schema"` to persist what was discovered.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PUT {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/schema
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "objects": [
+    {
+      "name": "Send", "label": "Send",
+      "fields": [
+        { "apiName": "ID",        "dataType": "NUMBER", "isPrimaryKey": true },
+        { "apiName": "EmailName", "dataType": "TEXT" },
+        { "apiName": "SentDate",  "dataType": "DATE_TIME" }
+      ]
+    }
+  ]
+}
+
+Input (parameters)
+connectionId (string, required).
+operation (string, required) - "upsert" only.
+objects (array, required) - [{ name, label, fields: [{ apiName,
+  dataType, isPrimaryKey, isExternalId, isRequired }] }].
+
+Result
+schema (object) - Refreshed schema with new `version`.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on object/field name. Fields not included in the new
+  payload are removed.
+
+Errors
+- 404 NOT_FOUND, 400 INVALID_FIELD (unknown dataType).
+
+Example request
+
+manage_connection_schema({
+  "connectionId": "0Z65800000000ABCAA",
+  "operation": "upsert",
+  "objects": [
+    { "name": "Send", "fields": [
+      { "apiName": "ID", "dataType": "NUMBER", "isPrimaryKey": true }
+    ] }
+  ]
+})
+
+Example result
+{ "schema": { "connectionId": "0Z65800000000ABCAA", "version": 15 } }

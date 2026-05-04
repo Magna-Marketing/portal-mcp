@@ -1,0 +1,54 @@
+Tool: manage_external_data_source
+
+Description
+Create / update / delete External Data Sources (Salesforce Connect):
+OData2/4, AcrossOrgs, custom Apex Connector, etc.
+
+Salesforce API
+Metadata API (`ExternalDataSource`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "validateAndSyncSchema".
+fullName (string, required) - DeveloperName.
+masterLabel (string, required for create).
+type (string, required for create) - "OData2" | "OData4" | "AcrossOrgs" | "DataDotCom" | "GoogleDrive" | "Custom".
+endpoint (string, required for create).
+protocol (string, optional) - "NoAuthentication" | "Oauth" | "Password".
+authProvider (string, optional) - For OAuth.
+namedCredentialName (string, optional) - When using Named Credentials for auth.
+defaultIsolationLevel (string, optional, default "ReadOnly") - "ReadOnly" | "Transactional".
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+externalDataSource (object) - { id, fullName, masterLabel, type, endpoint }.
+
+Required permissions
+- "Customize Application" + "Manage External Connections".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD.
+
+Example request
+
+manage_external_data_source({
+  "operation": "create",
+  "fullName": "Partner_Inventory_API",
+  "masterLabel": "Partner Inventory API",
+  "type": "OData4",
+  "endpoint": "https://api.partner.com/odata/",
+  "namedCredentialName": "MTG_Partner_API"
+})

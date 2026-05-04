@@ -1,0 +1,56 @@
+Tool: get_export
+
+Description
+Read a single async export job. Poll on a 10-30 second interval
+until `status=Complete`, then enumerate `resultRefs` and download
+each chunk via `download_export_results`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/exports/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default includes errorRef and
+  expanded createdBy.*.
+
+Result
+export (object): id, object, status, fields (string[]),
+  procedure (string), arguments (object), counter (number),
+  resultRefs (array<{ fileId (number), sizeBytes (number) }>),
+  errorRef (string|null), fileName (string|null), createdAt, updatedAt,
+  createdById, isExpired (boolean).
+createdBy (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. Result CSVs are retained for 30 days, then `isExpired=true`.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_export({ "id": 7782 })
+
+Example result
+{
+  "export": {
+    "id": 7782, "object": "Prospect", "status": "Complete",
+    "counter": 28412,
+    "resultRefs": [{ "fileId": 1, "sizeBytes": 38421100 }],
+    "isExpired": false
+  }
+}

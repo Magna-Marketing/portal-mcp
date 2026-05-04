@@ -1,0 +1,58 @@
+Tool: unenroll_member
+
+Description
+Unenroll (cancel) a member from a Loyalty Program. Wraps the Loyalty
+Program Process "Unenroll a Member". Sets `MemberStatus = "Cancelled"`
+and an end date; preserves history for audit.
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Unenroll a Member", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Unenroll a Member",
+  "processParameters": {
+    "MemberId": "0lMQg00000abcDE2",
+    "ProgramName": "MTG_Rewards",
+    "ReasonForUnenrollment": "Member request",
+    "MembershipEndDate": "2026-05-01"
+  }
+}
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+reason (string, optional).
+membershipEndDate (string, optional, default today).
+expirePoints (boolean, optional, default true) - Force expire all unredeemed points.
+cancelOpenVouchers (boolean, optional, default true).
+
+Result
+processResult (object) - { isSuccess, errors, processStatus }.
+member (object) - { id, memberStatus "Cancelled", membershipEndDate }.
+counts (object) - { vouchersCancelled, pointsExpired }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent on already-cancelled member (returns no-op result).
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+unenroll_member({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "reason": "Member request"
+})

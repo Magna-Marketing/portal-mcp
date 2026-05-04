@@ -1,0 +1,107 @@
+Tool: get_picklist_values
+
+Description
+Return the active picklist values for a single field on an sObject,
+respecting the running user's record type, controlling-field
+dependencies, and field-level security. This is the source of truth for
+"what values can I write to this picklist?" because it understands
+record-type-specific picklist filtering and dependent picklists, which
+plain `describe_object` does not.
+
+Use `describe_object` for the static, all-record-types value list.
+Use this tool when you need only the values that are valid for a
+specific record type, or when the picklist is dependent on another field.
+
+Salesforce API
+UI API, v66.0. `GET /ui-api/object-info/{sObject}/picklist-values/{recordTypeId}/{field}`.
+For all picklist fields on a record type at once:
+`GET /ui-api/object-info/{sObject}/picklist-values/{recordTypeId}`.
+
+Endpoint
+GET https://{instance}.my.salesforce.com/services/data/v66.0/ui-api/object-info/{sObject}/picklist-values/{recordTypeId}/{field}
+GET https://{instance}.my.salesforce.com/services/data/v66.0/ui-api/object-info/{sObject}/picklist-values/{recordTypeId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+sObject (string, required) - sObject API name.
+field (string, optional) - Field API name (e.g. "StageName"). When
+  omitted, returns picklist values for every picklist field on the
+  record type (heavier response).
+recordTypeId (string, optional, default "012000000000000AAA" = master) -
+  18-char Record Type Id. Use master ID when the object has no record
+  types or when you want the master picklist. Use `query_record_types`
+  to find a specific record type Id by DeveloperName.
+includeInactive (boolean, optional, default false) - Include picklist
+  entries with `active=false`.
+controllerValue (string, optional) - When the field is a dependent
+  picklist, the controlling-field value to filter against.
+
+Result
+For a single field:
+  values (array) - Each:
+    label (string) - Display label.
+    value (string) - Stored value (this is what you POST/PATCH).
+    attributes (object|null) - Reserved.
+    validFor (number[]) - Bit indices into the controlling-field's values
+      list (for dependent picklists). [] when not dependent.
+  controllerValues (object|null) - Map of controlling field's value ->
+    bit index (only present for dependent picklists).
+  defaultValue (object|null) - { value, label } when a default is set.
+  url (string) - Path used.
+  eTag (string) - ETag for caching.
+For all fields on a record type:
+  picklistFieldValues (object) - Map of fieldApiName to the structure above.
+
+Required permissions
+- API Enabled.
+- Read on the sObject and the picklist field (FLS).
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Salesforce returns ETag/If-None-Match; the MCP layer uses it to serve
+  304s.
+- UI API picklist-values calls don't count against query CPU but do
+  count against API requests.
+
+Errors
+- INVALID_TYPE: sObject doesn't exist.
+- INVALID_FIELD: field doesn't exist or isn't a picklist.
+- INVALID_RECORD_TYPE: recordTypeId is not on the sObject.
+
+Example request (single field, dependent picklist)
+
+get_picklist_values({
+  "sObject": "Opportunity",
+  "field": "Sub_Stage__c",
+  "recordTypeId": "012Qg0000004aBcDE",
+  "controllerValue": "Negotiation"
+})
+
+Example result
+
+{
+  "values": [
+    { "label": "Final Review",  "value": "Final Review",  "validFor": [3] },
+    { "label": "Awaiting Sign", "value": "Awaiting Sign", "validFor": [3] }
+  ],
+  "controllerValues": { "Prospecting": 0, "Proposal": 1, "Negotiation": 3, "Closed Won": 4 },
+  "defaultValue": { "value": "Final Review", "label": "Final Review" },
+  "url": "/services/data/v66.0/ui-api/object-info/Opportunity/picklist-values/012Qg0000004aBcDE/Sub_Stage__c",
+  "eTag": "12d4d1b21e1c"
+}
+
+Example request (all picklists on a record type)
+
+get_picklist_values({
+  "sObject": "Account",
+  "recordTypeId": "012000000000000AAA"
+})
+
+Result has picklistFieldValues keyed by field API name (Industry, Type,
+Rating, etc.).

@@ -1,0 +1,57 @@
+Tool: manage_approval_process
+
+Description
+Create / update / activate / deactivate / delete approval processes via
+the Metadata API. Allows defining entry criteria, approval steps with
+approvers, and final actions.
+
+Salesforce API
+Metadata API (`ApprovalProcess`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+object (string, required) - sObject API name.
+fullName (string, required) - DeveloperName.
+label (string, required for create) - Master label.
+description (string, optional).
+entryCriteria (object, optional) - { booleanFilter, criteriaItems[], formula }.
+approvalSteps (array, optional) - [{ stepNumber, label, description, criteria, assignedApprover ({ type, name }), allowDelegate, ifCriteriaNotMet }].
+initialSubmitters (array, optional) - [{ type, name }].
+recordEditability (string, optional) - "Admin" | "AdminOrCurrentApprover".
+finalApprovalActions (array, optional) - [{ actionName, actionType }].
+finalRejectionActions, recallActions, approvalActions, rejectionActions (array, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+approvalProcess (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on bad criteria.
+
+Example request
+
+manage_approval_process({
+  "operation": "create",
+  "object": "Opportunity",
+  "fullName": "Discount_Over_20_Percent",
+  "label": "Discount > 20%",
+  "entryCriteria": { "criteriaItems": [{ "field": "Opportunity.Discount__c", "operation": "greaterThan", "value": "20" }] },
+  "approvalSteps": [{ "stepNumber": 1, "label": "Sales Director", "assignedApprover": { "type": "User", "name": "sales.dir@magnatech.com" } }]
+})

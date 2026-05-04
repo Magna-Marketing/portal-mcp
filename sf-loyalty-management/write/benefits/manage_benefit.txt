@@ -1,0 +1,56 @@
+Tool: manage_benefit
+
+Description
+Create / update / activate / deactivate / delete a `Benefit` row plus
+its `BenefitParameterValue` rows.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `Benefit` and `BenefitParameterValue`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/Benefit
+PATCH  /services/data/v66.0/sobjects/Benefit/{id}
+DELETE /services/data/v66.0/sobjects/Benefit/{id}
+POST   /services/data/v66.0/composite/sobjects     (BenefitParameterValue rows)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "Free_Checked_Bag", "Description": "First checked bag free", "BenefitTypeId": "...", "IsActive": true, "EffectiveStartDate": "2026-05-01", "ImageUrl": "..." }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+benefitId (string, optional, required for non-create).
+benefitTypeId (string, optional, required for create) - Or benefitTypeName.
+benefitTypeName (string, optional).
+name (string, required for create).
+description (string, optional).
+imageUrl (string, optional).
+isActive (boolean, optional).
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+parameters (object, optional) - Map of BenefitParameterValue.Name -> Value (e.g. { "BagCount": "1" }).
+
+Result
+benefit (object) - { id, name, benefitTypeId, isActive, parameters }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE.
+
+Example request
+
+manage_benefit({
+  "operation": "create",
+  "benefitTypeName": "Discount",
+  "name": "Free_Checked_Bag",
+  "description": "First checked bag free",
+  "parameters": { "BagCount": "1" }
+})

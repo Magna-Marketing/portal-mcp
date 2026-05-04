@@ -1,0 +1,53 @@
+Tool: get_connection_sitemap
+
+Description
+Read the connection's "site map" — the curated set of objects /
+folders / paths the source has been narrowed to (used by
+file-based connectors like S3 / SFTP to scope traversals to a
+specific bucket-prefix or directory).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/sitemap
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+connectionId (string, required).
+
+Result
+sitemap (object): connectionId, version, paths (array<{ path, type
+  ("Bucket" | "Prefix" | "File" | "Folder"), label, includeRecursive,
+  fileFormat (string|null) }>), lastUpdatedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 400 INVALID_CONNECTOR_TYPE (sitemap is only
+  meaningful for file-based connectors).
+
+Example request
+
+get_connection_sitemap({ "connectionId": "0Z65800000000ABCAA" })
+
+Example result
+{
+  "sitemap": {
+    "connectionId": "0Z65800000000ABCAA", "version": 3,
+    "paths": [
+      { "path": "s3://magnatech-data/customers/", "type": "Prefix",
+        "includeRecursive": true, "fileFormat": "CSV" }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+Tool: manage_document_ai_configuration
+
+Description
+Create, update, or delete a Document AI configuration.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/document-processing/configurations                  (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/document-processing/configurations/:idOrApiName     (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/document-processing/configurations/:idOrApiName     (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "Invoice_Default",
+  "label": "Default Invoice extractor",
+  "documentType": "Invoice",
+  "schema": {
+    "fields": [
+      { "apiName": "InvoiceNumber__c", "dataType": "TEXT", "isRequired": true },
+      { "apiName": "Amount__c",        "dataType": "DECIMAL" },
+      { "apiName": "InvoiceDate__c",   "dataType": "DATE" }
+    ]
+  },
+  "targetDmoApiName": "Invoice__dlm"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+idOrApiName (string, required for update / delete).
+apiName (string, required for create).
+label (string, required for create).
+documentType (string, required for create) - "Invoice" | "Contract" |
+  "PurchaseOrder" | "Receipt" | "Custom".
+schema (object, required for create).
+targetDmoApiName (string, required for create).
+extractionRules (array, optional).
+
+Result
+configuration (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; running extraction jobs are aborted.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_SCHEMA, 404 NOT_FOUND.
+
+Example request
+
+manage_document_ai_configuration({
+  "operation": "create",
+  "apiName": "Invoice_Default",
+  "label": "Default Invoice extractor",
+  "documentType": "Invoice",
+  "schema": { "fields": [{ "apiName": "InvoiceNumber__c", "dataType": "TEXT" }] },
+  "targetDmoApiName": "Invoice__dlm"
+})
+
+Example result
+{ "configuration": { "id": "0YE580000000001", "apiName": "Invoice_Default", "status": "Active" } }

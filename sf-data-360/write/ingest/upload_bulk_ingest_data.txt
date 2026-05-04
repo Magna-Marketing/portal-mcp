@@ -1,0 +1,64 @@
+Tool: upload_bulk_ingest_data
+
+Description
+Upload a CSV or JSON chunk to an open Bulk Ingestion job. Up to
+100MB per chunk; multiple chunks per job. Job must be in `Open`
+state — close after the final chunk to start processing.
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+PUT {cdpTenantUrl}/api/v1/ingest/jobs/:jobId/batches
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: text/csv         (CSV)  or application/json   (JSON)
+Accept: application/json
+
+Body (CSV)
+Id__c,OrderDate__c,Amount__c
+ORDER-100023,2026-04-29T13:02:11Z,199.99
+
+Body (JSON)
+{ "data": [ { "Id__c": "ORDER-100023", "Amount__c": 199.99 } ] }
+
+Input (parameters)
+jobId (string, required).
+csv (string, optional) - Inline CSV.
+csvBase64 (string, optional).
+data (object[], optional) - JSON rows.
+
+Result
+batchId (string).
+jobId (string).
+state (string) - "Queued".
+sizeBytes (number).
+rowCountEstimate (number).
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Not idempotent.
+- 100MB per chunk.
+
+Errors
+- 400 INVALID_CSV_HEADER, 409 JOB_NOT_OPEN,
+  413 PAYLOAD_TOO_LARGE, 401 invalid_token.
+
+Example request
+
+upload_bulk_ingest_data({
+  "jobId": "JOB_001",
+  "csv": "Id__c,Amount__c\nORDER-100023,199.99"
+})
+
+Example result
+{
+  "batchId": "BATCH_001",
+  "jobId": "JOB_001",
+  "state": "Queued",
+  "sizeBytes": 64,
+  "rowCountEstimate": 1
+}

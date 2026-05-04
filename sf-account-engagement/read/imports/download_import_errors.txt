@@ -1,0 +1,60 @@
+Tool: download_import_errors
+
+Description
+Download the per-row error CSV for an import that ended with
+`errorCount > 0`. Each row includes the original payload + the
+validation error message.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/imports/:id/errors
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: text/csv, application/octet-stream
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+asJson (boolean, optional, default false) - When true, the MCP
+  server parses the CSV and returns row objects.
+asBase64 (boolean, optional, default false).
+
+Result
+importId (number).
+fileName (string).
+contentType (string) - "text/csv".
+sizeBytes (number).
+csv (string, when asBase64=false and asJson=false).
+csvBase64 (string, when asBase64=true).
+rows (array, when asJson=true) - Each row: original CSV columns +
+  `error.message`, `error.code`.
+rowCount (number).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. Errors file is retained for 30 days post-completion.
+
+Errors
+- 59 not_found, 53 import_not_complete.
+
+Example request
+
+download_import_errors({ "id": 5512, "asJson": true })
+
+Example result
+{
+  "importId": 5512,
+  "rowCount": 12,
+  "rows": [
+    { "email": "bad@", "first_name": "Sam",
+      "error": { "code": "invalid_email", "message": "Email is invalid" } }
+  ]
+}

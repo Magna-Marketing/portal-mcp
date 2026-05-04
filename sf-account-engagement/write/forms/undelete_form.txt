@@ -1,0 +1,44 @@
+Tool: undelete_form
+
+Description
+Restore a soft-deleted Form by id. Within the 90-day retention
+window the row remains; after that, undelete returns
+`code: 53 form_purged`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/forms/do/undelete
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "ids": [4421, 4422] }
+
+Input (parameters)
+ids (number[], required) - Up to 200 form ids per call.
+
+Result
+restored (number[]) - Successfully restored ids.
+errors (array) - Each: { id, code, message }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent: restoring an already-active form is a no-op.
+
+Errors
+- 53 form_purged, 59 not_found.
+
+Example request
+
+undelete_form({ "ids": [4421] })
+
+Example result
+{ "restored": [4421], "errors": [] }

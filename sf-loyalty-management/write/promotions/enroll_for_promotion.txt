@@ -1,0 +1,58 @@
+Tool: enroll_for_promotion
+
+Description
+Enroll one or more members in a promotion. Required when the promotion
+has `EnrollmentRequired = true`. Wraps the Loyalty Program Process
+"Enroll for Promotions".
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Enroll for Promotions", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Enroll for Promotions",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "PromotionId": "0M3Qg00000abcDE2",
+    "Members": [{ "MemberId": "0lMQg00000abcDE2" }],
+    "EnrollmentChannel": "Web"
+  }
+}
+
+Input (parameters)
+programName (string, required).
+promotionId (string, optional) - Or promotionName.
+promotionName (string, optional).
+members (object[], required) - Each: { memberId | membershipNumber }.
+enrollmentChannel (string, optional).
+enrollmentDate (string, optional, default today).
+
+Result
+processResult (object) - { isSuccess, processStatus }.
+results (array) - Per member: { memberId, status ("enrolled"|"already_enrolled"|"not_eligible"|"failed"), enrollmentId, error }.
+summary (object) - { enrolled, alreadyEnrolled, notEligible, failed, total }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Idempotent — re-enrolling returns "already_enrolled".
+
+Errors
+- LOYALTY_PROMOTION_NOT_ELIGIBLE, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+enroll_for_promotion({
+  "programName": "MTG_Rewards",
+  "promotionName": "Q3_Earn_Double_Points",
+  "members": [{ "memberId": "0lMQg00000abcDE2" }]
+})

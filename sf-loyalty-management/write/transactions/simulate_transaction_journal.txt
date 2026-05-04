@@ -1,0 +1,56 @@
+Tool: simulate_transaction_journal
+
+Description
+Simulate a Transaction Journal: runs accrual / redemption rules and
+returns the **points / voucher / promotion deltas** the journal would
+produce **without persisting** anything. Use to pre-compute
+"what would I earn?" UI hints or to validate rule-engine config.
+
+Salesforce API
+Loyalty Connect API, v66.0. Same endpoint as `execute_transaction_journal`
+but with `isSimulation=true`.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/transactions/transaction-journals
+Body has `isSimulation: true`.
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Same shape as `execute_transaction_journal` plus `isSimulation: true`.
+
+Input (parameters)
+Same as `execute_transaction_journal`.
+
+Result
+results (array) - Per journal: isSuccess, simulated (boolean=true),
+  pointsCredited (number, optional), pointsDebited (number, optional),
+  programCurrencyName (string|null),
+  matchedPromotions (array) - [{ promotionId, promotionName, expectedPoints, expectedVoucher }],
+  appliedRules (array, optional),
+  errors (array, optional).
+processedAt (string).
+
+Required permissions
+- `Loyalty Management` permission set (read-level since nothing is written).
+
+Idempotency & limits
+- Read-only effect; safe to retry.
+- Same 200-journal cap as execute.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, INVALID_JOURNAL_TYPE.
+
+Example request
+
+simulate_transaction_journal({
+  "programName": "MTG_Rewards",
+  "journals": [{
+    "memberId": "0lMQg00000abcDE2",
+    "journalTypeName": "Accrual",
+    "transactionAmount": 250,
+    "currencyIsoCode": "USD"
+  }]
+})

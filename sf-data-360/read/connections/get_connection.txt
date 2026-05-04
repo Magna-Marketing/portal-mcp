@@ -1,0 +1,48 @@
+Tool: get_connection
+
+Description
+Read a single Connection by id with its full configuration (auth
+credentials are masked).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+connectionId (string, required).
+
+Result
+connection (object): id, name, label, connectorType, description,
+  status, isDefaultConnection, additionalProperties (object —
+  per-connector config), createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 INVALID_SESSION_ID.
+
+Example request
+
+get_connection({ "connectionId": "0Z65800000000ABCAA" })
+
+Example result
+{
+  "connection": {
+    "id": "0Z65800000000ABCAA", "name": "MTG_MCE",
+    "connectorType": "MarketingCloudEngagement",
+    "additionalProperties": { "subdomain": "mc7xxxxxxxxxxx", "memberId": 5001234 }
+  }
+}

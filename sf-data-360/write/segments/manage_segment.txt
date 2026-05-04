@@ -1,0 +1,76 @@
+Tool: manage_segment
+
+Description
+Create, update, or delete a Segment. Segments live in a DMO; the
+filter expression refines the population (using a structured
+criteria graph or a SQL `WHERE` clause).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/segments                        (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName         (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName         (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "EMEAHighValue",
+  "label": "EMEA High-value Customers",
+  "description": "Region=EMEA AND LTV >= 5000",
+  "dataSpace": "default",
+  "dmoApiName": "UnifiedIndividual__dlm",
+  "filter": {
+    "rootGroup": "AND",
+    "conditions": [
+      { "field": "Region__c",        "op": "eq",  "value": "EMEA" },
+      { "field": "LifetimeValue__c", "op": "gte", "value": 5000 }
+    ]
+  },
+  "schedule": { "scheduleType": "Cron", "cronExpression": "0 0 * * * ?" }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+segmentApiName (string, required for update / delete).
+apiName (string, required for create).
+label (string, required for create).
+description (string, optional).
+dataSpace (string, optional, default "default").
+dmoApiName (string, required for create).
+filter (object, required for create) - Criteria graph.
+schedule (object, optional).
+
+Result
+segment (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; activations referencing the segment break.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_FILTER, 404 NOT_FOUND.
+
+Example request
+
+manage_segment({
+  "operation": "create",
+  "apiName": "EMEAHighValue",
+  "label": "EMEA High-value",
+  "dmoApiName": "UnifiedIndividual__dlm",
+  "filter": {
+    "rootGroup": "AND",
+    "conditions": [{ "field": "Region__c", "op": "eq", "value": "EMEA" }]
+  }
+})
+
+Example result
+{ "segment": { "id": "0YS580000000001", "apiName": "EMEAHighValue", "publishStatus": "NotPublished" } }

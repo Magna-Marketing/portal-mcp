@@ -1,0 +1,86 @@
+Tool: manage_data_graph
+
+Description
+Create or delete a Data Graph. Updating an existing Data Graph's
+shape (which DMOs are included, cardinalities) isn't supported by
+v5; recreate it under a different `developerName` and migrate
+consumers.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-graphs               (operation="create")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-graphs/:dataGraphName (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "developerName": "UnifiedIndividualGraph",
+  "label": "Unified Individual Graph",
+  "dataSpace": "default",
+  "primaryDmo": "UnifiedIndividual__dlm",
+  "refreshFrequency": "Hourly",
+  "includedDmos": [
+    {
+      "dmoApiName": "EngagementHistory__dlm",
+      "relationshipName": "EngagementHistory",
+      "cardinality": "OneToMany",
+      "fields": ["EventType__c","EventTimestamp__c"]
+    }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+dataGraphName (string, required for delete).
+developerName (string, required for create).
+label (string, required for create).
+dataSpace (string, optional, default "default").
+primaryDmo (string, required for create).
+refreshFrequency (string, optional, default "Hourly") - "Hourly" |
+  "Daily" | "OnDemand".
+includedDmos (array, required for create) - Each:
+  { dmoApiName, relationshipName, cardinality, fields (string[]) }.
+
+Result
+dataGraph (object) - Created row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; downstream consumers (MC Next personalization) error
+  on the next refresh.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_RELATIONSHIP, 404 NOT_FOUND.
+
+Example request
+
+manage_data_graph({
+  "operation": "create",
+  "developerName": "UnifiedIndividualGraph",
+  "label": "Unified Individual Graph",
+  "primaryDmo": "UnifiedIndividual__dlm",
+  "includedDmos": [
+    { "dmoApiName": "EngagementHistory__dlm",
+      "relationshipName": "EngagementHistory",
+      "cardinality": "OneToMany",
+      "fields": ["EventType__c","EventTimestamp__c"] }
+  ]
+})
+
+Example result
+{
+  "dataGraph": {
+    "developerName": "UnifiedIndividualGraph",
+    "primaryDmo": "UnifiedIndividual__dlm",
+    "status": "Refreshing"
+  }
+}

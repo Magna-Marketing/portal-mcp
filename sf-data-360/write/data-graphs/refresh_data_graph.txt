@@ -1,0 +1,53 @@
+Tool: refresh_data_graph
+
+Description
+Trigger an on-demand refresh of a Data Graph — re-pulls the latest
+DMO data and rebuilds the denormalized graph cache. Async; the
+graph remains queryable with stale data until the refresh
+completes.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-graphs/:dataGraphName/actions/refresh
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{}
+
+Input (parameters)
+dataGraphName (string, required).
+runIdempotencyKey (string, optional).
+
+Result
+runId (string).
+dataGraphName (string).
+status (string) - "Queued".
+submittedAt (ISO-8601).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight refresh per Data Graph.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS.
+
+Example request
+
+refresh_data_graph({ "dataGraphName": "UnifiedIndividualGraph" })
+
+Example result
+{
+  "runId": "RUN_DG_2026-04-29T13",
+  "dataGraphName": "UnifiedIndividualGraph",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

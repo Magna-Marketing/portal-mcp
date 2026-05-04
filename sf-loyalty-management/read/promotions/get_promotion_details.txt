@@ -1,0 +1,58 @@
+Tool: get_promotion_details
+
+Description
+Get a single promotion's full configuration via the Loyalty Connect
+API: identity, eligibility criteria, rule template, products /
+categories scoped, channels, market segments, party usage limits,
+limits / caps, executor groups. Use to render the promotion to a
+member or admin.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/promotions/{promotionId}/promotion-details
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required).
+promotionId (string, required).
+includeRuleTemplate (boolean, optional, default true).
+includeProducts (boolean, optional, default true).
+includeChannels (boolean, optional, default true).
+includeLimits (boolean, optional, default true).
+
+Result
+promotion (object) - Verbatim Connect API promotion details:
+  promotionId, promotionName, description, status, promotionType,
+  effectiveStartDate, effectiveEndDate, enrollmentRequired,
+  enrolledMembersCount, maxMembershipCount,
+  ruleTemplateName (string|null), ruleTemplateParameters (object|null),
+  products (array, optional), productCategories (array, optional),
+  channels (array, optional) - [{ name, type }],
+  marketSegments (array, optional),
+  limits (array, optional) - [{ limitType, value, period }],
+  partyUsage (array, optional) - [{ partyType, value, period }],
+  loyaltyTiersScoped (array, optional).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROMOTION_NOT_FOUND, LOYALTY_PROGRAM_NOT_FOUND.
+
+Example request
+
+get_promotion_details({
+  "programName": "MTG_Rewards",
+  "promotionId": "0M3Qg00000abcDE2"
+})

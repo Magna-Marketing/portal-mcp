@@ -1,0 +1,63 @@
+Tool: get_transaction_history
+
+Description
+Member-facing, Connect-API formatted transaction history (the same
+shape used in member portals). Each entry summarizes points earned /
+redeemed, channel, related activity, and reference. Use this for
+member-app integrations; for raw rows use `list_transaction_journals`.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/members/{memberId}/transactions/transaction-history?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&pageSize=50&pageToken=...
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+startDate (string, optional) - YYYY-MM-DD.
+endDate (string, optional) - YYYY-MM-DD.
+journalType (string|string[], optional) - Filter to types.
+pageSize (number, optional, default 50, max 200).
+pageToken (string, optional) - Continuation token from previous page.
+followAllPages (boolean, optional, default false) - When true, follow `nextPageToken` automatically.
+
+Result
+memberId (string).
+totalCount (number, optional).
+hasNextPage (boolean).
+nextPageToken (string|null).
+transactions (array) - Each:
+  journalId (string), journalDate (string), journalType (string), journalSubType (string|null),
+  status (string), transactionAmount (number, optional), currencyIsoCode (string|null),
+  pointsCredited (number, optional), pointsDebited (number, optional),
+  programCurrencyName (string|null),
+  externalTransactionNumber (string|null),
+  channel (string|null), eventType (string|null),
+  productId (string|null), productName (string|null),
+  comments (string|null).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+get_transaction_history({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "startDate": "2026-01-01",
+  "pageSize": 50
+})

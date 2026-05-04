@@ -1,0 +1,51 @@
+Tool: update_field_history_tracking
+
+Description
+Enable / disable Field History tracking on specific fields of an
+sObject. When tracked, edits create rows in `<sObject>History`.
+Optional Shield Field Audit Trail retention is controlled separately.
+
+Salesforce API
+Metadata API (`CustomObject.enableHistory` + per-field `trackHistory`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+sObject (string, required).
+enableObjectHistory (boolean, optional) - Org-level toggle.
+fields (object[], required) - Each: { field (API name), trackHistory (boolean) }.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+sObject (string).
+fields (array) - { field, trackHistory, status ("changed"|"unchanged"|"failed") }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent.
+- Each sObject has a max of 20 tracked fields.
+
+Errors
+- TRACK_HISTORY_LIMIT_EXCEEDED, INVALID_FIELD.
+
+Example request
+
+update_field_history_tracking({
+  "sObject": "Project__c",
+  "enableObjectHistory": true,
+  "fields": [
+    { "field": "Status__c", "trackHistory": true },
+    { "field": "Project_Manager__c", "trackHistory": true }
+  ]
+})

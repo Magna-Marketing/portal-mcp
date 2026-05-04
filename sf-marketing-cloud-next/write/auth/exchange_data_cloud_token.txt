@@ -1,0 +1,81 @@
+Tool: exchange_data_cloud_token
+
+Description
+Exchange a regular Salesforce Core access token for a **Data Cloud-
+scoped token** bound to the org's CDP host. Required before any
+Data Cloud (Streaming Ingest, Bulk Ingest, Query, Profile, Segment,
+Activation, IR) call. The MCP server caches the resulting token for
+its `expires_in` lifetime and reuses it across tool calls; this tool
+is rarely called by the user directly.
+
+Auth flow:
+
+1. Mint a regular Salesforce token (sf-core handles this — JWT
+   bearer / refresh_token / client_credentials all work).
+2. POST it to `/services/a360/token` (the CDP Auth Exchange) with
+   `grant_type=urn:salesforce:grant-type:external:cdp` and
+   `subject_token=<core_access_token>`.
+3. Use the returned `access_token` against the returned
+   `instance_url` (the CDP host).
+
+Salesforce API
+Salesforce CDP Auth Exchange.
+
+Endpoint
+POST {core_instance_url}/services/a360/token
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+Body (form-urlencoded)
+grant_type=urn:salesforce:grant-type:external:cdp
+&subject_token=<core_access_token>
+&subject_token_type=urn:ietf:params:oauth:token-type:access_token
+
+Input (parameters)
+coreAccessToken (string, optional) - Override the configured Connected
+  App's cached access token. When omitted, the MCP server mints a
+  fresh one via the standard sf-core auth path before exchanging.
+forceRefresh (boolean, optional, default false) - Skip the cached
+  CDP token and exchange a new one.
+
+Result
+accessToken (string) - The Data Cloud-scoped token. Use this on
+  every CDP call.
+instanceUrl (string) - The CDP host (e.g.
+  "https://magnatech.c360a.salesforce.com"). Use as the base URL.
+issuedTokenType (string) - Always
+  "urn:ietf:params:oauth:token-type:access_token".
+tokenType (string) - "Bearer".
+expiresIn (number) - Token lifetime in seconds (typically 7200).
+
+Required scopes
+- `cdp_api` (broad) or any of the specific CDP scopes
+  (`cdp_query_api_read`, `cdp_profile_api_read`, `cdp_ingest_api`,
+  `cdp_segment_api`, `cdp_calculated_insight_api`,
+  `cdp_identityresolution_api`).
+
+Idempotency & limits
+- Each call returns a fresh CDP token. The previously-issued token
+  remains valid until its TTL.
+- 100 token exchanges/minute per Connected App; cache aggressively.
+
+Errors
+- 400 invalid_grant (core token expired / wrong audience),
+  400 unsupported_grant_type (Connected App not enabled for CDP),
+  403 invalid_audience (org doesn't have Data Cloud provisioned).
+
+Example request
+
+exchange_data_cloud_token({})
+
+Example result
+{
+  "accessToken": "00D58000000IFx0!ARkAQE...",
+  "instanceUrl": "https://magnatech.c360a.salesforce.com",
+  "issuedTokenType": "urn:ietf:params:oauth:token-type:access_token",
+  "tokenType": "Bearer",
+  "expiresIn": 7200
+}

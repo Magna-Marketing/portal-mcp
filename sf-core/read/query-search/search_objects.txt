@@ -1,0 +1,102 @@
+Tool: search_objects
+
+Description
+Discover sObjects in the org by name pattern. Returns the matching
+objects from the global describe with high-level metadata (label, custom
+flag, queryable/createable flags, key prefix). Use this to resolve a
+human label or partial API name to an exact sObject API name before
+calling `describe_object`, `query_records`, or `dml_records`. For full
+field/relationship/recordType detail of a single object use
+`describe_object`.
+
+Salesforce API
+REST API (Data), v66.0. Backed by the global describe at
+`GET /sobjects/`. The MCP server filters and ranks results.
+
+Endpoint
+GET https://{instance}.my.salesforce.com/services/data/v66.0/sobjects/
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+pattern (string, required) - Glob-like pattern. Supports `*` (any chars)
+  and case-insensitive substring match. Examples: "Project*", "*Order*",
+  "Account".
+includeCustomOnly (boolean, optional, default false) - Restrict to custom
+  objects (API names ending `__c` or with namespace prefix).
+includeStandardOnly (boolean, optional, default false) - Restrict to
+  standard objects.
+queryableOnly (boolean, optional, default false) - Only objects where
+  queryable=true.
+limit (number, optional, default 50, max 200) - Cap on returned objects.
+
+Result
+results (array) - Each entry:
+  name (string) - sObject API name (e.g. "Opportunity", "Project__c").
+  label (string) - UI label.
+  labelPlural (string).
+  custom (boolean) - true for __c objects.
+  customSetting (boolean).
+  keyPrefix (string|null) - 3-char ID prefix (e.g. "001" = Account).
+  queryable (boolean).
+  createable (boolean).
+  updateable (boolean).
+  deletable (boolean).
+  layoutable (boolean).
+  searchable (boolean).
+  feedEnabled (boolean).
+  triggerable (boolean).
+  urls (object) - Standard URLs (sobject, describe, rowTemplate, etc.).
+
+Required permissions
+- API Enabled.
+- Object read on each sObject (filtered objects with no read are omitted).
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Global describe is cached; tool may serve from local cache for ~5 min.
+
+Errors
+- INVALID_TYPE: pattern is malformed.
+
+Example request
+
+search_objects({ "pattern": "Project*", "includeCustomOnly": true })
+
+Example result
+
+{
+  "results": [
+    {
+      "name": "Project__c",
+      "label": "Project",
+      "labelPlural": "Projects",
+      "custom": true,
+      "keyPrefix": "a01",
+      "queryable": true,
+      "createable": true,
+      "updateable": true,
+      "deletable": true,
+      "searchable": true,
+      "triggerable": true
+    },
+    {
+      "name": "Project_Phase__c",
+      "label": "Project Phase",
+      "labelPlural": "Project Phases",
+      "custom": true,
+      "keyPrefix": "a02",
+      "queryable": true,
+      "createable": true,
+      "updateable": true,
+      "deletable": true,
+      "searchable": true,
+      "triggerable": false
+    }
+  ]
+}

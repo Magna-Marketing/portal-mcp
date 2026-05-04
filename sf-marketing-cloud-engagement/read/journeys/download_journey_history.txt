@@ -1,0 +1,59 @@
+Tool: download_journey_history
+
+Description
+Queue a CSV export of a journey's activity history (per-contact, per-
+activity events). The export is asynchronous; the response includes a
+download Id you can fetch later.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/journeyhistory/download`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/journeyhistory/download?columns=ActivityId,ContactKey,ActivityType,Status,EventDate
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "DefinitionIds": ["abc-journey-id-1"],
+  "VersionNumbers": [1, 2],
+  "StartDate": "2026-04-01T00:00:00Z",
+  "EndDate": "2026-04-30T23:59:59Z",
+  "ActivityIds": [],
+  "ContactKeys": []
+}
+
+Input (parameters)
+journeyIds (string[], required).
+versionNumbers (number[], optional).
+startDate (string, optional) - ISO timestamp.
+endDate (string, optional).
+activityIds (string[], optional) - Restrict to specific activity keys.
+contactKeys (string[], optional) - Restrict to specific contacts.
+columns (string[], optional, default ["ActivityId","ContactKey","ActivityType","Status","EventDate"]) - Output columns.
+
+Result
+operationId (string) - Use to poll status / download.
+status (string) - "Queued" | "Processing".
+downloadUrl (string|null) - Populated when complete.
+estimatedRowCount (number, optional).
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Not idempotent — each call queues a new export.
+- Large windows can take minutes.
+
+Errors
+- 30002 journey not found, INVALID_DATE_RANGE.
+
+Example request
+
+download_journey_history({
+  "journeyIds": ["abc-journey-id-1"],
+  "startDate": "2026-04-01T00:00:00Z",
+  "endDate": "2026-04-30T23:59:59Z"
+})

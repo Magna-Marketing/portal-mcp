@@ -1,0 +1,47 @@
+Tool: list_approval_processes
+
+Description
+List Approval Processes (`ProcessDefinition`) for an sObject, showing entry criteria, approval steps with approvers, initial submitters, final approval/rejection actions, and current activation status.
+
+Salesforce API
+Metadata API (`ApprovalProcess` per sObject) + Tooling API (`ProcessDefinition`), v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, DeveloperName, TableEnumOrId, Type, State, Description FROM ProcessDefinition WHERE Type = 'Approval'
+POST /services/Soap/m/66.0   (readMetadata ApprovalProcess for full configuration)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], optional).
+includeInactive (boolean, optional, default false).
+namePattern (string, optional).
+includeFullConfig (boolean, optional, default true) - Includes step approvers and actions.
+
+Result
+totalSize (number).
+approvalProcesses (array) - Each:
+  id, name, developerName, sObject, state ("Active"|"Inactive"|"Disabled"), description.
+  entryCriteria (object|null) - { booleanFilter, criteriaItems[], formula }.
+  approvalSteps (array, when includeFullConfig=true) - Each: { stepNumber, label, description, criteria, assignedApprover ({ type, name }), allowDelegate, ifCriteriaNotMet }.
+  initialSubmitters (array) - { type, name }.
+  recordEditability (string).
+  approvalAction, rejectionAction, recallAction, finalApprovalAction, finalRejectionAction (object) - { name, type ("FieldUpdate"|"FlowAction"|...) }.
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_approval_processes({ "sObjects": ["Opportunity"], "includeInactive": false })

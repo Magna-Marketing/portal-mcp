@@ -1,0 +1,54 @@
+Tool: manage_groupconnect_app
+
+Description
+Create / update / delete a GroupConnect app registration (LINE channel,
+KakaoTalk, etc.).
+
+Marketing Cloud API
+REST API (`/legacy/v1/beta/groupconnect/apps`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/apps
+PATCH  https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/apps/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/apps/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "name": "MTG_Line", "lineAccountName": "MTG", "channelId": "...", "channelSecret": "...", "channelAccessToken": "...", "applicationType": "LINE" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+appId (string, optional, required for non-create).
+name (string, required for create).
+applicationType (string, required for create) - "LINE" | "KakaoTalk".
+lineAccountName (string, optional, for LINE).
+channelId (string, optional).
+channelSecret (string, optional).
+channelAccessToken (string, optional).
+webhookUrl (string, optional) - For inbound events.
+
+Result
+app (object) - { id, name, applicationType, lineAccountName, webhookUrl }.
+
+Required scopes
+- `messaging_api_app_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE.
+
+Example request
+
+manage_groupconnect_app({
+  "operation": "create",
+  "name": "MTG_Line",
+  "applicationType": "LINE",
+  "lineAccountName": "MTG",
+  "channelId": "1234567890",
+  "channelAccessToken": "..."
+})

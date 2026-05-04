@@ -1,0 +1,62 @@
+Tool: get_form
+
+Description
+Read a single Form by id with audit and tracker-domain relations
+expanded. Combine with `list_form_fields` to see field order.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/forms/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `trackerDomain.*`,
+  `campaign.*`, `layoutTemplate.*`, `folder.*`.
+includeFields (boolean, optional, default false) - When true, the
+  MCP server runs `list_form_fields` and returns the result as
+  `formFields[]`.
+
+Result
+form (object): id, name, campaignId, folderId, trackerDomainId,
+  layoutTemplateId, embedCode, thankYouContent, thankYouCode,
+  redirectLocation, isUseRedirectLocation, isCaptchaEnabled,
+  isCookielessTracking, salesforceId, isAlwaysDisplay,
+  beforeFormContent, afterFormContent, submitButtonText, fontFamily,
+  fontSize, fontColor, labelAlignment, radioAlignment, checkboxAlignment,
+  requiredCharacter, showNotProspect, tagReplacementLanguage, isDeleted,
+  createdAt, updatedAt.
+trackerDomain (object|null), campaign (object|null),
+  layoutTemplate (object|null), folder (object|null).
+formFields (array, when includeFields=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_form({ "id": 4421, "includeFields": true })
+
+Example result
+{
+  "form": { "id": 4421, "name": "Demo Request", "campaignId": 1024 },
+  "formFields": [
+    { "id": 51, "name": "Email",     "prospectApiFieldId": "email", "isRequired": true },
+    { "id": 52, "name": "FirstName", "prospectApiFieldId": "first_name" }
+  ]
+}

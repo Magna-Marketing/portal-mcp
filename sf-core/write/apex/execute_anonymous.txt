@@ -1,0 +1,83 @@
+Tool: execute_anonymous
+
+Description
+Execute an Apex code block anonymously, as the running OAuth user.
+Useful for ad-hoc scripts, one-off data fixes, or smoke tests. The code
+runs in a single synchronous transaction with normal governor limits
+(10 s CPU, 6 MB heap, 100 SOQL, 150 DML). Output of `System.debug()` is
+captured if a debug log was open for the user.
+
+This **does not** persist any class. Use `write_apex` to save reusable
+code.
+
+Salesforce API
+Tooling API, v66.0. `GET /tooling/executeAnonymous`.
+
+Endpoint
+GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody={url-encoded source}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None — the source is a query parameter.
+
+Input (parameters)
+body (string, required) - Apex code to run. Must end with a `;` after
+  every statement; supports any valid anonymous block (loops, DML, etc.).
+captureDebugLog (boolean, optional, default true) - When true, the tool
+  enables a temporary `TraceFlag` over the running user with `Debug` log
+  level so the run produces a debug log. The log is fetched after
+  execution and returned in `debugLog`. Adds ~1 s of overhead.
+debugLevels (object, optional) - Override per-category levels when
+  captureDebugLog=true: { Apex: "DEBUG", Workflow: "INFO", Db: "INFO",
+  Validation: "INFO", System: "DEBUG", Callout: "INFO", Profiling: "NONE" }.
+
+Result
+result (object):
+  compiled (boolean).
+  compileProblem (string|null) - When compiled=false.
+  line, column (number|null).
+  success (boolean) - true iff compiled and ran without uncaught exception.
+  exceptionMessage (string|null).
+  exceptionStackTrace (string|null).
+debugLog (string|null) - Full text of the captured debug log (when
+  captureDebugLog=true and TraceFlag was set).
+debugLogId (string|null) - ApexLog Id (use `manage_debug_logs` to fetch
+  later).
+
+Required permissions
+- "Author Apex".
+- "View All Data" / "Modify All Data" if the code touches data the user
+  can't normally see.
+
+Idempotency & limits
+- Anonymous Apex is **not idempotent**: side effects (DML, callouts)
+  apply once per call.
+- Single transaction governor limits.
+- Source length up to 100 KB.
+
+Errors
+- compiled=false with compileProblem.
+- success=false with exceptionMessage (e.g.
+  "System.NullPointerException: Attempt to de-reference a null object").
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+execute_anonymous({
+  "body": "Account a = new Account(Name='ACME-Test'); insert a; System.debug('inserted: ' + a.Id);"
+})
+
+Example result
+
+{
+  "result": {
+    "compiled": true,
+    "success": true,
+    "exceptionMessage": null
+  },
+  "debugLog": "10:14:23.0 (1234) USER_DEBUG ... |inserted: 0014Q00000abcDE\n",
+  "debugLogId": "07L4Q00000XyZab"
+}

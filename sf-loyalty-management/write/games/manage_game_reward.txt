@@ -1,0 +1,68 @@
+Tool: manage_game_reward
+
+Description
+Create / update / delete a `GameReward` (a prize slot inside a
+`GameDefinition`). Reward types: Points, Voucher, Badge, Custom.
+Probability + per-segment caps drive the random / weighted draw.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `GameReward`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/GameReward
+PATCH  /services/data/v66.0/sobjects/GameReward/{id}
+DELETE /services/data/v66.0/sobjects/GameReward/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "Name": "100_Bonus_Points",
+  "GameDefinitionId": "...",
+  "RewardType": "Points",
+  "RewardValue": 100,
+  "ProgramCurrencyId": "...",
+  "ProbabilityPercent": 35,
+  "MaxRedemptionCount": 5000,
+  "IsActive": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+gameRewardId (string, optional, required for non-create).
+gameDefinitionId (string, optional, required for create) - Or gameName.
+gameName (string, optional).
+name (string, required for create).
+rewardType (string, required for create) - "Points" | "Voucher" | "Badge" | "Custom".
+rewardValue (number, optional) - For Points type.
+programCurrencyId (string, optional) - For Points type.
+voucherDefinitionId (string, optional) - For Voucher type.
+badgeId (string, optional) - For Badge type.
+probabilityPercent (number, optional) - 0..100.
+maxRedemptionCount (number, optional).
+isActive (boolean, optional, default true).
+
+Result
+gameReward (object) - { id, name, gameDefinitionId, rewardType, rewardValue, probabilityPercent, isActive }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on inconsistent rewardType + value combination.
+
+Example request
+
+manage_game_reward({
+  "operation": "create",
+  "gameName": "Spin_The_Wheel_Q3",
+  "name": "100_Bonus_Points",
+  "rewardType": "Points",
+  "rewardValue": 100,
+  "probabilityPercent": 35
+})

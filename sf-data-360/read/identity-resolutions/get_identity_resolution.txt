@@ -1,0 +1,56 @@
+Tool: get_identity_resolution
+
+Description
+Read a single Identity Resolution ruleset by id or api name. Returns
+the full match + reconciliation rules and run history.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions/:identityResolution
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+identityResolution (string, required) - Id or api name.
+
+Result
+identityResolution (object): id, apiName, label, status,
+  unifiedDmoApiName, sourceDmos, schedule,
+  matchRules (array<{ apiName, sourceField, normalization, fuzzy,
+    weight, threshold }>),
+  reconciliationRules (array<{ targetField, strategy ("Recency" |
+    "SourcePriority" | "Frequency"), sourcePriority (array) }>),
+  lastRunStatus, lastRunDate, unifiedRecordCount, createdDate,
+  lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_identity_resolution({ "identityResolution": "UnifiedIndividual_default" })
+
+Example result
+{
+  "identityResolution": {
+    "apiName": "UnifiedIndividual_default",
+    "unifiedDmoApiName": "UnifiedIndividual__dlm",
+    "matchRules": [
+      { "apiName": "match_email", "sourceField": "EmailAddress__c",
+        "normalization": "EMAIL", "fuzzy": false, "weight": 0.6 }
+    ]
+  }
+}

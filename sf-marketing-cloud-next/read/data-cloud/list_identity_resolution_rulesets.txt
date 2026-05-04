@@ -1,0 +1,59 @@
+Tool: list_identity_resolution_rulesets
+
+Description
+List Identity Resolution rulesets — the configured match + reconcile
+rules that produce a Unified Individual / Unified Account profile
+from the underlying source DMOs. Each ruleset has its own match
+criteria and reconciliation strategies.
+
+Salesforce API
+Data Cloud Identity Resolution API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/identityresolution/rulesets
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Inactive".
+nameContains (string, optional).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+rulesets (array) - Each: { id, name, label, status,
+  unifiedDmoApiName ("UnifiedIndividual__dlm" / "UnifiedAccount__dlm"),
+  sourceDmos (array), matchRules (array), reconciliationRules
+  (array), schedule (object), lastRunStatus, lastRunDate,
+  unifiedRecordCount }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_identityresolution_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_identity_resolution_rulesets({})
+
+Example result
+{
+  "rulesets": [
+    { "id": "IR_UNIF_IND_DEFAULT", "name": "unified_individual_default",
+      "status": "Active",
+      "unifiedDmoApiName": "UnifiedIndividual__dlm",
+      "sourceDmos": ["Contact__dlm","Lead__dlm","Subscriber__dlm"],
+      "lastRunStatus": "Success", "unifiedRecordCount": 482000 }
+  ]
+}

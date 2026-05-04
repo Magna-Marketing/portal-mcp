@@ -1,0 +1,43 @@
+Tool: get_triggered_send_status
+
+Description
+Get the delivery status for a specific Triggered Send message
+identified by its `recipientSendId` (returned by `send_triggered_email`).
+Useful to confirm individual transactional sends.
+
+Marketing Cloud API
+REST API
+(`/messaging/v1/messageDefinitionSends/key:{key}/deliveryRecords/{recipientSendId}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/messageDefinitionSends/key:{triggeredSendCustomerKey}/deliveryRecords/{recipientSendId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+triggeredSendCustomerKey (string, required).
+recipientSendId (string, required) - Returned by `send_triggered_email`.
+
+Result
+delivery (object) - { recipientSendId, subscriberKey, emailAddress, status ("Queued"|"Sent"|"Bounced"|"Failed"|"NotProcessed"), bounceReason (string|null), sendDate, openCount, clickCount, lastEventDate }.
+
+Required scopes
+- `email_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_triggered_send_status({
+  "triggeredSendCustomerKey": "MTG_Welcome_TS",
+  "recipientSendId": "abc-456-recipient-id"
+})

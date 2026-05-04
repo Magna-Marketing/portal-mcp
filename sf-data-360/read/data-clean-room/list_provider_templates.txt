@@ -1,0 +1,51 @@
+Tool: list_provider_templates
+
+Description
+List the query templates available for a Data Clean Room provider.
+Templates are pre-approved SQL shapes that can be parameterized
+and run inside a collaboration.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/providers/:providerIdOrName/templates
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+providerIdOrName (string, required).
+
+Result
+templates (array) - Each: { id, apiName, label, description,
+  parameters (array<{ name, dataType, isRequired }>),
+  approvalStatus, createdDate }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+list_provider_templates({ "providerIdOrName": "MTG_Snowflake_DCR" })
+
+Example result
+{
+  "templates": [
+    { "id": "tpl_001", "apiName": "OverlapAudience",
+      "label": "Audience overlap",
+      "parameters": [
+        { "name": "minOverlapCount", "dataType": "INTEGER", "isRequired": true }
+      ] }
+  ]
+}

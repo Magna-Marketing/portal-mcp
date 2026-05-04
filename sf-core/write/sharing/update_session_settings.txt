@@ -1,0 +1,44 @@
+Tool: update_session_settings
+
+Description
+Update org-level session settings (timeouts, lockouts, HTTPS-required,
+session security level) and per-profile overrides. Applies via the
+Metadata API.
+
+Salesforce API
+Metadata API (`SecuritySettings`, `ProfileSessionSetting`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+session (object, optional) - { sessionTimeout, forceLogoutOnSessionTimeout, forceRelogin, lockSessionsToDomain, lockSessionsToIp, requireHttpOnly, requireHttps, enableCSRFOnGet, redirectionWarning, useNativeBrowserForLogin }.
+profileOverrides (object[], optional) - [{ profileName, sessionTimeout, sessionPersistence }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+session (object) - Updated values.
+profileOverrides (array) - Updated per-profile values.
+
+Required permissions
+- "Manage Internal Users" + "Customize Application".
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- INVALID_FIELD on bad enum.
+
+Example request
+
+update_session_settings({
+  "session": { "sessionTimeout": "FourHours", "forceRelogin": true, "requireHttps": true }
+})

@@ -1,0 +1,43 @@
+Tool: manage_form_tags
+
+Description
+Add or remove tags on a Form.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/forms/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/forms/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Demo Funnel" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), formId (number), tag (string), operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_form_tags({ "id": 4421, "operation": "add", "tag": "Demo Funnel" })
+
+Example result
+{ "success": true, "formId": 4421, "tag": "Demo Funnel", "operation": "add" }

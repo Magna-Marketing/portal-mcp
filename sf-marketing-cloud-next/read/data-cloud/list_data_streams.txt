@@ -1,0 +1,64 @@
+Tool: list_data_streams
+
+Description
+List Data Streams configured in Data Cloud. Each Data Stream
+ingests records from a source (S3, SFTP, Marketing Cloud, etc.) and
+produces a Data Lake Object (DLO) that maps into the customer's
+Data Model Objects (DMOs).
+
+Salesforce API
+Data Cloud Metadata API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/metadata?entityType=DataStream
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default") - Data Space scope.
+status (string, optional) - "Active" | "Paused" | "Error".
+sourceType (string, optional) - "S3" | "SFTP" | "AmazonKinesis" |
+  "MarketingCloud" | "MarketingCloudEngagement" | "Salesforce" |
+  "MarketingCloudNext" | "ManualUpload" | "WebSDK".
+nameContains (string, optional) - case-insensitive `like` filter
+  on `dataStreamApiName` / `label`.
+limit (number, optional, default 100, max 500).
+nextPageToken (string, optional).
+
+Result
+dataStreams (array) - Each: { id, dataStreamApiName, label,
+  sourceType, sourceObjectName, dlmApiName, dataSpace, status,
+  schedule (object), refreshMode ("Full" | "Incremental"),
+  lastRunStatus, lastRunDate, recordCount, createdDate,
+  lastModifiedDate }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_api` or `cdp_query_api_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token, 403 INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_data_streams({ "sourceType": "MarketingCloudEngagement" })
+
+Example result
+{
+  "dataStreams": [
+    { "id": "DS_MC_Sends", "dataStreamApiName": "mc_sends__dls",
+      "label": "MC Engagement Sends",
+      "sourceType": "MarketingCloudEngagement",
+      "dlmApiName": "mc_sends__dlm",
+      "status": "Active", "lastRunStatus": "Success",
+      "recordCount": 12450 }
+  ]
+}

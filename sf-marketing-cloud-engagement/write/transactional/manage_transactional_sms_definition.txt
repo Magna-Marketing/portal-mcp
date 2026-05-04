@@ -1,0 +1,61 @@
+Tool: manage_transactional_sms_definition
+
+Description
+Create / update / delete a Transactional Messaging SMS definition.
+Mirrors `manage_transactional_email_definition` but for SMS.
+
+Marketing Cloud API
+REST API (`/messaging/v1/sms/definitions`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions
+PATCH  https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}
+DELETE https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "definitionKey": "MTG_OrderConfirmation_SMS",
+  "name": "MTG Order Confirmation SMS",
+  "classification": "Default Transactional",
+  "status": "Active",
+  "content": { "message": "Hi %%FirstName%%, your order %%OrderId%% has shipped." },
+  "subscriptions": { "shortCode": "12345", "countryCode": "US" }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+definitionKey (string, required).
+name (string, required for create).
+description (string, optional).
+classification (string, optional, default "Default Transactional").
+status (string, optional).
+messageContent (string, optional, required for create) - SMS body with AMPscript / merge.
+shortCode (string, required for create).
+countryCode (string, optional, default "US").
+keyword (string, optional).
+
+Result
+definition (object) - { definitionKey, definitionId, name, status, classification, content, subscriptions }.
+
+Required scopes
+- `sms_send`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_SHORTCODE.
+
+Example request
+
+manage_transactional_sms_definition({
+  "operation": "create",
+  "definitionKey": "MTG_OrderConfirmation_SMS",
+  "name": "MTG Order Confirmation SMS",
+  "messageContent": "Hi %%FirstName%%, your order %%OrderId%% has shipped.",
+  "shortCode": "12345"
+})

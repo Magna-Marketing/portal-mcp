@@ -1,0 +1,81 @@
+Tool: read_flexipage
+
+Description
+Read a Lightning Page (FlexiPage). Returns the FlexiPage row, its type
+(RecordPage / AppPage / HomePage / EmbeddedServiceMinView /
+CommApp), the associated sObject (for RecordPage), and the structural
+composition: regions and the components placed in each. To go deeper
+(per-component property values, region details) use
+`read_flexipage_detailed`. For a list across the org use
+`list_lightning_pages`.
+
+Salesforce API
+Tooling API, v66.0. `FlexiPage` sObject + Metadata API for the structured
+XML when needed.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, NamespacePrefix, ManageableState, Description FROM FlexiPage WHERE DeveloperName = '{name}'
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}/Metadata    (returns parsed metadata)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - DeveloperName (e.g. "Project__c_Record_Page").
+includeXml (boolean, optional, default false) - Include the raw XML
+  body. Off by default; structured form is more useful.
+
+Result
+flexiPage (object):
+  id, name, label, type ("RecordPage"|"AppPage"|"HomePage"|...),
+  sObject (string|null) - Resolved from EntityDefinitionId for RecordPage,
+    null otherwise.
+  namespacePrefix (string|null), manageableState (string),
+  description (string|null).
+  template (string) - Lightning template name (e.g. "flexipage:headerLabel").
+  regions (array) - Each:
+    name (string) - Region API name (e.g. "header", "main", "right").
+    type (string) - "Region" | "Facet".
+    appendable (boolean).
+    components (array) - Each:
+      identifier (string) - Component identifier in the region.
+      componentName (string) - "lightning:relatedListContainer", or
+        "c:projectCard" for custom LWC.
+      componentInstanceProperties (array) - { name, value }.
+xml (string, optional) - Raw FlexiPage metadata XML when includeXml=true.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+read_flexipage({ "name": "Project__c_Record_Page" })
+
+Example result (truncated)
+
+{
+  "flexiPage": {
+    "id": "0M04Q00000aBcDef", "name": "Project__c_Record_Page",
+    "label": "Project Record Page", "type": "RecordPage", "sObject": "Project__c",
+    "template": "flexipage:recordHomeWithHeader",
+    "regions": [
+      { "name": "main", "type": "Region", "components": [
+        { "identifier": "highlight_panel", "componentName": "force:highlightsPanel" },
+        { "identifier": "tabs",            "componentName": "flexipage:tabset" }
+      ]},
+      { "name": "right", "type": "Region", "components": [
+        { "identifier": "card",            "componentName": "c:projectCard" }
+      ]}
+    ]
+  }
+}

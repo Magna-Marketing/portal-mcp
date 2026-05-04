@@ -1,0 +1,59 @@
+Tool: update_component_properties
+
+Description
+Update property values on a single component instance within a
+FlexiPage region. Use to change a label, swap a fieldApiName, change
+visibility rules, or add/remove a property. Three operations:
+- `set`: overwrite or add (default).
+- `remove`: delete listed properties.
+- `merge`: shallow merge (no overwrite of existing keys not in input).
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+flexiPageName (string, required).
+region (string, required).
+identifier (string, required) - Component identifier.
+operation (string, optional, default "set") - "set" | "remove" | "merge".
+properties (object, required for set/merge) - Property name -> value.
+propertyNames (string[], required for remove) - Names to delete.
+visibilityRule (object|"clear", optional) - When set: replace; when "clear":
+  drop the visibility rule entirely.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object) - { id, name }.
+componentInstance (object) - { identifier, before: { properties, visibilityRule }, after: { properties, visibilityRule } }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- NOT_FOUND on identifier.
+- INVALID_FIELD on a property name not allowed by the component.
+
+Example request (set a property + clear visibility)
+
+update_component_properties({
+  "flexiPageName": "Project__c_Record_Page",
+  "region": "right",
+  "identifier": "card_main",
+  "operation": "set",
+  "properties": { "label": "Project Summary (Q3)" },
+  "visibilityRule": "clear"
+})

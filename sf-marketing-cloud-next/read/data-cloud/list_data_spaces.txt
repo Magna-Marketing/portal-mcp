@@ -1,0 +1,48 @@
+Tool: list_data_spaces
+
+Description
+List Data Spaces — tenant-within-tenant scopes that isolate DMOs,
+segments, and activations (e.g. one Data Space per brand or per
+geography). Most calls default to `default`.
+
+Salesforce API
+Data Cloud Metadata API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/metadata/dataspaces
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+dataSpaces (array) - Each: { name, label, isDefault, createdDate,
+  lastModifiedDate, memberCount (number, when populated by usage
+  metadata) }.
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_data_spaces({})
+
+Example result
+{
+  "dataSpaces": [
+    { "name": "default", "label": "Default", "isDefault": true },
+    { "name": "EMEA",    "label": "EMEA Brand", "isDefault": false }
+  ]
+}

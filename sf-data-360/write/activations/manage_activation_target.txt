@@ -1,0 +1,65 @@
+Tool: manage_activation_target
+
+Description
+Create or update an Activation Target. Targets reference an
+External Platform + a target-specific config (Data Extension key,
+S3 bucket prefix, etc.).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST  {instanceUrl}/services/data/v{ver}/ssot/activation-targets                              (operation="create")
+PATCH {instanceUrl}/services/data/v{ver}/ssot/activation-targets/:activationTargetId          (operation="update")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "MTG_MCE_DE_EMEA",
+  "label": "MCE DE EMEA",
+  "targetType": "MarketingCloudEngagement",
+  "externalPlatformName": "MTG_MCE_Default",
+  "targetConfig": {
+    "dataExtensionExternalKey": "DE_EMEA_HIGH_VALUE",
+    "memberId": 5001234
+  }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update".
+activationTargetId (string, required for update).
+name (string, required for create).
+label (string, required for create).
+targetType (string, required for create).
+externalPlatformName (string, required for create).
+targetConfig (object, required for create).
+
+Result
+activationTarget (object) - Created / updated row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `name` for create.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND, 400 INVALID_TARGET_CONFIG.
+
+Example request
+
+manage_activation_target({
+  "operation": "create",
+  "name": "MTG_MCE_DE_EMEA",
+  "label": "MCE DE EMEA",
+  "targetType": "MarketingCloudEngagement",
+  "externalPlatformName": "MTG_MCE_Default",
+  "targetConfig": { "dataExtensionExternalKey": "DE_EMEA_HIGH_VALUE", "memberId": 5001234 }
+})
+
+Example result
+{ "activationTarget": { "id": "0YT580000000001", "name": "MTG_MCE_DE_EMEA" } }

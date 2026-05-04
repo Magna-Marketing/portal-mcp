@@ -1,0 +1,40 @@
+Tool: list_data_extension_fields
+
+Description
+List the fields (schema) for a Data Extension. Convenience wrapper for
+the schema slice of `get_data_extension`.
+
+Marketing Cloud API
+SOAP API (`DataExtensionField.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on DataExtensionField filtered by DataExtension.CustomerKey.
+
+Input (parameters)
+customerKey (string, optional) - DE External Key.
+deName (string, optional).
+deId (string, optional).
+  One required.
+
+Result
+fields (array) - { name, fieldType, maxLength, isPrimaryKey, isRequired, defaultValue, ordinal, scale, customerKey }.
+
+Required scopes
+- `data_extensions_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_data_extension_fields({ "customerKey": "Members_DE" })

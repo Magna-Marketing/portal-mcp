@@ -1,0 +1,53 @@
+Tool: manage_visualforce_component
+
+Description
+Create / update / delete a Visualforce component (`ApexComponent`).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/ApexComponentMember
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+DELETE /services/data/v66.0/tooling/sobjects/ApexComponent/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+name (string, required) - Component Name.
+masterLabel (string, required for create).
+apiVersion (number, optional).
+markup (string, required for create/update).
+controllerType (string, optional).
+description (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+component (object) - { id, name, masterLabel, apiVersion }.
+
+Required permissions
+- "Customize Application" / "Author Apex".
+
+Idempotency & limits
+- upsert idempotent on `name`.
+
+Errors
+- DEPLOY_FAILED.
+
+Example request
+
+manage_visualforce_component({
+  "operation": "create",
+  "name": "AccountHeader",
+  "masterLabel": "Account Header",
+  "apiVersion": 62.0,
+  "markup": "<apex:component>...</apex:component>"
+})

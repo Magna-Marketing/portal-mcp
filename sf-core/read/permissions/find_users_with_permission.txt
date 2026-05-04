@@ -1,0 +1,92 @@
+Tool: find_users_with_permission
+
+Description
+Find every active user that has a given permission, anywhere in their
+sourcing chain (profile or any permission set / permission set group).
+Two flavors:
+1. System permission: `permission` is one of the boolean Permissions*
+   flags (e.g. "ModifyAllData", "ManageUsers", "ApiEnabled").
+2. Object permission: pass `sObject` plus `accessType`
+   ("read" | "create" | "edit" | "delete" | "viewall" | "modifyall").
+
+Use this for security audits like "who can ModifyAllData?" or "who can
+delete Opportunities?".
+
+Salesforce API
+REST API + Tooling, v66.0. The MCP server runs the appropriate query:
+- System: query `PermissionSet WHERE PermissionsXxx = true` and
+  `Profile WHERE PermissionsXxx = true`, then resolve assignees.
+- Object: query `ObjectPermissions WHERE SObjectType = '<sObject>' AND
+  PermissionsXxx = true` joined to `Parent.Profile` /
+  `Parent.PermissionSet` and follow assignments.
+
+Endpoint
+N/A (composite).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+permission (string, optional) - System permission name without the
+  "Permissions" prefix (e.g. "ModifyAllData").
+sObject (string, optional) - sObject API name (use with accessType).
+accessType (string, optional) - "read" | "create" | "edit" | "delete" |
+  "viewall" | "modifyall". Required when sObject is set.
+  Exactly one of (permission) or (sObject + accessType) is required.
+includeInactiveUsers (boolean, optional, default false).
+limit (number, optional, default 1000, max 50000).
+
+Result
+permissionLabel (string) - Human label of what was searched.
+totalUsers (number).
+users (array) - Each:
+  userId, name, username, email, isActive, profileName.
+  source (string[]) - One entry per origin: "Profile: <name>",
+    "PermissionSet: <name>", "PermissionSetGroup: <name>".
+hasMore (boolean).
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- A truly broad query (e.g. ApiEnabled) can hit many users; the tool
+  paginates.
+
+Errors
+- INVALID_FIELD: unknown permission name.
+- INVALID_TYPE: unknown sObject.
+
+Example request
+
+find_users_with_permission({ "permission": "ModifyAllData", "includeInactiveUsers": false })
+
+Example result
+
+{
+  "permissionLabel": "ModifyAllData",
+  "totalUsers": 4,
+  "users": [
+    {
+      "userId": "005Qg0000020aBcAA", "name": "Admin One",
+      "username": "admin.one@magnatech.com", "email": "admin.one@magnatech.com",
+      "isActive": true, "profileName": "System Administrator",
+      "source": ["Profile: System Administrator"]
+    },
+    {
+      "userId": "005Qg0000020aBcBB", "name": "Sec Eng",
+      "username": "sec.eng@magnatech.com", "email": "sec.eng@magnatech.com",
+      "isActive": true, "profileName": "Standard User",
+      "source": ["PermissionSetGroup: MTG_Security_Admin"]
+    }
+  ],
+  "hasMore": false
+}
+
+Example request (object access)
+
+find_users_with_permission({ "sObject": "Opportunity", "accessType": "delete" })

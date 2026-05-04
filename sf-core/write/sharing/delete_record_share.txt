@@ -1,0 +1,47 @@
+Tool: delete_record_share
+
+Description
+Delete one or more `<sObject>Share` rows. Only `Manual` and Apex
+managed sharing rows can be deleted; `Owner`, `Rule`, `ImplicitChild`,
+`Team`, `Territory` rows are platform-managed.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+DELETE /services/data/v66.0/composite/sobjects?ids=...
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required).
+shareIds (string[], optional) - Direct share row Ids.
+records (object[], optional) - Each: { recordId, userOrGroupId | username | groupName }.
+  Tool resolves to share row Id.
+allOrNone (boolean, optional, default false).
+skipIfNotShared (boolean, optional, default true).
+
+Result
+results (array) - { shareId, status ("removed"|"not_shared"|"failed"|"row_cause_locked"), recordId, error }.
+summary (object) - { removed, notShared, failed, total }.
+
+Required permissions
+- "Modify All" on the sObject or be the owner.
+
+Idempotency & limits
+- Idempotent with `skipIfNotShared=true`.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- INVALID_ROW_CAUSE: trying to delete a non-Manual / non-Apex row.
+
+Example request
+
+delete_record_share({
+  "sObject": "Account",
+  "records": [{ "recordId": "0014Q00000abcDE", "username": "external.partner@magnatech.com" }]
+})

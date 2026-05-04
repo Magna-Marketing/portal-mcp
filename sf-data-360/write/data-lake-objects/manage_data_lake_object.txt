@@ -1,0 +1,72 @@
+Tool: manage_data_lake_object
+
+Description
+Create, update, or delete a Data Lake Object. Most DLOs are
+implicitly created by Data Streams; this tool is needed only for
+ad-hoc / external DLOs (e.g. when ingesting via the Streaming or
+Bulk Ingestion API directly to a DLO without a Data Stream
+wrapper).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-lake-objects                                (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/data-lake-objects/:recordIdOrDeveloperName       (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-lake-objects/:recordIdOrDeveloperName       (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "developerName": "ext_orders__dll",
+  "label": "External Orders",
+  "category": "Engagement",
+  "fields": [
+    { "apiName": "Id__c",        "dataType": "TEXT", "isPrimaryKey": true },
+    { "apiName": "Amount__c",    "dataType": "DECIMAL" },
+    { "apiName": "OrderDate__c", "dataType": "DATE_TIME" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+recordIdOrDeveloperName (string, required for update / delete).
+developerName (string, required for create).
+label (string, required for create).
+category (string, optional, default "Other") - "Profile" |
+  "Engagement" | "Other".
+fields (array, required for create) - [{ apiName, dataType,
+  isPrimaryKey, isExternalId, isRequired }].
+
+Result
+dataLakeObject (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; downstream DMO mappings break.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_FIELD, 404 NOT_FOUND.
+
+Example request
+
+manage_data_lake_object({
+  "operation": "create",
+  "developerName": "ext_orders__dll",
+  "label": "External Orders",
+  "category": "Engagement",
+  "fields": [
+    { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true },
+    { "apiName": "Amount__c", "dataType": "DECIMAL" }
+  ]
+})
+
+Example result
+{ "dataLakeObject": { "developerName": "ext_orders__dll", "category": "Engagement" } }

@@ -1,0 +1,46 @@
+Tool: get_provider
+
+Description
+Read a single Data Clean Room provider by id or name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/providers/:providerIdOrName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+providerIdOrName (string, required).
+
+Result
+provider (object): id, name, label, providerType, status,
+  configuration (object), templateCount, collaborationCount,
+  createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_provider({ "providerIdOrName": "MTG_Snowflake_DCR" })
+
+Example result
+{
+  "provider": {
+    "id": "0YP580000000001", "name": "MTG_Snowflake_DCR",
+    "providerType": "Snowflake", "templateCount": 4
+  }
+}

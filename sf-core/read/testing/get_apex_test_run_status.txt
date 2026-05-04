@@ -1,0 +1,48 @@
+Tool: get_apex_test_run_status
+
+Description
+Get the live status of an Apex test run by `AsyncApexJob` Id. Returns
+queue items, completion progress, and (when finished) the per-method
+results. For just the results once complete, use `list_apex_test_results`
+filtered by the same parent job.
+
+Salesforce API
+Tooling + REST API, v66.0.
+- `AsyncApexJob` for the parent.
+- `ApexTestQueueItem` for the queued test methods.
+- `ApexTestResult` for finished method outcomes.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Status, ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors, CompletedDate FROM AsyncApexJob WHERE Id = '{jobId}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, ApexClassId, ApexClass.Name, Status, ExtendedStatus, ParentJobId FROM ApexTestQueueItem WHERE ParentJobId = '{jobId}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, ApexClassId, ApexClass.Name, MethodName, Outcome, RunTime, StackTrace, Message FROM ApexTestResult WHERE AsyncApexJobId = '{jobId}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+jobId (string, required) - AsyncApexJob Id.
+includeResults (boolean, optional, default true).
+
+Result
+job (object) - { id, status, jobItemsProcessed, totalJobItems, numberOfErrors, completedDate, percentComplete }.
+queueItems (array) - { id, apexClassName, status ("Queued"|"Processing"|"Aborted"|"Completed"|"Failed"|"Preparing"|"Holding"), extendedStatus }.
+results (array, when includeResults=true) - { id, apexClassName, methodName, outcome ("Pass"|"Fail"|"CompileFail"|"Skip"), runTime (ms), message, stackTrace }.
+summary (object) - { passed, failed, skipped, total, durationMs }.
+
+Required permissions
+- "View All Data" / "Author Apex".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+get_apex_test_run_status({ "jobId": "707Qg00000abcDE" })

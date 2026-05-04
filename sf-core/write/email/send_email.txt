@@ -1,0 +1,82 @@
+Tool: send_email
+
+Description
+Send a single email message via Salesforce. Three modes: free-form
+(subject + body), template-based (rendered against a target record),
+or composite invocable action. Supports To / Cc / Bcc, attachments,
+HTML body, save-as-activity (logs an EmailMessage on the record).
+
+Salesforce API
+REST API (Connect API + Standard Invocable Actions), v66.0.
+
+Endpoint
+POST /services/data/v66.0/actions/standard/emailSimple        (synchronous send)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "inputs": [{
+    "emailAddresses": "to1@example.com,to2@example.com",
+    "emailAddressesArray": ["to1@example.com"],
+    "emailSubject": "Quarterly Update",
+    "emailBody": "Hello, ...",
+    "emailTemplateId": "00X4Q00000abcDE",
+    "senderType": "CurrentUser",
+    "senderAddress": null,
+    "logEmailOnSend": true,
+    "relatedRecordId": "0014Q00000abcDE",
+    "recipientId": "003Qg0000020aBcDE"
+  }]
+}
+
+Input (parameters)
+to (string|string[], required) - One or more email addresses or User Ids.
+cc (string|string[], optional).
+bcc (string|string[], optional).
+subject (string, optional) - Required when no template.
+htmlBody (string, optional).
+textBody (string, optional).
+templateId (string, optional) - Or templateName. Renders against `targetRecordId`.
+templateName (string, optional).
+targetRecordId (string, optional) - Record context for merge fields.
+whatId (string, optional) - Related record (Opportunity, Case, etc.) for activity logging.
+senderType (string, optional, default "CurrentUser") - "CurrentUser" | "OrgWideEmailAddress".
+orgWideEmailAddressId (string, optional).
+saveAsActivity (boolean, optional, default true).
+attachments (object[], optional) - [{ contentVersionId | contentDocumentId | base64 + fileName + contentType }].
+
+Result
+result (object) - { success, errors (array), messageId, sentDate, savedAsActivity }.
+
+Required permissions
+- "Send Email" + (for templateId) read on the template's folder.
+
+Idempotency & limits
+- Not idempotent.
+- Daily SingleEmail limit: 5,000 external recipients/day (`SingleEmail` in `get_org_limits`).
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, EMAIL_TEMPLATE_NOT_FOUND, INVALID_EMAIL_ADDRESS.
+- EMAIL_LIMIT_EXCEEDED.
+
+Example request
+
+send_email({
+  "to": ["jane.doe@magnatech.com"],
+  "subject": "Project Update",
+  "htmlBody": "<p>Status: <b>Green</b></p>",
+  "whatId": "a01Qg0000020aBcDE",
+  "saveAsActivity": true
+})
+
+Example request (template)
+
+send_email({
+  "to": ["003Qg0000020aBcDE"],
+  "templateName": "MTG_Project_Status_Email",
+  "targetRecordId": "a01Qg0000020aBcDE",
+  "saveAsActivity": true
+})

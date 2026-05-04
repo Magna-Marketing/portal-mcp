@@ -1,0 +1,51 @@
+Tool: manage_custom_notification_type
+
+Description
+Create / update / delete Custom Notification Types — the channels you
+publish to via `publish_custom_notification`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `CustomNotificationType`.
+
+Endpoint
+POST /services/data/v66.0/sobjects/CustomNotificationType
+PATCH /services/data/v66.0/sobjects/CustomNotificationType/{id}
+DELETE /services/data/v66.0/sobjects/CustomNotificationType/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "DeveloperName": "MTG_Project_Update", "MasterLabel": "MTG Project Update", "CustomNotifTypeName": "MTG Project Update", "Description": "...", "Title": null, "Body": null, "NotificationChannel": "Desktop;Mobile" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+developerName (string, required) - DeveloperName.
+masterLabel (string, required for create).
+description (string, optional).
+defaultTitle (string, optional).
+defaultBody (string, optional).
+channels (string[], optional, default ["Desktop","Mobile"]) - Subset of "Desktop","Mobile".
+iconName (string, optional).
+
+Result
+notificationType (object) - { id, developerName, masterLabel, channels }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_custom_notification_type({
+  "operation": "create",
+  "developerName": "MTG_Project_Update",
+  "masterLabel": "MTG Project Update",
+  "channels": ["Desktop", "Mobile"]
+})

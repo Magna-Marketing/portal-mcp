@@ -1,0 +1,101 @@
+Tool: manage_object
+
+Description
+Create or update a custom Salesforce object via the Metadata API. Use
+this for `__c` objects only — standard objects can have fields/layouts
+modified but cannot be created or renamed. Operations: `create`, `update`,
+`upsert` (create-or-update), `delete`. Returns the deploy result with
+synchronous status; the Metadata API is asynchronous so the MCP server
+polls until the deploy reaches a terminal state.
+
+Salesforce API
+Metadata API (`CustomObject` type), v66.0. Composite metadata deploy via
+`POST /services/data/v66.0/metadata/deploy`.
+
+Endpoint
+POST  /services/data/v66.0/metadata/deployRequest                 (preferred; JSON wrapper)
+or SOAP `metadata/v66.0` with createMetadata / updateMetadata / deleteMetadata.
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (create example)
+{
+  "operation": "create",
+  "fullName": "Project__c",
+  "label": "Project",
+  "pluralLabel": "Projects",
+  "nameField": { "type": "AutoNumber", "displayFormat": "PRJ-{0000}", "label": "Project Number" },
+  "deploymentStatus": "Deployed",
+  "sharingModel": "ReadWrite",
+  "enableActivities": true,
+  "enableHistory": true,
+  "enableReports": true,
+  "enableSearch": true,
+  "enableBulkApi": true,
+  "enableSharing": true,
+  "enableStreamingApi": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+fullName (string, required) - sObject API name (e.g. "Project__c").
+  For standard sObjects, only "update" is allowed.
+label (string, required for create) - Singular label.
+pluralLabel (string, required for create).
+description (string, optional).
+nameField (object, required for create) - { type ("Text"|"AutoNumber"),
+  label (string), displayFormat (string for AutoNumber, with {0000}
+  template) }.
+deploymentStatus (string, optional, default "Deployed") - "Deployed" or "InDevelopment".
+sharingModel (string, optional, default "ReadWrite") - "Private",
+  "Read", "ReadWrite", "ReadWriteTransfer", "FullAccess",
+  "ControlledByParent" (junction).
+enableActivities, enableHistory, enableReports, enableSearch,
+  enableBulkApi, enableSharing, enableStreamingApi (boolean, optional).
+enableLicensing (boolean, optional).
+recordTypeTrackHistory (boolean, optional).
+visibility (string, optional, default "Public") - "Public" | "Protected".
+checkOnly (boolean, optional, default false) - Validate without saving.
+testLevel (string, optional, default "NoTestRun" in sandboxes;
+  required "RunLocalTests" in production for changes that touch Apex).
+
+Result
+deployId (string) - Metadata API deploy Id.
+status (string) - "Pending" | "InProgress" | "Succeeded" | "Failed" |
+  "Canceled" | "SucceededPartial".
+done (boolean).
+numberComponentsTotal (number).
+numberComponentsDeployed (number).
+numberComponentErrors (number).
+componentSuccesses (array) - Per-component success entries.
+componentFailures (array) - { componentType, fileName, problemType,
+  problem, lineNumber, columnNumber }.
+runTestsResult (object|null) - For production deploys; pass/fail per test.
+elapsedMs (number).
+
+Required permissions
+- "Customize Application", "Modify All Data", and (for production)
+  "Manage Deployments".
+
+Idempotency & limits
+- `upsert` is idempotent on `fullName`; `create` is not (will fail on
+  conflict). The MCP layer maps `create` -> `upsert` when an existing
+  object is detected and `update` semantics fit.
+- Metadata deploys count against the org's "Daily Metadata Calls" budget.
+- Production deploys require Apex test runs (≥75% coverage org-wide).
+
+Errors
+- DUPLICATE_DEVELOPER_NAME on create when fullName exists.
+- INVALID_FIELD on bad nameField.type.
+- DEPLOY_FAILED with componentFailures.
+
+Example request (update sharing model)
+
+manage_object({
+  "operation": "update",
+  "fullName": "Project__c",
+  "sharingModel": "Private",
+  "enableActivities": true
+})

@@ -1,0 +1,59 @@
+Tool: get_member_profile
+
+Description
+Get a Loyalty Program Member's profile via the Loyalty Connect API.
+Returns the API-canonical view: identity, status, enrollment, tier(s),
+points balance summary, attributes. This is the recommended
+member-detail endpoint for partner integrations because the response
+shape is stable across releases.
+
+For raw sObject fields use `get_member`.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/members/{memberId}/member-profile
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required) - LoyaltyProgram.Name (URL-safe).
+memberId (string, required) - LoyaltyProgramMember.Id (18-char).
+
+Result
+profile (object) - Verbatim Connect API profile:
+  loyaltyProgramMemberId (string).
+  membershipNumber (string).
+  memberStatus (string).
+  membershipType (string).
+  enrollmentDate (string).
+  enrollmentChannel (string|null).
+  associatedAccount (object|null) - { id, name }.
+  associatedContact (object|null) - { id, firstName, lastName, email }.
+  memberTiers (array) - [{ tierGroupName, tierName, effectiveFromDate, effectiveToDate }].
+  pointsBalances (array) - [{ programCurrencyName, pointsBalance, escrowPointsBalance, expirablePoints, nonExpirablePoints }].
+  attributes (object) - Custom member attributes from `LoyaltyPgmMbrAttributeVal`.
+  membershipExpirationDate (string|null).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND.
+- LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+get_member_profile({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2"
+})

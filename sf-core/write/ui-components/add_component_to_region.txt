@@ -1,0 +1,64 @@
+Tool: add_component_to_region
+
+Description
+Add a Lightning component or field instance to a region of a FlexiPage.
+Supports standard Lightning components, custom LWC/Aura ("c:projectCard"),
+field instances ("flexipage:fieldInstance" with field API name),
+related lists, and tabs. Configure properties at insertion time.
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0. The MCP server reads current
+metadata, splices in the new component, and submits an update deploy.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+flexiPageName (string, required) - DeveloperName.
+region (string, required) - Region API name (e.g. "main", "right").
+componentName (string, required) - "lightning:relatedList" | "c:projectCard"
+  | "flexipage:fieldInstance" | "force:highlightsPanel" | etc.
+identifier (string, optional, default = `<componentName>_<index>`) -
+  Unique within the region.
+properties (object, optional) - Property values keyed by property name:
+  e.g. { "label": "Project", "fieldApiName": "Project__c.Status__c" }.
+position (number|"end"|"start", optional, default "end") - 0-based
+  insertion index, "start", or "end".
+visibilityRule (object, optional) - { booleanFilter, criteria: [{ leftValue, operator, rightValue }] }.
+facets (array, optional) - For facet-bearing components: [{ regionName, components: [...] }] (recursive).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object) - { id, name, regionTouched: { name, componentCount } }.
+componentInstance (object) - { identifier, componentName, position }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent (a second call adds a second instance unless
+  `identifier` collides, which fails).
+- Components are validated against the page's allowed regions/templates.
+
+Errors
+- DUPLICATE_VALUE: identifier already used in the region.
+- INVALID_COMPONENT: componentName not allowed in this region/type.
+
+Example request (add a custom LWC to right region)
+
+add_component_to_region({
+  "flexiPageName": "Project__c_Record_Page",
+  "region": "right",
+  "componentName": "c:projectCard",
+  "identifier": "card_main",
+  "properties": { "label": "Project Summary" },
+  "position": "start"
+})

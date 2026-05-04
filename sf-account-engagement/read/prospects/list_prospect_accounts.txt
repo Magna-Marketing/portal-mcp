@@ -1,0 +1,60 @@
+Tool: list_prospect_accounts
+
+Description
+List Prospect Accounts (the "company" entity that groups prospects).
+Cross-references SFDC Account via `salesforceId`. Account-Based
+Marketing dashboards are powered by these rows.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/prospect-accounts?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+salesforceId (string, optional) - SFDC Account 18-char id.
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,salesforceId,
+  assignedToUserId,industry,website,billingAddressOne,billingAddressTwo,
+  billingCity,billingState,billingZip,billingCountry,createdAt,
+  updatedAt,createdById,updatedById,number,annualRevenue,employees,
+  ownership,sicCode,tickerSymbol).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+prospectAccounts (array) - Each: { id, name, salesforceId,
+  assignedToUserId, industry, website, billingAddressOne, billingCity,
+  billingState, billingCountry, employees, annualRevenue, ownership,
+  sicCode, tickerSymbol, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_prospect_accounts({ "salesforceId": "001580000A1B2C3DEAQ" })
+
+Example result
+{
+  "prospectAccounts": [
+    { "id": 5512, "name": "Acme", "salesforceId": "001580000A1B2C3DEAQ",
+      "industry": "Technology", "employees": 1200 }
+  ]
+}

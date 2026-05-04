@@ -1,0 +1,65 @@
+Tool: query_calculated_insight
+
+Description
+Query the values of a Calculated Insight (CIO) — returns aggregated
+measure rows, optionally filtered / projected. Runs on the runtime
+plane for low-latency.
+
+For ad-hoc SQL on a CIO, use `query_data_cloud_sql_v2` instead.
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+GET {cdpTenantUrl}/api/v1/insight/calculated-insights/:ci_name
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+ciName (string, required) - e.g. "CustomerLTV__cio".
+dimensions (string[], optional) - Group-by columns.
+measures (string[], optional) - Measure columns to return.
+filter (object, optional) - { field, operator, value }; multi-AND.
+limit (number, optional, default 100, max 5000).
+offset (number, optional).
+
+Result
+data (array<object>) - Each row keyed by selected dimensions /
+  measures.
+metadata (object) - { columns: [{ name, type }] }.
+done (boolean).
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_calculated_insight_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token, 404 NOT_FOUND, 400 INVALID_FIELD.
+
+Example request
+
+query_calculated_insight({
+  "ciName": "CustomerLTV__cio",
+  "dimensions": ["IndividualId__c"],
+  "measures": ["LifetimeValue__c"],
+  "limit": 5
+})
+
+Example result
+{
+  "data": [
+    { "IndividualId__c": "IND_001", "LifetimeValue__c": 12450.00 }
+  ],
+  "metadata": { "columns": [
+    { "name": "IndividualId__c",  "type": "TEXT" },
+    { "name": "LifetimeValue__c", "type": "DECIMAL" }
+  ] }
+}

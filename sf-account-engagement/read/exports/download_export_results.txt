@@ -1,0 +1,65 @@
+Tool: download_export_results
+
+Description
+Download a single result chunk for a completed export. Iterate
+`resultRefs[]` from `get_export` and call once per `fileId`. The
+returned payload is a CSV with the columns matching the export's
+`fields[]`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/exports/:id/results/:fileId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: text/csv, application/json, application/octet-stream
+
+Body
+None.
+
+Input (parameters)
+exportId (number, required).
+fileId (number, required) - From `resultRefs[].fileId` (1-based).
+asBase64 (boolean, optional, default false).
+asJson (boolean, optional, default false) - When true, MCP server
+  parses the CSV into row objects keyed by `fields[]`.
+
+Result
+exportId (number).
+fileId (number).
+fileName (string) - Suggested filename.
+contentType (string) - "text/csv".
+sizeBytes (number).
+csv (string, when asBase64=false and asJson=false).
+csvBase64 (string, when asBase64=true).
+rows (array<object>, when asJson=true).
+rowCount (number).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. Each chunk is up to ~250MB. Server pre-signed URL is
+  valid for 60 minutes.
+
+Errors
+- 59 not_found, 53 export_not_complete (export still running),
+  77 export_expired.
+
+Example request
+
+download_export_results({ "exportId": 7782, "fileId": 1, "asJson": true })
+
+Example result
+{
+  "exportId": 7782,
+  "fileId": 1,
+  "fileName": "Prospect_2026-04-29.csv",
+  "rowCount": 28412,
+  "rows": [
+    { "id": 7745, "email": "jane@example.com", "createdAt": "2026-04-01T08:21:00Z" }
+  ]
+}

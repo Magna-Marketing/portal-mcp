@@ -1,0 +1,37 @@
+Tool: read_visualforce_page
+
+Description
+Read a single Visualforce page (`ApexPage`) with markup body and
+controller binding.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/ApexPage/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - VF page Name.
+
+Result
+page (object) - { id, name, masterLabel, apiVersion, controllerType ("Default"|"StandardController"|"CustomController"), controllerKey, isAvailableInTouch, namespacePrefix, manageableState, description, markup (string), createdDate, lastModifiedDate }.
+
+Required permissions
+- "Customize Application" / "Author Apex".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+read_visualforce_page({ "name": "AccountSummary" })

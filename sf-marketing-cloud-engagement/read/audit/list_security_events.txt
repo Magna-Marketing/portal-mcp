@@ -1,0 +1,50 @@
+Tool: list_security_events
+
+Description
+List Marketing Cloud Security Events (`/data/v1/audit/securityEvents`):
+authentication / authorization-related events (failed logins, password
+changes, MFA challenges, IP allowlist hits, OAuth token revocations,
+permission grants). Distinct from `list_audit_events`, which covers
+content + setup operations.
+
+Marketing Cloud API
+REST API (`/data/v1/audit/securityEvents`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/audit/securityEvents?$pagesize=100&$page=1&$orderBy=createdDate desc
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sinceHours (number, optional, default 24).
+eventType (string|string[], optional) - "Login" | "LogoutSuccess" | "FailedLogin" | "PasswordChanged" | "MFAChallenged" | "TokenRevoked" | "PermissionGranted" | etc.
+userId (number, optional).
+businessUnitId (number, optional).
+sourceIp (string, optional).
+page (number, optional, default 1).
+pageSize (number, optional, default 100, max 200).
+orderBy (string, optional, default "createdDate desc").
+
+Result
+totalCount (number).
+events (array) - { id, eventType, createdDate, userId, userName, accountId, businessUnitId, sourceIpAddress, applicationName, status ("Success"|"Failure"), description, additionalData (object) }.
+hasMore (boolean), page (number).
+
+Required scopes
+- `audit_events_read` + Audit Trail entitlement.
+
+Idempotency & limits
+- Read-only.
+- Retention: 30 days standard; 13 months on Audit Trail upgrade.
+
+Errors
+- 403 unauthorized (no Audit entitlement).
+
+Example request
+
+list_security_events({ "eventType": "FailedLogin", "sinceHours": 24 })

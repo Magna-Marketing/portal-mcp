@@ -1,0 +1,55 @@
+Tool: manage_knowledge_article
+
+Description
+Create / update / publish / archive / delete Knowledge articles.
+Articles are versioned: `KnowledgeArticleVersion` rows are created per
+draft, and publishing transitions a draft to `Online`.
+
+Salesforce API
+REST API (Data) + Connect API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/sobjects/{ArticleType}__kav                    (create draft)
+PATCH /services/data/v66.0/sobjects/{ArticleType}__kav/{id}              (update draft)
+POST /services/data/v66.0/connect/knowledgeArticles/{kavId}/publish      (publish)
+POST /services/data/v66.0/connect/knowledgeArticles/{kavId}/archive     (archive)
+DELETE /services/data/v66.0/sobjects/KnowledgeArticleVersion/{id}        (delete)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "publish" | "archive" | "delete" | "newVersion".
+articleType (string, required for create) - Custom article type with `__kav` suffix.
+articleVersionId (string, optional, required for non-create).
+title (string, optional).
+urlName (string, optional).
+fields (object, optional) - Map of additional field API names -> values.
+language (string, optional, default org default).
+asMajorVersion (boolean, optional, default false, only for publish).
+
+Result
+article (object) - { id, knowledgeArticleId, articleNumber, title, urlName, publishStatus, language, isLatestVersion }.
+
+Required permissions
+- "Manage Articles" + Knowledge enabled on the org.
+
+Idempotency & limits
+- publish/archive idempotent.
+
+Errors
+- KNOWLEDGE_NOT_ENABLED, INVALID_TYPE.
+
+Example request
+
+manage_knowledge_article({
+  "operation": "create",
+  "articleType": "FAQ__kav",
+  "title": "How to reset MFA",
+  "urlName": "how-to-reset-mfa",
+  "fields": { "Body__c": "<p>Follow these steps...</p>" }
+})

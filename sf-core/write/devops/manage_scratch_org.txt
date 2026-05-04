@@ -1,0 +1,72 @@
+Tool: manage_scratch_org
+
+Description
+Create or delete a scratch org from a Dev Hub. Scratch orgs are
+short-lived (30-day max) ephemeral orgs typically used in CI / dev
+loops. Definition includes edition, features, namespace, and
+post-create config.
+
+Salesforce API
+Tooling API, v66.0. `ScratchOrgInfo`.
+
+Endpoint
+POST   /services/data/v66.0/tooling/sobjects/ScratchOrgInfo
+DELETE /services/data/v66.0/tooling/sobjects/ScratchOrgInfo/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "OrgName": "MTG Dev",
+  "Edition": "Developer",
+  "Country": "US",
+  "ExpirationDate": "2026-05-29",
+  "Features": "EnableSetPasswordInApi;Communities",
+  "AdminEmail": "ops@magnatech.com",
+  "Description": "MTG dev scratch",
+  "ConnectedAppConsumerKey": "...",
+  "ConnectedAppCallbackUrl": "..."
+}
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+scratchOrgInfoId (string, optional, required for delete).
+orgName (string, required for create).
+edition (string, required for create) - "Developer" | "Enterprise" | "Group" | "Professional".
+country (string, optional, default "US").
+expirationDays (number, optional, default 7, max 30).
+adminEmail (string, optional).
+features (string, optional) - Semicolon-separated.
+description (string, optional).
+namespace (string, optional).
+connectedAppConsumerKey (string, optional).
+connectedAppCallbackUrl (string, optional).
+
+Result
+scratchOrgInfoId (string).
+status (string).
+username (string|null) - Populated when status=Active.
+authCode (string|null) - One-time exchange for OAuth tokens; expires fast.
+loginUrl (string|null).
+
+Required permissions
+- "Manage Dev Hub" + run from a Dev Hub org.
+
+Idempotency & limits
+- Not idempotent.
+- Daily Scratch Org limit (`get_org_limits.DailyScratchOrgs`).
+
+Errors
+- DAILY_SCRATCH_ORG_LIMIT, INVALID_ORG_TYPE.
+
+Example request
+
+manage_scratch_org({
+  "operation": "create",
+  "orgName": "MTG Dev",
+  "edition": "Developer",
+  "expirationDays": 7,
+  "features": "EnableSetPasswordInApi;Communities"
+})

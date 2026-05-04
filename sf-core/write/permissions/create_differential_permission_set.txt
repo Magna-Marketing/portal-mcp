@@ -1,0 +1,62 @@
+Tool: create_differential_permission_set
+
+Description
+Create a permission set containing only the **differences** between two
+profiles: permissions that the source profile has but the baseline
+profile does not. Useful for migration to a "Standard User" baseline
+plus a small diff permset per role.
+
+Salesforce API
+Metadata API (`Profile` readMetadata + `PermissionSet` create), v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0    (readMetadata both profiles)
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A (the MCP server computes the diff and submits a create).
+
+Input (parameters)
+sourceProfile (string, required) - Profile DeveloperName whose extras
+  you want as a permset.
+baselineProfile (string, required, default "Standard_User") - Profile
+  to compare against.
+newPermsetName (string, required).
+newPermsetLabel (string, required).
+newPermsetDescription (string, optional).
+license (string, optional) - Default = source's license.
+includeFieldPermissions (boolean, optional, default true).
+includeSystemPermissions (boolean, optional, default true).
+includeObjectPermissions (boolean, optional, default true).
+includeApexAccess (boolean, optional, default true).
+includeVfAccess (boolean, optional, default true).
+includeTabSettings (boolean, optional, default false).
+checkOnly (boolean, optional, default false).
+
+Result
+diffSummary (object) - Per-category: { onlyInSource: number, onlyInBaseline: number, common: number }.
+permissionSet (object) - { id, fullName, label, license,
+  copiedComponents } - Only "onlyInSource" perms were copied.
+
+Required permissions
+- "Manage Profiles and Permission Sets".
+
+Idempotency & limits
+- Create is **not** idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+- NOT_FOUND on either profile.
+
+Example request
+
+create_differential_permission_set({
+  "sourceProfile": "MTG_Project_Manager_Profile",
+  "baselineProfile": "Standard_User",
+  "newPermsetName": "MTG_Project_Manager_Diff",
+  "newPermsetLabel": "MTG Project Manager (Diff vs Standard User)"
+})

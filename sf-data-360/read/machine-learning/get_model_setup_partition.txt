@@ -1,0 +1,53 @@
+Tool: get_model_setup_partition
+
+Description
+Read a single partition of a Model Setup Version — full metrics and
+dataset reference.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-setups/:modelSetupIdOrName/setup-versions/:modelSetupVersionId/partitions/:modelSetupPartitionId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+modelSetupIdOrName (string, required).
+modelSetupVersionId (string, required).
+modelSetupPartitionId (string, required).
+
+Result
+partition (object): id, name, partitionType, recordCount,
+  datasetRef, metrics (object), featureDistribution (object),
+  createdDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_model_setup_partition({
+  "modelSetupIdOrName": "ChurnModel",
+  "modelSetupVersionId": "MSV_001",
+  "modelSetupPartitionId": "P_001"
+})
+
+Example result
+{
+  "partition": {
+    "id": "P_001", "partitionType": "Train", "recordCount": 800000,
+    "metrics": { "accuracy": 0.85, "f1": 0.80 }
+  }
+}

@@ -1,0 +1,44 @@
+Tool: undelete_prospect
+
+Description
+Restore one or more soft-deleted prospects by id. Within the 90-day
+retention window the row remains queryable with `isDeleted=true`;
+after that, `code: 53 prospect_purged` is returned.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/prospects/do/undelete
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "ids": [7745, 7746] }
+
+Input (parameters)
+ids (number[], required) - Up to 200 prospect ids per call.
+
+Result
+restored (number[]) - Successfully restored ids.
+errors (array) - Each: { id, code, message }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 53 prospect_purged, 59 not_found.
+
+Example request
+
+undelete_prospect({ "ids": [7745] })
+
+Example result
+{ "restored": [7745], "errors": [] }

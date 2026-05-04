@@ -1,0 +1,43 @@
+Tool: list_duplicate_rules
+
+Description
+List `DuplicateRule` records and their matching rules
+(`MatchingRule`) for an sObject. Returns active state, action on create
+/ update, alert text.
+
+Salesforce API
+Tooling API + Metadata API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, IsActive, SobjectType, OperationsOnInsert, OperationsOnUpdate FROM DuplicateRule
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, SobjectType, RuleStatus, MatchEngine FROM MatchingRule
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], optional).
+isActive (boolean, optional).
+includeMatchingRules (boolean, optional, default true).
+
+Result
+totalSize (number).
+duplicateRules (array) - { id, developerName, masterLabel, sObject, isActive, operationsOnInsert (string[]), operationsOnUpdate (string[]) }.
+matchingRules (array, when includeMatchingRules=true) - { id, developerName, masterLabel, sObject, ruleStatus, matchEngine ("Standard"|"Fuzzy") }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_duplicate_rules({ "sObjects": ["Account", "Lead", "Contact"], "isActive": true })

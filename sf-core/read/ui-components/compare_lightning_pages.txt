@@ -1,0 +1,59 @@
+Tool: compare_lightning_pages
+
+Description
+Compare two Lightning Pages (FlexiPages) and report metadata + region +
+component differences. Useful when consolidating record-page variants
+(e.g. profile-specific or record-type-specific pages) or migrating from
+one page to another.
+
+Salesforce API
+Tooling API, v66.0. Two reads of FlexiPage detailed metadata, then a
+client-side structural diff.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}     (twice)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+nameA (string, required) - First FlexiPage DeveloperName.
+nameB (string, required) - Second FlexiPage DeveloperName.
+ignoreOrder (boolean, optional, default false) - Ignore component order
+  inside a region when comparing.
+includeXmlDiff (boolean, optional, default false) - Add a unified XML diff.
+
+Result
+pageA, pageB (objects) - { id, name, label, type, sObject }.
+metadataDiff (array) - Each: { field, a, b }.
+regionDiff (array) - Each:
+  region (string) - Region API name.
+  inA (boolean), inB (boolean).
+  components (object):
+    onlyInA (string[]) - identifiers.
+    onlyInB (string[]).
+    common (array) - { identifier, propertyDiff: [{ name, a, b }] }.
+componentCounts (object) - { a, b, common, addedInB, removedInB }.
+similarity (number) - 0..1 across regions/components/properties.
+xmlDiff (string|null) - Unified diff when includeXmlDiff=true.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on either name.
+
+Example request
+
+compare_lightning_pages({
+  "nameA": "Project__c_Record_Page",
+  "nameB": "Project__c_Record_Page_Sales",
+  "ignoreOrder": true
+})

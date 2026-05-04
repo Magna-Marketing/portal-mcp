@@ -1,0 +1,48 @@
+Tool: manage_apex_test_suite
+
+Description
+Create / update / delete Apex Test Suites and manage their member
+classes.
+
+Salesforce API
+Tooling API, v66.0. `ApexTestSuite` + `TestSuiteMembership`.
+
+Endpoint
+POST   /services/data/v66.0/tooling/sobjects/ApexTestSuite
+PATCH  /services/data/v66.0/tooling/sobjects/ApexTestSuite/{id}
+DELETE /services/data/v66.0/tooling/sobjects/ApexTestSuite/{id}
+POST   /services/data/v66.0/tooling/sobjects/TestSuiteMembership
+DELETE /services/data/v66.0/tooling/sobjects/TestSuiteMembership/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addClasses" | "removeClasses" | "setClasses".
+testSuiteName (string, required).
+classNames (string[], optional) - For add / remove / set / create.
+
+Result
+testSuite (object) - { id, testSuiteName, members: [{ classId, className }] }.
+classChanges (object) - { added, removed, unchanged }.
+
+Required permissions
+- "Author Apex".
+
+Idempotency & limits
+- update / addClasses / removeClasses idempotent.
+
+Errors
+- DUPLICATE_VALUE on testSuiteName.
+
+Example request
+
+manage_apex_test_suite({
+  "operation": "create",
+  "testSuiteName": "MTG_Smoke",
+  "classNames": ["ProjectServiceTest", "ProjectTriggerHandlerTest"]
+})

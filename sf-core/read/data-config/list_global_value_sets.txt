@@ -1,0 +1,44 @@
+Tool: list_global_value_sets
+
+Description
+List Global Value Sets (`GlobalValueSet`). These are reusable picklist
+value lists that can be referenced from picklist fields across objects.
+
+Salesforce API
+Tooling API + Metadata API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MasterLabel, DeveloperName, Description, Sorted, Standard FROM GlobalValueSet
+POST /services/Soap/m/66.0    (readMetadata GlobalValueSet for values)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional).
+includeValues (boolean, optional, default true).
+includeFieldUsage (boolean, optional, default false) - Show fields that reference each set.
+
+Result
+totalSize (number).
+globalValueSets (array) - Each:
+  id, masterLabel, developerName, description, sorted (boolean), isStandard (boolean).
+  values (array, when includeValues=true) - [{ fullName, label, default, isActive }].
+  fieldUsage (array, when includeFieldUsage=true) - [{ object, field }].
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_global_value_sets({ "includeValues": true, "includeFieldUsage": true })

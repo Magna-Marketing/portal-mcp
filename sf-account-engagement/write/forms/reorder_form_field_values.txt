@@ -1,0 +1,53 @@
+Tool: reorder_form_field_values
+
+Description
+Re-order the picklist values on a Form Field. Pass the full ordered
+list of value strings; the server applies sortOrder=0..N-1.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/form-fields/:id/do/reorderFormFieldValues
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "values": ["NA", "EMEA", "APAC"] }
+
+Input (parameters)
+id (number, required) - Form field id.
+values (string[], required) - Complete ordered list of values
+  (must include every existing value).
+
+Result
+formField (object) - Refreshed form field with values in new order.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 20 invalid_input (mismatched values vs. existing), 59 not_found.
+
+Example request
+
+reorder_form_field_values({ "id": 53, "values": ["EMEA", "NA", "APAC"] })
+
+Example result
+{
+  "formField": {
+    "id": 53,
+    "values": [
+      { "value": "EMEA", "sortOrder": 0 },
+      { "value": "NA",   "sortOrder": 1 },
+      { "value": "APAC", "sortOrder": 2 }
+    ]
+  }
+}

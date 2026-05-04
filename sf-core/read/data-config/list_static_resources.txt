@@ -1,0 +1,44 @@
+Tool: list_static_resources
+
+Description
+List static resources in the org. Each resource has a name, content
+type, body length, and cache control. Use to find SLDS overrides,
+JS/CSS shipped with VF/Aura/LWC, images, ZIP bundles. To download a
+resource use `read_static_resource`.
+
+Salesforce API
+Tooling API, v66.0. `StaticResource` sObject.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ContentType, BodyLength, CacheControl, Description, ManageableState, LastModifiedDate FROM StaticResource
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional).
+contentType (string, optional) - e.g. "application/zip", "text/javascript".
+namespacePrefix (string, optional).
+includeManaged (boolean, optional, default false).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+staticResources (array) - { id, name, namespacePrefix, contentType, bodyLength, cacheControl ("Public"|"Private"), description, manageableState, lastModifiedDate }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_static_resources({ "contentType": "application/zip" })

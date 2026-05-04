@@ -1,0 +1,74 @@
+Tool: enroll_individual_member
+
+Description
+Enroll an individual (Account + Contact) into a Loyalty Program. Wraps
+the Loyalty Connect API endpoint for individual member enrollment.
+Can create the Contact / Account on the fly when not present, or link
+to existing records by Id / external Id.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/individual-member-enrollments
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "enrollmentDate": "2026-04-30",
+  "membershipNumber": null,
+  "memberStatus": "Active",
+  "transactionJournalStatementFrequency": "Monthly",
+  "associatedContactDetails": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane.doe@example.com",
+    "phone": "+1-555-0100",
+    "additionalContactValueMap": { "MailingCountry": "US" }
+  },
+  "associatedAccountDetails": null,
+  "memberAdditionalAttributeValues": null,
+  "enrollmentChannel": "Web",
+  "createTransactionJournals": false
+}
+
+Input (parameters)
+programName (string, required).
+membershipNumber (string, optional) - Auto-assigned when omitted.
+memberStatus (string, optional, default "Active") - "Active" | "Pending".
+enrollmentDate (string, optional, default today) - YYYY-MM-DD.
+enrollmentChannel (string, optional) - "Web" | "Mobile" | "InStore" | etc.
+transactionJournalStatementFrequency (string, optional) - "Monthly" | "Quarterly" | "Annually".
+contact (object, optional) - { id (link to existing) } OR { firstName, lastName, email, phone, additionalContactValueMap (object) }.
+account (object, optional) - { id } OR { name, additionalAccountValueMap }.
+memberAttributes (object, optional) - Custom member attribute name -> value map.
+referredByMembershipNumber (string, optional).
+
+Result
+member (object) - { id (LoyaltyProgramMember Id), membershipNumber, programName, memberStatus, enrollmentDate, contactId, accountId }.
+isSuccess (boolean).
+errors (array, optional).
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Not idempotent: a second call with the same contact will create another `LoyaltyProgramMember` row.
+- Pre-check via SOQL on `LoyaltyProgramMember WHERE ContactId = ...` to avoid duplicates.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND.
+- DUPLICATE_VALUE on a unique `MembershipNumber`.
+- INVALID_EMAIL_ADDRESS.
+
+Example request
+
+enroll_individual_member({
+  "programName": "MTG_Rewards",
+  "contact": { "firstName": "Jane", "lastName": "Doe", "email": "jane.doe@example.com" },
+  "enrollmentChannel": "Web"
+})

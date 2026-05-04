@@ -1,0 +1,69 @@
+Tool: trigger_activation
+
+Description
+Publish (run) an Activation — pushes the latest segment snapshot
+to its configured Data Action Target (e.g. a Marketing Cloud
+Engagement Data Extension, an S3 bucket, an AppExchange connector).
+Async: returns a `runId`.
+
+Salesforce API
+Data Cloud Activation API.
+
+Endpoint
+POST {cdpInstanceUrl}/api/v1/activations/:activationId/actions/publish
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "publishType": "FULL"
+}
+
+Input (parameters)
+activationId (string, required).
+dataSpace (string, optional, default "default").
+publishType (string, optional, default "FULL") - "FULL" |
+  "INCREMENTAL". Incremental sends only the delta vs. the prior run.
+runIdempotencyKey (string, optional).
+forceSegmentRepublish (boolean, optional, default false) - When true,
+  the source segment is re-published before this activation runs.
+
+Result
+runId (string).
+activationId (string).
+segmentId (string) - Source segment.
+status (string) - "Queued".
+submittedAt (ISO-8601).
+segmentRunId (string|null) - When `forceSegmentRepublish=true`, the
+  triggered segment publish's runId.
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight publish per activation.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS,
+  503 TARGET_UNAVAILABLE (e.g. MCE BU paused / S3 bucket missing),
+  401 invalid_token.
+
+Example request
+
+trigger_activation({
+  "activationId": "ACT_EMEA_TO_MC",
+  "publishType": "INCREMENTAL"
+})
+
+Example result
+{
+  "runId": "RUN_ACT_2026-04-29T13",
+  "activationId": "ACT_EMEA_TO_MC",
+  "segmentId": "SEG_HIGH_VALUE_EMEA",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

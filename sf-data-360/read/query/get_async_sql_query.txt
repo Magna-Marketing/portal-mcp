@@ -1,0 +1,79 @@
+Tool: get_async_sql_query
+
+Description
+Submit an async SQL query, poll its status, or fetch its result
+rows. The async Query API is the new "/ssot/query-sql" surface
+that supports billion-row results, paged via `/rows`. Unifies the
+three Postman endpoints under `subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/query-sql                  (subOperation="submit")
+GET    {instanceUrl}/services/data/v{ver}/ssot/query-sql/:queryId         (subOperation="status")
+GET    {instanceUrl}/services/data/v{ver}/ssot/query-sql/:queryId/rows    (subOperation="rows")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (submit)
+{
+  "sql": "SELECT * FROM UnifiedIndividual__dlm",
+  "outputFormat": "JSON"
+}
+
+Input (parameters)
+subOperation (string, required) - "submit" | "status" | "rows".
+sql (string, required for submit).
+outputFormat (string, optional, default "JSON", submit-only) -
+  "JSON" | "CSV".
+queryId (string, required for status / rows).
+limit (number, optional, default 1000, rows-only) - Up to 100000.
+offset (number, optional, rows-only).
+dataSpace (string, optional).
+
+Result
+For "submit":
+  queryId (string).
+  status (string) - "Queued".
+  submittedAt (ISO-8601).
+For "status":
+  queryId (string).
+  status (string) - "Queued" | "Running" | "Complete" | "Failed" |
+    "Cancelled".
+  rowCount (number, when Complete).
+  errorMessage (string|null).
+For "rows":
+  rows (array<object>) - Each row as { columnName: value }.
+  done (boolean).
+  nextOffset (number|null).
+  totalRowCount (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Submit is not idempotent; supply your own dedupe key.
+- Job retention: 24 hours.
+- Max result size: 1 billion rows.
+
+Errors
+- 404 NOT_FOUND, 409 NOT_COMPLETE (rows fetched before status is
+  Complete), 400 INVALID_QUERY.
+
+Example request
+
+get_async_sql_query({
+  "subOperation": "submit",
+  "sql": "SELECT * FROM UnifiedIndividual__dlm WHERE LastModifiedDate__c >= '2026-04-01'"
+})
+
+Example result
+{
+  "queryId": "Q_async_2026-04-29",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

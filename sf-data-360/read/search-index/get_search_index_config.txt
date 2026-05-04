@@ -1,0 +1,49 @@
+Tool: get_search_index_config
+
+Description
+Read the org-wide Semantic Search configuration — default embedding
+models, retrieval settings, and quotas.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/search-index/config
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+config (object): defaultEmbeddingModel, supportedEmbeddingModels
+  (array), defaultVectorDimension, defaultSimilarityFunction
+  ("cosine" | "dot" | "euclidean"), maxIndexes, currentIndexCount,
+  maxRecordsPerIndex.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+get_search_index_config({})
+
+Example result
+{
+  "config": {
+    "defaultEmbeddingModel": "openai.text-embedding-3-small",
+    "defaultVectorDimension": 1536,
+    "maxIndexes": 50, "currentIndexCount": 4
+  }
+}

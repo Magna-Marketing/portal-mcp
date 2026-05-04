@@ -1,0 +1,43 @@
+Tool: list_sandboxes
+
+Description
+List sandboxes (`SandboxInfo`) for the org's production: type
+(Developer, Developer Pro, Partial, Full), name, current status,
+licensable usage, refresh history. To start a refresh see
+`manage_sandbox`.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, SandboxName, LicenseType, Status, ActivationUserGroupId, AutoActivate, ApexClassId, CopyChatter, Description, HistoryDays, SourceId, TemplateId, CreatedById, CreatedDate, EndDate, StartDate FROM SandboxInfo
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+licenseType (string, optional) - "DEVELOPER" | "DEVELOPER_PRO" | "PARTIAL" | "FULL".
+status (string, optional) - "Pending" | "Processing" | "Activating" | "Completed" | "Failed" | "Aborted".
+namePattern (string, optional).
+
+Result
+totalSize (number).
+sandboxes (array) - { id, sandboxName, licenseType, status, autoActivate, copyChatter, description, historyDays, sourceId, templateId, createdById, createdDate, startDate, endDate }.
+
+Required permissions
+- "Manage Sandboxes" + run from production.
+
+Idempotency & limits
+- Read-only.
+- This tool only works when running against a production org; sandboxes can't list other sandboxes.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, INVALID_ORG_TYPE.
+
+Example request
+
+list_sandboxes({ "licenseType": "DEVELOPER" })

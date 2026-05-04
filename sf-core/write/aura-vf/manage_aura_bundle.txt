@@ -1,0 +1,67 @@
+Tool: manage_aura_bundle
+
+Description
+Create / update / delete Aura component bundles. Operations include
+adding/removing individual definitions (.cmp, .app, .evt, .intf,
+controller.js, helper.js, renderer.js, style.css, design, svg,
+documentation).
+
+Salesforce API
+Tooling API, v66.0. `AuraDefinitionBundle` + `AuraDefinition` (uses the
+container/save pattern like `write_apex`).
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle
+POST /services/data/v66.0/tooling/sobjects/AuraDefinition
+PATCH /services/data/v66.0/tooling/sobjects/AuraDefinition/{id}
+DELETE /services/data/v66.0/tooling/sobjects/AuraDefinition/{id}
+DELETE /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle/{id}
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addDefinition" | "updateDefinition" | "deleteDefinition".
+name (string, required) - Bundle DeveloperName.
+masterLabel (string, required for create).
+description (string, optional).
+apiVersion (number, optional, default = org default).
+definitions (object[], optional) - For create / addDefinition / updateDefinition / deleteDefinition:
+  defType (string, required) - "COMPONENT" | "APPLICATION" | "EVENT" | "INTERFACE" | "CONTROLLER" | "HELPER" | "RENDERER" | "STYLE" | "DESIGN" | "SVG" | "DOCUMENTATION".
+  format (string, required) - "JS" | "CSS" | "XML" | "SVG".
+  source (string, required when not deleting).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+bundle (object) - { id, developerName, masterLabel, apiVersion, manageableState }.
+definitions (array) - Per def: { id, defType, format, sizeBytes, action ("created"|"updated"|"deleted") }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update / addDefinition / deleteDefinition idempotent.
+- Bundle name unique per namespace.
+
+Errors
+- DEPLOY_FAILED on compile error.
+
+Example request
+
+manage_aura_bundle({
+  "operation": "create",
+  "name": "AccountCard",
+  "masterLabel": "Account Card",
+  "apiVersion": 62.0,
+  "definitions": [
+    { "defType": "COMPONENT", "format": "XML", "source": "<aura:component>...</aura:component>" },
+    { "defType": "CONTROLLER", "format": "JS", "source": "({ doInit: function(c,e,h) { /* ... */ } })" }
+  ]
+})

@@ -1,0 +1,59 @@
+Tool: respond_collaboration_invitation
+
+Description
+Accept or reject an inbound Data Clean Room collaboration invitation.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PUT {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/actions/accept-invitation
+PUT {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/actions/reject-invitation
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (accept)
+{
+  "sharedDmos": ["UnifiedIndividual__dlm"],
+  "approvedSpecifications": ["PartnerX_OverlapSpec"]
+}
+
+Body (reject)
+{ "reason": "Out of scope for current quarter" }
+
+Input (parameters)
+collaborationIdOrApiName (string, required).
+operation (string, required) - "accept" | "reject".
+sharedDmos (string[], optional, accept-only).
+approvedSpecifications (string[], optional, accept-only).
+reason (string, optional, reject-only).
+
+Result
+collaboration (object) - Updated row.
+status (string) - "Accepted" | "Declined".
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent: re-accepting an already-accepted invitation is a no-op.
+
+Errors
+- 404 NOT_FOUND, 409 INVALID_STATE_TRANSITION.
+
+Example request
+
+respond_collaboration_invitation({
+  "collaborationIdOrApiName": "PartnerY_Inbound",
+  "operation": "accept",
+  "sharedDmos": ["UnifiedIndividual__dlm"]
+})
+
+Example result
+{
+  "collaboration": { "apiName": "PartnerY_Inbound", "status": "Accepted" },
+  "status": "Accepted"
+}

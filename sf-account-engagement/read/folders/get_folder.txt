@@ -1,0 +1,47 @@
+Tool: get_folder
+
+Description
+Read a single Folder by id, with its parent relation expanded.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/folders/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands parent folder,
+  `createdBy.*`, `updatedBy.*`.
+
+Result
+folder (object): id, name, parentFolderId, path, createdAt,
+  updatedAt, createdBy, updatedBy.
+parentFolder (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_folder({ "id": 33 })
+
+Example result
+{
+  "folder": { "id": 33, "name": "Spring 2026", "parentFolderId": 1,
+    "path": "/Marketing/Spring 2026" }
+}

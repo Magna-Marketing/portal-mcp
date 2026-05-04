@@ -1,0 +1,62 @@
+Tool: list_data_model_objects
+
+Description
+List Data Model Objects (DMOs) — the target schema in Data Cloud
+that downstream segmentation and activation rely on. Each DMO is
+populated by mappings from one or more Data Lake Objects (DLOs).
+
+Salesforce API
+Data Cloud Metadata API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/metadata?entityType=DataModelObject
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+category (string, optional) - "Profile" | "Engagement" | "Other".
+nameContains (string, optional).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+dmos (array) - Each: { dmoApiName, label, category, primaryKey,
+  fields (array<{ apiName, label, dataType, isPrimaryKey,
+    isExternalId, isRequired }>), relationships (array<{
+    fromDmo, toDmo, relationshipName, cardinality }>),
+  createdDate, lastModifiedDate }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_data_model_objects({ "category": "Profile" })
+
+Example result
+{
+  "dmos": [
+    { "dmoApiName": "UnifiedIndividual__dlm",
+      "label": "Unified Individual",
+      "category": "Profile",
+      "primaryKey": "Id__c",
+      "fields": [
+        { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true },
+        { "apiName": "FirstName__c", "dataType": "TEXT" }
+      ]
+    }
+  ]
+}

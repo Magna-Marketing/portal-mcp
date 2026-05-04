@@ -1,0 +1,51 @@
+Tool: manage_network_member
+
+Description
+Add or remove a user from an Experience site (`NetworkMember`). To
+control who *can* be added, profiles + permsets are managed in the
+site's membership configuration (`view_experience_site.membership`).
+
+Salesforce API
+REST API (Data), v66.0. `NetworkMember` sObject.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/NetworkMember
+DELETE /services/data/v66.0/sobjects/NetworkMember/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "NetworkId": "...", "MemberId": "..." }
+
+Input (parameters)
+operation (string, required) - "add" | "remove".
+siteId (string, optional).
+siteName (string, optional).
+  One required.
+userIds (string[], optional).
+usernames (string[], optional).
+  One required.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - { userId, username, networkMemberId, status, error }.
+summary (object) - { added, removed, failed, skipped }.
+
+Required permissions
+- "Manage Profiles and Permission Sets" + "Create and Set Up Experiences".
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+manage_network_member({
+  "operation": "add",
+  "siteName": "Customer_Hub",
+  "usernames": ["partner1@magnatech.com"]
+})

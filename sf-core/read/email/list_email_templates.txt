@@ -1,0 +1,44 @@
+Tool: list_email_templates
+
+Description
+List email templates (Classic + Lightning). Filter by folder, type
+(Text | HTML | Custom | Visualforce), language, owner. Returns subject,
+body, merge fields, and active status.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `EmailTemplate`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, FolderId, Folder.Name, IsActive, OwnerId, Owner.Name, Subject, HtmlValue, Body, BrandTemplateId, TemplateType, TemplateStyle, ApiVersion, Description, Encoding FROM EmailTemplate
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+folderId (string, optional).
+type (string, optional) - "text" | "html" | "custom" | "visualforce".
+namePattern (string, optional).
+includeBody (boolean, optional, default false) - Include subject + body (heavier).
+isActive (boolean, optional, default true).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+templates (array) - Each: { id, name, developerName, folderId, folderName, ownerName, isActive, type, subject (when includeBody), htmlBody (when includeBody), textBody (when includeBody), brandTemplateId, apiVersion, description }.
+
+Required permissions
+- "API Enabled" + read on `EmailTemplate`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_email_templates({ "type": "html", "namePattern": "MTG_*", "isActive": true })

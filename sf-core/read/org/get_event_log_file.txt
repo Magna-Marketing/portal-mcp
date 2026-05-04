@@ -1,0 +1,43 @@
+Tool: get_event_log_file
+
+Description
+Download the contents of an `EventLogFile` (CSV-shaped events). The
+tool can return raw CSV or parse into structured rows using the
+`fieldNames`/`fieldTypes` from the file's metadata.
+
+Salesforce API
+REST API (Data), v66.0. `GET /sobjects/EventLogFile/{id}/LogFile`.
+
+Endpoint
+GET /services/data/v66.0/sobjects/EventLogFile/{id}/LogFile
+
+Headers
+Authorization: Bearer <access_token>
+Accept: text/csv
+
+Body
+None.
+
+Input (parameters)
+id (string, required) - EventLogFile Id.
+parse (boolean, optional, default true) - When true, parse CSV to JSON rows.
+maxRows (number, optional) - Cap on returned rows when parse=true.
+
+Result
+file (object) - { id, eventType, logDate, logFileLength, fieldNames, fieldTypes }.
+rows (array, when parse=true) - Each row is an object keyed by fieldName.
+csv (string, when parse=false) - Raw CSV.
+
+Required permissions
+- "View Event Log Files" + Event Monitoring license.
+
+Idempotency & limits
+- Read-only.
+- Files can be 10s of MB; large parses may be capped by maxRows.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+get_event_log_file({ "id": "0AT4Q00000abcDE", "parse": true, "maxRows": 5000 })

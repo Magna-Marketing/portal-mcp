@@ -1,0 +1,64 @@
+Tool: list_forms
+
+Description
+List Pardot-hosted Forms. Each form has an embed code, target
+campaign, and (optionally) a thank-you content / redirect.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/forms?fields={fields}&filter[campaignId]=eq,1024
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+campaignId (number, optional).
+folderId (number, optional).
+trackerDomainId (number, optional).
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,campaignId,folderId,
+  trackerDomainId,layoutTemplateId,thankYouContent,thankYouCode,
+  redirectLocation,beforeFormContent,afterFormContent,salesforceId,
+  isAlwaysDisplay,isCaptchaEnabled,isCookielessTracking,
+  isUseRedirectLocation,fontFamily,fontSize,fontColor,labelAlignment,
+  radioAlignment,checkboxAlignment,requiredCharacter,submitButtonText,
+  showNotProspect,embedCode,createdAt,updatedAt,createdById,updatedById,
+  isDeleted,tagReplacementLanguage).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+forms (array) - Each: { id, name, campaignId, folderId, trackerDomainId,
+  layoutTemplateId, embedCode, thankYouContent, thankYouCode,
+  redirectLocation, isUseRedirectLocation, isCaptchaEnabled,
+  isCookielessTracking, salesforceId, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_forms({ "campaignId": 1024 })
+
+Example result
+{
+  "forms": [
+    { "id": 4421, "name": "Demo Request", "campaignId": 1024,
+      "embedCode": "<iframe src=\"https://go.magnatech.com/l/...\"></iframe>" }
+  ]
+}

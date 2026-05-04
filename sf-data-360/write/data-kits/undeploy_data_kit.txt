@@ -1,0 +1,56 @@
+Tool: undeploy_data_kit
+
+Description
+Undeploy a single component from a Data Kit. Removes the underlying
+asset from the org (subject to dependency checks). Use to roll
+back a partial deployment.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitName/undeploy
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "componentName": "Order__dlm" }
+
+Input (parameters)
+dataKitName (string, required).
+componentName (string, required).
+forceUndeploy (boolean, optional, default false) - When true, also
+  removes dependents.
+
+Result
+success (boolean).
+componentName (string).
+removedDependents (array, when forceUndeploy=true).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent: undeploying an already-removed component is a no-op.
+
+Errors
+- 404 NOT_FOUND, 409 DEPENDENT_COMPONENTS_EXIST (use
+  `forceUndeploy=true` to cascade).
+
+Example request
+
+undeploy_data_kit({
+  "dataKitName": "MTG_Retail_Foundation",
+  "componentName": "Order__dlm",
+  "forceUndeploy": true
+})
+
+Example result
+{
+  "success": true,
+  "componentName": "Order__dlm",
+  "removedDependents": ["OrderToIndividual_mapping"]
+}

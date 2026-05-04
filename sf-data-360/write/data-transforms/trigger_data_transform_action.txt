@@ -1,0 +1,65 @@
+Tool: trigger_data_transform_action
+
+Description
+Perform an action on a Data Transform: run on-demand, cancel an
+in-flight run, retry the most recent failed run, or refresh the
+status from the underlying compute layer. The Postman collection
+exposes 4 separate endpoints; this tool unifies them under
+`subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/actions/run             (subOperation="run")
+POST {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/actions/cancel          (subOperation="cancel")
+POST {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/actions/retry           (subOperation="retry")
+POST {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/actions/refresh-status  (subOperation="refreshStatus")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (run)
+{ "operationType": "Full" }
+
+Input (parameters)
+dataTransformNameOrId (string, required).
+subOperation (string, required) - "run" | "cancel" | "retry" |
+  "refreshStatus".
+operationType (string, optional, run-only) - "Full" | "Incremental".
+runId (string, optional) - For "cancel" target a specific run; for
+  "refreshStatus" target a specific run.
+runIdempotencyKey (string, optional, run-only).
+
+Result
+runId (string, when subOperation="run" / "retry").
+status (string).
+submittedAt (ISO-8601).
+success (boolean, for cancel / refreshStatus).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- `run` is idempotent on `runIdempotencyKey`.
+- 1 in-flight run per transform.
+
+Errors
+- 409 JOB_IN_PROGRESS, 404 NOT_FOUND, 400 NO_FAILED_RUN_TO_RETRY.
+
+Example request
+
+trigger_data_transform_action({
+  "dataTransformNameOrId": "build_unified_individual",
+  "subOperation": "run",
+  "operationType": "Incremental"
+})
+
+Example result
+{
+  "runId": "RUN_DT_2026-04-29T13",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

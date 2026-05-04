@@ -1,0 +1,50 @@
+Tool: manage_field_set
+
+Description
+Create / update / delete a Field Set on an sObject.
+
+Salesforce API
+Metadata API (`FieldSet`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+sObject (string, required).
+fullName (string, required) - "<sObject>.<DeveloperName>".
+label (string, required for create).
+description (string, optional).
+displayedFields (string[], optional) - Field API names in display order.
+availableFields (string[], optional) - Available fields not currently displayed.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+fieldSet (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD.
+
+Example request
+
+manage_field_set({
+  "operation": "create",
+  "sObject": "Project__c",
+  "fullName": "Project__c.Editable_Fields",
+  "label": "Editable Fields",
+  "displayedFields": ["Name", "Status__c", "Project_Manager__c", "Due_Date__c"]
+})

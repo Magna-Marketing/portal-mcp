@@ -1,0 +1,98 @@
+Tool: manage_report_instance
+
+Description
+Manage asynchronous report instances. Use this for reports that won't
+fit in the 2,000-row synchronous cap (`run_report`) or that take more
+than 30 s to compute. Operations:
+- `start`: kick off a new instance and return its Id.
+- `status`: check progress.
+- `results`: retrieve completed instance data.
+- `list`: list recent instances for a report.
+- `cancel`: cancel an in-progress instance.
+
+Instance status: `New` -> `Running` -> `Success` (or `Error` /
+`Cancelled`).
+
+Salesforce API
+Analytics REST API, v66.0. `/analytics/reports/{reportId}/instances`.
+
+Endpoint
+POST   /services/data/v66.0/analytics/reports/{reportId}/instances           (start)
+GET    /services/data/v66.0/analytics/reports/{reportId}/instances           (list)
+GET    /services/data/v66.0/analytics/reports/{reportId}/instances/{instanceId}    (status / results)
+DELETE /services/data/v66.0/analytics/reports/{reportId}/instances/{instanceId}    (cancel)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+Content-Type: application/json    (only for POST)
+
+Body (start with overrides)
+{
+  "reportMetadata": {
+    "reportFilters": [{ "column": "OWNER.NAME", "operator": "equals", "value": "Yamin Haji" }],
+    "standardDateFilter": { "column": "CLOSE_DATE", "durationValue": "THIS_FY" }
+  }
+}
+
+Input (parameters)
+operation (string, required) - "start" | "status" | "results" | "list" | "cancel".
+reportId (string, required) - Report Id.
+instanceId (string, required for status / results / cancel) - Instance Id.
+overrideMetadata (object, optional, only for start) - reportMetadata
+  overrides for the run.
+includeDetails (boolean, optional, default true, only for results).
+limit (number, optional, default 200, only for list).
+
+Result (start)
+instance (object) - { id, status ("New"), requestDate, ownerId,
+  hasDetailRows, queryable: false }.
+
+Result (status)
+instance (object) - same shape; `status` evolves to "Running", "Success",
+  "Error", "Cancelled".
+
+Result (results)
+Verbatim Analytics REST instance result JSON: factMap, groupings,
+reportMetadata, allData, etc. Same shape as `run_report`.
+
+Result (list)
+instances (array) - Each: { id, status, requestDate, completionDate,
+  ownerId }.
+hasMore (boolean).
+
+Result (cancel)
+instance (object) - status="Cancelled".
+
+Required permissions
+- "API Enabled".
+- Read on the report's folder.
+- "Manage Reports" to cancel another user's instance.
+
+Idempotency & limits
+- `start` is **not** idempotent (each call creates a new instance).
+- Async runs allow up to 100,000 rows per instance.
+- Instance metadata is retained ~24 h then purged.
+- 5 concurrent instances per report per user.
+
+Errors
+- INVALID_REPORT_ID, INVALID_INSTANCE_ID.
+- REPORT_INSTANCE_NOT_READY: results requested before status=Success.
+- TOO_MANY_INSTANCES.
+
+Example request (start)
+
+manage_report_instance({
+  "operation": "start",
+  "reportId": "00OQg0000004aBcDE",
+  "overrideMetadata": { "reportFilters": [{ "column": "AMOUNT", "operator": "greaterOrEqual", "value": "100000" }] }
+})
+
+Example request (results once complete)
+
+manage_report_instance({
+  "operation": "results",
+  "reportId": "00OQg0000004aBcDE",
+  "instanceId": "0LGQg00000abcDE",
+  "includeDetails": true
+})

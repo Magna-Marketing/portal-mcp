@@ -1,0 +1,54 @@
+Tool: manage_custom_metadata_record
+
+Description
+Create / update / upsert / delete records of a Custom Metadata Type.
+Custom Metadata Type records are deployed via the Metadata API
+(`CustomMetadata` type), not direct sObject DML — this tool wraps that
+deploy flow.
+
+Salesforce API
+Metadata API (`CustomMetadata`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+typeName (string, required) - Custom Metadata Type API name (with or without `__mdt`).
+records (object[], required) - Each:
+  developerName (string, required).
+  label (string, required for create).
+  protected (boolean, optional, default false).
+  fields (object, required for create/update) - Map of fieldApiName -> value.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+records (array) - { developerName, status ("created"|"updated"|"deleted"|"failed"), error }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- upsert idempotent on developerName.
+- Custom Metadata Type records are deployed metadata; they survive sandbox refresh and are deployed via change sets/Bridge.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad fieldApiName.
+
+Example request
+
+manage_custom_metadata_record({
+  "operation": "upsert",
+  "typeName": "Feature_Flag__mdt",
+  "records": [
+    { "developerName": "MTG_Use_New_Form", "label": "Use new form", "fields": { "Enabled__c": true, "Description__c": "Enable Lightning form on Project" } }
+  ]
+})

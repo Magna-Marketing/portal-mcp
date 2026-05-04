@@ -1,0 +1,86 @@
+Tool: create_promotion_via_connect
+
+Description
+Create a fully-configured promotion (with rule template parameters,
+products / categories, channels, market segments, limits) via the
+Loyalty Connect API in a single call. The Connect endpoint deploys
+all backing metadata (PromotionRuleTemplate, PromotionProduct, ...)
+behind the scenes.
+
+Use `manage_promotion` for simple Promotion-row CRUD without the
+full configuration.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/promotions
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "promotionName": "Q3_Earn_Double_Points",
+  "programName": "MTG_Rewards",
+  "description": "Double earn rate on Q3 purchases",
+  "promotionType": "EarnAccelerator",
+  "effectiveStartDate": "2026-07-01",
+  "effectiveEndDate": "2026-09-30",
+  "ruleTemplate": "Earn_Multiplier",
+  "ruleTemplateParameters": { "MultiplierValue": 2, "ProgramCurrencyName": "Points" },
+  "products": [{ "productId": "01tQg00000abcDE" }],
+  "productCategories": [],
+  "channels": [{ "name": "Web" }, { "name": "Mobile" }],
+  "marketSegments": [],
+  "loyaltyTiersScoped": ["Silver", "Gold"],
+  "limits": [{ "limitType": "MaxAccrualPerMember", "value": 5000 }],
+  "enrollmentRequired": false
+}
+
+Input (parameters)
+programName (string, required).
+promotionName (string, required).
+description (string, optional).
+promotionType (string, required).
+effectiveStartDate (string, required).
+effectiveEndDate (string, required).
+ruleTemplate (string, optional) - Pre-built template DeveloperName.
+ruleTemplateParameters (object, optional) - Template-specific arguments.
+products (array, optional) - [{ productId }].
+productCategories (array, optional) - [{ categoryName }].
+channels (array, optional) - [{ name }].
+marketSegments (array, optional).
+loyaltyTiersScoped (string[], optional).
+limits (array, optional) - [{ limitType, value, period }].
+partyUsage (array, optional).
+enrollmentRequired (boolean, optional, default false).
+
+Result
+promotion (object) - Created promotion identity + URL to its details.
+deployedComponents (array) - [{ type, fullName }] - Metadata pieces deployed.
+isSuccess (boolean).
+errors (array, optional).
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+- "Create Marketing Promotions".
+
+Idempotency & limits
+- Not idempotent — duplicate names produce DUPLICATE_VALUE.
+
+Errors
+- DUPLICATE_VALUE, INVALID_RULE_TEMPLATE, INVALID_PRODUCT.
+
+Example request
+
+create_promotion_via_connect({
+  "programName": "MTG_Rewards",
+  "promotionName": "Q3_Earn_Double_Points",
+  "promotionType": "EarnAccelerator",
+  "effectiveStartDate": "2026-07-01",
+  "effectiveEndDate": "2026-09-30",
+  "ruleTemplate": "Earn_Multiplier",
+  "ruleTemplateParameters": { "MultiplierValue": 2, "ProgramCurrencyName": "Points" }
+})

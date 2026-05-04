@@ -1,0 +1,69 @@
+Tool: manage_promotion
+
+Description
+Create / update / activate / deactivate / delete a `Promotion` row.
+For complex promotions (rule templates, products, channels, market
+segments, limits) use `create_promotion_via_connect` which delegates
+to the Loyalty Connect API and runs the full setup wizard server-side.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `Promotion`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/Promotion
+PATCH  /services/data/v66.0/sobjects/Promotion/{id}
+DELETE /services/data/v66.0/sobjects/Promotion/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "Name": "Q3_Earn_Double_Points",
+  "ProgramId": "...",
+  "Description": "Double earn rate on Q3 purchases",
+  "PromotionType": "EarnAccelerator",
+  "Status": "Active",
+  "EffectiveStartDate": "2026-07-01",
+  "EffectiveEndDate": "2026-09-30",
+  "EnrollmentRequired": false
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+promotionId (string, optional, required for non-create).
+programName (string, optional, required for create).
+programId (string, optional).
+name (string, required for create).
+description (string, optional).
+promotionType (string, optional).
+status (string, optional) - "Active" | "Inactive" | "Draft" | "Expired".
+effectiveStartDate (string, optional) - YYYY-MM-DD.
+effectiveEndDate (string, optional).
+channelId (string, optional).
+enrollmentRequired (boolean, optional, default false).
+maxMembershipCount (number, optional).
+
+Result
+promotion (object) - { id, name, programId, programName, status, effectiveStartDate, effectiveEndDate }.
+
+Required permissions
+- `Loyalty Management Admin` permission set + "Create Marketing Promotions".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on (programId, name).
+
+Example request
+
+manage_promotion({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "Q3_Earn_Double_Points",
+  "promotionType": "EarnAccelerator",
+  "effectiveStartDate": "2026-07-01",
+  "effectiveEndDate": "2026-09-30"
+})

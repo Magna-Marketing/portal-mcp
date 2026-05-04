@@ -1,0 +1,63 @@
+Tool: redeem_voucher
+
+Description
+Redeem a voucher (sets `Status = "Redeemed"` and records redemption
+amount, channel, location). Wraps the Loyalty Connect API endpoint.
+Validates expiration / status before applying.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/vouchers/{voucherId}/redeem
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "redeemedValue": 10.00,
+  "redemptionChannel": "PartnerStore",
+  "redemptionDate": "2026-04-30T12:00:00Z",
+  "externalTransactionId": "REDEEM-2026-04-001",
+  "additionalAttributes": { "PartnerStoreId": "NYC-01" }
+}
+
+Input (parameters)
+programName (string, required).
+voucherId (string, optional).
+voucherCode (string, optional).
+  One required.
+redeemedValue (number, optional) - For partial redemption (when allowed).
+redemptionChannel (string, optional).
+redemptionDate (string, optional, default now).
+externalTransactionId (string, optional, idempotency key).
+additionalAttributes (object, optional).
+
+Result
+voucher (object) - { id, voucherCode, status "Redeemed", redeemedDate, redeemedValue, remainingValue (when partial) }.
+isSuccess (boolean).
+errors (array, optional).
+
+Required permissions
+- `Loyalty Management Admin` permission set OR member-level redemption flow as the OAuth user.
+
+Idempotency & limits
+- Idempotent on `externalTransactionId`.
+- Cannot redeem a voucher that is `Cancelled`, `Expired`, or already
+  fully `Redeemed` (single-use).
+
+Errors
+- LOYALTY_VOUCHER_EXPIRED, LOYALTY_VOUCHER_ALREADY_REDEEMED,
+  LOYALTY_VOUCHER_CANCELLED.
+
+Example request
+
+redeem_voucher({
+  "programName": "MTG_Rewards",
+  "voucherCode": "VC-89231",
+  "redeemedValue": 10.00,
+  "redemptionChannel": "PartnerStore",
+  "externalTransactionId": "REDEEM-2026-04-001"
+})

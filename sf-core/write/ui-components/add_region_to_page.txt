@@ -1,0 +1,54 @@
+Tool: add_region_to_page
+
+Description
+Add a new region to a FlexiPage. Creates an empty region with no
+components; then use `add_component_to_region` to populate it. The
+region's allowed types depend on the page's template (e.g.
+`flexipage:recordHomeWithHeader` allows `header`, `main`, `right`).
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+flexiPageName (string, required).
+regionName (string, required) - New region API name. Must match the
+  template's allowed regions.
+type (string, optional, default "Region") - "Region" | "Facet" | "Container".
+appendable (boolean, optional, default true).
+position (number|"end"|"start", optional, default "end") - Insertion
+  position into the page's region array.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object) - { id, name, regionCount }.
+region (object) - { name, type, position, appendable }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent (fails on duplicate region name within the page).
+
+Errors
+- DUPLICATE_VALUE on existing region name.
+- INVALID_REGION_FOR_TEMPLATE: name not allowed by the page's template.
+
+Example request
+
+add_region_to_page({
+  "flexiPageName": "Project__c_Record_Page",
+  "regionName": "right",
+  "type": "Region",
+  "appendable": true
+})

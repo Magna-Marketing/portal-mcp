@@ -1,0 +1,49 @@
+Tool: manage_remote_site_setting
+
+Description
+Create / update / delete a Remote Site Setting. Use only if you can't
+move to Named Credentials.
+
+Salesforce API
+Metadata API (`RemoteSiteSetting`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+fullName (string, required).
+url (string, required for create/update).
+description (string, optional).
+isActive (boolean, optional, default true).
+disableProtocolSecurity (boolean, optional, default false) - When true, allows http://.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+remoteSiteSetting (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_remote_site_setting({
+  "operation": "create",
+  "fullName": "Partner_Webhook",
+  "url": "https://webhook.partner.com",
+  "description": "Outbound webhook for partner integration"
+})

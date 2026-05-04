@@ -1,0 +1,53 @@
+Tool: manage_send_classification
+
+Description
+Create / update / delete a `SendClassification` (the bundle of Sender +
+Delivery Profile + classification type used on every send).
+
+Marketing Cloud API
+SOAP API (`SendClassification` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+customerKey (string, required) - SendClassification External Key.
+name (string, required for create).
+description (string, optional).
+sendClassificationType (string, optional, default "Default Commercial") - "Default Commercial" | "Default Transactional".
+senderProfileCustomerKey (string, required for create).
+deliveryProfileCustomerKey (string, required for create).
+sendPriority (string, optional) - "High" | "Medium" | "Low".
+honorPublicationListOptOutsForTransactionalSends (boolean, optional).
+archiveEmail (boolean, optional, default false).
+
+Result
+sendClassification (object) - { id, customerKey, name, sendClassificationType, senderProfileCustomerKey, deliveryProfileCustomerKey }.
+
+Required scopes
+- `email_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE.
+
+Example request
+
+manage_send_classification({
+  "operation": "create",
+  "customerKey": "MTG_Default_Commercial",
+  "name": "MTG Default Commercial",
+  "sendClassificationType": "Default Commercial",
+  "senderProfileCustomerKey": "MTG_Sender",
+  "deliveryProfileCustomerKey": "MTG_Delivery"
+})

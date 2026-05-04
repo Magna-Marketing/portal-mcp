@@ -1,0 +1,96 @@
+Tool: create_user
+
+Description
+Create a new Salesforce user. Required fields: Username (must be unique
+across all Salesforce orgs and shaped like an email), Email, FirstName/
+LastName, Alias (≤8 chars), TimeZoneSidKey, LocaleSidKey,
+EmailEncodingKey, LanguageLocaleKey, ProfileId. The new user is active
+unless `isActive=false`. Optionally trigger a welcome email and assign
+permission set licenses + permission sets in the same call.
+
+Salesforce API
+REST API (Data), v66.0. `POST /sobjects/User`. License + permset
+assignments are extra calls the tool fans out.
+
+Endpoint
+POST /services/data/v66.0/sobjects/User
+POST /services/data/v66.0/sobjects/PermissionSetLicenseAssign     (per license)
+POST /services/data/v66.0/sobjects/PermissionSetAssignment        (per permset)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "Username": "jane.doe@magnatech.com",
+  "Email": "jane.doe@magnatech.com",
+  "FirstName": "Jane",
+  "LastName": "Doe",
+  "Alias": "jdoe",
+  "TimeZoneSidKey": "America/New_York",
+  "LocaleSidKey": "en_US",
+  "EmailEncodingKey": "UTF-8",
+  "LanguageLocaleKey": "en_US",
+  "ProfileId": "00eQg0000008ZyXAB",
+  "UserRoleId": "00EQg0000008abcAB",
+  "ManagerId": "005Qg0000020aBcDE",
+  "Department": "Engineering",
+  "Title": "Senior Engineer"
+}
+
+Input (parameters)
+username (string, required) - Email-shaped, globally unique.
+email (string, required).
+firstName (string, optional).
+lastName (string, required).
+alias (string, required, max 8 chars).
+profileId (string, required) - Or `profileName` (resolved by tool).
+profileName (string, optional).
+roleId (string, optional) - Or `roleName`.
+roleName (string, optional).
+managerId (string, optional) - Or `managerUsername`.
+managerUsername (string, optional).
+department (string, optional), title (string, optional).
+timeZoneSidKey (string, optional, default org default).
+localeSidKey (string, optional, default org default).
+emailEncodingKey (string, optional, default "UTF-8").
+languageLocaleKey (string, optional, default org default).
+phone (string, optional), mobilePhone (string, optional).
+federationIdentifier (string, optional) - For SSO.
+isActive (boolean, optional, default true).
+sendWelcomeEmail (boolean, optional, default false) - Triggers the
+  EmailHeader on create. Disabled by default to allow custom flows.
+permissionSetLicenseNames (string[], optional) - Auto-assign these PSLs.
+permissionSetNames (string[], optional) - Auto-assign these permsets.
+permissionSetGroupNames (string[], optional).
+
+Result
+user (object) - { id, username, email, alias, profileId, roleId, isActive, createdDate }.
+permissionSetLicenseAssignments (array) - { permissionSetLicenseId, name, status ("created"|"already_assigned") }.
+permissionSetAssignments (array) - { permissionSetId|permissionSetGroupId, name, assignmentId, status }.
+
+Required permissions
+- "Manage Internal Users" + "Manage Profiles and Permission Sets" (for permset assignment).
+- License headroom for the chosen profile's user license.
+
+Idempotency & limits
+- Not idempotent — fails on duplicate Username.
+- License consumption is checked at insert time.
+
+Errors
+- DUPLICATE_USERNAME, DUPLICATE_VALUE.
+- LICENSE_LIMIT_EXCEEDED, INSUFFICIENT_PERMSET_LICENSE.
+- INVALID_EMAIL_ADDRESS, INVALID_FIELD on bad locale/timezone keys.
+
+Example request
+
+create_user({
+  "username": "jane.doe@magnatech.com",
+  "email": "jane.doe@magnatech.com",
+  "firstName": "Jane", "lastName": "Doe",
+  "alias": "jdoe",
+  "profileName": "Standard User",
+  "roleName": "MTG_Engineering",
+  "permissionSetGroupNames": ["MTG_Delivery_Bundle"]
+})

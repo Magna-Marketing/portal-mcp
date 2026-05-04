@@ -1,0 +1,86 @@
+Tool: get_component_dependencies
+
+Description
+Get the dependency graph for a UI component:
+- Lightning Pages where the component is placed.
+- Apex controllers / classes referenced from the component's JS or markup.
+- Custom labels, static resources, and other Lightning components used.
+- Static parent component references (where this component is imported
+  by other LWCs/Aura).
+
+Backed by the Tooling API's `MetadataComponentDependency` view (the same
+view powering "Where is this used?" in Setup -> Lightning Components).
+Use this before refactoring or deleting components.
+
+Salesforce API
+Tooling API, v66.0. `MetadataComponentDependency` (read-only Tooling
+sObject; introduced for dependency tracing).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT MetadataComponentName, MetadataComponentType, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency WHERE (MetadataComponentName = '{name}' AND MetadataComponentType = '{type}') OR (RefMetadataComponentName = '{name}' AND RefMetadataComponentType = '{type}')
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - Component DeveloperName or Name.
+type (string, required) - Tooling component type ("LightningComponentBundle",
+  "AuraDefinitionBundle", "ApexPage", "FlexiPage", "ApexClass", etc.).
+direction (string, optional, default "both") - "outgoing" (this component
+  references X), "incoming" (X references this component), or "both".
+includeStandardRefs (boolean, optional, default false) - Include refs to
+  standard Lightning components (`lightning-record-form`, etc.).
+includeFlexiPages (boolean, optional, default true) - When this is an
+  LWC/Aura, also enumerate `FlexiPage` placements (region info).
+
+Result
+component (object) - { id, name, type, label, namespacePrefix }.
+outgoing (array, when direction != "incoming") - What this component depends on:
+  refName (string), refType (string), refNamespace (string|null).
+incoming (array, when direction != "outgoing") - What depends on this:
+  Same shape.
+flexiPages (array, when includeFlexiPages=true) - Lightning Pages where the
+  component appears: { flexiPageName, flexiPageLabel, type ("RecordPage"|
+  "AppPage"|"HomePage"), region, sObject (when RecordPage) }.
+summary (object) - { outgoingCount, incomingCount, flexiPageCount }.
+
+Required permissions
+- "View All Setup", "Modify All Data", or "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- `MetadataComponentDependency` is eventually consistent; brand-new
+  components may not appear for a few minutes.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- INVALID_TYPE: bad component type.
+
+Example request
+
+get_component_dependencies({
+  "name": "projectCard",
+  "type": "LightningComponentBundle",
+  "direction": "both"
+})
+
+Example result
+
+{
+  "component": { "id": "0Rb4Q00000abcDE", "name": "projectCard", "type": "LightningComponentBundle" },
+  "outgoing": [
+    { "refName": "ProjectController", "refType": "ApexClass" },
+    { "refName": "Project_Status_Label", "refType": "CustomLabel" }
+  ],
+  "incoming": [
+    { "refName": "projectDashboard", "refType": "LightningComponentBundle" }
+  ],
+  "flexiPages": [
+    { "flexiPageName": "Project_Record_Page", "flexiPageLabel": "Project Record Page", "type": "RecordPage", "region": "main", "sObject": "Project__c" }
+  ],
+  "summary": { "outgoingCount": 2, "incomingCount": 1, "flexiPageCount": 1 }
+}

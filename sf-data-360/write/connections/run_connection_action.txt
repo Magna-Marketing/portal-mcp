@@ -1,0 +1,75 @@
+Tool: run_connection_action
+
+Description
+Execute a connector-specific action (test, discover-schema,
+discover-databases, refresh-credentials, etc.) against an existing
+Connection — or test an unsaved configuration before creating one.
+The Postman collection ships several variations; this tool unifies
+them under `subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/actions/test                                     (subOperation="testNewConfig")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/actions/:command                                  (subOperation="runOnNewConfig")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/actions/test                        (subOperation="testExisting")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/actions/:command                    (subOperation="runOnExisting")
+POST {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/schema/actions/test                 (subOperation="testSchema")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (testNewConfig — pass a connector config to dry-run)
+{
+  "connectorType": "Snowflake",
+  "additionalProperties": {
+    "account": "magnatech",
+    "user": "marketing",
+    "warehouse": "MARKETING_WH"
+  }
+}
+
+Body (runOnExisting / runOnNewConfig — pass `command`)
+{ "command": "discover-schema" }
+
+Input (parameters)
+subOperation (string, required) - "testNewConfig" | "runOnNewConfig" |
+  "testExisting" | "runOnExisting" | "testSchema".
+connectionId (string, required for *Existing).
+command (string, required for runOn*) - "discover-schema" |
+  "discover-databases" | "discover-schemas" | "refresh-credentials" |
+  "validate-credentials" | etc. (per connector).
+connectorType (string, required for *NewConfig).
+additionalProperties (object, required for *NewConfig).
+
+Result
+action (object): subOperation, command, success (boolean), durationMs.
+result (object|null) - Connector-specific payload (e.g. a list of
+  databases or schemas; or the test outcome).
+errors (array) - When `success=false`.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Each call hits the source system. Subject to source-side rate limits.
+
+Errors
+- 502 SOURCE_UNAVAILABLE, 401 INVALID_SESSION_ID, 400 INVALID_COMMAND.
+
+Example request
+
+run_connection_action({
+  "subOperation": "runOnExisting",
+  "connectionId": "0Z65800000000ABCAA",
+  "command": "discover-schema"
+})
+
+Example result
+{
+  "action": { "command": "discover-schema", "success": true, "durationMs": 1284 },
+  "result": { "objectsDiscovered": 12, "version": 15 }
+}

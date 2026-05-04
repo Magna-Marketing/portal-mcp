@@ -1,0 +1,55 @@
+Tool: list_configured_models
+
+Description
+List Configured Models — ML models registered with Data 360 (via
+Einstein Studio / Model Builder, BYOM, or AppExchange) that are
+available for `predict` calls.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Active" | "Draft" | "Failed".
+modelType (string, optional) - "Classification" | "Regression" |
+  "TimeSeries" | "GenAI" | "Recommendation".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+configuredModels (array) - Each: { id, apiName, label, modelType,
+  status, modelArtifactId, version, predictionEndpoint,
+  inputSchema (object), outputSchema (object), createdDate,
+  lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_configured_models({ "modelType": "Classification" })
+
+Example result
+{
+  "configuredModels": [
+    { "apiName": "ChurnPredictor", "label": "Churn Predictor",
+      "modelType": "Classification", "status": "Active",
+      "version": "1.2.0" }
+  ]
+}

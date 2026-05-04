@@ -1,0 +1,105 @@
+Tool: analyze_common_permissions
+
+Description
+Analyze permissions that are shared across multiple profiles (or
+permission sets) to identify candidates for consolidation into a
+reusable permission set or PSG. Surfaces:
+- Object perms held in common across N profiles.
+- Field perms held in common.
+- System perms held in common.
+- "Almost-common" perms (held by ≥ threshold percent of profiles).
+
+Use to plan deduplication before running `generate_migration_plan` or
+`extract_permissions_from_profile`.
+
+Salesforce API
+REST API + Tooling, v66.0. SOQL on `Profile`, `ObjectPermissions`,
+`FieldPermissions`, `PermissionSet`. The MCP server intersects the
+permission sets server-side.
+
+Endpoint
+N/A (composite of read queries).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+scope (string, required) - "profiles" | "permissionSets" | "both".
+ids (string[], optional) - Profile or PermissionSet Ids to analyze. If
+  omitted, all custom profiles or permission sets in the org are used.
+names (string[], optional) - Same as `ids` but using DeveloperNames.
+threshold (number, optional, default 100) - Percent (0-100). 100 = held
+  by every analyzed entity; 80 = held by ≥80% (then the remaining ones
+  are listed as "missing").
+includeFieldPermissions (boolean, optional, default false) - Heavy.
+limit (number, optional, default 100) - Cap on returned consolidation
+  candidates.
+
+Result
+analyzed (array) - Each: { id, name, label, type ("Profile"|"PermissionSet") }.
+common (object):
+  systemPermissions (string[]) - Permissions held by all (>= threshold).
+  objectPermissions (array) - Each: { sObject, read, create, edit,
+    delete, viewAll, modifyAll, percentHolding (number) }.
+  fieldPermissions (array, optional) - { sObject, field, read, edit,
+    percentHolding }.
+consolidationCandidates (array) - Suggested permsets:
+  proposedName (string).
+  proposedLabel (string).
+  contains (object) - { systemPermissions, objectPermissions, fieldPermissions }.
+  wouldReplaceFrom (string[]) - Profile/permset names to remove these
+    perms from once the new permset is created.
+  estimatedUsersBenefit (number).
+
+Required permissions
+- "View Setup and Configuration", read on metadata sObjects.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- O(N * fields) where N = number of profiles/permsets analyzed.
+
+Errors
+- INVALID_FIELD: bad scope value.
+
+Example request
+
+analyze_common_permissions({
+  "scope": "profiles",
+  "names": ["MTG_Project_Manager_Profile", "MTG_Delivery_Profile", "MTG_Sales_Profile"],
+  "threshold": 80,
+  "includeFieldPermissions": false
+})
+
+Example result
+
+{
+  "analyzed": [
+    { "name": "MTG_Project_Manager_Profile", "type": "Profile" },
+    { "name": "MTG_Delivery_Profile",        "type": "Profile" },
+    { "name": "MTG_Sales_Profile",           "type": "Profile" }
+  ],
+  "common": {
+    "systemPermissions": ["ApiEnabled", "RunReports", "ViewMyTeamsDashboards"],
+    "objectPermissions": [
+      { "sObject": "Account",     "read": true, "edit": true, "create": false, "delete": false, "viewAll": false, "modifyAll": false, "percentHolding": 100 },
+      { "sObject": "Opportunity", "read": true, "edit": true, "create": true,  "delete": false, "viewAll": false, "modifyAll": false, "percentHolding": 100 },
+      { "sObject": "Project__c",  "read": true, "edit": true, "create": true,  "delete": false, "viewAll": false, "modifyAll": false, "percentHolding": 67 }
+    ]
+  },
+  "consolidationCandidates": [
+    {
+      "proposedName": "MTG_Account_Read_Edit",
+      "proposedLabel": "MTG | Account Read+Edit",
+      "contains": {
+        "systemPermissions": ["ApiEnabled", "RunReports"],
+        "objectPermissions": [{ "sObject": "Account", "read": true, "edit": true }]
+      },
+      "wouldReplaceFrom": ["MTG_Project_Manager_Profile", "MTG_Delivery_Profile", "MTG_Sales_Profile"],
+      "estimatedUsersBenefit": 41
+    }
+  ]
+}

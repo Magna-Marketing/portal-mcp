@@ -1,0 +1,58 @@
+Tool: manage_event_callback
+
+Description
+Manage Event Notification Service callbacks (the webhook endpoints
+ENS pushes events to). Operations: create, update, delete, verify
+(POST a one-time challenge to confirm endpoint ownership).
+
+Marketing Cloud API
+REST API (`/platform/v1/ens-callbacks` and `/platform/v1/ens-verify`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks
+PUT    https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks
+DELETE https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks/{callbackId}
+POST   https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-verify          (verification challenge)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "callbackName": "MTG-MainCallback",
+  "url": "https://webhook.magnatech.com/mc-events",
+  "signatureKey": "shared-secret-here",
+  "maxBatchSize": 50
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "verify".
+callbackId (string, optional, required for non-create).
+callbackName (string, required for create).
+url (string, required for create) - HTTPS endpoint that will receive events.
+signatureKey (string, optional, recommended) - Shared secret for signed payload verification.
+maxBatchSize (number, optional, default 50, max 100) - Events per batch.
+
+Result
+callback (object) - { callbackId, callbackName, url, status, signatureKey (masked), maxBatchSize, verifyResult (string|null) }.
+
+Required scopes
+- `webhooks_write`.
+
+Idempotency & limits
+- update idempotent.
+- Marketing Cloud expects the callback URL to respond 200 within 30s during verify.
+
+Errors
+- VERIFICATION_FAILED, 30002 not found.
+
+Example request
+
+manage_event_callback({
+  "operation": "create",
+  "callbackName": "MTG-MainCallback",
+  "url": "https://webhook.magnatech.com/mc-events",
+  "signatureKey": "shared-secret-here",
+  "maxBatchSize": 50
+})

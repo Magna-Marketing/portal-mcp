@@ -1,0 +1,45 @@
+Tool: list_search_layouts
+
+Description
+List search layouts for an sObject: search results columns, lookup
+dialog columns, lookup phone dialog columns, tab columns, and the
+buttons displayed in each.
+
+Salesforce API
+REST API, v66.0. `/search/layout/?q=...`.
+
+Endpoint
+GET /services/data/v66.0/search/layout/?q=Account,Contact,Opportunity
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], required) - sObject API names.
+
+Result
+layouts (array) - Each:
+  sObject (string).
+  searchResultsColumns (array) - [{ field, label, format }].
+  searchResultsCustomButtons (array).
+  lookupDialogsColumns (array).
+  lookupPhoneDialogsColumns (array).
+  tabColumns (array).
+  Limit (object|null).
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_search_layouts({ "sObjects": ["Account", "Opportunity"] })

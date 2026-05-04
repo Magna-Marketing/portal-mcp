@@ -1,0 +1,48 @@
+Tool: remove_contact_from_journey
+
+Description
+Remove (exit) one or more contacts from one or all journeys they're
+currently in. Useful for unsubscribe / preference-center flows or when
+a contact's data changes invalidate their journey membership.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/contactexit`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/contactexit
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "ContactKeyList": ["MEM-100023"],
+  "DefinitionIds": ["abc-journey-id-1", "abc-journey-id-2"]
+}
+
+Input (parameters)
+contactKeys (string[], required) - Up to 1000 per call.
+journeyIds (string[], optional) - Limit exit to specific journeys; omit to exit ALL journeys the contact is in.
+
+Result
+operationId (string) - Use `get_contact_exit_status` to track.
+status (string) - "Queued" | "Processing".
+contactsQueued (number).
+
+Required scopes
+- `journeys_execute`.
+
+Idempotency & limits
+- Idempotent on already-exited contact (returns success with 0 contacts queued).
+- Up to 1000 contacts per call.
+
+Errors
+- 10000 invalid contact key, 30002 journey not found.
+
+Example request
+
+remove_contact_from_journey({
+  "contactKeys": ["MEM-100023"],
+  "journeyIds": ["abc-journey-id-1"]
+})

@@ -1,0 +1,55 @@
+Tool: get_calculated_insight
+
+Description
+Read a single Calculated Insight Object by api name. Returns the
+CIO definition (measures + dimensions + source DMOs + refresh
+schedule + last-run status). To pull values, use
+`query_data_cloud_sql` with `SELECT * FROM <ciApiName>`.
+
+Salesforce API
+Data Cloud Calculated Insights API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/insight/objects/:ciApiName
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+ciApiName (string, required).
+dataSpace (string, optional, default "default").
+includeRunHistory (boolean, optional, default false) - Returns the
+  last 25 runs.
+
+Result
+calculatedInsight (object) - Full definition (see
+  `list_calculated_insights` row shape) plus `sql` (the underlying
+  SQL definition) and `formula` (for measures).
+runHistory (array, when includeRunHistory=true).
+
+Required scopes
+- `cdp_calculated_insight_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_calculated_insight({ "ciApiName": "CustomerLTV__cio" })
+
+Example result
+{
+  "calculatedInsight": {
+    "ciApiName": "CustomerLTV__cio",
+    "label": "Customer LTV",
+    "sql": "SELECT IndividualId__c, SUM(Amount__c) AS LifetimeValue__c FROM Order__dlm GROUP BY IndividualId__c",
+    "refreshFrequency": "Daily"
+  }
+}

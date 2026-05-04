@@ -1,0 +1,70 @@
+Tool: update_user
+
+Description
+Update one or many users. Common operations: deactivate, freeze /
+unfreeze, change profile, change role, change manager, change name,
+change email, change federation identifier, change timezone/locale.
+Bulk-friendly: pass `users[]` for batch updates.
+
+Note: **deactivation** = `IsActive=false` (frees license, removes
+session). **Freeze** uses `UserLogin.IsFrozen=true` (keeps license,
+blocks login).
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+PATCH /services/data/v66.0/sobjects/User/{userId}                                    (single)
+POST  /services/data/v66.0/composite/sobjects                                        (bulk update)
+POST  /services/data/v66.0/sobjects/UserLogin                                        (freeze/unfreeze updates UserLogin)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+PATCH:
+{
+  "IsActive": false,
+  "ProfileId": "00eQg0000008abcAB",
+  "ManagerId": "005Qg0000020aBcDE"
+}
+
+Input (parameters)
+users (object[], required) - Each:
+  userId (string, optional) - Or username.
+  username (string, optional).
+  isActive (boolean, optional).
+  freeze (boolean, optional) - true=freeze, false=unfreeze (writes UserLogin).
+  profileId (string, optional) / profileName (string, optional).
+  roleId (string, optional) / roleName (string, optional).
+  managerId (string, optional) / managerUsername (string, optional).
+  email (string, optional), firstName, lastName, alias (string, optional).
+  department, title, phone, mobilePhone (string, optional).
+  timeZoneSidKey, localeSidKey, languageLocaleKey, emailEncodingKey (string, optional).
+  federationIdentifier (string, optional).
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - Per user: { userId, username, status ("updated"|"failed"|"frozen"|"unfrozen"|"deactivated"), changes (string[]), error (string|null) }.
+summary (object) - { updated, failed, total }.
+
+Required permissions
+- "Manage Internal Users" + "Manage Profiles and Permission Sets" for profile changes.
+
+Idempotency & limits
+- Idempotent on equal input.
+- Composite cap: 200 per call; tool batches.
+
+Errors
+- INVALID_CROSS_REFERENCE_KEY, DUPLICATE_VALUE, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request (deactivate two users + reassign manager on a third)
+
+update_user({
+  "users": [
+    { "username": "alice@magnatech.com", "isActive": false },
+    { "username": "bob@magnatech.com",   "isActive": false },
+    { "username": "carol@magnatech.com", "managerUsername": "manager@magnatech.com" }
+  ]
+})

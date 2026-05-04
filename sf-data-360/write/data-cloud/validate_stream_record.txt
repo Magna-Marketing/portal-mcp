@@ -1,0 +1,64 @@
+Tool: validate_stream_record
+
+Description
+Validate a streaming-ingest payload **without** ingesting it.
+Useful for client-side schema validation before firing a write,
+especially in CI / dry-run pipelines.
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+POST {cdpTenantUrl}/api/v1/ingest/sources/:sourceApiName/:objectApiName/actions/test
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "data": [
+    { "Id__c": "ORDER-100023", "Amount__c": "not_a_number" }
+  ]
+}
+
+Input (parameters)
+sourceApiName (string, required).
+objectApiName (string, required).
+data (object[], required) - Up to 200 records.
+
+Result
+valid (boolean).
+recordCount (number).
+errors (array) - Per record: { index, field, code, message }.
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Read-only at the persistence layer; the platform doesn't ingest
+  the records.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+validate_stream_record({
+  "sourceApiName": "ecommerce",
+  "objectApiName": "Order",
+  "data": [
+    { "Id__c": "ORDER-100023", "Amount__c": "not_a_number" }
+  ]
+})
+
+Example result
+{
+  "valid": false,
+  "recordCount": 1,
+  "errors": [
+    { "index": 0, "field": "Amount__c", "code": "INVALID_NUMBER",
+      "message": "Cannot parse 'not_a_number' as DECIMAL" }
+  ]
+}

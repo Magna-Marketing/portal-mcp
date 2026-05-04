@@ -1,0 +1,55 @@
+Tool: get_data_stream
+
+Description
+Read a single Data Stream by id or developer name. Returns the
+full configuration: source mapping rules, schedule, filter, and
+metadata.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-streams/:recordIdOrDeveloperName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+recordIdOrDeveloperName (string, required).
+
+Result
+dataStream (object): id, developerName, label, connectionId,
+  sourceObject, refreshMode, schedule, status, dataLakeObjectName,
+  filter (object), mappingRules (array<{ sourceField, targetField,
+  dataType, transformExpression }>), recordCount, lastRunStatus,
+  lastRunDate, lastFailureMessage, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_stream({ "recordIdOrDeveloperName": "mc_sends" })
+
+Example result
+{
+  "dataStream": {
+    "developerName": "mc_sends",
+    "label": "MCE Sends",
+    "refreshMode": "Incremental",
+    "dataLakeObjectName": "mc_sends__dll",
+    "mappingRules": [
+      { "sourceField": "ID", "targetField": "Id__c", "dataType": "TEXT" }
+    ]
+  }
+}

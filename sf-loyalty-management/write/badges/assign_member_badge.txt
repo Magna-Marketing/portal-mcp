@@ -1,0 +1,49 @@
+Tool: assign_member_badge
+
+Description
+Award a badge to one or more members. Creates `LoyaltyProgramMemberBadge`
+rows.
+
+Salesforce API
+REST API (Data), v66.0. POST/composite on `LoyaltyProgramMemberBadge`.
+
+Endpoint
+POST /services/data/v66.0/sobjects/LoyaltyProgramMemberBadge
+POST /services/data/v66.0/composite/sobjects   (bulk)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "MemberId": "0lMQg00000abcDE2", "BadgeId": "...", "AwardedDate": "2026-04-30T00:00:00Z", "ExpiryDate": null }
+
+Input (parameters)
+badgeId (string, optional) - Or badgeName.
+badgeName (string, optional).
+programName (string, optional, required when using badgeName) - Used to scope the lookup.
+members (object[], required) - Each: { memberId | membershipNumber, awardedDate (optional), expiryDate (optional), relatedTransactionJournalId (optional) }.
+allOrNone (boolean, optional, default false).
+skipIfAlreadyAwarded (boolean, optional, default true).
+
+Result
+results (array) - { memberId, badgeId, status ("awarded"|"already_awarded"|"failed"), memberBadgeId, error }.
+summary (object) - { awarded, alreadyAwarded, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent with `skipIfAlreadyAwarded=true`.
+- Composite cap 200 per call.
+
+Errors
+- DUPLICATE_VALUE, BADGE_INACTIVE, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+assign_member_badge({
+  "badgeName": "First_Purchase",
+  "programName": "MTG_Rewards",
+  "members": [{ "memberId": "0lMQg00000abcDE2" }]
+})

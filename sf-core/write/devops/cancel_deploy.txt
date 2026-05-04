@@ -1,0 +1,38 @@
+Tool: cancel_deploy
+
+Description
+Cancel an in-progress metadata deploy. Status moves to "Canceled" if
+caught before tests run, otherwise rollback may be required.
+
+Salesforce API
+Metadata API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest/{deployId}/cancel
+or
+PATCH /services/data/v66.0/tooling/sobjects/DeployRequest/{deployId}    (Status="Canceling")
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None.
+
+Input (parameters)
+deployId (string, required).
+
+Result
+deployment (object) - { id, status ("Canceling"|"Canceled"|"Failed"|"InProgress"), done }.
+
+Required permissions
+- "Modify Metadata Through Metadata API Functions".
+
+Idempotency & limits
+- Idempotent (already-canceled job: no-op).
+
+Errors
+- DEPLOY_NOT_CANCELABLE: deploy already finished.
+
+Example request
+
+cancel_deploy({ "deployId": "0Af4Q00000abcDE" })

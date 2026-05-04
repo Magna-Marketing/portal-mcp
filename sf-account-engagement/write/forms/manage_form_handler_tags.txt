@@ -1,0 +1,43 @@
+Tool: manage_form_handler_tags
+
+Description
+Add or remove tags on a Form Handler.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/form-handlers/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/form-handlers/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "External Form" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), formHandlerId (number), tag (string), operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_form_handler_tags({ "id": 8101, "operation": "add", "tag": "External Form" })
+
+Example result
+{ "success": true, "formHandlerId": 8101, "tag": "External Form", "operation": "add" }

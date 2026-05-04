@@ -1,0 +1,70 @@
+Tool: read_lwc_file
+
+Description
+Read a single file from an LWC bundle. Useful when only one file is
+needed (the JS, the meta XML, or one of multiple SVG/icon files). Use
+`read_lwc_comprehensive` to get every file in the bundle.
+
+Salesforce API
+Tooling API, v66.0. `LightningComponentResource` (file rows).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}' AND FilePath LIKE '%/{fileName}'
+
+Or by Id once known:
+GET /services/data/v66.0/tooling/sobjects/LightningComponentResource/{resourceId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+bundleName (string, required) - LWC DeveloperName (e.g. "projectCard").
+fileName (string, required) - File name including extension (e.g.
+  "projectCard.js", "projectCard.html", "projectCard.css",
+  "projectCard.js-meta.xml", "projectCard.svg").
+asBase64 (boolean, optional, default false) - For binary-ish files
+  (svg). Default returns plain text.
+
+Result
+file (object):
+  id (string) - LightningComponentResource Id.
+  bundleId (string).
+  fileName (string).
+  format (string) - "js" | "html" | "css" | "xml" | "svg".
+  filePath (string) - e.g. "lwc/projectCard/projectCard.js".
+  sizeBytes (number).
+  source (string) - File contents (or base64 when asBase64=true).
+  lastModifiedDate (string).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- File source can be up to 1 MB.
+
+Errors
+- NOT_FOUND: bundle or file not found.
+
+Example request
+
+read_lwc_file({ "bundleName": "projectCard", "fileName": "projectCard.js" })
+
+Example result
+
+{
+  "file": {
+    "id": "0Rt4Q00000abcXY",
+    "bundleId": "0Rb4Q00000abcDE",
+    "fileName": "projectCard.js",
+    "format": "js",
+    "filePath": "lwc/projectCard/projectCard.js",
+    "sizeBytes": 1842,
+    "source": "import { LightningElement, api, wire } from 'lwc';\nimport getProject from '@salesforce/apex/ProjectController.getProject';\n\nexport default class ProjectCard extends LightningElement {\n  @api recordId;\n  /* ... */\n}\n",
+    "lastModifiedDate": "2026-04-22T13:18:09.000+0000"
+  }
+}

@@ -1,0 +1,49 @@
+Tool: list_custom_metadata_types
+
+Description
+List Custom Metadata Types in the org with their fields and current
+record count. Custom Metadata Types are configuration-as-data; their
+records are deployable through the Metadata API. Use to understand
+config flags, feature toggles, and per-tenant overrides.
+
+Salesforce API
+Tooling API + REST API, v66.0. SOQL on `EntityDefinition` filtered to `IsCustomMetadataType=true`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, NamespacePrefix, ManageableState FROM EntityDefinition WHERE IsCustomMetadataType = true
+GET /services/data/v66.0/sobjects/{cmtName}/describe                       (per CMT for fields)
+GET /services/data/v66.0/query/?q=SELECT COUNT() FROM {cmtName}            (record count)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namespacePrefix (string, optional).
+namePattern (string, optional).
+includeFields (boolean, optional, default true).
+includeRecordCounts (boolean, optional, default true).
+managedOnly (boolean, optional, default false).
+
+Result
+totalSize (number).
+customMetadataTypes (array) - Each:
+  qualifiedApiName (string), label (string), pluralLabel (string), namespacePrefix (string|null), manageableState (string).
+  fields (array, when includeFields=true) - { apiName, label, type, length, picklistValues }.
+  recordCount (number, when includeRecordCounts=true).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_custom_metadata_types({ "includeRecordCounts": true })

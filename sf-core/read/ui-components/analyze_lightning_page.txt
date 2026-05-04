@@ -1,0 +1,76 @@
+Tool: analyze_lightning_page
+
+Description
+Analyze a Lightning Page's structure and produce performance/UX
+recommendations. Heuristic checks include:
+- Total component count vs Lightning best practice (<25 in main region).
+- Custom components without `lazy` loading.
+- Heavy related lists in primary regions (suggest moving to tabs).
+- Components with unrecognized properties (probably broken).
+- Excessive nesting via tabs and accordions.
+- Visibility rules that always evaluate true/false.
+
+Read-only; no changes are made. Pair recommendations with
+`update_flexipage` / `update_component_properties` /
+`reorder_region_components`.
+
+Salesforce API
+Tooling API, v66.0. Reads `FlexiPage` metadata.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - FlexiPage DeveloperName.
+strict (boolean, optional, default false) - Treat warnings as errors.
+
+Result
+flexiPage (object) - { id, name, label, type, sObject }.
+metrics (object):
+  totalRegions (number).
+  totalComponents (number).
+  customComponents (number).
+  standardComponents (number).
+  maxNestingDepth (number).
+  componentsByRegion (object) - { regionName: count }.
+  uniqueComponentTypes (number).
+findings (array) - Each:
+  severity ("error"|"warning"|"info").
+  code (string) - "too_many_components", "broken_property", "deep_nesting", "visibility_rule_always_true", etc.
+  region (string|null).
+  componentIdentifier (string|null).
+  message (string).
+  suggestion (string|null).
+recommendations (string[]) - High-level actionable bullets.
+overallScore (number) - 0..100.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+analyze_lightning_page({ "name": "Project__c_Record_Page" })
+
+Example result (truncated)
+
+{
+  "flexiPage": { "name": "Project__c_Record_Page", "type": "RecordPage", "sObject": "Project__c" },
+  "metrics": { "totalRegions": 4, "totalComponents": 32, "customComponents": 4, "maxNestingDepth": 3, "componentsByRegion": { "main": 18, "right": 8, "header": 4, "footer": 2 } },
+  "findings": [
+    { "severity": "warning", "code": "too_many_components", "region": "main", "message": "main has 18 components; recommend < 12 for fastest load." }
+  ],
+  "overallScore": 76
+}

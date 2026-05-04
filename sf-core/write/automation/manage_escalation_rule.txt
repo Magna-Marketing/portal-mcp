@@ -1,0 +1,49 @@
+Tool: manage_escalation_rule
+
+Description
+Manage Case escalation rules (rule entries with criteria + escalation
+actions that fire after a record ages without expected progress).
+
+Salesforce API
+Metadata API (`EscalationRules`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+fullName (string, required for non-create).
+label (string, required for create).
+active (boolean, optional, default false).
+ruleEntries (array, optional) - [{ sortOrder, criteriaItems, formula, booleanFilter, businessHours, escalationActions: [{ ageOver, ageOverFromField, assignTo, assignToTemplate, notifyTo, notifyTemplate, notifyAssignee }] }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+rule (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on bad criteria.
+
+Example request
+
+manage_escalation_rule({
+  "operation": "create",
+  "fullName": "Case_Age_Escalation",
+  "label": "Case Age Escalation",
+  "active": true,
+  "ruleEntries": [{ "sortOrder": 1, "criteriaItems": [{ "field": "Case.Status", "operation": "notEqual", "value": "Closed" }], "escalationActions": [{ "ageOver": 1440, "assignTo": "MTG_Tier2_Queue" }] }]
+})

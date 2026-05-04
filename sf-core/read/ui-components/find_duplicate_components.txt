@@ -1,0 +1,65 @@
+Tool: find_duplicate_components
+
+Description
+Identify potentially duplicate or near-duplicate UI components by
+combining:
+- Name-similarity scoring (Levenshtein + token similarity on
+  DeveloperName).
+- File-content similarity (Jaccard over tokens for the JS / HTML / XML
+  files of LWC bundles, or .cmp/.cmp-meta.xml for Aura).
+- Same target / sObject / exposure settings.
+
+Returns clusters of components that may be candidates for consolidation.
+Use with `compare_ui_components` for a precise diff between two
+candidates and `deprecate_lwc_component` to retire one.
+
+Salesforce API
+Tooling API, v66.0. Reads metadata + content per candidate.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed FROM LightningComponentBundle [WHERE ManageableState = 'unmanaged']
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId IN (...)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, optional, default "lwc") - "lwc" | "aura".
+namespacePrefix (string, optional, default "" for default namespace).
+nameSimilarityThreshold (number, optional, default 0.7) - 0..1; lower =
+  more sensitive name match.
+contentSimilarityThreshold (number, optional, default 0.6) - 0..1; lower
+  = more sensitive content match.
+maxClusters (number, optional, default 25).
+includeFileBreakdown (boolean, optional, default false).
+
+Result
+type (string).
+clusters (array) - Each:
+  representative (object) - { id, name, label, apiVersion, isExposed }
+    (the first/oldest member).
+  members (array) - { id, name, label, lastModifiedDate, similarityToRepresentative (0..1) }.
+  averageSimilarity (number).
+  recommendation (string) - "consolidate", "rename to share base",
+    "keep separate (low overlap)".
+  fileBreakdown (object, optional) - Per file: { fileName,
+    averageSimilarityAcrossMembers }.
+totalCandidates (number).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Expensive in big orgs; cache result for daily reports.
+
+Errors
+- INVALID_FIELD on bad type.
+
+Example request
+
+find_duplicate_components({ "type": "lwc", "nameSimilarityThreshold": 0.6 })

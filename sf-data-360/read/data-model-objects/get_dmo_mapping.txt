@@ -1,0 +1,51 @@
+Tool: get_dmo_mapping
+
+Description
+Read a single DMO mapping by developer name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings/:objectSourceTargetMapDeveloperName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+objectSourceTargetMapDeveloperName (string, required).
+
+Result
+mapping (object): developerName, label, sourceObject, targetObject,
+  fieldMappings, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_dmo_mapping({
+  "objectSourceTargetMapDeveloperName": "mc_sends_to_send"
+})
+
+Example result
+{
+  "mapping": {
+    "developerName": "mc_sends_to_send",
+    "sourceObject": "mc_sends__dll",
+    "targetObject": "Send__dlm",
+    "fieldMappings": [
+      { "sourceField": "Id__c", "targetField": "Id__c" }
+    ]
+  }
+}

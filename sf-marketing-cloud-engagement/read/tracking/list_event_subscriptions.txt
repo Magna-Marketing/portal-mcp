@@ -1,0 +1,40 @@
+Tool: list_event_subscriptions
+
+Description
+List Event Notification Service subscriptions. Each subscription binds
+a callback (`callbackId`) to one or more event categories
+(EngagementEvents, TransactionalSendEvents, JourneyEvents, etc.).
+
+Marketing Cloud API
+REST API (`/platform/v1/ens-subscriptions`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscriptionId}
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions-by-cb/{callbackId}     (all subs for a callback)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+subscriptionId (string, optional) - Single subscription.
+callbackId (string, optional) - All subscriptions for a callback.
+
+Result
+subscriptions (array) - { subscriptionId, subscriptionName, callbackId, subscribedEventCategories, filters, status ("Active"|"Inactive"), createdDate, lastModifiedDate }.
+
+Required scopes
+- `webhooks_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_event_subscriptions({ "callbackId": "abc-1234" })

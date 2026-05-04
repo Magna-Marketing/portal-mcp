@@ -1,0 +1,97 @@
+Tool: manage_prospect
+
+Description
+Create, update, or soft-delete a Prospect. For idempotent inbound
+integrations, prefer `upsert_prospect_by_email` over `create`. To
+restore a soft-deleted prospect, use `undelete_prospect`.
+
+Custom-field values are passed inside `customFields` keyed by
+`apiFieldId` (the API name from `read/custom-fields/list_custom_fields`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/prospects       (create)
+PATCH  https://{pi-domain}/api/v5/objects/prospects/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/prospects/:id   (delete - soft)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "email": "jane@example.com",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "company": "Acme",
+  "campaignId": 1024,
+  "assignedToUserId": 421,
+  "customFields": { "region__c": "EMEA" }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+email (string, required for create).
+firstName, lastName, salutation (string, optional).
+company, jobTitle, department, industry (string, optional).
+phone, mobilePhone, fax (string, optional).
+website (string, optional).
+address1, address2, city, state, zip, country (string, optional).
+annualRevenue, employees, years_in_business (string|number, optional).
+notes (string, optional).
+campaignId (number, optional).
+assignedToUserId (number, optional) - See `assign_prospect` for
+  legacy v4 assignment options (group / role).
+prospectAccountId (number, optional).
+isDoNotEmail (boolean, optional).
+isDoNotCall (boolean, optional).
+isOptedOut (boolean, optional) - Global opt-out (different from
+  per-list opt-out via `manage_list_membership`).
+isReviewed (boolean, optional).
+isStarred (boolean, optional).
+score (number, optional).
+grade (string, optional) - Letter grade ("A" .. "F").
+salesforceId (string, optional) - Cross-reference SFDC Lead/Contact.
+customFields (object, optional) - { apiFieldId: value }.
+
+Result
+prospect (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Soft-delete; restore via `undelete_prospect` within 90 days.
+- Not idempotent on create; use `upsert_prospect_by_email` for
+  idempotent semantics.
+
+Errors
+- 4 invalid_business_unit, 11 invalid_email, 12 duplicate_prospect
+  (when `email` already exists and `email_uniqueness` is enforced),
+  49 readonly_field, 65 invalid_field_projection, 59 not_found.
+
+Example request
+
+manage_prospect({
+  "operation": "create",
+  "email": "jane@example.com",
+  "firstName": "Jane",
+  "company": "Acme",
+  "campaignId": 1024,
+  "customFields": { "region__c": "EMEA" }
+})
+
+Example result
+{
+  "prospect": {
+    "id": 7745, "email": "jane@example.com",
+    "firstName": "Jane", "company": "Acme",
+    "customFields": { "region__c": "EMEA" }
+  }
+}

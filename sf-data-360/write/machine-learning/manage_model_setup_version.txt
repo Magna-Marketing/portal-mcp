@@ -1,0 +1,63 @@
+Tool: manage_model_setup_version
+
+Description
+Create or update a Model Setup Version — Einstein Studio / Model
+Builder training-config snapshot.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST  {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-setups/:modelSetupIdOrName/setup-versions                                  (operation="create")
+PATCH {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-setups/:modelSetupIdOrName/setup-versions/:modelSetupVersionId             (operation="update")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "version": "1.3.0",
+  "trainingDatasetRef": "datacloud://CustomerLTV__cio?dataSpace=default",
+  "featureColumns": ["EngagementCount__c","DaysSinceLastPurchase__c"],
+  "targetColumn": "Churned__c",
+  "hyperparameters": { "learningRate": 0.001, "maxDepth": 6 }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update".
+modelSetupIdOrName (string, required).
+modelSetupVersionId (string, required for update).
+version (string, required for create).
+trainingDatasetRef (string, required for create).
+featureColumns (string[], required for create).
+targetColumn (string, required for create).
+hyperparameters (object, optional).
+status (string, optional) - "Active" | "Archived".
+
+Result
+version (object) - Created / updated row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `version`. Repeated create returns the existing version.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND.
+
+Example request
+
+manage_model_setup_version({
+  "operation": "create",
+  "modelSetupIdOrName": "ChurnModel",
+  "version": "1.3.0",
+  "trainingDatasetRef": "datacloud://CustomerLTV__cio",
+  "featureColumns": ["EngagementCount__c"],
+  "targetColumn": "Churned__c"
+})
+
+Example result
+{ "version": { "id": "MSV_002", "version": "1.3.0", "status": "Training" } }

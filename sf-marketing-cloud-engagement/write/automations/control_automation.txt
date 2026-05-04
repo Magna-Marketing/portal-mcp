@@ -1,0 +1,44 @@
+Tool: control_automation
+
+Description
+Control an automation's running state: start (run now), pause, resume,
+stop.
+
+Marketing Cloud API
+REST API (`/automation/v1/automations/{id}/actions/{action}`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/start
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/pause
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/resume
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/stop
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+automationId (string, optional).
+automationKey (string, optional).
+  One required.
+action (string, required) - "start" | "pause" | "resume" | "stop".
+
+Result
+result (object) - { id, action, status, startedAt (when start), instanceId (when start) }.
+
+Required scopes
+- `automations_execute`.
+
+Idempotency & limits
+- pause / resume / stop idempotent.
+- start is **not** idempotent — each call kicks off a fresh run.
+
+Errors
+- INVALID_STATE_TRANSITION.
+
+Example request
+
+control_automation({ "automationKey": "mtg_nightly_member_sync", "action": "start" })

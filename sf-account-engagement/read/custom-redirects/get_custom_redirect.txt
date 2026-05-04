@@ -1,0 +1,57 @@
+Tool: get_custom_redirect
+
+Description
+Read a single Custom Redirect by id. Returns the resolved
+`vanityUrl` (composed of tracker domain + path) and the click-target
+`destinationUrl`. Pair with `read/visitors/list_visitor_activities`
+filtered by `customRedirectId` to count clicks.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/custom-redirects/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands trackerDomain.*,
+  createdBy.*, updatedBy.*.
+
+Result
+customRedirect (object): id, name, destinationUrl, vanityUrl,
+  vanityUrlPath, trackedUrl, url, campaignId, trackerDomainId, folderId,
+  gaSource, gaMedium, gaTerm, gaContent, gaCampaign, bitlyShortUrl,
+  bitlyIsPersonalized, salesforceId, isDeleted, createdAt, updatedAt.
+trackerDomain (object|null) - { id, domain, isPrimary, isDeleted,
+  defaultCampaignId, sslStatus, validationStatus }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_custom_redirect({ "id": 612 })
+
+Example result
+{
+  "customRedirect": {
+    "id": 612, "name": "Spring promo",
+    "vanityUrl": "https://go.magnatech.com/r/spring",
+    "destinationUrl": "https://magnatech.com/spring"
+  },
+  "trackerDomain": { "id": 7, "domain": "go.magnatech.com", "sslStatus": "active" }
+}

@@ -1,0 +1,84 @@
+Tool: compare_user_permissions
+
+Description
+Compare effective permissions across multiple users to see who has what.
+Produces a per-user permission summary plus a diff matrix highlighting
+where users disagree. Useful when onboarding a new user against an
+established peer, or auditing "two PMs but only one can delete".
+
+Salesforce API
+REST API + Tooling, v66.0. Internally calls the same logic as
+`analyze_user_permissions` for each user, then produces a column-wise diff.
+
+Endpoint
+N/A (composite).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+userIds (string[], optional) - List of User Ids (mix-ins with usernames).
+usernames (string[], optional) - User.Username values.
+  Must supply 2..10 users in total.
+includeFieldPermissions (boolean, optional, default false).
+diffOnly (boolean, optional, default true) - When true, omit perms held
+  by every compared user (only show divergence).
+includeSystemPermissions (boolean, optional, default true).
+includeObjectPermissions (boolean, optional, default true).
+
+Result
+users (array) - Each: { userId, name, username, profileName }.
+common (object) - System + object + field perms held by every user.
+diff (array) - Each row:
+  category ("system"|"object"|"field"|"apex"|"vf").
+  key (string) - "ModifyAllData" | "Opportunity.delete" | "Account.Phone.read".
+  values (object) - userId -> boolean (or "unknown" when not visible).
+  divergence (number) - Number of users out of total who hold it.
+summary (object) - { totalDivergentRows, byCategory: { system, object, field, apex, vf } }.
+
+Required permissions
+- "View Setup and Configuration" / "Manage Users".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- O(N) where N = users compared (each does its own analyze_user_permissions
+  expansion). Heavy with FLS on.
+
+Errors
+- INVALID_REQUEST: fewer than 2 or more than 10 users.
+
+Example request
+
+compare_user_permissions({
+  "usernames": ["jane.doe@magnatech.com", "john.smith@magnatech.com"],
+  "diffOnly": true
+})
+
+Example result (truncated)
+
+{
+  "users": [
+    { "userId": "005Qg0000020aBcDE", "name": "Jane Doe", "username": "jane.doe@magnatech.com", "profileName": "Standard User" },
+    { "userId": "005Qg0000020aBcFF", "name": "John Smith", "username": "john.smith@magnatech.com", "profileName": "Standard User" }
+  ],
+  "common": { "systemPermissions": ["ApiEnabled", "RunReports"] },
+  "diff": [
+    {
+      "category": "object",
+      "key": "Opportunity.delete",
+      "values": { "005Qg0000020aBcDE": false, "005Qg0000020aBcFF": true },
+      "divergence": 1
+    },
+    {
+      "category": "system",
+      "key": "ManageUsers",
+      "values": { "005Qg0000020aBcDE": false, "005Qg0000020aBcFF": true },
+      "divergence": 1
+    }
+  ],
+  "summary": { "totalDivergentRows": 2, "byCategory": { "system": 1, "object": 1, "field": 0, "apex": 0, "vf": 0 } }
+}

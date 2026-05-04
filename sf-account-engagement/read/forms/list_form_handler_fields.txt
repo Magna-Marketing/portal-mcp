@@ -1,0 +1,56 @@
+Tool: list_form_handler_fields
+
+Description
+List the inbound-field mapping rows on a Form Handler. Each row
+defines a posted-form field name and which prospect field it
+populates (`prospectApiFieldId`).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/form-handler-fields?fields={fields}&filter[formHandlerId]=eq,:id
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+formHandlerId (number, required).
+isRequired (boolean, optional).
+fields (string[], optional, default: id,formHandlerId,name,
+  prospectApiFieldId,dataFormat,errorMessage,isMaintainInitialValue,
+  isRequired,sortOrder,createdAt,updatedAt).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+formHandlerFields (array) - Each: { id, formHandlerId, name,
+  prospectApiFieldId, dataFormat (string), errorMessage, isRequired,
+  isMaintainInitialValue, sortOrder, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+list_form_handler_fields({ "formHandlerId": 8101 })
+
+Example result
+{
+  "formHandlerFields": [
+    { "id": 1101, "name": "email", "prospectApiFieldId": "email", "isRequired": true },
+    { "id": 1102, "name": "firstname", "prospectApiFieldId": "first_name" }
+  ]
+}

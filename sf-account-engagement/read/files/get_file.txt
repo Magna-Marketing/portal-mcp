@@ -1,0 +1,55 @@
+Tool: get_file
+
+Description
+Read a single File by id. Includes the binary download URL and
+folder relation. To download the file bytes, fetch `url` directly
+with the same Bearer + BU header (or via the public CDN if the
+file is on a tracker domain).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/files/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `folder.*`,
+  `trackerDomain.*`, `createdBy.*`, `updatedBy.*`.
+includeBytes (boolean, optional, default false) - When true, the
+  MCP server fetches `url` and returns the file as base64
+  (`fileBase64`).
+
+Result
+file (object): id, name, size, mimeType, url, vanityUrl, trackedUrl,
+  folderId, trackerDomainId, campaignId, salesforceId, isTracked,
+  isDeleted, createdAt, updatedAt.
+folder (object|null), trackerDomain (object|null).
+fileBase64 (string, when includeBytes=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_file({ "id": 901 })
+
+Example result
+{
+  "file": { "id": 901, "name": "logo.png", "mimeType": "image/png",
+    "size": 18244, "url": "https://go.magnatech.com/l/.../logo.png" }
+}

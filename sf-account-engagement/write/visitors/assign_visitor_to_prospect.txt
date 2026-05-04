@@ -1,0 +1,56 @@
+Tool: assign_visitor_to_prospect
+
+Description
+Staple an anonymous Visitor to an existing Prospect. Useful when
+de-anonymizing a session retroactively (e.g. an offline match
+based on a CRM linkage). After this call, the visitor's existing
+visits, page views, and activities are re-attributed to the
+prospect's activity feed.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/visitors/:id/do/assignToProspect
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "prospectId": 7745 }
+
+Input (parameters)
+id (number, required) - Visitor id.
+prospectId (number, required) - Pardot prospect id.
+
+Result
+success (boolean).
+visitor (object) - Refreshed visitor with `prospectId` populated and
+  `isIdentified=true`.
+reattributedActivities (number) - How many existing visitor
+  activities were rewritten to point at the prospect.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent: assigning to the same prospect is a no-op.
+- Reassigning to a different prospect rewrites attribution.
+
+Errors
+- 59 not_found, 53 visitor_already_assigned (when reassign blocked
+  by BU policy), 20 invalid_input.
+
+Example request
+
+assign_visitor_to_prospect({ "id": 5512001, "prospectId": 7745 })
+
+Example result
+{
+  "success": true,
+  "visitor": { "id": 5512001, "prospectId": 7745, "isIdentified": true },
+  "reattributedActivities": 18
+}

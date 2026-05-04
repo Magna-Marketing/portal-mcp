@@ -1,0 +1,45 @@
+Tool: list_deployments
+
+Description
+List recent Metadata API deployments (`DeployRequest`). Each row shows
+status (Pending|InProgress|Succeeded|Failed|Canceled|SucceededPartial),
+component counts, test results, time taken, and the user who submitted.
+Use to audit who deployed what and confirm pipelines.
+
+Salesforce API
+Tooling API + Metadata API, v66.0. `DeployRequest` (Tooling) and the
+Metadata API status endpoint.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Status, NumberComponentsTotal, NumberComponentsDeployed, NumberComponentErrors, NumberTestsTotal, NumberTestsCompleted, NumberTestErrors, CheckOnly, IgnoreWarnings, RollbackOnError, StartDate, CompletedDate, CreatedById, CreatedBy.Name, ErrorStatusCode, ErrorMessage, TestLevel FROM DeployRequest ORDER BY StartDate DESC
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string|string[], optional).
+sinceHours (number, optional, default 168).
+checkOnlyOnly (boolean, optional) - Filter to validate-only deploys (true) or actual deploys (false).
+createdById (string, optional).
+limit (number, optional, default 100).
+
+Result
+totalSize (number).
+deployments (array) - { id, status, numberComponentsTotal, numberComponentsDeployed, numberComponentErrors, numberTestsTotal, numberTestsCompleted, numberTestErrors, checkOnly, ignoreWarnings, rollbackOnError, startDate, completedDate, createdById, createdByName, testLevel, errorStatusCode, errorMessage }.
+
+Required permissions
+- "Modify Metadata Through Metadata API Functions" / "Manage Deployments".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_deployments({ "sinceHours": 72, "checkOnlyOnly": false })

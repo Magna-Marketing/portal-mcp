@@ -1,0 +1,88 @@
+Tool: manage_form
+
+Description
+Create or delete a Form. v5 supports `Create` and `Delete` only on
+forms (no PATCH); to update, recreate or use the UI. Soft-delete is
+the default — `undelete_form` brings the form back within the 90-day
+retention window.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/forms       (operation="create")
+DELETE https://{pi-domain}/api/v5/objects/forms/:id   (operation="delete")
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "Demo Request",
+  "campaignId": 1024,
+  "folderId": 33,
+  "trackerDomainId": 7,
+  "layoutTemplateId": 71,
+  "thankYouContent": "<p>Thanks!</p>",
+  "submitButtonText": "Request demo",
+  "isCaptchaEnabled": true,
+  "isCookielessTracking": false,
+  "labelAlignment": "above",
+  "fontFamily": "Arial",
+  "fontSize": "14px",
+  "tagReplacementLanguage": "ENGLISH"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+id (number, required when operation="delete").
+name (string, required when create).
+campaignId (number, required when create).
+folderId (number, optional).
+trackerDomainId (number, optional).
+layoutTemplateId (number, optional).
+thankYouContent (string, optional) - Inline HTML.
+thankYouCode (string, optional) - Custom JS / pixel firing on submit.
+isUseRedirectLocation (boolean, optional, default false).
+redirectLocation (string, optional).
+beforeFormContent (string, optional), afterFormContent (string, optional).
+submitButtonText (string, optional, default "Submit").
+isCaptchaEnabled (boolean, optional, default true).
+isCookielessTracking (boolean, optional, default false).
+isAlwaysDisplay (boolean, optional, default false) - "Show this form
+  to known prospects" toggle.
+showNotProspect (boolean, optional, default false).
+fontFamily (string, optional), fontSize (string, optional),
+  fontColor (string, optional).
+labelAlignment (string, optional) - "above" | "left" | "right".
+radioAlignment (string, optional), checkboxAlignment (string, optional).
+requiredCharacter (string, optional, default "*").
+tagReplacementLanguage (string, optional, default "ENGLISH").
+
+Result
+form (object) - Created row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Soft delete; restore via `undelete_form` within 90 days.
+
+Errors
+- 53 not_permitted, 600 missing_required_field.
+
+Example request
+
+manage_form({
+  "operation": "create",
+  "name": "Demo Request",
+  "campaignId": 1024,
+  "submitButtonText": "Request demo"
+})
+
+Example result
+{ "form": { "id": 4421, "name": "Demo Request", "campaignId": 1024 } }

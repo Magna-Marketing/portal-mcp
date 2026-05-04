@@ -1,0 +1,58 @@
+Tool: manage_user
+
+Description
+Create / update / lock / unlock / delete a Marketing Cloud user. Wraps
+SOAP `AccountUser` CUD operations.
+
+Marketing Cloud API
+SOAP API (`AccountUser` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest envelope.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "lock" | "unlock" | "delete".
+userId (number, optional, required for non-create).
+username (string, required for create) - Marketing Cloud username (`UserID`).
+name (string, required for create).
+email (string, required for create).
+password (string, optional, required for create) - Initial password.
+mustChangePassword (boolean, optional, default true).
+isApiUser (boolean, optional, default false).
+isActive (boolean, optional).
+defaultBusinessUnit (number, optional) - Default MID.
+roles (number[], optional) - RoleIds to assign.
+timezone (string, optional).
+locale (string, optional).
+
+Result
+user (object) - { id, accountUserId, username, name, email, isActive, isLocked, mustChangePassword, defaultBusinessUnit, roles }.
+
+Required scopes
+- `users_write`.
+
+Idempotency & limits
+- update / lock / unlock idempotent.
+- create not idempotent (DUPLICATE_USERNAME).
+
+Errors
+- DUPLICATE_USERNAME, INVALID_PASSWORD.
+
+Example request
+
+manage_user({
+  "operation": "create",
+  "username": "marketingops@magnatech.com",
+  "name": "Marketing Ops",
+  "email": "marketingops@magnatech.com",
+  "password": "TempPass!123",
+  "isApiUser": false,
+  "defaultBusinessUnit": 5001234
+})

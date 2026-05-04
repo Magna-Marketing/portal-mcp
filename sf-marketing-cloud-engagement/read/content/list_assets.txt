@@ -1,0 +1,56 @@
+Tool: list_assets
+
+Description
+List Content Builder assets — HTML emails, templates, blocks
+(text/HTML/free-form), images, documents. Filter by `assetType.id`,
+folder, or owner. Use to inventory creative library or pick an asset
+for `manage_triggered_send_definition` / `send_email_now`.
+
+Marketing Cloud API
+REST API (`/asset/v1/content/assets/query`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/query
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "page": { "page": 1, "pageSize": 50 },
+  "query": {
+    "leftOperand": { "property": "assetType.id", "simpleOperator": "in", "value": [196, 207, 208, 209, 210] },
+    "logicalOperator": "AND",
+    "rightOperand": { "property": "category.id", "simpleOperator": "equal", "value": 12345 }
+  }
+}
+
+Input (parameters)
+assetTypeIds (number[], optional) - e.g. 196 (block) | 207 (template) | 208 (htmlemail) | 209 (templatebasedemail) | 210 (textonlyemail) | 213 (smscontent) | etc.
+categoryId (number, optional) - Folder Id.
+namePattern (string, optional).
+modifiedSince (string, optional) - ISO timestamp.
+ownerId (number, optional).
+page (number, optional, default 1).
+pageSize (number, optional, default 50, max 200).
+
+Result
+count (number).
+items (array) - Each: { id, customerKey, name, description, assetType (object), category (object), createdDate, modifiedDate, owner, status, version, contentType, fileProperties (when file), thumbnail (object) }.
+hasMore (boolean), page (number), pageSize (number).
+
+Required scopes
+- `documents_and_images_read` (images / docs).
+- `email_read` (email assets / templates / blocks).
+
+Idempotency & limits
+- Read-only.
+- Use targeted assetTypeIds in big tenants — full-tenant queries can be slow.
+
+Errors
+- 10000 bad request, 30002 not found.
+
+Example request
+
+list_assets({ "assetTypeIds": [208], "categoryId": 12345 })

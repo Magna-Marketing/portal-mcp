@@ -1,0 +1,46 @@
+Tool: update_aura_definition
+
+Description
+Update a single Aura definition file inside a bundle. Convenience
+wrapper for the common case of editing one file.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+PATCH /services/data/v66.0/tooling/sobjects/AuraDefinition/{id}
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Source": "..." }
+
+Input (parameters)
+bundleName (string, required).
+defType (string, required) - "COMPONENT" | "CONTROLLER" | "HELPER" | "RENDERER" | "STYLE" | "DESIGN" | "SVG" | "DOCUMENTATION" | "APPLICATION" | "EVENT" | "INTERFACE".
+source (string, required) - New file contents.
+
+Result
+deploy (object).
+definition (object) - { id, defType, format, sizeBytes }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal source.
+
+Errors
+- NOT_FOUND, DEPLOY_FAILED.
+
+Example request
+
+update_aura_definition({
+  "bundleName": "AccountCard",
+  "defType": "CONTROLLER",
+  "source": "({ doInit: function(c,e,h) { /* updated */ } })"
+})

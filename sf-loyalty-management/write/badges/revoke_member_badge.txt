@@ -1,0 +1,52 @@
+Tool: revoke_member_badge
+
+Description
+Revoke previously awarded badges from members. Deletes
+`LoyaltyProgramMemberBadge` rows (or sets `IsActive=false` for orgs
+that prefer soft-revoke).
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+DELETE /services/data/v66.0/composite/sobjects?ids=...
+or
+PATCH /services/data/v66.0/sobjects/LoyaltyProgramMemberBadge/{id}   (when softRevoke=true)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+None for delete; soft revoke body: { "IsActive": false, "ExpiryDate": "2026-04-30T00:00:00Z" }.
+
+Input (parameters)
+badgeId (string, optional).
+badgeName (string, optional).
+members (object[], required) - { memberId | membershipNumber }.
+softRevoke (boolean, optional, default false) - When true, expire instead of delete.
+reason (string, optional).
+allOrNone (boolean, optional, default false).
+skipIfNotAwarded (boolean, optional, default true).
+
+Result
+results (array) - { memberId, badgeId, status ("revoked"|"not_awarded"|"failed"), error }.
+summary (object) - { revoked, notAwarded, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent with `skipIfNotAwarded=true`.
+
+Errors
+- ENTITY_IS_DELETED, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+revoke_member_badge({
+  "badgeName": "First_Purchase",
+  "members": [{ "memberId": "0lMQg00000abcDE2" }],
+  "softRevoke": true,
+  "reason": "Refund after purchase"
+})

@@ -1,0 +1,74 @@
+Tool: manage_field_permissions
+
+Description
+Grant or revoke field-level security (FLS) on one or more fields, on
+one or more permission sets / profiles. Without this, newly created
+custom fields are **not visible to anyone but the System Administrator
+profile**. The tool batches updates into Metadata API deploys.
+
+Use after `manage_field` (create) to make the field actually usable.
+Use `view_permission_set` to see current FLS for a permset.
+
+Salesforce API
+Metadata API (`PermissionSet.fieldPermissions`,
+`Profile.fieldPermissions`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "operation": "grant",
+  "fields": [
+    { "object": "Project__c", "field": "Project_Status__c" }
+  ],
+  "permissionSets": ["MTG_Project_Manager", "MTG_Delivery_Bundle_Member"],
+  "profiles": ["System Administrator"],
+  "access": "edit"
+}
+
+Input (parameters)
+operation (string, required) - "grant" | "revoke" | "set".
+  - grant: add read or edit (does not downgrade existing edit -> read).
+  - revoke: remove read+edit (caller cannot see/edit the field).
+  - set: explicit; cleared first then applied (use to flip edit -> read).
+fields (object[], required) - Each: { object (sObject API name), field
+  (field API name) }.
+permissionSets (string[], optional) - PermissionSet names.
+permissionSetGroups (string[], optional) - PSG developer names. The
+  tool resolves to the underlying member permsets.
+profiles (string[], optional) - Profile names. (Use sparingly — Salesforce
+  recommends permsets.)
+access (string, optional, default "edit" for grant; ignored for revoke)
+  - "read" | "edit". `edit` implies `read`.
+checkOnly (boolean, optional, default false).
+allOrNone (boolean, optional, default true).
+
+Result
+Same shape as `manage_object`'s deploy result.
+
+Required permissions
+- "Customize Application", "Manage Profiles and Permission Sets".
+- Editing profile FLS additionally requires "Modify All Data".
+
+Idempotency & limits
+- Idempotent: granting an already-granted permission is a no-op.
+- Cap: ~200 PermissionSet/Profile components per deploy; tool batches
+  larger requests across multiple deploys.
+
+Errors
+- INVALID_FIELD: field doesn't exist or isn't FLS-applicable (system
+  fields like Id, CreatedDate are not).
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request (revoke FLS on a sensitive field for a permset)
+
+manage_field_permissions({
+  "operation": "revoke",
+  "fields": [{ "object": "Account", "field": "Tax_Id__c" }],
+  "permissionSets": ["MTG_Sales_Rep"]
+})

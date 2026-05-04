@@ -1,0 +1,39 @@
+Tool: list_sender_profiles
+
+Description
+List `SenderProfile` records (the From-name + From-email + reply-to
+template used in sends).
+
+Marketing Cloud API
+SOAP API (`SenderProfile.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on SenderProfile.
+
+Input (parameters)
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+senderProfiles (array) - { id, customerKey, name, description, fromName, fromAddress, replyToName, replyToAddress, useDefaultRMMRules, autoForwardToAddress, dateCreated, dateModified }.
+
+Required scopes
+- `email_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_sender_profiles({})

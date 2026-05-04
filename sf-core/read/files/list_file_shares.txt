@@ -1,0 +1,43 @@
+Tool: list_file_shares
+
+Description
+List `ContentDocumentLink` rows for a file or for a record (the inverse
+of `list_files` filtered by recordId). Each row shows the entity (record,
+user, library, group), share type ('V' viewer, 'C' collaborator, 'I'
+inferred), and visibility scope.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, LinkedEntityId, LinkedEntity.Name, LinkedEntity.Type, ShareType, Visibility, IsDeleted, ContentDocument.Title FROM ContentDocumentLink WHERE ContentDocumentId = '...' OR LinkedEntityId = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contentDocumentId (string, optional) - File whose shares to list.
+linkedEntityId (string, optional) - Record/user/group whose linked files to list.
+  At least one required.
+shareType (string, optional) - "V" | "C" | "I".
+
+Result
+totalSize (number).
+shares (array) - Each: { id, contentDocumentId, fileTitle, linkedEntityId, linkedEntityName, linkedEntityType ("Account"|"User"|"Group"|"ContentWorkspace"|...), shareType, visibility }.
+
+Required permissions
+- File or record read.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_file_shares({ "contentDocumentId": "069Qg0000004ZyAA" })

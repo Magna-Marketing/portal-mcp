@@ -1,0 +1,44 @@
+Tool: list_folder_contents
+
+Description
+List the items inside a folder (used to inventory an Email folder, DE
+folder, Triggered Send folder, etc. without opening Marketing Cloud
+UI).
+
+Marketing Cloud API
+Composite of SOAP retrieves filtered by `CategoryID` for the relevant
+sObject.
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx     (per content type)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on the object type associated with `contentType`.
+
+Input (parameters)
+folderId (number, required).
+contentType (string, required) - Same enum as `list_folders`.
+recursive (boolean, optional, default false) - When true, include items in subfolders.
+limit (number, optional, default 500).
+
+Result
+folder (object) - { id, name, contentType }.
+items (array) - Each row's identity: { id, customerKey, name, type, dateCreated, dateModified }.
+hasMore (boolean).
+
+Required scopes
+- Varies by contentType.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_folder_contents({ "folderId": 12345, "contentType": "dataextension" })

@@ -1,0 +1,41 @@
+Tool: get_send_status
+
+Description
+Get the status of a Send (one queued/in-progress/completed email
+batch). Returns identity, status, queued/sent/delivered/opened/clicked
+counts, scheduled time.
+
+Marketing Cloud API
+SOAP API (`Send.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on Send filtered by ID.
+
+Input (parameters)
+sendId (number, optional).
+sendCustomerKey (string, optional).
+emailCustomerKey (string, optional) - Use to fetch the most recent send for an email.
+recentOnly (boolean, optional, default false) - Return the latest send (when emailCustomerKey is set).
+
+Result
+send (object) - { id, customerKey, emailId, emailName, sendDate, status ("New"|"Pending"|"Scheduled"|"Sending"|"Complete"|"Cancelled"|"Failed"), queuedCount, sentCount, deliveredCount, openCount, uniqueOpenCount, clickCount, uniqueClickCount, bounceCount, unsubscribeCount, fromAddress, fromName, subjectLine, sourceCustomerKey, isMultipart }.
+
+Required scopes
+- `email_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- SEND_NOT_FOUND.
+
+Example request
+
+get_send_status({ "sendId": 1234567 })

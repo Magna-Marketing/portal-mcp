@@ -1,0 +1,63 @@
+Tool: send_mass_email
+
+Description
+Send a templated email to many recipients in one batch (up to 1,000
+recipients per call). Each recipient resolves merge fields against
+their own context record. Logs as activity per recipient (optional).
+
+Salesforce API
+REST API (Standard Invocable), v66.0. `actions/standard/emailMassSimple`
+or apex `Messaging.MassEmailMessage` via `execute_anonymous` (the tool
+prefers REST).
+
+Endpoint
+POST /services/data/v66.0/actions/standard/emailMassSimple
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "inputs": [{
+    "templateId": "00X4Q00000abcDE",
+    "recipientIds": ["003Qg00...", "003Qg00..."],
+    "targetRecordIds": ["a01Qg00...", "a01Qg00..."],
+    "senderType": "OrgWideEmailAddress",
+    "orgWideEmailAddressId": "0D2Qg00000abcDE",
+    "logEmailOnSend": true
+  }]
+}
+
+Input (parameters)
+templateId (string, optional).
+templateName (string, optional).
+  One required.
+recipients (object[], required) - Each: { recipientId (Contact/Lead/User), targetRecordId (record context), cc?, bcc? }.
+senderType (string, optional, default "CurrentUser").
+orgWideEmailAddressId (string, optional).
+saveAsActivity (boolean, optional, default true).
+priority (string, optional, default "Normal") - "Normal" | "High" | "Low".
+
+Result
+result (object) - { sent, failed, errors, messageIds (string[]), logIds (string[]) }.
+
+Required permissions
+- "Mass Email" + "Send Email".
+
+Idempotency & limits
+- Not idempotent.
+- 1,000 mass recipients per call. Daily MassEmail cap (5,000–unlimited depending on edition; check `get_org_limits.MassEmail`).
+
+Errors
+- MASS_MAIL_LIMIT_EXCEEDED, EMAIL_TEMPLATE_NOT_FOUND.
+
+Example request
+
+send_mass_email({
+  "templateName": "MTG_Project_Status_Email",
+  "recipients": [
+    { "recipientId": "003Qg00000a", "targetRecordId": "a01Qg00000A" },
+    { "recipientId": "003Qg00000b", "targetRecordId": "a01Qg00000B" }
+  ]
+})

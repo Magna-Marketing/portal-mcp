@@ -1,0 +1,60 @@
+Tool: get_tenant_info
+
+Description
+Get tenant-wide info: tenant subdomain, edition, time zone, currency,
+parent enterprise MID, available REST/SOAP/Auth base URLs, and (for
+Enterprise tenants) a business-unit hierarchy summary.
+
+Combines OAuth `/v2/userinfo`, OAuth `/v2/discovery` (canonical base
+URL discovery), and a SOAP `Account` retrieve.
+
+Marketing Cloud API
+OAuth + SOAP API. Discovery endpoint is the official source for
+per-app base URLs:
+- `GET /v2/discovery?client_id={clientId}&resource=acct:{userId}`
+  returns the REST and SOAP instance URLs the Installed Package can
+  call into.
+
+Endpoint
+GET  https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
+GET  https://{tenant}.auth.marketingcloudapis.com/v2/discovery?client_id={clientId}&resource=acct:{userId}
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx        (`Retrieve` Account for richer fields)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json (REST) or text/xml (SOAP)
+
+Body
+None for the GETs. SOAP envelope built by the MCP server.
+
+Input (parameters)
+includeBusinessUnits (boolean, optional, default true).
+includeBaseUrls (boolean, optional, default true) - Calls `/v2/discovery`.
+
+Result
+tenant (object):
+  subdomain (string), authUrl (string), restInstanceUrl (string), soapInstanceUrl (string).
+discovery (object|null, when includeBaseUrls=true) - { rest_instance_url, soap_instance_url, auth_url, additional_base_urls (array) }.
+account (object):
+  id (number) - MID.
+  name (string).
+  edition (string) - "ProEdition" | "EnterpriseEdition" | "Corporate" etc.
+  enterpriseId (number).
+  parentId (number|null).
+  accountType (string) - "EnterpriseLite" | "Enterprise2" | "BusinessUnit".
+  timeZone (string).
+  currency (string).
+businessUnits (array, when includeBusinessUnits=true and account is enterprise) - [{ id, name, accountType }].
+
+Required scopes
+- `accounts_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+get_tenant_info({})

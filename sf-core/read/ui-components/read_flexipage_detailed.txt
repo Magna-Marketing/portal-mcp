@@ -1,0 +1,64 @@
+Tool: read_flexipage_detailed
+
+Description
+Read a Lightning Page (FlexiPage) with full structural detail: every
+region, every component instance, every property value, all
+component-instance facets, and visibility rules. This is the deep view;
+`read_flexipage` returns a lighter form. Use this before mutating a
+page (`update_flexipage`, `update_component_properties`,
+`reorder_region_components`) to know exact identifiers and current
+state.
+
+Salesforce API
+Tooling API + Metadata API, v66.0. The Tooling row has the parsed
+metadata under `Metadata`; the MCP layer also retrieves the canonical
+XML via Metadata API for fidelity.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}              (Metadata field)
+POST /services/Soap/m/66.0   (Metadata API readMetadata for FlexiPage when needed)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - DeveloperName.
+includeXml (boolean, optional, default false) - Include raw XML body.
+
+Result
+flexiPage (object):
+  id, name, label, type, sObject (when RecordPage), namespacePrefix,
+  description, template, masterLabel, parentFlexiPage (string|null).
+  regions (array) - Each:
+    name (string).
+    type (string) - "Region" | "Facet" | "Container".
+    appendable (boolean).
+    components (array) - Each:
+      identifier (string).
+      componentName (string) - e.g. "c:projectCard", "lightning:relatedList".
+      componentInstanceProperties (array) - { name, value, type ("string"|"object"|"reference"|"action") }.
+      componentInstancePropertyListItems (array, optional) - For list-shaped properties.
+      visibilityRule (object|null) - Filter visibility: { booleanFilter,
+        criteria: [{ leftValue, operator, rightValue }] }.
+      facets (array, optional) - Nested regions for facetable components
+        (same shape as `regions`).
+  events (array) - { eventName, eventActions[] }.
+xml (string, optional).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Pages with many components can produce a large response.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+read_flexipage_detailed({ "name": "Project__c_Record_Page" })

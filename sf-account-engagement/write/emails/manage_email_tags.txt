@@ -1,0 +1,44 @@
+Tool: manage_email_tags
+
+Description
+Add or remove tags on an Email send (an `Email` record, one row per
+delivered send).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/emails/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/emails/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Welcome 2026" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), emailId (number), tag (string), operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_email_tags({ "id": 99821, "operation": "add", "tag": "Welcome 2026" })
+
+Example result
+{ "success": true, "emailId": 99821, "tag": "Welcome 2026", "operation": "add" }

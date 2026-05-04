@@ -1,0 +1,64 @@
+Tool: query_data_cloud_sql_v1
+
+Description
+Run an ANSI-SQL query (Query API v1) against Data 360 — DMOs,
+DLOs, CIOs. v1 returns the entire result set in one synchronous
+response (capped at 100k rows). For larger results or chunked
+streaming, use `query_data_cloud_sql_v2` (which returns
+`nextBatchId`).
+
+Salesforce API
+Connect plane (default — `/ssot/query`) **or** runtime plane (when
+`plane="runtime"` — `/api/v1/query`). Both accept the same body.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/query        (plane="connect", default)
+POST {cdpTenantUrl}/api/v1/query                          (plane="runtime")
+
+Headers
+Authorization: Bearer <core_access_token>      (connect)
+Authorization: Bearer <data_cloud_token>       (runtime)
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "sql": "SELECT Id__c, EmailAddress__c FROM UnifiedIndividual__dlm LIMIT 100"
+}
+
+Input (parameters)
+plane (string, optional, default "connect").
+sql (string, required).
+dataSpace (string, optional, default "default").
+rowLimit (number, optional, max 100000) - Server-side cap.
+
+Result
+data (array<array>) - Row-major result set.
+metadata (object) - { columns: [{ name, type }] }.
+queryId (string).
+rowCount (number).
+
+Required scopes
+- `api` (connect) or `cdp_query_api_read` (runtime).
+
+Idempotency & limits
+- Read-only.
+- Max 100k rows per response. Per-query timeout: 5 minutes.
+
+Errors
+- 400 INVALID_QUERY, 401 invalid_token, 408 QUERY_TIMEOUT,
+  429 REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+query_data_cloud_sql_v1({
+  "sql": "SELECT COUNT(*) AS c FROM UnifiedIndividual__dlm"
+})
+
+Example result
+{
+  "data": [[482000]],
+  "metadata": { "columns": [{ "name": "c", "type": "INTEGER" }] },
+  "queryId": "Q-2026-04-29-abc",
+  "rowCount": 1
+}

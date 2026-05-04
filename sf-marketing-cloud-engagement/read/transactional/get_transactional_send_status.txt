@@ -1,0 +1,44 @@
+Tool: get_transactional_send_status
+
+Description
+Get the queue status / per-message send status for a Transactional
+Messaging definition. Track individual messages by `messageKey`.
+
+Marketing Cloud API
+REST API (`/messaging/v1/{type}/messages/{messageKey}` and `/queueMetrics`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages/{messageKey}
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}/queueMetrics
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages/{messageKey}
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}/queueMetrics
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, required) - "email" | "sms".
+messageKey (string, optional) - One specific message.
+definitionKey (string, optional) - Aggregate queue metrics for a definition.
+  One required.
+
+Result
+For messageKey: { messageKey, status ("Queued"|"Sent"|"Failed"|"Pending"|"NotProcessed"), eventCategoryType, info (object) }.
+For definitionKey: { definitionKey, queueMetrics: { definition, sent, queued, undeliverable, attempts, lastQueueTimeUtc } }.
+
+Required scopes
+- `email_send` / `sms_send`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_transactional_send_status({ "type": "email", "definitionKey": "MTG_OrderConfirmation" })

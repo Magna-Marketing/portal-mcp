@@ -1,0 +1,61 @@
+Tool: upload_import_batch
+
+Description
+Upload a CSV batch of prospect rows to a previously-created import
+job. Up to 50,000 rows per batch; many batches per import. The
+import must be in `Open` state (call `manage_import operation="create"`
+first; finalize after all batches are uploaded).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/imports/:id/batches
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: multipart/form-data
+Accept: application/json
+
+Body (multipart)
+- file (file): the CSV. First row = column names matching either
+  built-in prospect fields or custom-field `apiFieldId`s (e.g.
+  `email,first_name,last_name,company,region__c`).
+
+Input (parameters)
+importId (number, required).
+csv (string, optional) - Inline CSV content; the server packages it
+  into a multipart upload.
+csvBase64 (string, optional) - Alternative to `csv`.
+filename (string, optional, default "batch-{n}.csv").
+
+Result
+batch (object) - { id, importId, status, rowCount, errorCount,
+  createdAt }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent — repeated uploads of the same payload create
+  duplicate batch rows and ingest them twice. Validate batch ids
+  caller-side.
+- Max 50,000 rows per batch; max ~25 batches per import.
+
+Errors
+- 600 batch_too_large, 53 import_not_open, 20 invalid_csv_columns
+  (header row mismatched), 59 not_found.
+
+Example request
+
+upload_import_batch({
+  "importId": 5512,
+  "csv": "email,first_name,last_name,region__c\njane@example.com,Jane,Doe,EMEA"
+})
+
+Example result
+{
+  "batch": { "id": 1, "importId": 5512, "status": "Pending",
+    "rowCount": 1, "createdAt": "2026-04-29T13:02:11Z" }
+}

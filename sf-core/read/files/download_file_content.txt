@@ -1,0 +1,49 @@
+Tool: download_file_content
+
+Description
+Download the binary content of a `ContentVersion` (a file in
+Salesforce Files). Returns base64 by default; for known text content
+types (text/*, application/json) the tool returns plain text.
+
+Salesforce API
+REST API (Data), v66.0. `GET /sobjects/ContentVersion/{id}/VersionData`.
+
+Endpoint
+GET /services/data/v66.0/sobjects/ContentVersion/{contentVersionId}/VersionData
+
+Headers
+Authorization: Bearer <access_token>
+Accept: <content type>
+
+Body
+None.
+
+Input (parameters)
+contentVersionId (string, optional) - Specific version to download.
+contentDocumentId (string, optional) - Use the document's latest version.
+  One required.
+asBase64 (boolean, optional, default false) - Force base64.
+asTextEncoding (string, optional) - "utf8" | "ascii" | "latin1".
+
+Result
+file (object) - { contentVersionId, contentDocumentId, title, fileType, fileExtension, contentSize, contentType }.
+content (object):
+  isText (boolean).
+  text (string|null).
+  base64 (string|null).
+  byteLength (number).
+
+Required permissions
+- File read share.
+
+Idempotency & limits
+- Read-only.
+- File size cap depends on org setting (default 2 GB but practical MCP cap ~50 MB).
+
+Errors
+- NOT_FOUND.
+- FILE_TOO_LARGE for very large binaries.
+
+Example request
+
+download_file_content({ "contentDocumentId": "069Qg0000004ZyAA" })

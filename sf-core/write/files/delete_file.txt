@@ -1,0 +1,38 @@
+Tool: delete_file
+
+Description
+Delete a file (`ContentDocument`). Cascades to all `ContentVersion`s
+and `ContentDocumentLink`s. Goes to Recycle Bin (15-day undelete
+window).
+
+Salesforce API
+REST API (Data), v66.0. `DELETE /sobjects/ContentDocument/{id}`.
+
+Endpoint
+DELETE /services/data/v66.0/sobjects/ContentDocument/{id}
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None.
+
+Input (parameters)
+contentDocumentId (string, required).
+hardDelete (boolean, optional, default false) - When true, permanently delete (admin only).
+
+Result
+deleted (boolean), id (string).
+
+Required permissions
+- File ownership or "Delete from Recycle Bin" for hardDelete.
+
+Idempotency & limits
+- Idempotent (second delete returns ENTITY_IS_DELETED but tool surfaces "already_deleted").
+
+Errors
+- ENTITY_IS_DELETED, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+delete_file({ "contentDocumentId": "069Qg0000004ZyAA" })

@@ -1,0 +1,43 @@
+Tool: manage_prospect_tags
+
+Description
+Add or remove tags on a Prospect.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/prospects/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/prospects/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "MQL" }
+
+Input (parameters)
+id (number, required) - Prospect id.
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), prospectId (number), tag (string), operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_prospect_tags({ "id": 7745, "operation": "add", "tag": "MQL" })
+
+Example result
+{ "success": true, "prospectId": 7745, "tag": "MQL", "operation": "add" }

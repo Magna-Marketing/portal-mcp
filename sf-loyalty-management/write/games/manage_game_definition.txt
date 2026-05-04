@@ -1,0 +1,70 @@
+Tool: manage_game_definition
+
+Description
+Create / update / activate / deactivate / delete a `GameDefinition`
+(Loyalty Gamification). Defines mechanics, eligibility window,
+participation cap.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `GameDefinition`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/GameDefinition
+PATCH  /services/data/v66.0/sobjects/GameDefinition/{id}
+DELETE /services/data/v66.0/sobjects/GameDefinition/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "Name": "Spin_The_Wheel_Q3",
+  "ProgramId": "...",
+  "GameType": "SpinTheWheel",
+  "Status": "Active",
+  "EffectiveStartDate": "2026-07-01",
+  "EffectiveEndDate": "2026-09-30",
+  "MaxParticipationCount": 1,
+  "ImageUrl": "https://...",
+  "RuleSet": null
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+gameDefinitionId (string, optional, required for non-create).
+programName (string, optional, required for create).
+programId (string, optional).
+name (string, required for create).
+description (string, optional).
+gameType (string, required for create) - "SpinTheWheel" | "ScratchCard" | "PickOne" | "Quiz" | "RevealReward".
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+maxParticipationCount (number, optional, default 1) - Max plays per member.
+imageUrl (string, optional).
+ruleSet (string, optional) - Reference to a rule template Id.
+isActive (boolean, optional).
+
+Result
+gameDefinition (object) - { id, name, gameType, status, effectiveStartDate, effectiveEndDate, maxParticipationCount }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on (programId, name).
+
+Example request
+
+manage_game_definition({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "Spin_The_Wheel_Q3",
+  "gameType": "SpinTheWheel",
+  "effectiveStartDate": "2026-07-01",
+  "effectiveEndDate": "2026-09-30",
+  "maxParticipationCount": 1
+})

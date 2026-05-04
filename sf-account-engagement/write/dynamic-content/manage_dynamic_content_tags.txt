@@ -1,0 +1,44 @@
+Tool: manage_dynamic_content_tags
+
+Description
+Add or remove tags on a Dynamic Content block.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/dynamic-contents/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/dynamic-contents/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Localized" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), dynamicContentId (number), tag (string),
+operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_dynamic_content_tags({ "id": 41, "operation": "add", "tag": "Localized" })
+
+Example result
+{ "success": true, "dynamicContentId": 41, "tag": "Localized", "operation": "add" }

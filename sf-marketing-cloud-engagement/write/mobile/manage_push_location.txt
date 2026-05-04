@@ -1,0 +1,53 @@
+Tool: manage_push_location
+
+Description
+Create / update / delete a MobilePush location (geofence). Used as a
+target for location-triggered push messages.
+
+Marketing Cloud API
+REST API (`/push/v1/location/`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/push/v1/location
+PUT    https://{tenant}.rest.marketingcloudapis.com/push/v1/location/{locationId}
+DELETE https://{tenant}.rest.marketingcloudapis.com/push/v1/location/{locationId}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "name": "MTG HQ", "description": "MTG corporate HQ geofence", "latitude": 40.7128, "longitude": -74.0060, "radiusInMeters": 500, "address": "...", "city": "New York", "state": "NY", "country": "US", "postalCode": "10005" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+locationId (string, optional, required for non-create).
+name (string, required for create).
+description (string, optional).
+latitude (number, required for create) - WGS-84 decimal degrees.
+longitude (number, required for create).
+radiusInMeters (number, required for create).
+address, city, state, country, postalCode (string, optional).
+isActive (boolean, optional).
+
+Result
+location (object) - { id, name, latitude, longitude, radiusInMeters, isActive }.
+
+Required scopes
+- `push_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_COORDINATES, 30002 not found.
+
+Example request
+
+manage_push_location({
+  "operation": "create",
+  "name": "MTG HQ",
+  "latitude": 40.7128,
+  "longitude": -74.0060,
+  "radiusInMeters": 500
+})

@@ -1,0 +1,43 @@
+Tool: delete_lwc_file
+
+Description
+Delete a single file from an LWC bundle. Refuses to delete required
+files (`js` and `js-meta.xml`). Allowed types: `css`, `html`, `svg`.
+Note: deleting `html` is allowed by the platform but the resulting
+bundle has no template and the component will throw at runtime.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET    /services/data/v66.0/tooling/query/?q=SELECT Id FROM LightningComponentResource WHERE LightningComponentBundleId = '...' AND FilePath LIKE '%{fileName}'
+DELETE /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None.
+
+Input (parameters)
+bundleName (string, required).
+fileName (string, required).
+
+Result
+deleted (boolean).
+file (object) - { id, fileName, format, sizeBytes }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent: a second call returns deleted=false with status
+  "already_deleted".
+
+Errors
+- NOT_DELETABLE: cannot delete `.js` or `.js-meta.xml`.
+- NOT_FOUND if file or bundle doesn't exist.
+
+Example request
+
+delete_lwc_file({ "bundleName": "projectCard", "fileName": "projectCard.svg" })

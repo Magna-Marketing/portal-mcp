@@ -1,0 +1,50 @@
+Tool: manage_csp_trusted_site
+
+Description
+Create / update / delete CSP Trusted Sites — endpoints whitelisted in
+the org's Content Security Policy for LWC, Aura, and Lightning Out
+to call.
+
+Salesforce API
+Metadata API (`CspTrustedSite`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+fullName (string, required).
+endpointUrl (string, required for create/update).
+description (string, optional).
+isActive (boolean, optional, default true).
+context (string, optional, default "All") - "All" | "LEX" | "Communities".
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+cspTrustedSite (object).
+
+Required permissions
+- "Modify All Data" / "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_csp_trusted_site({
+  "operation": "create",
+  "fullName": "Partner_CDN",
+  "endpointUrl": "https://cdn.partner.com",
+  "context": "LEX"
+})

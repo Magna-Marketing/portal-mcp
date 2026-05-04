@@ -1,0 +1,48 @@
+Tool: get_ingest_job
+
+Description
+Read a single Bulk Ingestion job by id (runtime plane).
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+GET {cdpTenantUrl}/api/v1/ingest/jobs/:jobId
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+jobId (string, required).
+
+Result
+job (object): id, sourceApiName, objectApiName, operation, state,
+  contentType, columnDelimiter, lineEnding, jobType,
+  recordsProcessed, recordsRejected, errorMessage,
+  failedRecordsRef, apiVersion, createdDate, systemModstamp.
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Read-only. Poll on a 5-30s interval until `state` is terminal.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_ingest_job({ "jobId": "JOB_001" })
+
+Example result
+{
+  "job": {
+    "id": "JOB_001", "operation": "upsert",
+    "state": "JobComplete", "recordsProcessed": 12450,
+    "recordsRejected": 0
+  }
+}

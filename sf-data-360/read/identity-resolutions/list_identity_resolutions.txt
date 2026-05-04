@@ -1,0 +1,57 @@
+Tool: list_identity_resolutions
+
+Description
+List Identity Resolution rulesets — the configured match +
+reconcile rules that produce Unified Individual / Unified Account
+profiles from source DMOs.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Inactive".
+unifiedDmoApiName (string, optional) - Filter by target unified DMO.
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+identityResolutions (array) - Each: { id, apiName, label, status,
+  unifiedDmoApiName, sourceDmos (array), schedule (object),
+  matchRuleCount (number), reconciliationRuleCount (number),
+  lastRunStatus, lastRunDate, unifiedRecordCount, createdDate,
+  lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_identity_resolutions({ "status": "Active" })
+
+Example result
+{
+  "identityResolutions": [
+    { "id": "0YR580000000001", "apiName": "UnifiedIndividual_default",
+      "unifiedDmoApiName": "UnifiedIndividual__dlm",
+      "status": "Active", "lastRunStatus": "Success",
+      "unifiedRecordCount": 482000 }
+  ]
+}

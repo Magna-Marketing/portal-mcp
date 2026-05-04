@@ -1,0 +1,64 @@
+Tool: get_metadata
+
+Description
+List Data 360 metadata across the whole catalogue, filtered by
+type / entity / category, or fetch the global summary. Unifies the
+Postman variants under `mode`.
+
+Salesforce API
+Connect plane (default) or runtime plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/metadata           (plane="connect", default)
+GET {cdpTenantUrl}/api/v1/metadata                             (plane="runtime")
+
+Headers
+Authorization: Bearer <core_access_token>      (connect)
+Authorization: Bearer <data_cloud_token>       (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+plane (string, optional, default "connect").
+mode (string, optional, default "global") - "global" | "byType" |
+  "byEntity" | "byCategory".
+entityType (string, optional, mode="byType") - "DataStream" |
+  "DataLakeObject" | "DataModelObject" | "Segment" | "Activation" |
+  "DataTransform" | "CalculatedInsight" | "DataGraph" | "DataSpace" |
+  "Connection" | "DataKit" | "IdentityResolution".
+entityName (string, optional, mode="byEntity").
+category (string, optional, mode="byCategory") - "Profile" |
+  "Engagement" | "Other" | "Account" | "Contact".
+limit (number, optional).
+dataSpace (string, optional).
+
+Result
+metadata (array) - Each: { entityType, entityName, label, category,
+  dataSpace, status, recordCount, createdDate, lastModifiedDate,
+  additionalProperties (object) }.
+totalSize (number).
+
+Required scopes
+- `api` (connect) or `cdp_api` (runtime).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID / invalid_token.
+
+Example request
+
+get_metadata({ "mode": "byType", "entityType": "DataModelObject", "limit": 5 })
+
+Example result
+{
+  "metadata": [
+    { "entityType": "DataModelObject",
+      "entityName": "UnifiedIndividual__dlm",
+      "category": "Profile",
+      "recordCount": 482000 }
+  ]
+}

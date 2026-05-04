@@ -1,0 +1,40 @@
+Tool: get_transactional_definition
+
+Description
+Get a single Transactional Messaging definition with its full content
+reference, classification, sender, and send queue summary.
+
+Marketing Cloud API
+REST API (`/messaging/v1/{type}/definitions/{key}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, required) - "email" | "sms".
+definitionKey (string, required).
+
+Result
+definition (object) - { definitionKey, definitionId, name, description, status, classification, content: { customerKey | message } depending on type, subscriptions: { dataExtension, list }, options (object) }.
+queueMetrics (object|null) - { sent, queued, undeliverable, attempts }.
+
+Required scopes
+- `email_send` / `sms_send`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_transactional_definition({ "type": "email", "definitionKey": "MTG_OrderConfirmation" })

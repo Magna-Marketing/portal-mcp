@@ -1,0 +1,46 @@
+Tool: get_file
+
+Description
+Get a file's metadata: latest version + every version, all sharing
+links, owner, content type, size, custom fields. To download the bytes
+use `download_file_content`.
+
+Salesforce API
+REST API (Data) + Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/sobjects/ContentDocument/{id}
+GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, VersionNumber, Title, FileExtension, ContentSize, FileType, IsLatest, CreatedDate, ContentModifiedDate FROM ContentVersion WHERE ContentDocumentId = '...' ORDER BY VersionNumber DESC
+GET /services/data/v66.0/query/?q=SELECT Id, LinkedEntityId, LinkedEntity.Name, ShareType, Visibility FROM ContentDocumentLink WHERE ContentDocumentId = '...'
+GET /services/data/v66.0/connect/files/{contentDocumentId}                              (Chatter Connect detail)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contentDocumentId (string, optional).
+contentVersionId (string, optional) - Either is fine; tool resolves the document.
+includeAllVersions (boolean, optional, default true).
+includeShares (boolean, optional, default true).
+
+Result
+file (object) - { id, title, fileType, fileExtension, contentSize, ownerId, ownerName, latestVersionId, contentModifiedDate, isArchived, description, sharingPrivacy }.
+versions (array, when includeAllVersions=true) - { id, versionNumber, title, contentSize, fileType, isLatest, createdDate }.
+shares (array, when includeShares=true) - { id, linkedEntityId, linkedEntityName, linkedEntityType, shareType ("V"|"C"|"I"), visibility ("AllUsers"|"InternalUsers"|"SharedUsers") }.
+
+Required permissions
+- File read share or "View All Data".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+get_file({ "contentDocumentId": "069Qg0000004ZyAA" })

@@ -1,0 +1,40 @@
+Tool: list_remote_site_settings
+
+Description
+List `RemoteSiteSetting` rows: legacy mechanism that allowed Apex /
+Visualforce / LWC `lwc/wire` callouts to specific URLs before Named
+Credentials. Each setting has a URL, active flag, and a description.
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, EndpointUrl, IsActive, DisableProtocolSecurity, NamespacePrefix, Description FROM RemoteProxy
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeInactive (boolean, optional, default true).
+namePattern (string, optional).
+
+Result
+totalSize (number).
+remoteSites (array) - { id, name, endpointUrl, isActive, disableProtocolSecurity, namespacePrefix, description }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_remote_site_settings({ "includeInactive": false })

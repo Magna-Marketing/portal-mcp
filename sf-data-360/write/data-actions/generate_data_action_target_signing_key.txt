@@ -1,0 +1,54 @@
+Tool: generate_data_action_target_signing_key
+
+Description
+Generate (or rotate) the HMAC signing key for a Data Action Target
+configured with `authType=HMAC_SIGNED`. The previous key is
+immediately invalidated.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-action-targets/:apiName/signing-key
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{}
+
+Input (parameters)
+apiName (string, required).
+
+Result
+apiName (string).
+signingKey (string) - The fresh secret; **shown only once** in this
+  response.
+keyId (string).
+generatedAt (ISO-8601).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Not idempotent — every call rotates the key.
+
+Errors
+- 404 NOT_FOUND, 400 NOT_HMAC_SIGNED (target uses a different
+  authType).
+
+Example request
+
+generate_data_action_target_signing_key({
+  "apiName": "WebhookTarget__dat"
+})
+
+Example result
+{
+  "apiName": "WebhookTarget__dat",
+  "signingKey": "k_2026_abc...",
+  "keyId": "key_001",
+  "generatedAt": "2026-04-29T13:02:11Z"
+}

@@ -1,0 +1,54 @@
+Tool: list_eligible_promotions
+
+Description
+List promotions a member is **eligible** to enroll in (entry criteria
+satisfied). Wraps the Loyalty Connect API endpoint that runs eligibility
+rules against the member's current state. Use this to drive the
+"Promotions for you" UI.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/members/{memberId}/promotions/eligible-promotions
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+channel (string, optional) - Filter by promotion channel.
+includeAlreadyEnrolled (boolean, optional, default false).
+includeAlreadyCompleted (boolean, optional, default false).
+
+Result
+memberId (string).
+eligiblePromotions (array) - Each:
+  promotionId (string), promotionName (string),
+  description (string|null),
+  effectiveStartDate (string), effectiveEndDate (string),
+  enrollmentRequired (boolean),
+  alreadyEnrolled (boolean), alreadyCompleted (boolean),
+  potentialReward (object|null) - { rewardType, points, discountPercent, voucherDefinitionName }.
+processedAt (string).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+list_eligible_promotions({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2"
+})

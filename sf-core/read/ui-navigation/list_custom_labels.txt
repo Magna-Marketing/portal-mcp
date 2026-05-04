@@ -1,0 +1,42 @@
+Tool: list_custom_labels
+
+Description
+List custom labels (used in Apex, LWC, Aura, VF, formulas, and translations). Each label has a categorized name, value, language, protected flag, and namespace.
+
+Salesforce API
+Tooling API, v66.0. `CustomLabel`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, Value, Language, IsProtected, NamespacePrefix, Categories FROM CustomLabel
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional).
+language (string, optional, default org's default).
+namespacePrefix (string, optional).
+category (string, optional).
+includeManaged (boolean, optional, default false).
+limit (number, optional, default 500).
+
+Result
+totalSize (number).
+customLabels (array) - Each: { id, name, masterLabel, value, language, isProtected, namespacePrefix, categories }.
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_FIELD on bad language.
+
+Example request
+
+list_custom_labels({ "namePattern": "MTG_*" })

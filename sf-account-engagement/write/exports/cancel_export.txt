@@ -1,0 +1,44 @@
+Tool: cancel_export
+
+Description
+Cancel an in-flight export job. Only valid while `status` is
+`Waiting` or `Processing`. Once cancelled, partial result chunks
+already written are discarded.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/exports/:id/do/cancel
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+
+Result
+success (boolean).
+export (object) - Refreshed export row with `status="Cancelled"`.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent (re-cancelling a cancelled export is a no-op).
+
+Errors
+- 53 export_already_complete, 59 not_found.
+
+Example request
+
+cancel_export({ "id": 7782 })
+
+Example result
+{ "success": true, "export": { "id": 7782, "status": "Cancelled" } }

@@ -1,0 +1,85 @@
+Tool: run_program_process
+
+Description
+Generic Loyalty Program Process runner. Invokes any named
+`LoyaltyProgramProcess` with arbitrary `processParameters` JSON.
+Use this to call custom processes defined in your org or pre-built
+processes that don't have a dedicated tool yet.
+
+For frequently-used processes prefer the dedicated tools
+(`credit_points`, `debit_points`, `issue_voucher`, `cancel_voucher`,
+`enroll_for_promotion`, `opt_out_from_promotion`, `update_member_details`,
+`update_member_tier`, `unenroll_member`, `list_member_promotions`).
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "processName": "Custom_Reset_Status_Points",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "TierGroupName": "Status_Tiers",
+    "AsOfDate": "2026-12-31"
+  }
+}
+
+Input (parameters)
+processName (string, required) - Active LoyaltyProgramProcess name.
+processParameters (object, required) - Verbatim parameter map; the
+  shape is defined by the process's input schema.
+externalTransactionId (string, optional) - Idempotency key forwarded as
+  `processParameters.ExternalTransactionId` when set.
+async (boolean, optional, default false) - When true, the tool returns
+  immediately with the job Id and does not wait for completion.
+waitTimeoutSec (number, optional, default 60) - Sync mode only.
+
+Result
+processResult (object):
+  isSuccess (boolean).
+  processStatus (string) - "Success" | "InProgress" | "Failed".
+  jobId (string|null) - When async or long-running.
+  outputs (object|null) - Process-specific output payload.
+  errors (array, optional) - { errorCode, message }.
+processedAt (string).
+
+Required permissions
+- The running user must have access to the named process via the
+  `Loyalty Management` / `Loyalty Management Admin` permission sets.
+
+Idempotency & limits
+- Idempotency depends on the underlying process; passing
+  `externalTransactionId` is the standard idempotency convention.
+- Counts toward DailyApiRequests + program-process governor limits.
+
+Errors
+- LOYALTY_PROCESS_NOT_FOUND, LOYALTY_PROCESS_PARAMETER_INVALID.
+
+Example request (custom process)
+
+run_program_process({
+  "processName": "Reset_Status_Points",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "TierGroupName": "Status_Tiers",
+    "AsOfDate": "2026-12-31"
+  }
+})
+
+Example request (forwarding to a built-in process)
+
+run_program_process({
+  "processName": "Get Member Promotions",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "MemberId": "0lMQg00000abcDE2"
+  }
+})

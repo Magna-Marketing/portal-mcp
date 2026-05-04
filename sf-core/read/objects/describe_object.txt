@@ -1,0 +1,128 @@
+Tool: describe_object
+
+Description
+Get the full describe for a single sObject: every field with its type
+and FLS, every relationship (parent and child), every record type, every
+recordTypeInfo (visible/default per profile), every named layout, plus
+CRUD/queryable/triggerable flags. Use this to ground SOQL/SOSL field
+choices, validate required fields before DML, or generate forms. For a
+shallow object lookup by name, use `search_objects`. For picklist values
+(record-type-aware) use `get_picklist_values`. For record types alone
+use `query_record_types`.
+
+Salesforce API
+REST API (Data), v66.0. `GET /sobjects/{sObject}/describe`. The MCP server
+caches per object for ~5 minutes (use `noCache=true` to bypass).
+
+Endpoint
+GET https://{instance}.my.salesforce.com/services/data/v66.0/sobjects/{sObject}/describe
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+If-Modified-Since: <RFC1123 date>   (optional; returns 304 if unchanged)
+
+Body
+None (GET request).
+
+Input (parameters)
+sObject (string, required) - sObject API name (e.g. "Account",
+  "Project__c", "ApexClass").
+includeChildRelationships (boolean, optional, default true) - Whether to
+  include the childRelationships array.
+includeFields (boolean, optional, default true) - Whether to include the
+  fields array (huge for some standard objects; set false for a slim
+  metadata-only describe).
+includeRecordTypes (boolean, optional, default true) - Whether to include
+  recordTypeInfos.
+noCache (boolean, optional, default false) - Bypass MCP local cache.
+
+Result
+name (string) - sObject API name.
+label, labelPlural (string).
+custom (boolean), customSetting (boolean).
+keyPrefix (string|null).
+queryable, createable, updateable, deletable, layoutable, searchable,
+  feedEnabled, triggerable, mruEnabled (boolean).
+fields (array) - Each field:
+  name (string) - API name.
+  label (string).
+  type (string) - id|string|reference|picklist|multipicklist|boolean|int
+    |double|currency|percent|date|datetime|email|phone|url|address|
+    location|textarea|encryptedstring|combobox|complexvalue.
+  length, precision, scale, byteLength.
+  nillable (boolean), createable, updateable, calculated, autoNumber,
+    defaultedOnCreate, defaultValue, restrictedPicklist, dependentPicklist.
+  picklistValues (array) - { value, label, active, defaultValue }.
+  referenceTo (string[]) - For reference fields, target sObjects.
+  relationshipName (string|null) - For dotted SOQL traversal.
+  relationshipOrder (number|null) - 0=master in master-detail.
+  cascadeDelete (boolean), restrictedDelete (boolean).
+  controllerName (string|null), externalId (boolean), unique (boolean).
+recordTypeInfos (array) - Each:
+  recordTypeId, name, developerName, master (boolean), available
+    (boolean for running user), defaultRecordTypeMapping, urls.layout.
+namedLayoutInfos (array) - { name, urls.layout }.
+childRelationships (array) - Each:
+  childSObject, field (FK on child), relationshipName, cascadeDelete,
+  deprecatedAndHidden, restrictedDelete.
+urls (object) - sobject, describe, rowTemplate, listviews, etc.
+
+Required permissions
+- API Enabled.
+- Object read on the sObject. (Object describes are visible to anyone
+  with profile read; fields shown respect FLS.)
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Use If-Modified-Since to avoid bandwidth on unchanged metadata.
+- Per-call response can exceed 1 MB on standard objects with many fields.
+
+Errors
+- INVALID_TYPE: sObject doesn't exist or caller has no read.
+- 304 Not Modified: when If-Modified-Since matches.
+
+Example request
+
+describe_object({ "sObject": "Opportunity", "includeChildRelationships": false })
+
+Example result (truncated)
+
+{
+  "name": "Opportunity",
+  "label": "Opportunity",
+  "labelPlural": "Opportunities",
+  "custom": false,
+  "keyPrefix": "006",
+  "queryable": true, "createable": true, "updateable": true,
+  "deletable": true, "searchable": true, "triggerable": true,
+  "fields": [
+    {
+      "name": "Id", "label": "Opportunity ID", "type": "id",
+      "length": 18, "nillable": false, "createable": false, "updateable": false
+    },
+    {
+      "name": "AccountId", "label": "Account ID", "type": "reference",
+      "referenceTo": ["Account"], "relationshipName": "Account",
+      "nillable": true, "createable": true, "updateable": true,
+      "restrictedDelete": false, "cascadeDelete": false
+    },
+    {
+      "name": "StageName", "label": "Stage", "type": "picklist",
+      "restrictedPicklist": false, "nillable": false,
+      "picklistValues": [
+        { "value": "Prospecting", "label": "Prospecting", "active": true, "defaultValue": false },
+        { "value": "Closed Won", "label": "Closed Won", "active": true, "defaultValue": false }
+      ]
+    }
+  ],
+  "recordTypeInfos": [
+    {
+      "recordTypeId": "012Qg0000004aBcDE",
+      "name": "Internal Project",
+      "developerName": "Internal_Project",
+      "master": false, "available": true, "defaultRecordTypeMapping": false,
+      "urls": { "layout": "/services/data/v66.0/sobjects/Opportunity/describe/layouts/012Qg0000004aBcDE" }
+    }
+  ]
+}

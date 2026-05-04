@@ -1,0 +1,62 @@
+Tool: manage_data_transform_schedule
+
+Description
+Update the schedule of a Data Transform. Supported schedule types:
+`Cron`, `Interval`, `EventDriven`, `Manual`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PUT {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/schedule
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "scheduleType": "Cron",
+  "cronExpression": "0 0 */6 * * ?",
+  "timeZone": "UTC",
+  "isActive": true
+}
+
+Input (parameters)
+dataTransformNameOrId (string, required).
+scheduleType (string, required) - "Cron" | "Interval" |
+  "EventDriven" | "Manual".
+cronExpression (string, optional) - Required when scheduleType=Cron.
+intervalMinutes (number, optional) - Required when scheduleType=Interval.
+startDate (string, optional) - ISO-8601.
+endDate (string, optional).
+timeZone (string, optional, default "UTC").
+isActive (boolean, optional, default true).
+
+Result
+schedule (object) - Updated schedule.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 400 INVALID_CRON, 404 NOT_FOUND.
+
+Example request
+
+manage_data_transform_schedule({
+  "dataTransformNameOrId": "build_unified_individual",
+  "scheduleType": "Cron",
+  "cronExpression": "0 0 */6 * * ?",
+  "isActive": true
+})
+
+Example result
+{
+  "schedule": { "scheduleType": "Cron",
+    "cronExpression": "0 0 */6 * * ?", "isActive": true }
+}

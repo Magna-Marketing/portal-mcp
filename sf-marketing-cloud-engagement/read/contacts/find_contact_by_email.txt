@@ -1,0 +1,40 @@
+Tool: find_contact_by_email
+
+Description
+Look up the Contact Key associated with one or more email addresses
+(reverse-lookup). Faster than `list_contacts` when you have email but
+need the contactKey.
+
+Marketing Cloud API
+REST API (`/contacts/v1/addresses/email/search`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/addresses/email/search
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "channelAddressList": ["jane.doe@example.com", "john.smith@example.com"], "maximumCount": 100 }
+
+Input (parameters)
+emails (string[], required) - Up to 100 per call.
+maximumCount (number, optional, default 100, max 500).
+
+Result
+totalCount (number).
+contacts (array) - Each: { channelAddress, contactKey, contactId, contactStatus, addressId, isPrimary }.
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+find_contact_by_email({ "emails": ["jane.doe@example.com"] })

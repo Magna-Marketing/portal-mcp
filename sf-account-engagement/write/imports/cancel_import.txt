@@ -1,0 +1,44 @@
+Tool: cancel_import
+
+Description
+Cancel an in-flight Prospect import. Valid while `state` is
+`Ready` or `Processing`. Already-processed rows remain in Pardot;
+unprocessed rows are dropped.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/imports/:id/do/cancel
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+
+Result
+success (boolean).
+import (object) - Refreshed row with `state="Cancelled"`.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 53 import_already_complete, 59 not_found.
+
+Example request
+
+cancel_import({ "id": 5512 })
+
+Example result
+{ "success": true, "import": { "id": 5512, "state": "Cancelled" } }

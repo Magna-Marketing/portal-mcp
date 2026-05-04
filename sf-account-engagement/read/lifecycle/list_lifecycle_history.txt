@@ -1,0 +1,59 @@
+Tool: list_lifecycle_history
+
+Description
+List Lifecycle History rows (per-prospect funnel transitions). One
+row per prospect-stage entry; pair with `list_lifecycle_stages` to
+resolve `lifecycleStageId` → stage name. Useful for "how long did
+this prospect spend at MQL?" questions.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/lifecycle-histories?fields={fields}&filter[prospectId]=eq,:prospectId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+prospectId (number, optional).
+lifecycleStageId (number, optional).
+createdAfter (string, optional) - ISO-8601.
+createdBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,prospectId,lifecycleStageId,
+  previousLifecycleStageId,secondsElapsedInPreviousStage,createdAt).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+lifecycleHistories (array) - Each: { id, prospectId, lifecycleStageId,
+  previousLifecycleStageId (number|null),
+  secondsElapsedInPreviousStage (number), createdAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_lifecycle_history({ "prospectId": 7745 })
+
+Example result
+{
+  "lifecycleHistories": [
+    { "id": 1801, "prospectId": 7745, "lifecycleStageId": 2,
+      "previousLifecycleStageId": 1, "secondsElapsedInPreviousStage": 86400,
+      "createdAt": "2026-04-22T15:00:00Z" }
+  ]
+}

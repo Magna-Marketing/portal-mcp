@@ -1,0 +1,48 @@
+Tool: publish_platform_event
+
+Description
+Publish one or many Platform Events. Synchronous publish, returns
+EventReplayId per event. Subscribers (Apex triggers, Flows, CDC
+listeners, external Pub/Sub clients) receive within seconds.
+
+Salesforce API
+REST API (Data), v66.0. POST a record on the Platform Event sObject
+(`<EventName>__e`).
+
+Endpoint
+POST /services/data/v66.0/sobjects/{eventName}__e
+POST /services/data/v66.0/composite/sobjects                        (bulk)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Field__c": "...", "Anther_Field__c": "..." }
+
+Input (parameters)
+eventName (string, required) - Platform Event API name (without `__e`).
+events (object[], required) - Each is the field map.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - { id (EventReplayId placeholder), success, errors }.
+publishedCount (number).
+failedCount (number).
+
+Required permissions
+- "Customize Application" + "Send Outbound Messages" / "API Enabled".
+
+Idempotency & limits
+- Not idempotent.
+- Hourly publish caps in `get_org_limits.HourlyPublishedPlatformEvents`.
+
+Errors
+- INVALID_TYPE, REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+publish_platform_event({
+  "eventName": "Project_Status_Update__e",
+  "events": [{ "Project_Id__c": "a01Qg00000abcDE", "New_Status__c": "Active" }]
+})

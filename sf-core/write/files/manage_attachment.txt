@@ -1,0 +1,53 @@
+Tool: manage_attachment
+
+Description
+Create / delete a legacy `Attachment` row. Files (ContentVersion) is
+preferred for new uploads; this tool is for systems still on the
+classic Attachment model.
+
+Salesforce API
+REST API (Data), v66.0. `Attachment` sObject.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/Attachment
+DELETE /services/data/v66.0/sobjects/Attachment/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "...", "ParentId": "...", "ContentType": "...", "Body": "<base64>", "Description": "...", "IsPrivate": false }
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+attachmentId (string, optional, required for delete).
+parentId (string, required for create).
+name (string, required for create).
+contentType (string, optional).
+description (string, optional).
+isPrivate (boolean, optional, default false).
+base64 (string, required for create).
+
+Result
+attachment (object) - { id, name, parentId, contentType, bodyLength }.
+
+Required permissions
+- "Edit" on the parent sObject.
+
+Idempotency & limits
+- Not idempotent.
+- Body cap: 25 MB.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+manage_attachment({
+  "operation": "create",
+  "parentId": "500Qg0000020aBcDE",
+  "name": "case_screenshot.png",
+  "contentType": "image/png",
+  "base64": "iVBORw0KG..."
+})

@@ -1,0 +1,79 @@
+Tool: manage_event_definition
+
+Description
+Create / update / delete a journey event definition. API event
+definitions are the typical "external trigger" used with
+`fire_journey_entry_event` and `inject_contacts_into_journey`.
+
+Marketing Cloud API
+REST API (`/interaction/v1/eventDefinitions`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
+PUT    https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{key}
+PUT    https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{key}
+DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "name": "MTG_Order_Confirmed",
+  "key": "APIEvent-MTG-Order-Confirmed",
+  "description": "Fires when a customer order is confirmed.",
+  "type": "APIEvent",
+  "mode": "Production",
+  "iconUrl": null,
+  "schema": {
+    "fields": [
+      { "key": "OrderId", "name": "OrderId", "dataType": "Text", "isRequired": true },
+      { "key": "OrderTotal", "name": "OrderTotal", "dataType": "Decimal", "isRequired": true }
+    ]
+  },
+  "arguments": { "useHighFrequencyDataset": false },
+  "configurationArguments": { "applicationExtensionKey": null, "schedule": { "type": "OnEvent" } },
+  "metaData": {}
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+eventDefinitionId (string, optional).
+eventDefinitionKey (string, optional, recommended).
+name (string, required for create).
+description (string, optional).
+type (string, required for create) - "APIEvent" | "DataExtension" | "SalesforceObject" | "ContactEvent".
+mode (string, optional, default "Production") - "Production" | "Test".
+schema (object, optional, required for create) - { fields: [{ key, name, dataType ("Text"|"Number"|"Decimal"|"Date"|"Boolean"), isRequired, defaultValue }] }.
+dataExtensionId (string, optional) - For DataExtension-type events.
+configurationArguments (object, optional).
+arguments (object, optional).
+
+Result
+eventDefinition (object) - { id, key, name, type, mode, schema }.
+
+Required scopes
+- `journeys_write`.
+
+Idempotency & limits
+- update idempotent on equal definition.
+
+Errors
+- DUPLICATE_KEY, 30002 not found.
+
+Example request
+
+manage_event_definition({
+  "operation": "create",
+  "eventDefinitionKey": "APIEvent-MTG-Order-Confirmed",
+  "name": "MTG_Order_Confirmed",
+  "type": "APIEvent",
+  "schema": {
+    "fields": [
+      { "key": "OrderId", "name": "OrderId", "dataType": "Text", "isRequired": true },
+      { "key": "OrderTotal", "name": "OrderTotal", "dataType": "Decimal", "isRequired": true }
+    ]
+  }
+})

@@ -1,0 +1,54 @@
+Tool: list_tags
+
+Description
+List Tags configured on the BU. Tags are simple labels; the same
+tag value can be applied across most object families (Prospects,
+Campaigns, Forms, Files, etc.). Use `list_tagged_objects` to see
+the things a tag is applied to.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/tags?fields={fields}&filter[name]=like,Welcome*
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,objectCount,
+  createdAt,updatedAt,createdById,updatedById,isDeleted).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+tags (array) - Each: { id, name, objectCount (number), isDeleted,
+  createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_tags({ "nameContains": "Welcome" })
+
+Example result
+{
+  "tags": [
+    { "id": 211, "name": "Welcome 2026", "objectCount": 14 }
+  ]
+}

@@ -1,0 +1,69 @@
+Tool: publish_segment
+
+Description
+Publish (re-evaluate) or deactivate a Segment. The Postman
+collection exposes:
+
+- `POST .../segments/:id/actions/publish` — kicks off a publish run.
+- `POST .../segments/:apiName/actions/deactivate` — deactivates by name.
+- `POST .../segments/:id/actions/deactivate` — deactivates by id.
+
+This tool unifies them under `subOperation`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentId/actions/publish              (subOperation="publish")
+POST {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName/actions/deactivate      (subOperation="deactivateByName")
+POST {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentId/actions/deactivate           (subOperation="deactivateById")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (publish)
+{ "publishType": "FULL" }
+
+Body (deactivate)
+{}
+
+Input (parameters)
+subOperation (string, required) - "publish" | "deactivateByName" |
+  "deactivateById".
+segmentId (string, required for "publish" / "deactivateById").
+segmentApiName (string, required for "deactivateByName").
+publishType (string, optional, default "FULL", publish-only) -
+  "FULL" | "INCREMENTAL".
+runIdempotencyKey (string, optional, publish-only).
+
+Result
+runId (string, when publish).
+status (string).
+submittedAt (ISO-8601, when publish).
+deactivated (boolean, when deactivate).
+
+Required scopes
+- `api` (or `cdp_segment_api` for runtime equivalents).
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight publish per segment.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS, 400 SEGMENT_INVALID.
+
+Example request
+
+publish_segment({
+  "subOperation": "publish",
+  "segmentId": "0YS580000000001"
+})
+
+Example result
+{
+  "runId": "RUN_SEG_2026-04-29T13",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

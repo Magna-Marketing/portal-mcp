@@ -1,0 +1,69 @@
+Tool: search_ui_components
+
+Description
+Search UI components by name pattern across all component types
+(`LightningComponentBundle`, `AuraDefinitionBundle`, `ApexPage`,
+`FlexiPage`). Supports `*` and `?` wildcards. Use to discover candidates
+when you don't know whether something is an LWC vs Aura vs VF page.
+
+For type-specific listing use `list_ui_components`. For Lightning Pages
+specifically (record/app/home pages) use `list_lightning_pages`.
+
+Salesforce API
+Tooling API, v66.0. Multiple SOQL queries unioned by the MCP layer.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT ... FROM LightningComponentBundle WHERE DeveloperName LIKE '...'
+... (one query per sObject)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+pattern (string, required) - Glob with `*` (any chars) and `?` (single
+  char). Case-insensitive substring also accepted (e.g. "card" matches).
+types (string[], optional) - Subset of ["lwc", "aura", "visualforce",
+  "flexipage"]. Default: all four.
+namespacePrefix (string, optional).
+managedOnly (boolean, optional, default false).
+limit (number, optional, default 200, max 1000).
+
+Result
+totalSize (number).
+results (array) - Each:
+  type ("lwc"|"aura"|"visualforce"|"flexipage").
+  id (string).
+  name (string) - DeveloperName / Name.
+  label (string).
+  apiVersion (number|null).
+  namespacePrefix (string|null).
+  description (string|null).
+  lastModifiedDate (string).
+groupedByType (object|null) - When >1 type returned: { lwc: [...], aura: [...] }.
+
+Required permissions
+- "Customize Application" / "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- INVALID_FIELD on bad type.
+
+Example request
+
+search_ui_components({ "pattern": "*Card", "types": ["lwc","aura"] })
+
+Example result (truncated)
+
+{
+  "totalSize": 5,
+  "results": [
+    { "type": "lwc",  "id": "0Rb4Q00000abcDE", "name": "projectCard", "label": "Project Card", "apiVersion": 62.0 },
+    { "type": "aura", "id": "0Ad4Q00000xyzAB", "name": "AccountCard",  "label": "Account Card", "apiVersion": 60.0 }
+  ]
+}

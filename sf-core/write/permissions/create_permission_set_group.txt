@@ -1,0 +1,65 @@
+Tool: create_permission_set_group
+
+Description
+Create a new permission set group bundling multiple permission sets.
+Optionally attach a "muting" permission set that subtracts perms from
+the bundle (advanced; rarely used). After creation, Salesforce kicks
+off an asynchronous recalculation; the tool polls until the PSG
+`Status="Updated"` (or surfaces "Outdated"/"Failed").
+
+Salesforce API
+Metadata API (`PermissionSetGroup` type), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "fullName": "MTG_Delivery_Bundle",
+  "label": "MTG Delivery Bundle",
+  "description": "Project delivery base perms",
+  "permissionSets": ["MTG_Project_Manager", "MTG_Time_Logger"],
+  "mutingPermissionSets": []
+}
+
+Input (parameters)
+fullName (string, required) - PSG DeveloperName.
+label (string, required) - Master label.
+description (string, optional).
+permissionSets (string[], required) - PermissionSet DeveloperNames to
+  include.
+mutingPermissionSets (string[], optional) - PermissionSet DeveloperNames
+  whose disabled perms suppress the same perms in the included sets.
+checkOnly (boolean, optional, default false).
+waitForRecalc (boolean, optional, default true) - Poll the PSG until
+  Status reaches a terminal state ("Updated"|"Failed"). Up to 60 s.
+
+Result
+Standard deploy result, plus:
+group (object) - { id, fullName, label, status, members (string[]),
+  recalcMs (number) }.
+
+Required permissions
+- "Manage Profiles and Permission Sets".
+
+Idempotency & limits
+- Create is **not** idempotent (fails on duplicate).
+- Recalc usually completes < 5 s; can take longer for very large
+  permsets.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+- INVALID_FIELD on a permset name that doesn't exist.
+- PERMISSION_SET_GROUP_RECALC_FAILED with details.
+
+Example request
+
+create_permission_set_group({
+  "fullName": "MTG_Delivery_Bundle",
+  "label": "MTG Delivery Bundle",
+  "permissionSets": ["MTG_Project_Manager", "MTG_Time_Logger"]
+})

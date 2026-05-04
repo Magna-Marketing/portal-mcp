@@ -1,0 +1,64 @@
+Tool: list_sent_emails
+
+Description
+List individual `Email` send rows — one row per delivered (or
+failed) email send. This is the most granular send log; for
+aggregate stats on a list-email blast, see `get_list_email`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/emails?fields={fields}&filter[prospectId]=eq,:prospectId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+prospectId (number, optional) - Filter to one recipient.
+listEmailId (number, optional) - All sends for one List Email.
+campaignId (number, optional).
+emailTemplateId (number, optional).
+type (string, optional) - "ListEmail" | "OneToOneEmail" |
+  "TestEmail" | "AutoresponderEmail" | "DripEmail".
+sentAfter (string, optional) - ISO-8601 (filter on `sentAt`).
+sentBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,name,subject,type,userId,
+  campaignId,listId,clientType,sentAt,prospectId,listEmailId,
+  emailTemplateId,isOperational,senderOptions.address,senderOptions.name,
+  replyToOptions.address).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+emails (array) - Each: { id, name, subject, type, userId, campaignId,
+  listId, clientType, sentAt, prospectId, listEmailId, emailTemplateId,
+  isOperational, senderOptions, replyToOptions }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_sent_emails({ "prospectId": 7745, "limit": 20 })
+
+Example result
+{
+  "emails": [
+    { "id": 99821, "name": "Welcome", "subject": "Welcome, Jane",
+      "type": "AutoresponderEmail", "sentAt": "2026-04-29T13:02:11Z",
+      "prospectId": 7745, "campaignId": 1024 }
+  ]
+}

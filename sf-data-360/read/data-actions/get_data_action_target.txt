@@ -1,0 +1,47 @@
+Tool: get_data_action_target
+
+Description
+Read a single Data Action Target by api name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-action-targets/:apiName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+apiName (string, required).
+
+Result
+dataActionTarget (object): apiName, label, targetType, endpointUrl,
+  status, signingKeyConfigured, authType, configuration (object),
+  createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_action_target({ "apiName": "WebhookTarget__dat" })
+
+Example result
+{
+  "dataActionTarget": {
+    "apiName": "WebhookTarget__dat",
+    "targetType": "Webhook",
+    "endpointUrl": "https://hooks.magnatech.com/cdp"
+  }
+}

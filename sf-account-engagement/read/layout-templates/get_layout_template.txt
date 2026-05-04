@@ -1,0 +1,52 @@
+Tool: get_layout_template
+
+Description
+Read a single Layout Template by id, including the layout HTML
+(`layoutContent`), form HTML (`formContent`), and site search HTML.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/layout-templates/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default includes layoutContent,
+  formContent, siteSearchContent, css, folder.*.
+
+Result
+layoutTemplate (object): id, name, folderId, isIncludeDefaultCss,
+  layoutContent (string), formContent (string), siteSearchContent
+  (string), css (string), isDeleted, createdAt, updatedAt.
+folder (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_layout_template({ "id": 71 })
+
+Example result
+{
+  "layoutTemplate": {
+    "id": 71, "name": "Default LP shell",
+    "layoutContent": "<div>%%content%%</div>",
+    "css": "body { font-family: sans-serif; }"
+  }
+}

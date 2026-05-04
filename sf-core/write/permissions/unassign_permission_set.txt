@@ -1,0 +1,56 @@
+Tool: unassign_permission_set
+
+Description
+Remove permission set assignments from one or more users. Targets
+`PermissionSetAssignment` rows that match (user, permset). Supports
+bulk removal by user list or by selection criteria delegated to
+`bulk_remove_permissions` (this tool focuses on a single permset).
+
+Salesforce API
+REST API (Data), v66.0.
+- Single: `DELETE /sobjects/PermissionSetAssignment/{assignmentId}`.
+- Bulk: `DELETE /composite/sobjects?ids=...` (≤200 per call).
+
+Endpoint
+GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetAssignment WHERE PermissionSetId = '...' AND AssigneeId IN (...)
+DELETE /services/data/v66.0/composite/sobjects?ids=<comma-separated assignment ids>
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None for the DELETE; ids are query params.
+
+Input (parameters)
+permissionSetName (string, optional).
+permissionSetId (string, optional).
+  One required.
+userIds (string[], optional).
+usernames (string[], optional).
+  One of userIds / usernames required.
+allOrNone (boolean, optional, default false).
+skipIfNotAssigned (boolean, optional, default true).
+
+Result
+permissionSet (object) - { id, name, label }.
+results (array) - One per user:
+  userId, username, status ("removed"|"not_assigned"|"failed"),
+  assignmentId (string|null), error (string|null).
+summary (object) - { removed, notAssigned, failed, total }.
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users".
+
+Idempotency & limits
+- Idempotent when `skipIfNotAssigned=true`.
+
+Errors
+- ENTITY_IS_DELETED if the assignment was already deleted.
+- INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+unassign_permission_set({
+  "permissionSetName": "MTG_Project_Manager",
+  "usernames": ["jane.doe@magnatech.com"]
+})

@@ -1,0 +1,79 @@
+Tool: send_triggered_email
+
+Description
+Fire a triggered email to one or more subscribers via a Triggered Send
+Definition. The TSD must be `Active` (start it with
+`manage_triggered_send_definition`). The MCP server prefers the modern
+REST endpoint `/messaging/v1/messageDefinitionSends/key:{key}/send`
+and falls back to SOAP `TriggeredSend.Create` only when the REST path
+is unavailable in the tenant's tier.
+
+For status of a previously-fired send, use `get_triggered_send_status`.
+
+Marketing Cloud API
+REST API (`/messaging/v1/messageDefinitionSends/key:{key}/send`) +
+SOAP fallback (`TriggeredSend.Create`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/messageDefinitionSends/key:{triggeredSendCustomerKey}/send
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx                       (SOAP fallback)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json (REST) or text/xml (SOAP)
+
+Body (REST single-recipient)
+{
+  "From": { "Address": "noreply@magnatech.com", "Name": "MTG" },
+  "To": {
+    "Address": "jane.doe@example.com",
+    "SubscriberKey": "MEM-100023",
+    "ContactAttributes": {
+      "SubscriberAttributes": { "FirstName": "Jane", "TierName": "Gold" }
+    }
+  },
+  "OPTIONS": { "RequestType": "ASYNC" }
+}
+
+Input (parameters)
+triggeredSendCustomerKey (string, required).
+recipients (object[], required) - Each:
+  subscriberKey (string, required).
+  emailAddress (string, optional) - Updates / sets the subscriber's email.
+  attributes (object, optional) - Map of subscriber attribute names -> values for personalization (mapped to `ContactAttributes.SubscriberAttributes`).
+  status (string, optional, default "Active").
+fromAddress (string, optional) - Override From address.
+fromName (string, optional).
+saveAsActivity (boolean, optional, default true) - SOAP only.
+sendDate (string, optional, default now).
+requestType (string, optional, default "ASYNC") - "SYNC" | "ASYNC".
+conversationId (string, optional) - Idempotency-style identifier.
+messageId (string, optional) - Per-message Id; recommended for dedupe / status lookup.
+suppressTracking (boolean, optional).
+
+Result
+results (array) - Per recipient: { subscriberKey, success, errors (array), messageId, recipientSendId }.
+summary (object) - { sent, failed, total }.
+mode (string) - "REST" | "SOAP" depending on which path was taken.
+
+Required scopes
+- `email_send`.
+
+Idempotency & limits
+- Pass a stable `messageId` for tracking; Marketing Cloud doesn't dedupe automatically.
+- Up to 50 recipients per REST batch (1 per `key:.../send` invocation; the MCP server batches).
+- Up to 200 per SOAP TriggeredSend.Create.
+
+Errors
+- 12014 Triggered Send paused / inactive, 12011 invalid attributes.
+
+Example request
+
+send_triggered_email({
+  "triggeredSendCustomerKey": "MTG_Welcome_TS",
+  "recipients": [
+    { "subscriberKey": "MEM-100023", "emailAddress": "jane.doe@example.com",
+      "attributes": { "FirstName": "Jane", "TierName": "Gold" } }
+  ],
+  "messageId": "MEM-100023-WELCOME-2026-04-30"
+})

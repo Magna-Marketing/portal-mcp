@@ -1,0 +1,40 @@
+Tool: list_custom_tabs
+
+Description
+List `CustomTab` records: tabs for custom objects, Visualforce pages, web tabs, Lightning Page tabs, and LWC tabs. Includes mounted component / page reference.
+
+Salesforce API
+Tooling API, v66.0. `CustomTab` Metadata + Tooling sObject.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, Name, SObjectName, IsCustom, Type, Url, Page, FlexiPage, MotifId, IsHidden, NamespacePrefix FROM CustomTab
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, optional) - "SObject" | "Web" | "Visualforce" | "FlexiPage" | "LightningComponent" | "AuraComponent".
+namePattern (string, optional).
+includeManaged (boolean, optional, default false).
+
+Result
+totalSize (number).
+customTabs (array) - Each:
+  id, developerName, label, type, sObjectName (when SObject type), url (when Web), page (when Visualforce), flexiPage (when FlexiPage), motifId (icon style), isHidden, namespacePrefix.
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_FIELD on bad type.
+
+Example request
+
+list_custom_tabs({ "type": "FlexiPage" })

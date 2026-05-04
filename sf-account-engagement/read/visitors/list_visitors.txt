@@ -1,0 +1,64 @@
+Tool: list_visitors
+
+Description
+List Visitors (anonymous web visitors not yet identified as a
+prospect). Each Visitor has a `piVID` (cookie value), inferred
+company / location (Visitor Insight when licensed), and the count of
+visits / page views.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visitors?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+prospectId (number, optional) - Filter to visitors stapled to a
+  given prospect.
+companyName (string, optional) - Reverse-IP firmographic match.
+isIdentified (boolean, optional).
+createdAfter (string, optional) - ISO-8601.
+fields (string[], optional, default: id,prospectId,piVID,
+  companyName,companyDomain,city,state,country,latitude,longitude,
+  campaignParameter,mediumParameter,sourceParameter,contentParameter,
+  termParameter,visitCount,pageViewCount,isIdentified,createdAt,
+  updatedAt).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+visitors (array) - Each: { id, prospectId, piVID, companyName,
+  companyDomain, city, state, country, latitude, longitude,
+  campaignParameter, mediumParameter, sourceParameter,
+  contentParameter, termParameter, visitCount, pageViewCount,
+  isIdentified, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_visitors({ "isIdentified": false, "limit": 25 })
+
+Example result
+{
+  "visitors": [
+    { "id": 5512001, "piVID": "abc-12345", "companyName": "Example LLC",
+      "visitCount": 4, "pageViewCount": 18, "isIdentified": false }
+  ]
+}

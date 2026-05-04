@@ -1,0 +1,54 @@
+Tool: manage_queue
+
+Description
+Manage Queues: create, update name, set supported sObjects (`QueueSObject`),
+add/remove members (users + groups), delete.
+
+Salesforce API
+Metadata API (`Queue` type) + REST API for member management, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest        (create / update / delete via Metadata)
+POST /services/data/v66.0/sobjects/GroupMember          (add member)
+DELETE /services/data/v66.0/sobjects/GroupMember/{id}   (remove member)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "addMembers" | "removeMembers" | "addSObjects" | "removeSObjects".
+fullName (string, required for non-create) - Queue DeveloperName.
+name (string, required for create) - Master label.
+developerName (string, optional).
+sObjects (string[], optional) - sObject API names to support (Case, Lead, Project__c, etc.).
+doesSendEmailToMembers (boolean, optional, default false).
+members (object[], optional) - Same shape as `manage_public_group.members`.
+checkOnly (boolean, optional, default false).
+
+Result
+queue (object) - { id, name, developerName, type "Queue", supportedSObjects (string[]), memberCount }.
+sObjectChanges (object) - { added, removed, unchanged }.
+memberChanges (object) - { added, removed, unchanged }.
+
+Required permissions
+- "Customize Application" + "Manage Public List Views" (for supported sObjects).
+
+Idempotency & limits
+- create not idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_TYPE.
+
+Example request
+
+manage_queue({
+  "operation": "create",
+  "fullName": "MTG_Triage",
+  "name": "MTG Triage Queue",
+  "sObjects": ["Case", "Lead"],
+  "members": [{ "type": "Group", "groupName": "MTG_Sales_NA" }]
+})

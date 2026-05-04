@@ -1,0 +1,52 @@
+Tool: create_content_distribution
+
+Description
+Create a public link (`ContentDistribution`) for a file. Optionally
+password-protect, set expiration, allow original file download.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+POST /services/data/v66.0/sobjects/ContentDistribution
+DELETE /services/data/v66.0/sobjects/ContentDistribution/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "ContentVersionId": "...", "Name": "...", "PreferencesAllowOriginalDownload": true, "PreferencesPasswordRequired": false, "ExpiryDate": "2026-12-31T23:59:59Z" }
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+distributionId (string, optional, required for delete).
+contentVersionId (string, optional, required for create) - Or contentDocumentId (tool resolves to latest version).
+contentDocumentId (string, optional).
+name (string, required for create).
+preferencesAllowOriginalDownload (boolean, optional, default true).
+preferencesAllowPDFDownload (boolean, optional, default true).
+preferencesPasswordRequired (boolean, optional, default false).
+preferencesNotifyOnVisit (boolean, optional, default false).
+expiryDate (string, optional) - ISO 8601.
+
+Result
+distribution (object) - { id, name, distributionPublicUrl, expiryDate, passwordRequired, viewCount }.
+
+Required permissions
+- "Create Public Links" on the file.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, ENTITY_IS_DELETED.
+
+Example request
+
+create_content_distribution({
+  "operation": "create",
+  "contentDocumentId": "069Qg0000004ZyAA",
+  "name": "Project Brief Public Link",
+  "expiryDate": "2026-08-31T23:59:59Z"
+})

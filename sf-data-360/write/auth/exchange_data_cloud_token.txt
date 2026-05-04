@@ -1,0 +1,67 @@
+Tool: exchange_data_cloud_token
+
+Description
+Exchange a regular Salesforce Core access token for a Data Cloud-
+scoped token bound to the org's CDP tenant URL. Required before any
+runtime-plane call (Streaming + Bulk Ingestion, Profile API, Query
+API v1/v2, Calculated Insight queries, Data Graph runtime lookups,
+Universal ID lookup, Metadata runtime).
+
+The MCP server caches the resulting token until ~30s before
+`expires_in`; this tool is rarely called directly.
+
+Salesforce API
+Salesforce CDP Auth Exchange.
+
+Endpoint
+POST {core_instance_url}/services/a360/token
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+Body (form-urlencoded)
+grant_type=urn:salesforce:grant-type:external:cdp
+&subject_token=<core_access_token>
+&subject_token_type=urn:ietf:params:oauth:token-type:access_token
+
+Input (parameters)
+coreAccessToken (string, optional) - Override the configured Connected
+  App's cached SFDC access token.
+forceRefresh (boolean, optional, default false) - Skip the cached
+  CDP token and exchange a fresh one.
+
+Result
+accessToken (string) - The Data Cloud-scoped token.
+instanceUrl (string) - The CDP tenant URL (e.g.
+  "https://magnatech.c360a.salesforce.com"). Use as base for runtime
+  calls.
+issuedTokenType (string) - "urn:ietf:params:oauth:token-type:access_token".
+tokenType (string) - "Bearer".
+expiresIn (number) - Token lifetime (typically 7200).
+
+Required scopes
+- `cdp_api` (broad) or specific (`cdp_query_api_read`,
+  `cdp_profile_api_read`, `cdp_ingest_api`, `cdp_segment_api`,
+  `cdp_calculated_insight_api`, `cdp_identityresolution_api`).
+
+Idempotency & limits
+- 100 token exchanges/minute per Connected App; the server caches
+  aggressively.
+
+Errors
+- 400 invalid_grant, 400 unsupported_grant_type, 403 invalid_audience
+  (org doesn't have Data 360 / Data Cloud provisioned).
+
+Example request
+
+exchange_data_cloud_token({})
+
+Example result
+{
+  "accessToken": "00D58000000IFx0!ARkAQE...",
+  "instanceUrl": "https://magnatech.c360a.salesforce.com",
+  "tokenType": "Bearer",
+  "expiresIn": 7200
+}

@@ -1,0 +1,64 @@
+Tool: manage_data_action_target
+
+Description
+Create or delete a Data Action Target. To rotate the signing key,
+use `generate_data_action_target_signing_key`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-action-targets                  (operation="create")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-action-targets/:apiName         (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "WebhookTarget__dat",
+  "label": "Marketing webhook",
+  "targetType": "Webhook",
+  "endpointUrl": "https://hooks.magnatech.com/cdp",
+  "authType": "HMAC_SIGNED",
+  "configuration": {}
+}
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+apiName (string, required).
+label (string, required for create).
+targetType (string, required for create).
+endpointUrl (string, required for create).
+authType (string, optional) - "HMAC_SIGNED" | "OAuth2" |
+  "ApiKey" | "None".
+configuration (object, optional) - Type-specific.
+
+Result
+dataActionTarget (object) - Created row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; Data Actions referencing the target stop firing.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND.
+
+Example request
+
+manage_data_action_target({
+  "operation": "create",
+  "apiName": "WebhookTarget__dat",
+  "label": "Marketing webhook",
+  "targetType": "Webhook",
+  "endpointUrl": "https://hooks.magnatech.com/cdp",
+  "authType": "HMAC_SIGNED"
+})
+
+Example result
+{ "dataActionTarget": { "apiName": "WebhookTarget__dat", "status": "Active" } }

@@ -1,0 +1,75 @@
+Tool: manage_bulk_action
+
+Description
+Create or update a Bulk Action — a one-shot operation that targets
+a filtered set of prospects (set field, add/remove from list, add/
+remove tag, change assignment, delete, undelete). Up to 50,000
+records per job. Async — poll `get_bulk_action` until `status` is
+terminal.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST  https://{pi-domain}/api/v5/bulk-actions          (operation="create")
+PATCH https://{pi-domain}/api/v5/bulk-actions/:id      (operation="update", e.g. cancel)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create AddToList)
+{
+  "object": "Prospect",
+  "bulkAction": "AddToList",
+  "argument": { "listId": 301 },
+  "filter": [ { "field": "score", "operator": "gte", "value": 50 } ]
+}
+
+Body (update - cancel)
+{ "status": "Cancelled" }
+
+Input (parameters)
+operation (string, required) - "create" | "update".
+id (number, required when operation="update").
+object (string, required when create) - "Prospect".
+bulkAction (string, required when create) - "AddTag" | "RemoveTag" |
+  "AddToList" | "RemoveFromList" | "Delete" | "Undelete" |
+  "ChangeAssignment" | "SetField".
+argument (object, required when create) - Action-specific:
+  AddToList / RemoveFromList → { listId }.
+  AddTag / RemoveTag → { tag }.
+  ChangeAssignment → { userId? | groupId? | roleId? }.
+  SetField → { apiFieldId, value }.
+filter (array, required when create) - [{ field, operator, value }].
+status (string, optional, update-only) - "Cancelled".
+
+Result
+bulkAction (object) - Same shape as `read/bulk-actions/get_bulk_action`.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent — each call queues a new job.
+- 50,000 record cap per job; larger sets need multiple bulk actions.
+- 1 in-flight bulk action per BU at a time (others queue).
+
+Errors
+- 20 invalid_input (bad filter), 53 not_permitted (user lacks
+  bulk-action right), 184 daily_limit_reached.
+
+Example request
+
+manage_bulk_action({
+  "operation": "create",
+  "object": "Prospect",
+  "bulkAction": "AddToList",
+  "argument": { "listId": 301 },
+  "filter": [{ "field": "score", "operator": "gte", "value": 50 }]
+})
+
+Example result
+{ "bulkAction": { "id": 88421, "status": "Pending", "count": 12450 } }

@@ -1,0 +1,43 @@
+Tool: list_mobile_subscribers
+
+Description
+List MobileConnect subscribers (`Subscription`) — phone number-based
+SMS subscribers attached to keywords or lists.
+
+Marketing Cloud API
+REST API (`/legacy/v1/beta/mobile/subscription/`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/mobile/subscription
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+mobileNumber (string, optional).
+status (string, optional) - "Active" | "Pending" | "Unsubscribed".
+keywordId (number, optional).
+codeId (number, optional).
+limit (number, optional, default 1000).
+
+Result
+totalCount (number).
+subscribers (array) - { id, mobileNumber, contactKey, codeId, codeShortCode, keywordId, keyword, subscriptionStatus, subscribedDate, unsubscribedDate, optInSource, locale }.
+hasMore (boolean).
+
+Required scopes
+- `mobile_connect_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_mobile_subscribers({ "status": "Active", "codeId": 12345 })

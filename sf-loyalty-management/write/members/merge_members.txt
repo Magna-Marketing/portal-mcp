@@ -1,0 +1,67 @@
+Tool: merge_members
+
+Description
+Merge two Loyalty Program Members into one (e.g. duplicate enrollments
+collapsed into a single record, with combined points and history).
+Wraps the `LoyaltyProgramMemberMerge` flow. The losing member is
+deactivated; their journals, vouchers, badges, and balances are
+re-pointed to the surviving member.
+
+Salesforce API
+Loyalty Connect API + REST (Data), v66.0. Backed by the Apex
+`LoyaltyProgramMember` merge framework.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/members/merge
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "survivingMemberId": "0lMQg00000abcDE2",
+  "losingMemberIds": ["0lMQg00000xyzDE3"],
+  "mergeReason": "Duplicate enrollment",
+  "transferTransactionJournals": true,
+  "transferVouchers": true,
+  "transferBadges": true,
+  "preserveLoyaltyTiers": "Surviving",
+  "consolidatePoints": true
+}
+
+Input (parameters)
+programName (string, required).
+survivingMemberId (string, required).
+losingMemberIds (string[], required, max 5 per call).
+mergeReason (string, optional).
+transferTransactionJournals (boolean, optional, default true).
+transferVouchers (boolean, optional, default true).
+transferBadges (boolean, optional, default true).
+preserveLoyaltyTiers (string, optional, default "Surviving") - "Surviving" | "HighestPerGroup".
+consolidatePoints (boolean, optional, default true).
+mergeId (string, optional) - External idempotency reference for `LoyaltyProgramMemberMerge`.
+
+Result
+mergeRecord (object) - { id, survivingMemberId, losingMemberIds, status ("Completed"|"InProgress"|"Failed"), mergeDate }.
+counts (object) - { transferredJournals, transferredVouchers, transferredBadges, consolidatedPoints }.
+warnings (array, optional).
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Pass a stable `mergeId` to deduplicate on retry.
+- One losing-member can only participate in one merge at a time.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, MERGE_IN_PROGRESS, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+merge_members({
+  "programName": "MTG_Rewards",
+  "survivingMemberId": "0lMQg00000abcDE2",
+  "losingMemberIds": ["0lMQg00000xyzDE3"],
+  "mergeReason": "Duplicate enrollment caught in audit"
+})

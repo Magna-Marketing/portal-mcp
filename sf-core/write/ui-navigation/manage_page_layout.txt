@@ -1,0 +1,51 @@
+Tool: manage_page_layout
+
+Description
+Create / update / delete page layouts and assign them per profile +
+record type.
+
+Salesforce API
+Metadata API (`Layout`, `ProfileLayoutAssignment`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "assign".
+sObject (string, required).
+fullName (string, required) - "Project__c-Project Layout" or just "Project Layout".
+sections (array, optional) - [{ label, columns ("OneColumn"|"TwoColumn"|"CustomLinks"), style, layoutItems: [{ field, behavior ("Edit"|"Required"|"Readonly"), emptySpace }] }].
+relatedLists (array, optional) - [{ relatedList, fields, sortField, sortOrder, customButtons }].
+quickActions (array, optional) - Action names included.
+assignments (array, optional) - For "assign": [{ profileName, recordType, layoutName }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+layout (object) - Updated identity.
+assignments (array, when operation="assign") - Applied assignments.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update / assign idempotent.
+
+Errors
+- INVALID_FIELD on bad layoutItems.
+
+Example request
+
+manage_page_layout({
+  "operation": "assign",
+  "sObject": "Project__c",
+  "fullName": "Project__c-Project_Layout",
+  "assignments": [{ "profileName": "MTG_Project_Manager", "recordType": "Internal_Project", "layoutName": "Project__c-Project_Layout" }]
+})

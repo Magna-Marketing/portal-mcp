@@ -1,0 +1,53 @@
+Tool: delete_contact
+
+Description
+Delete a contact (and optionally all linked Subscriber + DataExtension
+data) via Marketing Cloud's Contact Delete / Compliance API. Used for
+GDPR / CCPA right-to-erasure requests.
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts/actions/delete`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/actions/delete?type=keys
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "values": ["MEM-100023"],
+  "DeleteOperationType": "ContactAndAttributes"
+}
+
+Input (parameters)
+contactKeys (string[], optional).
+contactIds (number[], optional).
+emails (string[], optional).
+  One required.
+operationType (string, optional, default "ContactAndAttributes") - "ContactOnly" | "ContactAndAttributes".
+deleteFromAllChannelAddresses (boolean, optional, default true).
+
+Result
+operationId (string) - Track via `/contacts/v1/contacts/actions/delete/processStatus/{operationId}`.
+status (string) - "Pending" | "Processing" | "Complete".
+counts (object) - { requested, queued, failed }.
+
+Required scopes
+- `audiences_write`.
+
+Idempotency & limits
+- Idempotent on contactKey: deleting an already-deleted contact returns "Complete" with no work.
+- The actual data scrubbing is async and can take minutes to hours
+  depending on the contact's footprint.
+
+Errors
+- 30002 not found, 403 unauthorized (no compliance entitlement).
+
+Example request
+
+delete_contact({
+  "contactKeys": ["MEM-100023"],
+  "operationType": "ContactAndAttributes"
+})

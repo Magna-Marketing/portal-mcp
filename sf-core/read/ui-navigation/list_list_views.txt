@@ -1,0 +1,49 @@
+Tool: list_list_views
+
+Description
+List List Views for an sObject and (optionally) describe one or fetch
+its results. List Views are the saved per-user / per-org filtered
+views ("My Open Cases", "All Open Opportunities").
+
+Salesforce API
+REST API, v66.0. `/sobjects/{sObject}/listviews/...`.
+
+Endpoint
+GET /services/data/v66.0/sobjects/{sObject}/listviews/                                  (list)
+GET /services/data/v66.0/sobjects/{sObject}/listviews/{listViewId}/describe             (describe)
+GET /services/data/v66.0/sobjects/{sObject}/listviews/{listViewId}/results              (results)
+GET /services/data/v66.0/sobjects/{sObject}/listviews/recent                            (recently viewed list views)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required).
+includeRecentOnly (boolean, optional, default false) - Use the `recent` endpoint.
+listViewId (string, optional) - When set, return that list view's describe and (optionally) results.
+includeResults (boolean, optional, default false).
+limit (number, optional, default 50).
+
+Result
+sObject (string).
+listViews (array) - Each: { id, label, developerName, soqlCompatible (boolean), describeUrl, resultsUrl }.
+listView (object, when listViewId provided) - Full describe: columns, query, scope, sortOrder, filterScope, lastModifiedDate.
+results (object, when includeResults=true) - { records: [{ columns: [{ value, label }], id }], size }.
+
+Required permissions
+- "API Enabled" + read on the sObject.
+
+Idempotency & limits
+- Read-only.
+- Some list views are flagged `soqlCompatible: false` (they use SOSL or scoring); cannot fetch via results endpoint.
+
+Errors
+- INVALID_LIST_VIEW_ID.
+
+Example request
+
+list_list_views({ "sObject": "Account", "listViewId": "00BQg0000004ZyAA", "includeResults": true })

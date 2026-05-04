@@ -1,0 +1,64 @@
+Tool: enroll_corporate_member
+
+Description
+Enroll a corporate member (B2B / business Account) into a Loyalty
+Program. Often paired with linked individual members under the
+corporate account.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/corporate-member-enrollments
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "enrollmentDate": "2026-04-30",
+  "membershipNumber": null,
+  "memberStatus": "Active",
+  "associatedAccountDetails": {
+    "id": "0014Q00000abcDE",
+    "additionalAccountValueMap": { "AccountSource": "Partner Referral" }
+  },
+  "linkedIndividualMembers": [
+    { "memberId": "0lMQg00000abcDE2", "linkType": "Manager" }
+  ],
+  "enrollmentChannel": "Sales",
+  "memberAdditionalAttributeValues": null
+}
+
+Input (parameters)
+programName (string, required).
+membershipNumber (string, optional).
+memberStatus (string, optional, default "Active").
+enrollmentDate (string, optional).
+enrollmentChannel (string, optional).
+account (object, required) - { id } OR { name, additionalAccountValueMap }.
+linkedIndividualMembers (array, optional) - [{ memberId, linkType ("Manager"|"Member") }].
+memberAttributes (object, optional).
+
+Result
+member (object) - { id, membershipNumber, programName, memberStatus, enrollmentDate, accountId, linkedMemberIds }.
+isSuccess (boolean).
+errors (array, optional).
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND, DUPLICATE_VALUE.
+
+Example request
+
+enroll_corporate_member({
+  "programName": "MTG_Rewards",
+  "account": { "id": "0014Q00000abcDE" },
+  "linkedIndividualMembers": [{ "memberId": "0lMQg00000abcDE2", "linkType": "Manager" }]
+})

@@ -1,0 +1,52 @@
+Tool: get_ingest_job
+
+Description
+Read a single Bulk Ingestion job by id. Returns the full job
+envelope: state, processed / rejected counts, run timing, and
+(when `state=Failed`) the error reference.
+
+Salesforce API
+Data Cloud Bulk Ingestion API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/ingest/jobs/:jobId
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+jobId (string, required).
+
+Result
+job (object): id, sourceApiName, objectApiName, operation, state,
+  contentType, columnDelimiter, lineEnding, createdById, createdDate,
+  systemModstamp, jobType, recordsProcessed, recordsRejected,
+  apiVersion, errorMessage (string|null), failedRecordsRef
+  (string|null) - URL to a CSV of failures.
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Read-only. Poll on a 5-30s interval until `state` is terminal.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_ingest_job({ "jobId": "JOB_001" })
+
+Example result
+{
+  "job": {
+    "id": "JOB_001", "sourceApiName": "mc_sends",
+    "objectApiName": "Send__c", "operation": "upsert",
+    "state": "JobComplete", "recordsProcessed": 12450,
+    "recordsRejected": 0
+  }
+}

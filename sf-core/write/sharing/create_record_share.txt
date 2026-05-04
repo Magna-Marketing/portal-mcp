@@ -1,0 +1,69 @@
+Tool: create_record_share
+
+Description
+Create a manual share row on a record (`<sObject>Share`). This grants
+explicit access to a user, group, or role for a single record.
+
+Salesforce API
+REST API (Data), v66.0. `POST /sobjects/{sObject}Share`.
+
+Endpoint
+POST /services/data/v66.0/sobjects/{sObject}Share
+POST /services/data/v66.0/composite/sobjects        (bulk)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "ParentId": "0014Q00000abcDE",
+  "UserOrGroupId": "005Qg0000020aBcDE",
+  "AccessLevel": "Edit"
+}
+
+For Account: also AccountAccessLevel, OpportunityAccessLevel,
+CaseAccessLevel, ContactAccessLevel.
+
+Input (parameters)
+sObject (string, required) - sObject API name.
+shares (object[], required) - Each:
+  recordId (string, required).
+  userOrGroupId (string, optional) - Or `username` / `groupName`.
+  username (string, optional).
+  groupName (string, optional).
+  accessLevel (string, required) - "Read" | "Edit".
+  accountAccessLevel (string, optional, AccountShare only).
+  opportunityAccessLevel (string, optional, AccountShare only).
+  caseAccessLevel (string, optional, AccountShare only).
+  contactAccessLevel (string, optional, AccountShare only).
+  rowCause (string, optional, default "Manual") - Custom Apex sharing
+    reasons must be created first via Setup; "Manual" works for any user.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - Per share row: { id, recordId, userOrGroupId, accessLevel, status ("created"|"failed"), error }.
+summary (object) - { created, failed, total }.
+
+Required permissions
+- "Modify All" on the parent sObject **or** be the record owner with FullAccess.
+
+Idempotency & limits
+- Not idempotent — duplicates with the same UserOrGroupId on the same record return DUPLICATE_VALUE.
+- Bulk via composite/sobjects: 200 per call.
+
+Errors
+- DUPLICATE_VALUE.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- INVALID_ACCESS_LEVEL when "Edit" requested for Read-only sObject.
+
+Example request
+
+create_record_share({
+  "sObject": "Account",
+  "shares": [
+    { "recordId": "0014Q00000abcDE", "username": "external.partner@magnatech.com",
+      "accountAccessLevel": "Read", "opportunityAccessLevel": "Read",
+      "caseAccessLevel": "Read", "contactAccessLevel": "Read" }
+  ]
+})

@@ -1,0 +1,44 @@
+Tool: list_unsubscribes
+
+Description
+List `UnsubEvent` rows — opt-outs at the subscriber level (`Master
+Unsubscribe`) or list level (`List Unsubscribe`).
+
+Marketing Cloud API
+SOAP API (`UnsubEvent.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on UnsubEvent.
+
+Input (parameters)
+sinceDays (number, optional, default 7).
+listId (number, optional).
+sendId (number, optional).
+subscriberKey (string, optional).
+isMasterUnsubscribed (boolean, optional).
+limit (number, optional, default 1000).
+
+Result
+totalSize (number).
+unsubscribes (array) - { sendId, subscriberKey, subscriberId, listId, eventDate, isMasterUnsubscribed, isOnePulseList, listClassification, batchId }.
+hasMore (boolean), continueRequestId (string|null).
+
+Required scopes
+- `tracking_events_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_unsubscribes({ "sinceDays": 7, "isMasterUnsubscribed": true })

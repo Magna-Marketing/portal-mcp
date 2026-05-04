@@ -1,0 +1,44 @@
+Tool: get_user
+
+Description
+Get a single Marketing Cloud user with full role + business unit
+assignments.
+
+Marketing Cloud API
+SOAP API (`AccountUser.Retrieve` filtered).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on AccountUser with filter on Id, Username, or Email.
+
+Input (parameters)
+userId (number, optional) - Internal user Id.
+username (string, optional).
+email (string, optional).
+  One required.
+includeBusinessUnits (boolean, optional, default true).
+includeRolePermissions (boolean, optional, default false) - Heavy.
+
+Result
+user (object) - Same as a row from `list_users`, plus:
+  businessUnits (array) - [{ mid, name, isDefault }].
+  rolePermissions (array, when includeRolePermissions=true) - [{ permissionId, name, allowed }].
+
+Required scopes
+- `users_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- USER_NOT_FOUND.
+
+Example request
+
+get_user({ "username": "marketingops@magnatech.com" })

@@ -1,0 +1,45 @@
+Tool: list_recycle_bin
+
+Description
+List records currently in the Recycle Bin (soft-deleted, recoverable
+within 15 days). Filter by sObject and deleted-by user. Use as input
+to `undelete_record` (write tool).
+
+Salesforce API
+REST API (Data), v66.0. SOQL with `IsDeleted = true ALL ROWS` (or `/queryAll`).
+
+Endpoint
+GET /services/data/v66.0/queryAll/?q=SELECT Id, Name, LastModifiedDate, LastModifiedById, LastModifiedBy.Name, IsDeleted FROM {sObject} WHERE IsDeleted = true
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required) - sObject API name to inspect.
+deletedById (string, optional).
+sinceHours (number, optional, default 360 = 15 days).
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+sObject (string).
+totalSize (number).
+deletedRecords (array) - { id, name, lastModifiedDate, lastModifiedById, lastModifiedByName }.
+
+Required permissions
+- "View All Data" + read on the sObject.
+
+Idempotency & limits
+- Read-only.
+- Recycle Bin retention: 15 days (then hard-purged).
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_recycle_bin({ "sObject": "Opportunity", "sinceHours": 24 })

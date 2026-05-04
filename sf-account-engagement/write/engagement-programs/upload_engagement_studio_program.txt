@@ -1,0 +1,71 @@
+Tool: upload_engagement_studio_program
+
+Description
+Create an Engagement Studio program by uploading a YAML structure
+file. The YAML defines the step graph (rules / actions / triggers /
+email sends / branches). Use `download_program_structure` to
+round-trip an existing program, modify it, and re-upload as a new
+program (v5 doesn't expose update on existing programs).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/engagement-studio-programs
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: multipart/form-data
+Accept: application/json
+
+Body (multipart)
+- engagementStudioProgram (string, JSON): metadata
+  { "name": "Onboarding 2026", "description": "...", "recipientListId": 301,
+    "suppressionListIds": [310], "businessHoursId": 1, "scheduleType": "Continuous",
+    "campaignId": 1024, "folderId": 33 }
+- file (file): program-structure.yaml (the step graph)
+
+Input (parameters)
+name (string, required).
+description (string, optional).
+recipientListId (number, required) - The list of prospects entering
+  the program.
+suppressionListIds (number[], optional).
+businessHoursId (number, optional, default the BU's default hours).
+scheduleType (string, optional, default "Continuous") - "Continuous" |
+  "Schedule".
+campaignId (number, optional).
+folderId (number, optional).
+programStructureYaml (string, required) - Inline YAML; MCP server
+  packages it as the multipart `file` part.
+programStructureBase64 (string, optional) - Alternative to inline.
+
+Result
+engagementProgram (object) - Created in `Draft` status. Use the SFDC
+  Pardot UI (or a future v5 `do/publish` endpoint) to publish.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent; each call creates a new program.
+- Up to 300 steps per program.
+
+Errors
+- 600 invalid_program_structure (YAML schema), 53 not_permitted,
+  59 not_found (recipientListId, businessHoursId).
+
+Example request
+
+upload_engagement_studio_program({
+  "name": "Onboarding 2026",
+  "recipientListId": 301,
+  "campaignId": 1024,
+  "programStructureYaml": "schedule: continuous\nsteps:\n  - id: 1\n    type: ActionEmail\n    ..."
+})
+
+Example result
+{
+  "engagementProgram": { "id": 311, "name": "Onboarding 2026", "status": "Draft" }
+}

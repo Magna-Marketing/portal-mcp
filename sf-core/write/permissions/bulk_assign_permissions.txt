@@ -1,0 +1,77 @@
+Tool: bulk_assign_permissions
+
+Description
+Mass-assign permission sets and / or permission set groups to users
+selected by criteria (profile, role, department, custom SOQL). Supports
+batched processing, dry-run preview (delegate to
+`preview_bulk_permission_operation` first), and rollback on failure.
+
+Salesforce API
+REST API (Data), v66.0. The MCP server selects users via SOQL, then
+issues `POST /composite/sobjects` with `PermissionSetAssignment` rows
+in batches of ≤200.
+
+Endpoint
+GET  /services/data/v66.0/query/?q=SELECT Id, Name, Username FROM User WHERE ...
+POST /services/data/v66.0/composite/sobjects
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "allOrNone": false,
+  "records": [ { "attributes": { "type": "PermissionSetAssignment" }, "AssigneeId": "...", "PermissionSetId": "..." }, ... ]
+}
+
+Input (parameters)
+selection (object, required) - User selection criteria (any combination):
+  userIds (string[]).
+  usernames (string[]).
+  profileNames (string[]).
+  roleNames (string[]).
+  department (string).
+  isActiveOnly (boolean, default true).
+  customSoql (string) - WHERE clause appended to a base User query.
+permissionSetNames (string[], optional).
+permissionSetGroupNames (string[], optional).
+expirationDate (string, optional) - ISO 8601.
+dryRun (boolean, optional, default false) - Same response shape but no
+  inserts. (Or use `preview_bulk_permission_operation`.)
+batchSize (number, optional, default 200, max 200).
+allOrNone (boolean, optional, default false) - When true, **rollback
+  the entire run** on any single failure. Off by default for
+  partial-success behavior.
+skipIfAlreadyAssigned (boolean, optional, default true).
+
+Result
+selection (object) - The resolved user selection (count, criteria).
+operationCount (number) - Total assignment rows attempted.
+created (number).
+alreadyAssigned (number).
+failed (number).
+results (array) - Per row: { userId, username, target ("permset:..."|"group:..."), status, assignmentId, error }.
+durationMs (number).
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users".
+- "Manage Profiles and Permission Sets" for permsets containing
+  Standard Object permissions.
+
+Idempotency & limits
+- Idempotent on `(user, permset/group)` with skipIfAlreadyAssigned=true.
+- Composite cap: 200 per call; tool batches.
+- Watch DailyApiRequests; one composite call counts as 1 (not per row).
+
+Errors
+- INSUFFICIENT_PERMSET_LICENSE: stop and surface remaining unprocessed rows.
+- DUPLICATE_VALUE if skip=false and user already assigned.
+
+Example request
+
+bulk_assign_permissions({
+  "selection": { "profileNames": ["Standard User"], "department": "Engineering" },
+  "permissionSetGroupNames": ["MTG_Delivery_Bundle"],
+  "expirationDate": "2026-12-31T23:59:59Z"
+})

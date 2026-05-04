@@ -1,0 +1,65 @@
+Tool: update_member_details
+
+Description
+Update a member's profile fields and (optionally) the linked
+Account/Contact. Wraps the Loyalty Program Process "Update Member
+Details" — guarantees that downstream automation (eligibility
+recalc, segment refresh) fires correctly.
+
+For simple sObject patches, you can also use `salesforce-core`'s
+`dml_records` directly on `LoyaltyProgramMember`, but using this tool
+is preferred so program processes get a chance to react.
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Update Member Details", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Update Member Details",
+  "processParameters": {
+    "MemberId": "0lMQg00000abcDE2",
+    "ProgramName": "MTG_Rewards",
+    "MembershipUpdates": { "MemberStatus": "Active", "MembershipExpirationDate": "2027-04-30" },
+    "ContactUpdates": { "Email": "jane.doe@new.com", "MobilePhone": "+1-555-0123" },
+    "AccountUpdates": null,
+    "AttributeUpdates": { "PreferredCommunication": "Email" }
+  }
+}
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+membershipUpdates (object, optional) - LoyaltyProgramMember field updates.
+contactUpdates (object, optional) - Contact field updates (when associatedContactId is set).
+accountUpdates (object, optional) - Account field updates.
+attributeUpdates (object, optional) - Custom member attribute updates.
+
+Result
+processResult (object) - { isSuccess, errors, processStatus }.
+member (object) - Updated identity row.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, INVALID_FIELD.
+
+Example request
+
+update_member_details({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "membershipUpdates": { "MembershipExpirationDate": "2027-04-30" },
+  "contactUpdates": { "Email": "jane.doe@new.com" }
+})

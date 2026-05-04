@@ -1,0 +1,66 @@
+Tool: list_email_templates
+
+Description
+List Email Templates (the reusable email content used for
+auto-responders, drip campaigns, list emails, and one-to-one sends).
+Filter by `type` (autoresponder vs drip vs list vs one-to-one) or
+folder.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/email-templates?fields={fields}&filter[isDeleted]=eq,false
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+isOneToOneEmail (boolean, optional).
+isAutoResponderEmail (boolean, optional).
+isDripEmail (boolean, optional).
+isListEmail (boolean, optional).
+folderId (number, optional).
+campaignId (number, optional).
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,subject,type,
+  isOneToOneEmail,isAutoResponderEmail,isDripEmail,isListEmail,
+  isDeleted,folderId,campaignId,trackerDomainId,createdAt,updatedAt,
+  createdById,updatedById,senderOptions.address,senderOptions.name,
+  replyToOptions.address,tagReplacementLanguage).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+emailTemplates (array) - Each: { id, name, subject, type,
+  isOneToOneEmail, isAutoResponderEmail, isDripEmail, isListEmail,
+  isDeleted, folderId, campaignId, trackerDomainId, senderOptions,
+  replyToOptions, tagReplacementLanguage, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_email_templates({ "isAutoResponderEmail": true })
+
+Example result
+{
+  "emailTemplates": [
+    { "id": 451, "name": "Welcome", "subject": "Welcome to Magna",
+      "type": "HtmlAndText", "isAutoResponderEmail": true, "campaignId": 1024 }
+  ]
+}

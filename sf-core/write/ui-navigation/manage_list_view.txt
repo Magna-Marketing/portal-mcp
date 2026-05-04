@@ -1,0 +1,58 @@
+Tool: manage_list_view
+
+Description
+Create / update / delete List Views for an sObject. List Views are the
+saved filtered views shown in object tabs.
+
+Salesforce API
+Metadata API (`ListView`) + REST API for owner-level views, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+sObject (string, required).
+fullName (string, required) - "<sObject>.<DeveloperName>", e.g. "Project__c.MyOpenProjects".
+label (string, required for create).
+columns (string[], required for create) - Field API names in display order.
+filterScope (string, optional, default "Everything") - "Everything" | "Mine" | "Queue" | "MyTerritory" | "Team" | "Delegated" | "AllOrders" | "OpenOrders" | "ToBeClosed" | "Pending".
+filters (array, optional) - [{ field, operation, value }].
+booleanFilter (string, optional).
+sortColumn (string, optional).
+sortOrder (string, optional, default "Asc") - "Asc" | "Desc".
+sharedTo (object|null, optional) - { type ("group"|"role"|"roleAndSubordinates"|"queue"|"allInternalUsers"|"allCustomerPortalUsers"|"allPartnerUsers"), name }. Omit for "private to me".
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+listView (object) - { id, fullName, label, sObject, filterScope }.
+
+Required permissions
+- "Manage Public List Views" for shared/public list views; create only for own scope otherwise.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad columns/filters.
+
+Example request
+
+manage_list_view({
+  "operation": "create",
+  "sObject": "Opportunity",
+  "fullName": "Opportunity.OpenThisQuarter",
+  "label": "Open This Quarter",
+  "columns": ["Name", "Account.Name", "StageName", "Amount", "CloseDate"],
+  "filterScope": "Everything",
+  "filters": [{ "field": "Opportunity.IsClosed", "operation": "equals", "value": "false" }],
+  "sharedTo": { "type": "allInternalUsers", "name": "" }
+})

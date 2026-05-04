@@ -1,0 +1,56 @@
+Tool: list_data_space_members
+
+Description
+List the DMOs / Calculated Insights / Activations that belong to a
+Data Space. Membership controls which assets are visible in the
+Data Space.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName/members
+GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName/members/:dataSpaceMemberObjectName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+idOrName (string, required).
+memberObjectName (string, optional) - When supplied, returns a
+  single member (the DMO / CI / Activation api name).
+memberType (string, optional) - "DataModelObject" |
+  "CalculatedInsight" | "Activation" | "Segment" | "DataGraph".
+
+Result
+members (array, when memberObjectName not supplied) - Each:
+  { memberType, apiName, label, addedDate }.
+member (object|null, when memberObjectName supplied).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+list_data_space_members({ "idOrName": "EMEA",
+  "memberType": "DataModelObject" })
+
+Example result
+{
+  "members": [
+    { "memberType": "DataModelObject",
+      "apiName": "UnifiedIndividual__dlm",
+      "label": "Unified Individual",
+      "addedDate": "2026-04-01T08:00:00Z" }
+  ]
+}

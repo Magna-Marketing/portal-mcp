@@ -1,0 +1,53 @@
+Tool: assign_permission_set_license
+
+Description
+Assign a Permission Set License (PSL) to one or more users. Required
+for permsets that gate features behind a license (CRM Analytics, Sales
+Engagement, Pardot, etc.). Mirrors `assign_permission_set` but on
+`PermissionSetLicenseAssign`.
+
+Salesforce API
+REST API (Data), v66.0. `POST /sobjects/PermissionSetLicenseAssign` (single) or `POST /composite/sobjects` (bulk).
+
+Endpoint
+POST /services/data/v66.0/sobjects/PermissionSetLicenseAssign
+POST /services/data/v66.0/composite/sobjects
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "AssigneeId": "...", "PermissionSetLicenseId": "..." }
+
+Input (parameters)
+permissionSetLicenseName (string, optional) - PSL DeveloperName (e.g. "Sales_Console_User").
+permissionSetLicenseId (string, optional).
+  One required.
+userIds (string[], optional).
+usernames (string[], optional).
+  One required.
+allOrNone (boolean, optional, default false).
+skipIfAlreadyAssigned (boolean, optional, default true).
+
+Result
+permissionSetLicense (object) - { id, name, totalLicenses, usedLicenses, availableLicenses }.
+results (array) - { userId, username, status ("created"|"already_assigned"|"failed"), assignmentId, error }.
+summary (object) - { created, alreadyAssigned, failed, total, remainingLicenses }.
+
+Required permissions
+- "Manage Internal Users".
+
+Idempotency & limits
+- Idempotent with `skipIfAlreadyAssigned=true`.
+- License headroom must be sufficient.
+
+Errors
+- LICENSE_LIMIT_EXCEEDED, DUPLICATE_VALUE.
+
+Example request
+
+assign_permission_set_license({
+  "permissionSetLicenseName": "Sales_Console_User",
+  "usernames": ["alice@magnatech.com", "bob@magnatech.com"]
+})

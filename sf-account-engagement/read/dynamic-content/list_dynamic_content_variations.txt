@@ -1,0 +1,56 @@
+Tool: list_dynamic_content_variations
+
+Description
+List the rule-based variations of a Dynamic Content block. Each
+variation defines a comparison (`operator`, `value1`, optional
+`value2`) and the HTML snippet to render when the comparison
+matches the active prospect.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/dynamic-content-variations?filter[dynamicContentId]=eq,:id&fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dynamicContentId (number, required).
+fields (string[], optional, default: id,dynamicContentId,comparison,
+  content,operator,value1,value2).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+variations (array) - Each: { id, dynamicContentId, comparison
+  ("is" | "isNot" | "contains" | "doesNotContain" | "isBetween"),
+  operator (EQUAL | NOT_EQUAL | GREATER_THAN | LESS_THAN | BETWEEN),
+  value1 (string), value2 (string|null), content (string - HTML) }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found (when dynamicContentId is invalid).
+
+Example request
+
+list_dynamic_content_variations({ "dynamicContentId": 41 })
+
+Example result
+{
+  "variations": [
+    { "id": 92, "dynamicContentId": 41, "comparison": "is",
+      "operator": "EQUAL", "value1": "EMEA", "content": "<p>Bonjour!</p>" }
+  ]
+}

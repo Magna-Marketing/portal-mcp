@@ -1,0 +1,64 @@
+Tool: validate_data_transform
+
+Description
+Validate a Data Transform definition (SQL + target schema)
+without persisting it. Useful for "compile-only" checks in CI/CD.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-transforms-validation
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "type": "Batch",
+  "targetObject": "UnifiedIndividual__dlm",
+  "sql": "SELECT Id__c, FirstName__c FROM Contact__dlm"
+}
+
+Input (parameters)
+type (string, optional, default "Batch") - "Batch" | "Streaming".
+targetObject (string, required).
+sql (string, required).
+sourceObjects (string[], optional) - Override server-side detection.
+
+Result
+valid (boolean).
+errors (array) - Each: { code, message, line, column }.
+warnings (array) - Same shape.
+inferredSchema (object) - The output column shape the SQL produces.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only at the persistence layer; idempotent.
+
+Errors
+- 400 INVALID_QUERY (compile error returned in `errors[]`).
+
+Example request
+
+validate_data_transform({
+  "targetObject": "UnifiedIndividual__dlm",
+  "sql": "SELECT Id__c, FirstName__c FROM Contact__dlm"
+})
+
+Example result
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "inferredSchema": {
+    "columns": [
+      { "name": "Id__c", "type": "TEXT" },
+      { "name": "FirstName__c", "type": "TEXT" }
+    ]
+  }
+}

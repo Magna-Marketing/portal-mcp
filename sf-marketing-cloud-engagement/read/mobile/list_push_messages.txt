@@ -1,0 +1,42 @@
+Tool: list_push_messages
+
+Description
+List MobilePush messages (templates + scheduled sends). Each entry
+includes message text, action type, sound, badge, target audience.
+
+Marketing Cloud API
+REST API (`/push/v1/message`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/message
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Draft" | "Scheduled" | "Sending" | "Sent".
+applicationId (string, optional).
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalCount (number).
+messages (array) - { id, messageId, name, description, status, applicationId, applicationName, messageType ("Outbound"|"Silent"|"Geofence"|"InApp"), alert (string), title, badge, sound, customKeys, audience, scheduledTime, sentTime, dateCreated, dateModified }.
+hasMore (boolean).
+
+Required scopes
+- `push_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_push_messages({ "status": "Sent" })

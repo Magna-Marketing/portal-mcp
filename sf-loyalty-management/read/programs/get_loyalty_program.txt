@@ -1,0 +1,51 @@
+Tool: get_loyalty_program
+
+Description
+Get a single LoyaltyProgram with currencies, tier groups, tiers, and
+process inventory. Use to inspect program shape before configuring
+processes or running enrollments.
+
+Salesforce API
+REST API (Data), v66.0. SOQL composites on `LoyaltyProgram`,
+`LoyaltyProgramCurrency`, `LoyaltyTierGroup`, `LoyaltyTier`,
+`LoyaltyProgramProcess`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, Status, ProgramType, StartDate, EndDate, DefaultProgramCurrencyId, PrimaryTierGroupId FROM LoyaltyProgram WHERE Name = '...' OR Id = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, Name, ProgramId, IsPrimary FROM LoyaltyProgramCurrency WHERE ProgramId = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, Name, ProgramId FROM LoyaltyTierGroup WHERE ProgramId = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, Name, LoyaltyTierGroupId, SequenceNumber, MaxValue FROM LoyaltyTier WHERE LoyaltyTierGroup.ProgramId = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, optional).
+programId (string, optional).
+  One required.
+includeProcesses (boolean, optional, default true).
+includeTiers (boolean, optional, default true).
+
+Result
+program (object) - Same shape as a row from `list_loyalty_programs`.
+currencies (array) - { id, name, isPrimary }.
+tierGroups (array) - { id, name }.
+tiers (array, when includeTiers=true) - { id, name, tierGroupId, tierGroupName, sequenceNumber, maxValue, minValue }.
+processes (array, when includeProcesses=true) - { id, name, status, processType }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+get_loyalty_program({ "programName": "MTG_Rewards" })

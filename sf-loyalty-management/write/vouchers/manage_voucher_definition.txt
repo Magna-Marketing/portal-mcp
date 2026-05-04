@@ -1,0 +1,82 @@
+Tool: manage_voucher_definition
+
+Description
+Create / update / activate / deactivate / delete a `VoucherDefinition`
+(the template used to issue vouchers). Defines value, validity rules,
+allowed channels, partner restrictions, and issuance criteria.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `VoucherDefinition`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/VoucherDefinition
+PATCH  /services/data/v66.0/sobjects/VoucherDefinition/{id}
+DELETE /services/data/v66.0/sobjects/VoucherDefinition/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "Name": "Pizza_10off",
+  "ProgramId": "...",
+  "Type": "Discount",
+  "ValueType": "Percent",
+  "DiscountPercent": 10,
+  "ValidityType": "Period",
+  "ValidityDuration": 30,
+  "IsActive": true,
+  "MaxAllowedRedemptions": 1,
+  "PartnerAccountId": null,
+  "IsTransferable": false
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+voucherDefinitionId (string, optional, required for non-create).
+programName (string, optional, required for create).
+programId (string, optional).
+name (string, required for create).
+description (string, optional).
+type (string, optional) - "FixedValue" | "Discount" | "ProductOrService".
+valueType (string, optional) - "Currency" | "Percent" | "Other".
+faceValue (number, optional).
+discountPercent (number, optional).
+validityType (string, optional) - "Period" | "FixedDates".
+validityDuration (number, optional) - Days when validityType="Period".
+validityStartDate (string, optional).
+validityEndDate (string, optional).
+isActive (boolean, optional, default true).
+maxAllowedRedemptions (number, optional, default 1).
+partnerAccountId (string, optional).
+isTransferable (boolean, optional, default false).
+issuanceCriteria (string, optional) - Picklist on VoucherDefinition.
+checkOnly (boolean, optional, default false).
+
+Result
+voucherDefinition (object) - { id, name, programId, type, valueType, faceValue, discountPercent, validityType, isActive }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+- Cannot delete a definition with issued vouchers; deactivate instead.
+
+Errors
+- DUPLICATE_VALUE on (programId, name).
+- DELETE_FAILED with referenceTo.
+
+Example request
+
+manage_voucher_definition({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "Pizza_10off",
+  "type": "Discount",
+  "valueType": "Percent",
+  "discountPercent": 10,
+  "validityType": "Period",
+  "validityDuration": 30
+})

@@ -1,0 +1,50 @@
+Tool: get_member
+
+Description
+Get a single Loyalty Program Member with identity and quick-look fields:
+status, tier per group, points balances per program currency, account /
+contact, membership history, escrow / qualifying / lifetime totals.
+Pair with `get_member_profile` for the Connect-API formatted profile.
+
+Salesforce API
+REST API (Data) + Connect API, v66.0. SOQL composites on
+`LoyaltyProgramMember`, `LoyaltyMemberCurrency`, `LoyaltyMemberTier`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, MembershipNumber, MemberStatus, MembershipType, EnrollmentDate, ProgramId, Program.Name, AccountId, Account.Name, ContactId, Contact.Name, MemberClass, EnrollmentChannel, MembershipExpirationDate, MembershipEndDate, MembershipLastActivityDate FROM LoyaltyProgramMember WHERE Id = '...' OR MembershipNumber = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, LoyaltyProgramMemberId, LoyaltyProgramCurrencyId, LoyaltyProgramCurrency.Name, PointsBalance, EscrowPointsBalance, ExpirablePoints, NonExpirablePoints, QualifyingPointsBalance, LifetimePoints FROM LoyaltyMemberCurrency WHERE LoyaltyProgramMemberId = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, LoyaltyTierId, LoyaltyTier.Name, LoyaltyTier.LoyaltyTierGroupId, LoyaltyTier.LoyaltyTierGroup.Name, EffectiveFromDate, EffectiveToDate, IsActive FROM LoyaltyMemberTier WHERE LoyaltyProgramMemberId = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+memberId (string, optional).
+membershipNumber (string, optional).
+  One required.
+includeBalances (boolean, optional, default true).
+includeTiers (boolean, optional, default true).
+includeRecentJournals (boolean, optional, default false) - Last 25 TransactionJournal rows.
+
+Result
+member (object) - identity row.
+balances (array, when includeBalances=true) - { currencyId, currencyName, pointsBalance, escrowPointsBalance, expirablePoints, nonExpirablePoints, qualifyingPointsBalance, lifetimePoints }.
+tiers (array, when includeTiers=true) - { tierId, tierName, tierGroupId, tierGroupName, effectiveFromDate, effectiveToDate, isActive }.
+recentJournals (array, optional) - Compact recent activity (id, journalDate, journalType, status, points).
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+get_member({ "membershipNumber": "MEM-100023" })

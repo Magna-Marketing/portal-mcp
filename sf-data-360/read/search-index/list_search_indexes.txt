@@ -1,0 +1,53 @@
+Tool: list_search_indexes
+
+Description
+List Semantic Search indexes — vector / hybrid search indexes
+configured over Data 360 DMOs (used for retrieval-augmented
+generation, similarity lookups, Agentforce knowledge retrieval).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/search-index
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Active" | "Indexing" | "Failed" | "Draft".
+sourceDmoApiName (string, optional).
+limit (number, optional, default 100).
+
+Result
+searchIndexes (array) - Each: { id, apiName, label, status,
+  sourceDmoApiName, embeddingModel, vectorDimension,
+  recordCount, lastIndexedDate, createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_search_indexes({ "status": "Active" })
+
+Example result
+{
+  "searchIndexes": [
+    { "apiName": "ProductCatalog__si",
+      "sourceDmoApiName": "Product__dlm",
+      "embeddingModel": "openai.text-embedding-3-small",
+      "vectorDimension": 1536, "recordCount": 12000 }
+  ]
+}

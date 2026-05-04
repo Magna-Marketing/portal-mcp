@@ -1,0 +1,70 @@
+Tool: manage_data_action
+
+Description
+Create a Data Action. The Postman collection only exposes
+`Create` on data actions — to update or delete, use the runtime
+Connect plane via the standard Data 360 metadata APIs.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-actions
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "apiName": "ltv_threshold_alert",
+  "label": "LTV Threshold Alert",
+  "sourceDmo": "UnifiedIndividual__dlm",
+  "eventType": "DmoUpdate",
+  "condition": {
+    "rootGroup": "AND",
+    "conditions": [{ "field": "LifetimeValue__c", "op": "gte", "value": 10000 }]
+  },
+  "targetApiName": "WebhookTarget__dat",
+  "payloadTemplate": "{\"individualId\":\"{{Id__c}}\",\"ltv\":{{LifetimeValue__c}}}"
+}
+
+Input (parameters)
+operation (string, required) - "create" only.
+apiName (string, required).
+label (string, required).
+sourceDmo (string, required).
+eventType (string, required) - "DmoInsert" | "DmoUpdate" |
+  "DmoDelete" | "Calculated".
+condition (object, optional) - Standard criteria graph.
+targetApiName (string, required).
+payloadTemplate (string, required) - Mustache template for the
+  payload.
+
+Result
+dataAction (object) - Created row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `apiName`.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND (target), 400 INVALID_TEMPLATE.
+
+Example request
+
+manage_data_action({
+  "operation": "create",
+  "apiName": "ltv_threshold_alert",
+  "label": "LTV Threshold Alert",
+  "sourceDmo": "UnifiedIndividual__dlm",
+  "eventType": "DmoUpdate",
+  "targetApiName": "WebhookTarget__dat",
+  "payloadTemplate": "{\"id\":\"{{Id__c}}\"}"
+})
+
+Example result
+{ "dataAction": { "id": "0YD580000000001", "apiName": "ltv_threshold_alert", "status": "Active" } }

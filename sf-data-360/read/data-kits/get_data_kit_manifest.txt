@@ -1,0 +1,52 @@
+Tool: get_data_kit_manifest
+
+Description
+Read the manifest of a Data Kit — the full list of components it
+contains, their dependencies, and per-component install status.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/datakit/:dataKitDevName/manifest
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataKitDevName (string, required).
+
+Result
+manifest (object): dataKitDevName, version, components (array<{
+  componentName, componentType ("DataModelObject" | "DataLakeObject" |
+  "CalculatedInsight" | "DataStream" | "Mapping" | "Segment"),
+  isInstalled, dependencies (array<string>), conflictsWith (array)
+}>).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_kit_manifest({ "dataKitDevName": "B2C_Retail_Foundation" })
+
+Example result
+{
+  "manifest": {
+    "dataKitDevName": "B2C_Retail_Foundation", "version": "1.5.0",
+    "components": [
+      { "componentName": "Order__dlm", "componentType": "DataModelObject",
+        "isInstalled": true }
+    ]
+  }
+}

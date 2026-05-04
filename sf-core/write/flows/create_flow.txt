@@ -1,0 +1,84 @@
+Tool: create_flow
+
+Description
+Create a new Flow in Salesforce. Two modes:
+1. **Template**: pass `template` to instantiate from a built-in template
+   (e.g. `record_triggered_before_save`, `screen_form`,
+   `autolaunched`). The MCP server fills in the boilerplate XML.
+2. **Custom XML**: pass `xml` for full control over the Flow body.
+
+Either way, the new Flow is saved as **draft** (status `Draft`). Use
+`deploy_flow` with `action: "activate"` to turn on a version.
+
+Salesforce API
+Metadata API (`Flow` type), v66.0. Deploy via `metadata/deployRequest`.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (template example)
+{
+  "fullName": "Account_Trigger_Flow",
+  "label": "Account Trigger Flow",
+  "description": "Sets default region on Account create",
+  "processType": "AutoLaunchedFlow",
+  "apiVersion": 62.0,
+  "template": "record_triggered_before_save",
+  "templateOptions": {
+    "objectType": "Account",
+    "recordTriggerType": "Create"
+  }
+}
+
+Input (parameters)
+fullName (string, required) - Flow API name (DeveloperName).
+label (string, required) - Master label.
+description (string, optional).
+processType (string, required) - "Flow" | "AutoLaunchedFlow" |
+  "RecordTrigger" | "ScreenFlow" | "Workflow" | "InvocableProcess" |
+  "PlatformEvent" | "ApprovalProcess".
+apiVersion (number, optional, default 62.0).
+template (string, optional) - One of "record_triggered_before_save",
+  "record_triggered_after_save", "autolaunched", "screen_form",
+  "screen_lookup", "scheduled". Mutually exclusive with `xml`.
+templateOptions (object, optional) - Per-template variables
+  (objectType, recordTriggerType, scheduleStart, etc.).
+xml (string, optional) - Full <Flow> XML body. Mutually exclusive with
+  `template`.
+runInMode (string, optional, default "DefaultMode") - "DefaultMode" |
+  "SystemModeWithoutSharing".
+checkOnly (boolean, optional, default false).
+activateAfterDeploy (boolean, optional, default false) - When true, the
+  tool runs `deploy_flow` with `activate` after successful create.
+
+Result
+Same shape as `manage_object`'s deploy result: deployId, status, done,
+componentSuccesses, componentFailures.
+flow (object, on success) - { id, definitionId, fullName, label,
+  processType, status, latestVersionNumber }.
+
+Required permissions
+- "Manage Flow" + "Customize Application".
+
+Idempotency & limits
+- `create_flow` will fail if `fullName` already exists; use `update_flow`.
+- Each save bumps the version number; max 50 versions per Flow.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME on existing flow.
+- INVALID_FLOW_DEFINITION on bad XML.
+
+Example request (autolaunched, before-save trigger on Account)
+
+create_flow({
+  "fullName": "Account_Trigger_Flow",
+  "label": "Account Trigger Flow",
+  "processType": "AutoLaunchedFlow",
+  "apiVersion": 62.0,
+  "template": "record_triggered_before_save",
+  "templateOptions": { "objectType": "Account", "recordTriggerType": "Create" }
+})

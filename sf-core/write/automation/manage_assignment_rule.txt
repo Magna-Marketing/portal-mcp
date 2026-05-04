@@ -1,0 +1,51 @@
+Tool: manage_assignment_rule
+
+Description
+Manage Lead and Case assignment rules and their entries (criteria,
+target user/queue, email template, notify checkbox).
+
+Salesforce API
+Metadata API (`AssignmentRules`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete" | "addEntry" | "removeEntry".
+sObject (string, required) - "Lead" | "Case".
+fullName (string, required for non-create) - Rule fullName.
+label (string, required for create).
+active (boolean, optional, default false) - Only one active rule per object.
+ruleEntries (array, optional) - [{ sortOrder, criteriaItems, formula, booleanFilter, assignedTo, assignedToType, emailTemplate, notifyCcRecipients, overrideExistingTeams }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+rule (object) - Updated identity + ruleEntries summary.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on bad criteria.
+
+Example request
+
+manage_assignment_rule({
+  "operation": "create",
+  "sObject": "Case",
+  "fullName": "MTG_Tier1_Routing",
+  "label": "Tier 1 Routing",
+  "active": true,
+  "ruleEntries": [{ "sortOrder": 1, "criteriaItems": [{ "field": "Case.Priority", "operation": "equals", "value": "High" }], "assignedTo": "MTG_Tier1_Queue", "assignedToType": "Queue" }]
+})

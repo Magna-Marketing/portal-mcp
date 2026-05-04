@@ -1,0 +1,61 @@
+Tool: assign_permission_set_group
+
+Description
+Assign a permission set group to users. Mirrors `assign_permission_set`
+but writes `PermissionSetAssignment.PermissionSetGroupId` instead of
+`PermissionSetId`. Supports optional expiration date.
+
+Salesforce API
+REST API (Data), v66.0. `PermissionSetAssignment` sObject.
+
+Endpoint
+POST /services/data/v66.0/composite/sobjects     (bulk ≤200)
+POST /services/data/v66.0/sobjects/PermissionSetAssignment
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "allOrNone": false,
+  "records": [
+    { "attributes": { "type": "PermissionSetAssignment" }, "AssigneeId": "005Qg0000020aBcDE", "PermissionSetGroupId": "0PGQg00000004abAB" }
+  ]
+}
+
+Input (parameters)
+groupName (string, optional) - PSG DeveloperName.
+groupId (string, optional) - PSG Id.
+  One required.
+userIds (string[], optional).
+usernames (string[], optional).
+  One required.
+expirationDate (string, optional).
+allOrNone (boolean, optional, default false).
+skipIfAlreadyAssigned (boolean, optional, default true).
+
+Result
+group (object) - { id, developerName, label, status }.
+results (array) - { userId, username, status, assignmentId, error }.
+summary (object) - { created, alreadyAssigned, failed, total }.
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users".
+
+Idempotency & limits
+- Idempotent with `skipIfAlreadyAssigned=true`.
+- PSG must be in `Status="Updated"`. The tool surfaces a warning when
+  PSG is `Outdated`/`Updating` (assignment still works but new permset
+  membership might not have propagated).
+
+Errors
+- DUPLICATE_VALUE on existing assignment when skip=false.
+- INSUFFICIENT_PERMSET_LICENSE.
+
+Example request
+
+assign_permission_set_group({
+  "groupName": "MTG_Delivery_Bundle",
+  "usernames": ["jane.doe@magnatech.com"]
+})

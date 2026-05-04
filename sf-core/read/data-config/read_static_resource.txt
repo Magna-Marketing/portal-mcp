@@ -1,0 +1,53 @@
+Tool: read_static_resource
+
+Description
+Download a static resource's bytes (or a single file path inside a zip
+resource). Returns base64 by default; for known text content types the
+tool returns plain text.
+
+Salesforce API
+REST + Tooling, v66.0. `GET /tooling/sobjects/StaticResource/{id}/Body` or
+`/sobjects/StaticResource/{id}/Body`. For files inside a zip resource:
+`/sobjects/StaticResource/{id}/Body/<path>`.
+
+Endpoint
+GET /services/data/v66.0/sobjects/StaticResource/{id}/Body
+GET /services/data/v66.0/sobjects/StaticResource/{id}/Body/{filePath}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json or content type
+
+Body
+None.
+
+Input (parameters)
+name (string, optional) - Resource name (lookup by name).
+id (string, optional) - StaticResource Id.
+  One required.
+filePath (string, optional) - For zip resources, path to a single file inside.
+asBase64 (boolean, optional, default false) - When true, always return base64 (binary safety).
+
+Result
+resource (object) - { id, name, contentType, bodyLength, cacheControl }.
+content (object):
+  isText (boolean).
+  text (string|null) - Decoded text when not base64.
+  base64 (string|null) - Base64 bytes.
+  byteLength (number).
+filePath (string|null) - Echoed when set.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only.
+- Resource body limited to 5 MB.
+
+Errors
+- NOT_FOUND on name/id.
+- INVALID_REQUEST when filePath specified but resource isn't a zip.
+
+Example request
+
+read_static_resource({ "name": "MTG_BrandLogo" })

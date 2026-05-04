@@ -1,0 +1,71 @@
+Tool: composite_request
+
+Description
+Bundle up to 25 sub-requests into a single round trip. Each sub-request
+can reference the response of an earlier one via `@{refId.fieldPath}`.
+Useful for transactional create-record-then-create-related-record
+flows without N round trips.
+
+Salesforce API
+Composite REST API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/composite/                       (composite, supports response references)
+POST /services/data/v66.0/composite/batch                  (composite batch — independent sub-requests)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "allOrNone": true,
+  "compositeRequest": [
+    { "method": "POST", "url": "/services/data/v66.0/sobjects/Account", "referenceId": "newAccount", "body": { "Name": "ACME" } },
+    { "method": "POST", "url": "/services/data/v66.0/sobjects/Contact", "referenceId": "newContact", "body": { "LastName": "Doe", "AccountId": "@{newAccount.id}" } }
+  ]
+}
+
+Input (parameters)
+mode (string, optional, default "composite") - "composite" | "batch".
+allOrNone (boolean, optional, default false) - composite only.
+collateSubrequests (boolean, optional, default false) - composite only.
+subrequests (object[], required) - Each:
+  method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
+  url (string, required) - Path under /services/data/v{version}/...
+  referenceId (string, required for composite).
+  body (object, optional) - JSON body for POST/PATCH/PUT.
+  httpHeaders (object, optional).
+
+Result
+results (array) - Each: { referenceId, statusCode, body, httpHeaders, success }.
+overallSuccess (boolean) - true iff all sub-requests succeeded (or allOrNone=true with rollback).
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Up to 25 sub-requests; up to 5 cross-tool calls in `batch` mode.
+- Each sub-request counts as a separate API request unless
+  `collateSubrequests=true`.
+
+Errors
+- COMPOSITE_GRAPH_VALIDATION_FAILED on bad references.
+- Sub-request errors returned in `results[].body`.
+
+Example request
+
+composite_request({
+  "allOrNone": true,
+  "subrequests": [
+    { "method": "POST", "referenceId": "acc",
+      "url": "/services/data/v66.0/sobjects/Account",
+      "body": { "Name": "ACME", "Industry": "Tech" } },
+    { "method": "POST", "referenceId": "con",
+      "url": "/services/data/v66.0/sobjects/Contact",
+      "body": { "LastName": "Doe", "AccountId": "@{acc.id}", "Email": "doe@acme.com" } },
+    { "method": "POST", "referenceId": "opp",
+      "url": "/services/data/v66.0/sobjects/Opportunity",
+      "body": { "Name": "ACME Phase 1", "AccountId": "@{acc.id}", "StageName": "Prospecting", "CloseDate": "2026-12-31" } }
+  ]
+})

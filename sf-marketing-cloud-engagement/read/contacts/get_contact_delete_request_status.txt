@@ -1,0 +1,43 @@
+Tool: get_contact_delete_request_status
+
+Description
+Check the status of contact-delete requests issued via `delete_contact`.
+Two views: per-request details (analytics view) and overall summary
+(`/summary`).
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts/analytics/deleterequests`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/analytics/deleterequests
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/analytics/deleterequests/summary
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+mode (string, optional, default "details") - "details" | "summary".
+operationId (string, optional, only details) - Filter to one delete request operation.
+sinceDays (number, optional, default 30).
+limit (number, optional, default 100).
+
+Result
+For details: { totalCount, requests (array): [{ operationId, status ("Pending"|"InProgress"|"Complete"|"Failed"), startedAt, completedAt, requestedCount, queuedCount, processedCount, failedCount, requestedBy }] }.
+For summary: { activeRequests, completedToday, totalProcessedLast30Days, totalFailedLast30Days, oldestPendingRequestAge }.
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 403 unauthorized (no compliance entitlement).
+
+Example request
+
+get_contact_delete_request_status({ "mode": "summary" })

@@ -1,0 +1,61 @@
+Tool: publish_custom_notification
+
+Description
+Publish a Custom Notification to specified users / groups / queues. The
+notification appears in the bell icon (in-app) and on mobile (when
+enabled).
+
+Salesforce API
+REST API (Standard Invocable), v66.0. `actions/standard/customNotificationAction`.
+
+Endpoint
+POST /services/data/v66.0/actions/standard/customNotificationAction
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "inputs": [{
+    "customNotifTypeId": "0ML4Q00000abcDE",
+    "recipientIds": ["005Qg0000020aBcDE"],
+    "title": "Project status change",
+    "body": "MTG project flipped to Red",
+    "targetId": "a01Qg0000020aBcDE",
+    "targetPageRef": null
+  }]
+}
+
+Input (parameters)
+notificationTypeName (string, optional) - DeveloperName. Or notificationTypeId.
+notificationTypeId (string, optional).
+  One required.
+title (string, required).
+body (string, required).
+recipientIds (string[], optional) - Users, public groups, queues, role+sub IDs.
+targetId (string, optional) - Record Id the notification opens to when clicked.
+targetPageRef (object, optional) - Lightning navigation pageReference.
+sendOnlyToInternalUsers (boolean, optional, default false).
+
+Result
+result (object) - { success, errors, notificationsSent (number) }.
+
+Required permissions
+- "Send Custom Notifications".
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- CUSTOM_NOTIFICATION_TYPE_NOT_FOUND.
+
+Example request
+
+publish_custom_notification({
+  "notificationTypeName": "MTG_Project_Update",
+  "title": "Project went Red",
+  "body": "MTG | Phase 2 — owner: Jane Doe",
+  "recipientIds": ["005Qg0000020aBcDE", "005Qg0000020aBcEE"],
+  "targetId": "a01Qg0000020aBcDE"
+})

@@ -1,0 +1,65 @@
+Tool: issue_voucher
+
+Description
+Issue a voucher to a member from a `VoucherDefinition`. Wraps the
+Loyalty Connect API endpoint and (for batches) the Loyalty Program
+Process "Issue a Voucher".
+
+Salesforce API
+Loyalty Connect API + Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/voucher-definitions/{voucherDefinitionId}/issue-vouchers
+or
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Issue a Voucher", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "memberIds": ["0lMQg00000abcDE2"],
+  "effectiveDate": "2026-04-30",
+  "expirationDate": "2026-05-30",
+  "externalTransactionId": "ISSUE-2026-04-001",
+  "additionalAttributes": { "Channel": "Web" }
+}
+
+Input (parameters)
+programName (string, required).
+voucherDefinitionId (string, optional) - Or voucherDefinitionName.
+voucherDefinitionName (string, optional).
+memberIds (string[], optional) - Issue to one or many members.
+membershipNumbers (string[], optional).
+effectiveDate (string, optional, default today).
+expirationDate (string, optional, computed from definition validity).
+externalTransactionId (string, optional, recommended for idempotency).
+additionalAttributes (object, optional).
+quantityPerMember (number, optional, default 1) - When > 1, issues multiple identical vouchers.
+
+Result
+results (array) - Per member: { memberId, voucherId, voucherCode, status ("Issued"|"failed"), expirationDate, error }.
+summary (object) - { issued, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent when `externalTransactionId` is set per member.
+- VoucherDefinition `MaxAllowedRedemptions` and `MaxIssuanceCount`
+  caps are enforced.
+
+Errors
+- VOUCHER_DEFINITION_INACTIVE, VOUCHER_DEFINITION_LIMIT_EXCEEDED,
+  LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+issue_voucher({
+  "programName": "MTG_Rewards",
+  "voucherDefinitionName": "Pizza_10off",
+  "memberIds": ["0lMQg00000abcDE2"],
+  "externalTransactionId": "ISSUE-2026-04-001"
+})

@@ -1,0 +1,96 @@
+Tool: execute_transaction_journal
+
+Description
+Submit a Transaction Journal that the loyalty engine will process
+synchronously: applies eligible accrual / redemption / promotion rules,
+creates ledger rows, updates the member's points and tier-qualifying
+totals. The most general-purpose write — many other tools (`credit_points`,
+`debit_points`, `redeem_voucher` paths) end up creating Transaction
+Journals under the hood.
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty/programs/{programName}/transactions/transaction-journals
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "isSimulation": false,
+  "journals": [{
+    "memberId": "0lMQg00000abcDE2",
+    "membershipNumber": null,
+    "journalTypeName": "Accrual",
+    "journalSubTypeName": "Purchase",
+    "journalDate": "2026-04-30T00:00:00.000Z",
+    "transactionAmount": 99.50,
+    "currencyIsoCode": "USD",
+    "channelName": "Web",
+    "eventType": "Purchase",
+    "externalTransactionNumber": "ORD-1234",
+    "productLineItems": [
+      { "productId": "01tQg00000abcDE", "quantity": 1, "unitPrice": 99.50 }
+    ],
+    "additionalAttributes": { "StoreId": "NYC-01" }
+  }]
+}
+
+Input (parameters)
+programName (string, required).
+journals (object[], required, max 200) - Each:
+  memberId (string, optional) - Or membershipNumber.
+  membershipNumber (string, optional).
+  journalTypeName (string, required) - "Accrual" | "Redemption" | "Adjustment" | "Manual" | "Burn" | "Cancel".
+  journalSubTypeName (string, optional).
+  journalDate (string, optional, default now) - ISO timestamp.
+  activityDate (string, optional).
+  transactionAmount (number, optional).
+  currencyIsoCode (string, optional).
+  channelName (string, optional).
+  eventType (string, optional).
+  externalTransactionNumber (string, optional) - Recommended: stable Id for idempotent retries.
+  productLineItems (array, optional) - [{ productId, quantity, unitPrice, productCategory }].
+  additionalAttributes (object, optional) - Custom-field map applied to TransactionJournal.
+
+Result
+results (array) - Per journal:
+  isSuccess (boolean).
+  journalId (string|null).
+  pointsCredited (number, optional).
+  pointsDebited (number, optional).
+  programCurrencyName (string|null).
+  appliedPromotions (array, optional) - [{ promotionId, promotionName, points, voucherIssued }].
+  errors (array, optional).
+processedAt (string).
+
+Required permissions
+- `Loyalty Management Admin` permission set + program write access.
+
+Idempotency & limits
+- Pass `externalTransactionNumber` for idempotency: a duplicate
+  external Id is rejected with `DUPLICATE_VALUE`.
+- Up to 200 journals per call.
+- Synchronous execution; long-running rule chains are governed by
+  Apex CPU + heap.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, INVALID_JOURNAL_TYPE,
+  LOYALTY_INSUFFICIENT_POINTS (on Redemption), DUPLICATE_VALUE.
+
+Example request
+
+execute_transaction_journal({
+  "programName": "MTG_Rewards",
+  "journals": [{
+    "memberId": "0lMQg00000abcDE2",
+    "journalTypeName": "Accrual",
+    "journalSubTypeName": "Purchase",
+    "transactionAmount": 99.50,
+    "currencyIsoCode": "USD",
+    "externalTransactionNumber": "ORD-1234"
+  }]
+})

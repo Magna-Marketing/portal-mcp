@@ -1,0 +1,51 @@
+Tool: list_activation_external_platforms
+
+Description
+List the external platforms registered to receive activations
+(e.g. an MCE BU, a Snowflake share account, an AppExchange
+connector). External Platforms are the abstraction over Activation
+Targets — a single platform can host multiple targets.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/activation-external-platforms
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+platformType (string, optional).
+status (string, optional) - "Active" | "Paused" | "Failed".
+
+Result
+externalPlatforms (array) - Each: { id, name, label, platformType,
+  status, configuration (object), createdDate, lastModifiedDate,
+  targetCount }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_activation_external_platforms({})
+
+Example result
+{
+  "externalPlatforms": [
+    { "id": "0YP580000000001", "name": "MTG_MCE_Default",
+      "platformType": "MarketingCloudEngagement",
+      "status": "Active", "targetCount": 4 }
+  ]
+}

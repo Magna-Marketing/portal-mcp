@@ -1,0 +1,72 @@
+Tool: get_page_assignments
+
+Description
+Show where a Lightning Page is currently activated: which apps, which
+profiles, which record types, and the form factor (Desktop / Phone). Use
+to understand the impact of changing the page (or to find why a profile
+sees a stale layout).
+
+Salesforce API
+Tooling API + Metadata API, v66.0. Combines:
+- `FlexiPage` to find the page.
+- `AppMenuItem` / `CustomApplication` for app assignments.
+- `Profile.flexiPageAssignments` (Metadata API readMetadata).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId FROM FlexiPage WHERE DeveloperName = '{name}'
+POST /services/Soap/m/66.0      (Metadata readMetadata over Profile.flexiPageAssignments and CustomApplication.tabs)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - FlexiPage DeveloperName.
+includeProfileLevel (boolean, optional, default true).
+includeAppLevel (boolean, optional, default true).
+
+Result
+flexiPage (object) - { id, name, label, type, sObject (when RecordPage) }.
+appAssignments (array, when includeAppLevel=true) - Each:
+  appName (string) - CustomApplication DeveloperName.
+  appLabel (string).
+  formFactor (string) - "Large" | "Small".
+  isOrgDefault (boolean).
+profileAssignments (array, when includeProfileLevel=true) - Each:
+  profileName (string).
+  recordType (string|null) - For RecordPage with record-type-specific
+    assignment.
+  formFactor (string).
+  isProfileDefault (boolean).
+isOrgDefault (boolean) - Whether this page is the org-wide default for
+  its sObject + form factor.
+
+Required permissions
+- "Customize Application", "View All Setup".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+get_page_assignments({ "name": "Project__c_Record_Page" })
+
+Example result
+
+{
+  "flexiPage": { "id": "0M04Q00000aBcDef", "name": "Project__c_Record_Page", "label": "Project Record Page", "type": "RecordPage", "sObject": "Project__c" },
+  "isOrgDefault": true,
+  "appAssignments": [
+    { "appName": "Sales",      "appLabel": "Sales",   "formFactor": "Large", "isOrgDefault": false },
+    { "appName": "MTG_Console","appLabel": "MTG Console","formFactor": "Large", "isOrgDefault": true }
+  ],
+  "profileAssignments": [
+    { "profileName": "MTG Project Manager", "recordType": "Internal_Project", "formFactor": "Large", "isProfileDefault": true }
+  ]
+}

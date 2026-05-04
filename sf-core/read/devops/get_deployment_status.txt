@@ -1,0 +1,49 @@
+Tool: get_deployment_status
+
+Description
+Get a single deployment's full status, including per-component success
+and failure rows, run tests result, and code coverage warnings. Used by
+CI / CD pipelines after `deploy_metadata` to wait for completion.
+
+Salesforce API
+Metadata API + Tooling, v66.0.
+
+Endpoint
+GET /services/data/v66.0/metadata/deployRequest/{deployId}?includeDetails=true
+GET /services/data/v66.0/tooling/sobjects/DeployRequest/{deployId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+deployId (string, required).
+includeComponentSuccesses (boolean, optional, default true).
+includeComponentFailures (boolean, optional, default true).
+includeTests (boolean, optional, default true).
+
+Result
+deployment (object):
+  id, status, done (boolean), checkOnly, rollbackOnError, ignoreWarnings, runTestsEnabled, testLevel,
+  numberComponentsTotal, numberComponentsDeployed, numberComponentErrors,
+  numberTestsTotal, numberTestsCompleted, numberTestErrors,
+  startDate, completedDate, elapsedMs, createdBy, errorStatusCode, errorMessage.
+componentSuccesses (array, optional) - { componentType, fileName, fullName, success, created, deleted, changed }.
+componentFailures (array, optional) - { componentType, fileName, fullName, problemType, problem, lineNumber, columnNumber }.
+runTestsResult (object, optional) - { numTestsRun, numFailures, totalTime, failures: [{ name, methodName, message, stackTrace }], successes: [{ name, methodName, time }], codeCoverageWarnings: [{ name, message }] }.
+
+Required permissions
+- "Modify Metadata Through Metadata API Functions".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+get_deployment_status({ "deployId": "0Af4Q00000abcDE", "includeTests": true })

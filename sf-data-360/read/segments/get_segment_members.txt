@@ -1,0 +1,55 @@
+Tool: get_segment_members
+
+Description
+List the materialized members of a published Segment — page-by-
+page. Use the runtime Query API for ad-hoc joins or projections;
+this endpoint is the canonical "members of segment X" lookup.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName/members
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+segmentApiName (string, required).
+fields (string[], optional) - Subset of profile fields to return
+  per member.
+limit (number, optional, default 100, max 1000).
+offset (number, optional).
+
+Result
+members (array<object>) - Each: profile-record-shape (the segment's
+  source DMO fields).
+totalSize (number) - The segment's published `populationCount`.
+nextPageUrl (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only. Subject to the segment's `publishStatus=Published`
+  state — `Stale` or `NotPublished` returns `409 NOT_PUBLISHED`.
+
+Errors
+- 404 NOT_FOUND, 409 NOT_PUBLISHED.
+
+Example request
+
+get_segment_members({ "segmentApiName": "EMEAHighValue",
+  "fields": ["Id__c","FirstName__c","EmailAddress__c"], "limit": 5 })
+
+Example result
+{
+  "members": [
+    { "Id__c": "IND_001", "FirstName__c": "Jane", "EmailAddress__c": "jane@example.com" }
+  ],
+  "totalSize": 18420
+}

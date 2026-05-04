@@ -1,0 +1,120 @@
+Tool: search_all
+
+Description
+Free-text search across multiple sObjects using SOSL. Use when the user
+gives a name or fragment and you don't know which object holds it (e.g.
+"find anything mentioning ACME"), or to search big text/long-text fields
+which SOQL cannot index. SOSL searches the search index, not raw fields,
+so it is eventually consistent (a few seconds behind writes).
+
+Use `query_records` instead when you already know the object and want
+deterministic SOQL semantics. Use `search_objects` to discover sObjects
+by metadata (not data).
+
+Salesforce API
+REST API (Data), v66.0. SOSL via `GET /search` or `GET /parameterizedSearch`.
+
+Endpoint
+GET https://{instance}.my.salesforce.com/services/data/v66.0/search/?q={SOSL}
+GET https://{instance}.my.salesforce.com/services/data/v66.0/parameterizedSearch/?q=...   (alternative form when only `q` is needed)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+term (string, required) - Search term. Supports SOSL operators:
+  AND, OR, AND NOT, "", *, ?, ( ). Min 2 chars (1 char rejected).
+  Examples: "ACME", "ACME AND 2026", "smith*".
+in (string, optional, default "ALL FIELDS") - SOSL search group:
+  ALL FIELDS | NAME FIELDS | EMAIL FIELDS | PHONE FIELDS | SIDEBAR FIELDS.
+returning (array, required) - One entry per object to return. Each entry:
+  sObject (string, required) - sObject API name (e.g. "Account").
+  fields (string[], optional) - Fields to return per record (defaults to Id).
+  where (string, optional) - WHERE clause without the keyword.
+  orderBy (string, optional) - ORDER BY clause without the keyword.
+  limit (number, optional, max 200 per object) - Per-object cap.
+limit (number, optional, max 2000) - Global cap on all returned records.
+includeDeleted (boolean, optional, default false) - Include records in
+  the Recycle Bin.
+
+Result
+searchRecords (array) - Flat list of records (when using parameterizedSearch).
+  When using /search/, the response is shape:
+  {
+    "searchRecords": [
+      { "attributes": { "type": "Account", "url": "..." }, "Id": "001..." }
+    ]
+  }
+  or grouped by sObject (depending on RETURNING clause):
+  {
+    "results": [
+      { "sObject": "Account", "records": [...] },
+      { "sObject": "Contact", "records": [...] }
+    ]
+  }
+  Each record carries attributes.type and the requested fields.
+
+Required permissions
+- API Enabled.
+- Object read on each RETURNING sObject; FLS on each field.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Search index is asynchronously updated; recently saved records may not
+  appear for several seconds.
+- 2,000 records per query, 200 per RETURNING object.
+- Term must be ≥2 alphanumeric chars (single-char terms rejected).
+
+Errors
+- MALFORMED_SEARCH: SOSL syntax error or unsupported clause.
+- INVALID_FIELD / INVALID_TYPE: field or sObject not visible.
+- SEARCH_TOO_BROAD: term matches more than the engine returns.
+
+Example request
+
+search_all({
+  "term": "MITER",
+  "in": "ALL FIELDS",
+  "returning": [
+    { "sObject": "Account", "fields": ["Id", "Name", "Industry"] },
+    { "sObject": "Opportunity", "fields": ["Id", "Name", "StageName", "Amount"], "where": "IsClosed = false" }
+  ],
+  "limit": 100
+})
+
+Constructed SOSL:
+FIND {MITER} IN ALL FIELDS RETURNING Account(Id, Name, Industry), Opportunity(Id, Name, StageName, Amount WHERE IsClosed = false) LIMIT 100
+
+Example result
+
+{
+  "results": [
+    {
+      "sObject": "Account",
+      "records": [
+        {
+          "attributes": { "type": "Account", "url": "/services/data/v66.0/sobjects/Account/0011U00001abcDEFAB" },
+          "Id": "0011U00001abcDEFAB",
+          "Name": "MITER",
+          "Industry": "Technology"
+        }
+      ]
+    },
+    {
+      "sObject": "Opportunity",
+      "records": [
+        {
+          "attributes": { "type": "Opportunity", "url": "/services/data/v66.0/sobjects/Opportunity/006Qg00000Dkc4RIAR" },
+          "Id": "006Qg00000Dkc4RIAR",
+          "Name": "MITER | Phase 2",
+          "StageName": "Negotiation",
+          "Amount": 250000
+        }
+      ]
+    }
+  ]
+}

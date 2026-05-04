@@ -1,0 +1,52 @@
+Tool: reorder_form_fields
+
+Description
+Re-order the fields on a Form. Pass the full sequence of `formField`
+ids in the desired order; the server applies sortOrder=0..N-1.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/forms/:id/do/reorderFormFields
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "formFieldIds": [51, 52, 53, 54] }
+
+Input (parameters)
+id (number, required) - Form id.
+formFieldIds (number[], required) - Complete ordered list of the
+  form's field ids.
+
+Result
+form (object) - Refreshed form.
+formFields (array) - Refreshed field rows in new order.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent if the same order is supplied repeatedly.
+
+Errors
+- 20 invalid_input (missing field ids), 59 not_found.
+
+Example request
+
+reorder_form_fields({ "id": 4421, "formFieldIds": [51, 53, 52] })
+
+Example result
+{
+  "form": { "id": 4421 },
+  "formFields": [
+    { "id": 51, "sortOrder": 0 },
+    { "id": 53, "sortOrder": 1 },
+    { "id": 52, "sortOrder": 2 }
+  ]
+}

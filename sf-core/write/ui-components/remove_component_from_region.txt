@@ -1,0 +1,47 @@
+Tool: remove_component_from_region
+
+Description
+Remove a component instance from a FlexiPage region by its identifier.
+The component is excised from the metadata in a single deploy. Other
+components in the region are untouched.
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+flexiPageName (string, required).
+region (string, required) - Region API name.
+identifier (string, required) - Component identifier to remove.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object) - { id, name, region: { name, componentCount } }.
+removed (object) - { identifier, componentName }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent: a second call returns "already_removed".
+
+Errors
+- NOT_FOUND on flexiPageName, region, or identifier.
+
+Example request
+
+remove_component_from_region({
+  "flexiPageName": "Project__c_Record_Page",
+  "region": "right",
+  "identifier": "card_main"
+})

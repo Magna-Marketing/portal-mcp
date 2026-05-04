@@ -1,0 +1,82 @@
+Tool: refresh_access_token
+
+Description
+Mint a fresh Salesforce OAuth access token (Account Engagement uses
+Salesforce SSO). Supports `refresh_token`, `client_credentials`,
+and `password` grants. Use sandbox host
+`https://test.salesforce.com` for non-prod environments.
+
+The MCP server caches the resulting token for ~1 hour and reuses it
+across tool calls; this tool is rarely called directly — most callers
+just rely on the auto-refresh.
+
+Salesforce API
+Salesforce OAuth 2.0 (`/services/oauth2/token`).
+
+Endpoint
+POST https://login.salesforce.com/services/oauth2/token
+POST https://test.salesforce.com/services/oauth2/token   (sandbox)
+
+Headers
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+Body (refresh_token grant)
+grant_type=refresh_token
+&client_id={consumerKey}
+&client_secret={consumerSecret}
+&refresh_token={storedRefreshToken}
+
+Body (client_credentials grant)
+grant_type=client_credentials
+&client_id={consumerKey}
+&client_secret={consumerSecret}
+
+Body (password grant - legacy)
+grant_type=password
+&client_id={consumerKey}
+&client_secret={consumerSecret}
+&username={user}
+&password={password}{securityToken}
+
+Input (parameters)
+grantType (string, optional, default "refresh_token") - "refresh_token"
+  | "client_credentials" | "password".
+sandbox (boolean, optional, default false) - Hits test.salesforce.com.
+clientId (string, optional) - Override the configured Connected App
+  consumer key.
+clientSecret (string, optional).
+refreshToken (string, optional) - Required for refresh_token grant.
+username (string, optional) - password grant only.
+password (string, optional) - password grant only; append the user's
+  Security Token if running outside the trusted IP range.
+
+Result
+accessToken (string) - 15 min - 24 hr lifetime depending on connected app.
+instanceUrl (string) - SFDC instance (e.g. "https://yourorg.my.salesforce.com").
+issuedAt (string), id (string), tokenType (string) - "Bearer",
+  signature (string), scope (string), refreshToken (string|null).
+
+Required scopes
+- `pardot_api refresh_token offline_access` on the Connected App.
+
+Idempotency & limits
+- A new access token is issued on each call. Connected App allows
+  up to 5 concurrent OAuth sessions per user; older tokens are
+  rotated.
+
+Errors
+- 400 invalid_grant, 400 invalid_client_id, 400 unsupported_grant_type,
+  400 invalid_client (bad secret).
+
+Example request
+
+refresh_access_token({ "grantType": "client_credentials" })
+
+Example result
+{
+  "accessToken": "00D58000000IFx0!ARkAQ...",
+  "instanceUrl": "https://magnatech.my.salesforce.com",
+  "tokenType": "Bearer",
+  "scope": "pardot_api refresh_token"
+}

@@ -1,0 +1,72 @@
+Tool: get_segment
+
+Description
+Read a single Segment by id. Returns the segment definition
+(criteria graph + filter SQL), its current publish status, and
+the most recent run. To kick off a fresh publish, call
+`publish_segment`.
+
+Salesforce API
+Data Cloud Segmentation API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/segments/:segmentId
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+segmentId (string, required).
+dataSpace (string, optional, default "default").
+includeRunHistory (boolean, optional, default false).
+includeFilter (boolean, optional, default true) - Returns the
+  criteria graph as `filter`.
+
+Result
+segment (object): id, name, label, description, dmoApiName,
+  populationCount, status, publishStatus, schedule (object),
+  filter (object, when includeFilter=true) - {
+    rootGroup ("AND" | "OR"), conditions (array of leaf rules),
+    nestedGroups (array of recursive groups), sourceDmos (array)
+  }, lastPublishedAt, lastPublishStatus, createdDate,
+  lastModifiedDate, createdById.
+runHistory (array, when includeRunHistory=true) -
+  [{ runId, startedAt, completedAt, status, populationCount,
+     errorRef }].
+
+Required scopes
+- `cdp_segment_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_segment({ "segmentId": "SEG_HIGH_VALUE_EMEA",
+  "includeRunHistory": true })
+
+Example result
+{
+  "segment": {
+    "id": "SEG_HIGH_VALUE_EMEA", "label": "High-value EMEA",
+    "publishStatus": "Published", "populationCount": 18420,
+    "filter": {
+      "rootGroup": "AND",
+      "conditions": [
+        { "field": "Region__c",       "op": "eq", "value": "EMEA" },
+        { "field": "LifetimeValue__c","op": "gte","value": 5000 }
+      ]
+    }
+  },
+  "runHistory": [
+    { "runId": "RUN_2026-04-29T08", "status": "Success",
+      "populationCount": 18420 }
+  ]
+}

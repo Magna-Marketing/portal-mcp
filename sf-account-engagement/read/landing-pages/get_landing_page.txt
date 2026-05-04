@@ -1,0 +1,54 @@
+Tool: get_landing_page
+
+Description
+Read a single Landing Page by id. Returns the rendered HTML and
+the resolved tracker-domain URL.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/landing-pages/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `htmlMessage`,
+  `form.*`, `layoutTemplate.*`, `trackerDomain.*`.
+
+Result
+landingPage (object): id, name, htmlMessage, campaignId, folderId,
+  trackerDomainId, layoutTemplateId, formId, vanityUrl, url, title,
+  description, isDoNotIndex, isUseRedirectLocation, redirectLocation,
+  salesforceId, isDeleted, createdAt, updatedAt.
+form (object|null), layoutTemplate (object|null),
+  trackerDomain (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_landing_page({ "id": 6612 })
+
+Example result
+{
+  "landingPage": {
+    "id": 6612, "name": "Spring LP", "title": "Spring 2026",
+    "vanityUrl": "https://go.magnatech.com/spring",
+    "htmlMessage": "<html>...</html>"
+  }
+}

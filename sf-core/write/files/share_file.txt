@@ -1,0 +1,52 @@
+Tool: share_file
+
+Description
+Share a file with one or more users / records / groups by creating
+`ContentDocumentLink` rows. Optionally `unshare` (delete the link).
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+POST /services/data/v66.0/sobjects/ContentDocumentLink
+DELETE /services/data/v66.0/sobjects/ContentDocumentLink/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "ContentDocumentId": "...", "LinkedEntityId": "...", "ShareType": "V", "Visibility": "AllUsers" }
+
+Input (parameters)
+contentDocumentId (string, required).
+operation (string, required) - "share" | "unshare".
+links (object[], required) - Each:
+  linkedEntityId (string, optional) - Record/User/Group/Library Id.
+  username (string, optional) - For User links.
+  shareType (string, optional, default "V") - "V" | "C" | "I".
+  visibility (string, optional, default "AllUsers").
+
+Result
+results (array) - { linkId, linkedEntityId, status ("created"|"removed"|"already_exists"|"failed"), error }.
+summary (object) - { added, removed, failed, total }.
+
+Required permissions
+- File owner or Collaborator access.
+
+Idempotency & limits
+- "share" idempotent — duplicates return DUPLICATE_VALUE; tool surfaces as "already_exists".
+
+Errors
+- DUPLICATE_VALUE, INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+share_file({
+  "contentDocumentId": "069Qg0000004ZyAA",
+  "operation": "share",
+  "links": [
+    { "username": "jane.doe@magnatech.com", "shareType": "C" },
+    { "linkedEntityId": "a01Qg0000020aBcDE", "shareType": "V" }
+  ]
+})

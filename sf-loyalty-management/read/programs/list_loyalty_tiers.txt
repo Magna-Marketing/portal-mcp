@@ -1,0 +1,42 @@
+Tool: list_loyalty_tiers
+
+Description
+List tiers within a program (LoyaltyTier) with their tier group, sequence
+order, and qualification thresholds. Use to plan tier-change operations
+or validate `update_member_tier` / `change_member_tier` calls.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `LoyaltyTier`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, LoyaltyTierGroupId, LoyaltyTierGroup.Name, LoyaltyTierGroup.ProgramId, SequenceNumber, MaxValue, MinValue, ColorCode, IsDefault FROM LoyaltyTier WHERE LoyaltyTierGroup.ProgramId = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, optional).
+programId (string, optional).
+tierGroupName (string, optional).
+includeBenefits (boolean, optional, default false) - Resolve LoyaltyTierBenefit rows per tier.
+
+Result
+totalSize (number).
+tiers (array) - { id, name, description, tierGroupId, tierGroupName, sequenceNumber, minValue, maxValue, colorCode, isDefault, benefits (array, optional): [{ id, name, benefitId, benefitName }] }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_loyalty_tiers({ "programName": "MTG_Rewards", "includeBenefits": true })

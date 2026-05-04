@@ -1,0 +1,63 @@
+Tool: manage_validation_rule
+
+Description
+Create, update, or delete validation rules. Each rule has a boolean
+formula that, when **true**, blocks the save with the configured error
+message and (optionally) attaches the message to a specific field.
+
+Salesforce API
+Metadata API (`ValidationRule`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "operation": "create",
+  "object": "Project__c",
+  "fullName": "Status_required_when_active",
+  "active": true,
+  "errorConditionFormula": "ISBLANK(Status__c) && IsActive__c == true",
+  "errorMessage": "Status is required for active projects.",
+  "errorDisplayField": "Status__c",
+  "description": "Active projects must have a status."
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+object (string, required) - sObject API name.
+fullName (string, required) - Validation rule DeveloperName.
+active (boolean, optional, default true).
+errorConditionFormula (string, required for create/update) - Boolean Apex formula.
+errorMessage (string, required for create/update).
+errorDisplayField (string, optional) - When omitted, error appears at top of page.
+description (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+validationRule (object) - Updated identity + active flag.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- upsert / update idempotent on equal input.
+
+Errors
+- INVALID_FIELD on bad formula.
+- COMPILE_ERROR on syntactically invalid formula.
+
+Example request
+
+manage_validation_rule({
+  "operation": "create",
+  "object": "Opportunity",
+  "fullName": "Amount_required_for_close",
+  "errorConditionFormula": "ISCHANGED(StageName) && TEXT(StageName) == 'Closed Won' && ISBLANK(Amount)",
+  "errorMessage": "Amount must be set before closing won."
+})

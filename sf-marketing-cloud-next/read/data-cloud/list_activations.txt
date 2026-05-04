@@ -1,0 +1,63 @@
+Tool: list_activations
+
+Description
+List Activations — the bridge from a published segment to a
+Data Action Target (Marketing Cloud Engagement BU, AppExchange
+connector, S3, etc.). Each activation captures projection /
+mapping logic + a target.
+
+Salesforce API
+Data Cloud Activation API.
+
+Endpoint
+GET {cdpInstanceUrl}/api/v1/activations
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+segmentId (string, optional) - Filter to activations of one segment.
+targetType (string, optional) - "MarketingCloudEngagement" |
+  "MarketingCloudNext" | "AmazonS3" | "AppExchange" | "Snowflake" |
+  "AdNetwork".
+status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
+nameContains (string, optional).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+activations (array) - Each: { id, name, label, segmentId,
+  targetType, targetConfig (object), status, schedule (object),
+  contactPoints (array<{ apiName, label }>) - which DMOs and fields
+  are mapped to the target, lastRunStatus, lastRunDate,
+  populationCount, createdDate, lastModifiedDate }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_activations({ "targetType": "MarketingCloudEngagement" })
+
+Example result
+{
+  "activations": [
+    { "id": "ACT_EMEA_TO_MC", "label": "EMEA -> MC Engagement",
+      "segmentId": "SEG_HIGH_VALUE_EMEA",
+      "targetType": "MarketingCloudEngagement",
+      "status": "Active", "lastRunStatus": "Success",
+      "populationCount": 18420 }
+  ]
+}

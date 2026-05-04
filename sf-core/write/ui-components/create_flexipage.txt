@@ -1,0 +1,75 @@
+Tool: create_flexipage
+
+Description
+Create a new Lightning Page (FlexiPage). Three common types:
+- `RecordPage` (requires `objectType`).
+- `AppPage`.
+- `HomePage`.
+
+The page is created from a starter template by default with one empty
+region (`main`). After creation, add components with
+`add_component_to_region` and assign to apps/profiles via Setup or
+`get_page_assignments`-driven Metadata edits.
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "fullName": "Project__c_Record_Page",
+  "label": "Project Record Page",
+  "description": "Default record page for Project",
+  "type": "RecordPage",
+  "objectType": "Project__c",
+  "template": "flexipage:recordHomeWithHeader",
+  "regions": [
+    { "name": "main", "type": "Region", "appendable": true }
+  ]
+}
+
+Input (parameters)
+fullName (string, required) - DeveloperName.
+label (string, required).
+description (string, optional).
+type (string, required) - "RecordPage" | "AppPage" | "HomePage".
+objectType (string, required for RecordPage) - sObject API name.
+template (string, optional, default chosen by `type`):
+  RecordPage default: "flexipage:recordHomeWithHeader".
+  HomePage default:   "flexipage:defaultHome".
+  AppPage default:    "flexipage:defaultAppHome".
+regions (array, optional) - Initial regions:
+  name (string), type (string, default "Region"), appendable (boolean).
+  Default: one region named "main" of type "Region", appendable=true.
+masterLabel (string, optional) - Internal label override.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object, on success) - { id, name, label, type, sObject, regions: [{ name, type, componentCount: 0 }] }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+- INVALID_TYPE: bad type or bad objectType.
+- INVALID_OBJECT_TYPE_FOR_RECORD_PAGE.
+
+Example request
+
+create_flexipage({
+  "fullName": "Project__c_Record_Page",
+  "label": "Project Record Page",
+  "type": "RecordPage",
+  "objectType": "Project__c"
+})

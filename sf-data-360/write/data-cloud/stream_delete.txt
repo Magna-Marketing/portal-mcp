@@ -1,0 +1,62 @@
+Tool: stream_delete
+
+Description
+Stream one or more *delete* operations to a Data 360 Streaming
+Ingestion endpoint — soft-deletes records by primary key on the
+target DLO. Used for right-to-be-forgotten, transactional reverts,
+and CDC delete events.
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+DELETE {cdpTenantUrl}/api/v1/ingest/sources/:sourceApiName/:objectApiName
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "data": [
+    { "Id__c": "ORDER-100023" }
+  ]
+}
+
+Input (parameters)
+sourceApiName (string, required).
+objectApiName (string, required).
+data (object[], required) - Each record must contain the source
+  object's primary-key field.
+
+Result
+acceptedCount (number).
+rejectedCount (number).
+errors (array).
+ingestId (string).
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Idempotent on primary key; deleting a missing record is a no-op.
+- 200 records / call.
+
+Errors
+- 400 MISSING_PRIMARY_KEY, 404 NOT_FOUND, 429 REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+stream_delete({
+  "sourceApiName": "ecommerce",
+  "objectApiName": "Order",
+  "data": [{ "Id__c": "ORDER-100023" }]
+})
+
+Example result
+{
+  "acceptedCount": 1,
+  "rejectedCount": 0,
+  "ingestId": "ING_del_abc123"
+}

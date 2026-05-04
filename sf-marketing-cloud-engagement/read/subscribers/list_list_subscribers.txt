@@ -1,0 +1,43 @@
+Tool: list_list_subscribers
+
+Description
+List the subscribers on a given list (`ListSubscriber`). Each row
+includes subscriber identity, status on this list, and date added.
+
+Marketing Cloud API
+SOAP API (`ListSubscriber.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve filtered by ListID.
+
+Input (parameters)
+listId (number, optional).
+listName (string, optional).
+status (string|string[], optional) - "Active" | "Unsubscribed" | "Bounced" | "Held".
+limit (number, optional, default 1000).
+
+Result
+totalSize (number).
+listSubscribers (array) - { id, listId, subscriberKey, subscriberId, emailAddress, status, dateUnsubscribed (string|null), dateJoined, source }.
+hasMore (boolean), continueRequestId (string|null).
+
+Required scopes
+- `list_and_subscribers_read`.
+
+Idempotency & limits
+- Read-only.
+- Pagination via `continueRequestId` (SOAP MoreDataAvailable).
+
+Errors
+- LIST_NOT_FOUND.
+
+Example request
+
+list_list_subscribers({ "listName": "Q3_Newsletter", "status": "Active" })

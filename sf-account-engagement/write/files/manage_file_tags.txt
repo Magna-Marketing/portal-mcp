@@ -1,0 +1,43 @@
+Tool: manage_file_tags
+
+Description
+Add or remove tags on a File.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/files/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/files/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Brand" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), fileId (number), tag (string), operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_file_tags({ "id": 901, "operation": "add", "tag": "Brand" })
+
+Example result
+{ "success": true, "fileId": 901, "tag": "Brand", "operation": "add" }

@@ -1,0 +1,66 @@
+Tool: find_unused_components
+
+Description
+Find UI components (LWC, Aura, VF) that are not referenced from any
+Lightning Page, app, or other component. These are candidates for
+deprecation (`deprecate_lwc_component`) or deletion.
+
+Detection sources:
+- `MetadataComponentDependency` (incoming references).
+- `FlexiPage` regions for placement.
+- `CustomTab` for tab-mounted components.
+- `CustomApplication` for app-mounted components.
+
+A component is "unused" if it has zero hits across these.
+
+Salesforce API
+Tooling API, v66.0. Multiple SOQL queries.
+
+Endpoint
+N/A (composite).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string|string[], optional) - "lwc" | "aura" | "visualforce".
+  Default: ["lwc","aura"].
+includeManaged (boolean, optional, default false).
+namespacePrefix (string, optional).
+modifiedBefore (string, optional) - ISO date; only include components
+  not modified since (filter old candidates).
+limit (number, optional, default 500, max 2000).
+
+Result
+type (string).
+totalSize (number).
+unusedComponents (array) - Each:
+  type ("lwc"|"aura"|"visualforce").
+  id (string).
+  name (string).
+  label (string).
+  apiVersion (number).
+  lastModifiedDate (string).
+  daysSinceLastModified (number).
+  manageableState (string).
+  reasonsConsideredUnused (string[]) - "no_dependency_in",
+    "not_in_any_flexipage", "not_in_any_app_tab".
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- `MetadataComponentDependency` is eventually consistent; a fresh
+  reference may not appear for a few minutes.
+
+Errors
+- INVALID_FIELD: bad type.
+
+Example request
+
+find_unused_components({ "type": "lwc", "modifiedBefore": "2025-10-01" })

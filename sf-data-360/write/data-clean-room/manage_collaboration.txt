@@ -1,0 +1,72 @@
+Tool: manage_collaboration
+
+Description
+Create a new Data Clean Room collaboration with a partner. Only the
+"create" operation is exposed — accepting / rejecting incoming
+invitations is in `respond_collaboration_invitation`. To end an
+active collaboration use the Data Cloud Setup UI.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "apiName": "MTG_PartnerX",
+  "label": "MTG ↔ Partner X",
+  "providerIdOrName": "MTG_Snowflake_DCR",
+  "partnerOrgIdentifier": "ORG_PARTNER_X",
+  "sharedDmos": ["UnifiedIndividual__dlm"],
+  "specifications": ["PartnerX_OverlapSpec"]
+}
+
+Input (parameters)
+operation (string, required) - "create" only.
+apiName (string, required).
+label (string, required).
+providerIdOrName (string, required).
+partnerOrgIdentifier (string, required) - Identifier the partner uses
+  on their side (account name, org id, etc.).
+sharedDmos (string[], required) - DMOs whose data may participate
+  in the collaboration.
+specifications (string[], optional) - Pre-approved query
+  specifications to attach.
+
+Result
+collaboration (object) - Created row in `Pending` status.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `apiName`.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_PROVIDER, 404 NOT_FOUND
+  (specification).
+
+Example request
+
+manage_collaboration({
+  "operation": "create",
+  "apiName": "MTG_PartnerX",
+  "label": "MTG ↔ Partner X",
+  "providerIdOrName": "MTG_Snowflake_DCR",
+  "partnerOrgIdentifier": "ORG_PARTNER_X",
+  "sharedDmos": ["UnifiedIndividual__dlm"]
+})
+
+Example result
+{
+  "collaboration": {
+    "id": "0YC580000000001",
+    "apiName": "MTG_PartnerX", "status": "Pending"
+  }
+}

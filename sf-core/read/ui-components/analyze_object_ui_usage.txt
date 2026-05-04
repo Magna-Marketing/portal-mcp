@@ -1,0 +1,58 @@
+Tool: analyze_object_ui_usage
+
+Description
+For a given sObject, enumerate every Lightning Page that targets it, and
+across those pages list every UI component (LWC, Aura, VF, standard
+Lightning) with how many times it appears. Use to inventory the entire
+UI surface area of an object before a refactor or rebrand.
+
+Salesforce API
+Tooling API, v66.0.
+- `FlexiPage WHERE EntityDefinitionId.QualifiedApiName = '{sObject}'`.
+- For each FlexiPage, parse `Metadata.flexiPageRegions[].itemInstances`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type FROM FlexiPage WHERE EntityDefinition.QualifiedApiName = '{sObject}'
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}     (per page)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required) - sObject API name.
+includeStandardComponents (boolean, optional, default true).
+includeRelatedListsAsRefs (boolean, optional, default true).
+
+Result
+sObject (string).
+pages (array) - Each:
+  id, name, label, type, isOrgDefault.
+  componentCount (number).
+componentsAcrossPages (array) - Each:
+  componentName (string) - "c:projectCard", "lightning:relatedList", etc.
+  type (string) - "lwc" | "aura" | "standardLightning" | "standardForce" | "facet".
+  isCustom (boolean).
+  totalUsages (number) - Across all pages targeting this sObject.
+  pages (array) - { pageName, region, identifier }.
+summary (object):
+  totalPages (number).
+  totalUniqueComponents (number).
+  totalCustomComponents (number).
+  totalUsages (number).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- INVALID_TYPE: bad sObject.
+
+Example request
+
+analyze_object_ui_usage({ "sObject": "Project__c" })

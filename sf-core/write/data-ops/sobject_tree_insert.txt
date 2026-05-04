@@ -1,0 +1,71 @@
+Tool: sobject_tree_insert
+
+Description
+Insert a parent record plus its child records in a single call (200
+records max, including parent + children). The platform creates the
+parent first then children with the parent's Id auto-wired.
+
+Salesforce API
+REST API (Composite), v66.0.
+
+Endpoint
+POST /services/data/v66.0/composite/tree/{sObject}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "records": [{
+    "attributes": { "type": "Account", "referenceId": "acc1" },
+    "Name": "ACME",
+    "Contacts": {
+      "records": [
+        { "attributes": { "type": "Contact", "referenceId": "con1" }, "LastName": "Doe", "Email": "doe@acme.com" }
+      ]
+    }
+  }]
+}
+
+Input (parameters)
+sObject (string, required) - Root sObject API name.
+records (object[], required) - Tree-shaped records (children nested under
+  the parent's child relationship name, e.g. `Contacts`).
+
+Result
+hasErrors (boolean).
+results (array) - Per row (root + children): { referenceId, id, errors: [] | [{ statusCode, message, fields }] }.
+
+Required permissions
+- "API Enabled" + create on parent and child sObjects.
+
+Idempotency & limits
+- Not idempotent.
+- 200 records total per call (root + children).
+- All records must be of compatible sObjects (the URL declares the root).
+
+Errors
+- INVALID_FIELD on bad child relationship name.
+
+Example request
+
+sobject_tree_insert({
+  "sObject": "Account",
+  "records": [{
+    "attributes": { "type": "Account", "referenceId": "acc1" },
+    "Name": "ACME",
+    "Industry": "Tech",
+    "Contacts": {
+      "records": [
+        { "attributes": { "type": "Contact", "referenceId": "c1" }, "LastName": "Doe" },
+        { "attributes": { "type": "Contact", "referenceId": "c2" }, "LastName": "Smith" }
+      ]
+    },
+    "Opportunities": {
+      "records": [
+        { "attributes": { "type": "Opportunity", "referenceId": "o1" }, "Name": "ACME Phase 1", "StageName": "Prospecting", "CloseDate": "2026-12-31" }
+      ]
+    }
+  }]
+})

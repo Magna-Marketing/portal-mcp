@@ -1,0 +1,78 @@
+Tool: read_lwc
+
+Description
+Read a Lightning Web Component by name (single match) or by name pattern
+(list mode). Returns bundle metadata and the file list. To get full
+file contents inline use `read_lwc_comprehensive`. To get a single file
+use `read_lwc_file`. To get an even fuller picture (metadata + files +
+descriptive blocks) use `get_lwc_bundle_info`.
+
+Salesforce API
+Tooling API, v66.0. `LightningComponentBundle` and (for the file list)
+`LightningComponentResource`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed, NamespacePrefix, ManageableState, Description, CreatedDate, LastModifiedDate FROM LightningComponentBundle WHERE DeveloperName LIKE '...' OR DeveloperName = '...'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, LightningComponentBundleId FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, optional) - Exact DeveloperName.
+pattern (string, optional) - Glob (e.g. "project*"). Mutually exclusive with `name`.
+includeFiles (boolean, optional, default true) - Include the file
+  metadata list (no contents).
+includeManaged (boolean, optional, default false).
+
+Result (single)
+bundle (object):
+  id (string).
+  name (string) - DeveloperName.
+  label (string) - MasterLabel.
+  apiVersion (number).
+  isExposed (boolean).
+  namespacePrefix (string|null).
+  manageableState (string).
+  description (string|null).
+  createdDate, lastModifiedDate (string).
+  files (array, when includeFiles=true) - Each:
+    id (string).
+    fileName (string) - e.g. "projectCard.js".
+    format (string) - "js" | "html" | "css" | "xml" | "svg".
+    filePath (string).
+Result (pattern)
+totalSize (number).
+bundles (array of single shape).
+
+Required permissions
+- "Customize Application" / "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on `name`.
+
+Example request
+
+read_lwc({ "name": "projectCard" })
+
+Example result
+
+{
+  "bundle": {
+    "id": "0Rb4Q00000abcDE", "name": "projectCard", "label": "Project Card",
+    "apiVersion": 62.0, "isExposed": true, "manageableState": "unmanaged",
+    "files": [
+      { "id": "0Rt4Q00000abcXY", "fileName": "projectCard.js",          "format": "js" },
+      { "id": "0Rt4Q00000abcYZ", "fileName": "projectCard.html",        "format": "html" },
+      { "id": "0Rt4Q00000abcZA", "fileName": "projectCard.css",         "format": "css" },
+      { "id": "0Rt4Q00000abcAB", "fileName": "projectCard.js-meta.xml", "format": "xml" }
+    ]
+  }
+}

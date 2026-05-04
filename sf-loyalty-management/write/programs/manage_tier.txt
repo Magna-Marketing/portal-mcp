@@ -1,0 +1,58 @@
+Tool: manage_tier
+
+Description
+Create / update / delete a `LoyaltyTier` (a single tier inside a tier
+group). Use to add a new "Diamond" tier above "Platinum" or to retire
+an existing one. Eligibility rules and benefits are managed via
+`manage_tier_benefit` and tier-eligibility rule templates.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyTier`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyTier
+PATCH  /services/data/v66.0/sobjects/LoyaltyTier/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyTier/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "Diamond", "LoyaltyTierGroupId": "...", "SequenceNumber": 5, "MinValue": 100000, "MaxValue": null, "ColorCode": "#9D7EFF", "IsDefault": false }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+tierId (string, optional, required for non-create).
+tierGroupName (string, optional) - Or tierGroupId.
+tierGroupId (string, optional).
+name (string, required for create).
+description (string, optional).
+sequenceNumber (number, optional) - Order within tier group.
+minValue (number, optional) - Lower threshold (in qualifying points).
+maxValue (number|null, optional).
+colorCode (string, optional) - Hex color for UI.
+isDefault (boolean, optional).
+
+Result
+tier (object) - { id, name, tierGroupId, tierGroupName, sequenceNumber, minValue, maxValue, isDefault }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+- Cannot delete a tier with current members (`LoyaltyMemberTier` rows).
+
+Errors
+- DUPLICATE_VALUE, DELETE_FAILED.
+
+Example request
+
+manage_tier({
+  "operation": "create",
+  "tierGroupName": "Status_Tiers",
+  "name": "Diamond",
+  "sequenceNumber": 5,
+  "minValue": 100000
+})

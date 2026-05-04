@@ -1,0 +1,47 @@
+Tool: manage_topic_assignments
+
+Description
+Assign / unassign Topics on records (`TopicAssignment`). Topics are
+free-text tags shown on records and used for grouping in feeds /
+Knowledge / community search.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/TopicAssignment
+DELETE /services/data/v66.0/sobjects/TopicAssignment/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "TopicId": "0TOQg0000004ZyAA", "EntityId": "a01Qg0000020aBcDE" }
+
+Input (parameters)
+operation (string, required) - "assign" | "unassign".
+recordId (string, required).
+topicNames (string[], optional) - For "assign", create-on-demand topics by name.
+topicIds (string[], optional).
+entityType (string, optional) - sObject API name (auto-derived from record Id key prefix).
+
+Result
+results (array) - { topicId, topicName, status ("assigned"|"unassigned"|"already"|"failed"), error }.
+
+Required permissions
+- "Assign Topics" / "Create Topics".
+
+Idempotency & limits
+- assign idempotent on (record, topic).
+
+Errors
+- DUPLICATE_VALUE, INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+manage_topic_assignments({
+  "operation": "assign",
+  "recordId": "a01Qg0000020aBcDE",
+  "topicNames": ["Q3-2026", "Internal-Project"]
+})

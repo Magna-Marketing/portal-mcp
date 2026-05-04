@@ -1,0 +1,52 @@
+Tool: list_specifications
+
+Description
+List Data Clean Room specifications — the org-level configurations
+that bind a provider + a template + an output target into a runnable
+unit.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/specifications
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+providerIdOrName (string, optional).
+status (string, optional) - "Active" | "Inactive".
+limit (number, optional, default 100).
+
+Result
+specifications (array) - Each: { id, apiName, label,
+  providerIdOrName, templateApiName, parameters (object),
+  outputTargetApiName, status, createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_specifications({})
+
+Example result
+{
+  "specifications": [
+    { "id": "spec_001", "apiName": "PartnerX_OverlapSpec",
+      "providerIdOrName": "MTG_Snowflake_DCR",
+      "templateApiName": "OverlapAudience" }
+  ]
+}

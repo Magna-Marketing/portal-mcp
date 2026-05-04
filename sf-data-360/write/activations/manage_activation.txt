@@ -1,0 +1,69 @@
+Tool: manage_activation
+
+Description
+Create, update, or delete an Activation. Activation maps a Segment
+to an Activation Target with field-level mapping rules.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/activations                                   (operation="create")
+PUT    {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId                     (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId                     (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "EMEA_to_MC",
+  "label": "EMEA High-value -> MC Engagement",
+  "segmentId": "0YS580000000001",
+  "activationTargetId": "0YT580000000001",
+  "schedule": { "scheduleType": "Cron", "cronExpression": "0 0 6 * * ?" },
+  "contactPoints": [
+    { "apiName": "Email",     "sourceField": "EmailAddress__c" },
+    { "apiName": "FirstName", "sourceField": "FirstName__c" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+activationId (string, required for update / delete).
+apiName (string, required for create).
+label (string, required for create).
+segmentId (string, required for create).
+activationTargetId (string, required for create).
+schedule (object, optional).
+contactPoints (array, optional) - Field mapping rules for the target.
+publishType (string, optional, default "FULL").
+
+Result
+activation (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; in-flight publishes are aborted.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 MISSING_CONTACT_POINTS, 404 NOT_FOUND.
+
+Example request
+
+manage_activation({
+  "operation": "create",
+  "apiName": "EMEA_to_MC",
+  "label": "EMEA High-value -> MC",
+  "segmentId": "0YS580000000001",
+  "activationTargetId": "0YT580000000001",
+  "contactPoints": [{ "apiName": "Email", "sourceField": "EmailAddress__c" }]
+})
+
+Example result
+{ "activation": { "id": "0YA580000000001", "apiName": "EMEA_to_MC", "status": "Active" } }

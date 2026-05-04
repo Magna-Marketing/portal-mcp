@@ -1,0 +1,65 @@
+Tool: retrieve_metadata
+
+Description
+Retrieve a metadata package from the org. Provide either a `package.xml`-
+shaped manifest (types + members), an unpackaged single-package manifest,
+or one or more managed package names. Returns a downloadable zip
+location plus an inline base64 zip on completion.
+
+Salesforce API
+Metadata API + Tooling API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/retrieveRequest
+GET  /services/data/v66.0/metadata/retrieveResult/{retrieveId}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "apiVersion": 66.0,
+  "singlePackage": true,
+  "unpackaged": {
+    "types": [
+      { "name": "ApexClass", "members": ["*"] },
+      { "name": "Profile",   "members": ["*"] },
+      { "name": "FlexiPage", "members": ["Project__c_Record_Page"] }
+    ]
+  }
+}
+
+Input (parameters)
+apiVersion (number, optional, default 66.0).
+manifest (object, required) - The unpackaged structure: { types: [{ name, members: [string] }] }.
+packageNames (string[], optional) - Managed package names to include separately.
+singlePackage (boolean, optional, default true).
+waitForCompletion (boolean, optional, default true) - Poll until done; up to 30 minutes.
+asBase64 (boolean, optional, default true) - Return inline zip in response.
+
+Result
+retrieveId (string) - Async job Id.
+status (string) - "Queued"|"InProgress"|"Pending"|"Succeeded"|"Failed".
+done (boolean).
+fileProperties (array) - { fullName, fileName, type, lastModifiedDate, lastModifiedById, lastModifiedByName, manageableState }.
+zipBase64 (string|null) - When asBase64 = true and done.
+zipFileSize (number).
+elapsedMs (number).
+errors (string|null).
+
+Required permissions
+- "Modify Metadata Through Metadata API Functions".
+
+Idempotency & limits
+- Read-only on the source org (no changes), safe to retry.
+- Each request consumes deploy quota; large retrieves take several minutes.
+
+Errors
+- INVALID_TYPE on bad metadata type, REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+retrieve_metadata({
+  "manifest": { "types": [{ "name": "ApexClass", "members": ["*"] }] }
+})

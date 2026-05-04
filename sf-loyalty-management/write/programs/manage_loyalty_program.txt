@@ -1,0 +1,69 @@
+Tool: manage_loyalty_program
+
+Description
+Create / update / activate / deactivate / delete a Loyalty Program.
+Programs are deployed via the Metadata API as `LoyaltyProgramSetup` so
+they survive sandbox refresh and are deployable through change sets.
+
+Salesforce API
+Metadata API (`LoyaltyProgramSetup`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "operation": "create",
+  "fullName": "MTG_Rewards",
+  "label": "MTG Rewards",
+  "description": "MTG end-customer loyalty program",
+  "programType": "Engagement",
+  "startDate": "2026-05-01",
+  "endDate": null,
+  "defaultProgramCurrencyName": "Points",
+  "primaryTierGroupName": "Status_Tiers",
+  "status": "Active"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+fullName (string, required) - Program DeveloperName (e.g. "MTG_Rewards").
+label (string, required for create) - Master label.
+description (string, optional).
+programType (string, optional) - "Engagement" | "Reward" | "TierBased" | etc.
+startDate (string, optional) - YYYY-MM-DD.
+endDate (string, optional).
+status (string, optional) - "Active" | "Inactive" | "Draft".
+defaultProgramCurrencyName (string, optional) - Set primary currency.
+primaryTierGroupName (string, optional) - Set primary tier group.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object) - Standard Metadata deploy result.
+program (object, on success) - { id, name, status, programType, startDate, endDate }.
+
+Required permissions
+- "Customize Application" + `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update / activate / deactivate idempotent.
+- create not idempotent (fails on duplicate fullName).
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, LICENSE_NOT_AVAILABLE if Loyalty Management isn't licensed.
+
+Example request
+
+manage_loyalty_program({
+  "operation": "create",
+  "fullName": "MTG_Rewards",
+  "label": "MTG Rewards",
+  "programType": "Engagement",
+  "startDate": "2026-05-01",
+  "defaultProgramCurrencyName": "Points",
+  "primaryTierGroupName": "Status_Tiers"
+})

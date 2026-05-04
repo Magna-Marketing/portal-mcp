@@ -1,0 +1,78 @@
+Tool: manage_landing_page
+
+Description
+Create a Landing Page. v5 supports `Create` only on landing pages
+(no PATCH / DELETE on existing rows). To change content, recreate
+the LP and update the redirecting traffic source.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/landing-pages
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "name": "Spring LP",
+  "title": "Spring 2026",
+  "description": "Limited time offer",
+  "campaignId": 1024,
+  "folderId": 33,
+  "trackerDomainId": 7,
+  "layoutTemplateId": 71,
+  "formId": 4421,
+  "vanityUrlPath": "spring",
+  "isDoNotIndex": true,
+  "isUseRedirectLocation": false,
+  "htmlMessage": "<html>...</html>"
+}
+
+Input (parameters)
+operation (string, required) - "create" only.
+name (string, required).
+title (string, optional).
+description (string, optional).
+campaignId (number, required).
+folderId (number, optional).
+trackerDomainId (number, optional).
+layoutTemplateId (number, optional).
+formId (number, optional) - Inline form on the LP.
+vanityUrlPath (string, optional).
+htmlMessage (string, required if `layoutTemplateId` not set).
+isDoNotIndex (boolean, optional, default true).
+isUseRedirectLocation (boolean, optional, default false).
+redirectLocation (string, optional) - When `isUseRedirectLocation=true`,
+  the LP is just a redirect.
+salesforceCmsId (string, optional) - Source CMS reference.
+
+Result
+landingPage (object) - Created row with `vanityUrl` populated.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- 600 duplicate_vanity, 53 tracker_domain_not_validated, 59 not_found.
+
+Example request
+
+manage_landing_page({
+  "operation": "create",
+  "name": "Spring LP",
+  "campaignId": 1024,
+  "trackerDomainId": 7,
+  "vanityUrlPath": "spring",
+  "htmlMessage": "<html><body>Spring offer!</body></html>"
+})
+
+Example result
+{ "landingPage": { "id": 6612, "name": "Spring LP", "vanityUrl": "https://go.magnatech.com/spring" } }

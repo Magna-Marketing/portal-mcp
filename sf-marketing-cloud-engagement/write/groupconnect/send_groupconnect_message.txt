@@ -1,0 +1,52 @@
+Tool: send_groupconnect_message
+
+Description
+Send a GroupConnect (LINE / KakaoTalk / etc.) message to one or many
+subscribers. Supports text, image, video, sticker, audio, location,
+carousel content types.
+
+Marketing Cloud API
+REST API (`/legacy/v1/beta/groupconnect/messages/{messageId}/send`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/messages/{messageId}/send
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "subscribers": [{ "lineId": "U123abc..." }],
+  "messageType": "Text",
+  "content": "Hello from MTG"
+}
+
+Input (parameters)
+messageId (string, required) - GroupConnect message Id (template).
+subscribers (object[], required) - Each: { lineId | contactKey | groupConnectId }.
+messageType (string, optional, default "Text") - "Text" | "Image" | "Video" | "Sticker" | "Audio" | "Location" | "Carousel".
+content (string|object, required) - Text body or structured payload (carousel etc.).
+sendDate (string, optional, default now).
+
+Result
+results (array) - { subscriberId, status, errors }.
+totalQueued (number).
+
+Required scopes
+- `messaging_api_send`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- INVALID_LINE_ID, MESSAGE_NOT_FOUND.
+
+Example request
+
+send_groupconnect_message({
+  "messageId": "abc123",
+  "subscribers": [{ "lineId": "U123abc" }],
+  "messageType": "Text",
+  "content": "Hello from MTG"
+})

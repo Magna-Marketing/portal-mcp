@@ -1,0 +1,50 @@
+Tool: get_model_setup_version
+
+Description
+Read a single Model Setup Version by id.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-setups/:modelSetupIdOrName/setup-versions/:modelSetupVersionId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+modelSetupIdOrName (string, required).
+modelSetupVersionId (string, required).
+
+Result
+version (object): id, apiName, version, status, modelArtifactId,
+  trainingDatasetRef, featureColumns (array), targetColumn,
+  hyperparameters, metrics, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_model_setup_version({
+  "modelSetupIdOrName": "ChurnModel",
+  "modelSetupVersionId": "MSV_001"
+})
+
+Example result
+{
+  "version": {
+    "id": "MSV_001", "version": "1.2.0",
+    "metrics": { "accuracy": 0.84 }
+  }
+}

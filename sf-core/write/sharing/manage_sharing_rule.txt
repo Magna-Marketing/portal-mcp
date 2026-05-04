@@ -1,0 +1,62 @@
+Tool: manage_sharing_rule
+
+Description
+Create, update, or delete sharing rules (criteria-based or owner-based).
+Each rule shares records matching the criteria (or owned by the source)
+to a target group/role with a specified access level (Read | Edit |
+TransferAccess | All for Account-related rules).
+
+Salesforce API
+Metadata API (`SharingRules`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+sObject (string, required).
+ruleType (string, required) - "criteria" | "owner" | "territory".
+fullName (string, required) - Rule DeveloperName.
+label (string, required for create).
+description (string, optional).
+accessLevel (string, required for create/update) - "Read" | "Edit" | "All" | "TransferAccess" (Lead/Case only).
+sharedTo (object, required) - { type, name } (see list_sharing_rules for shape).
+sharedFrom (object, required for owner-based rules).
+criteria (array, required for criteria-based) - [{ field, operation ("equals"|"notEqual"|"lessThan"|"greaterThan"|"contains"|"notContains"|"startsWith"|"includes"|"excludes"), value }].
+booleanFilter (string, optional).
+accountSettings (object, optional, only Account rules) - { caseAccessLevel, contactAccessLevel, opportunityAccessLevel }.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+rule (object) - Updated rule shape (same as `list_sharing_rules` row).
+
+Required permissions
+- "Manage Sharing" + "Customize Application".
+
+Idempotency & limits
+- update is idempotent.
+- New rule triggers a sharing recalc for matching records (async).
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on criteria.
+
+Example request
+
+manage_sharing_rule({
+  "operation": "create",
+  "sObject": "Project__c",
+  "ruleType": "criteria",
+  "fullName": "MTG_Active_Projects_To_PMs",
+  "label": "Active Projects to PMs",
+  "accessLevel": "Edit",
+  "criteria": [{ "field": "Status__c", "operation": "equals", "value": "Active" }],
+  "sharedTo": { "type": "group", "name": "MTG_Project_Managers" }
+})

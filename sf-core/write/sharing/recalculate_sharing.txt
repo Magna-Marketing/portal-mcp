@@ -1,0 +1,45 @@
+Tool: recalculate_sharing
+
+Description
+Trigger an asynchronous sharing recalculation for an sObject's sharing
+rules. Used after creating/updating rules or in support cases when
+sharing seems incorrect. Returns a job Id; poll status with the
+`SharingRecalcStatus` view.
+
+Salesforce API
+Metadata API + Tooling, v66.0. The Metadata API exposes
+`Database.executeSharingRulesRecalc` via a custom Apex action; the
+tool wraps `/tooling/sobjects/SharingRecalcRequest` (where available)
+and falls back to `execute_anonymous` Apex.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/SharingRecalcRequest                 (preferred)
+or executes anonymous Apex `Database.executeBatch(new ...)`.
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "SObjectType": "Account" }
+
+Input (parameters)
+sObject (string, required).
+ruleType (string, optional, default "all") - "criteria" | "owner" | "all".
+waitForCompletion (boolean, optional, default false) - Poll until status is terminal (can be minutes/hours).
+
+Result
+job (object) - { id, status ("Queued"|"InProgress"|"Completed"|"Failed"), startedAt, completedAt }.
+
+Required permissions
+- "Manage Sharing" + "Modify All Data".
+
+Idempotency & limits
+- Multiple recalcs in the same window are coalesced server-side.
+
+Errors
+- SHARING_RECALC_IN_PROGRESS, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+recalculate_sharing({ "sObject": "Project__c", "ruleType": "all" })

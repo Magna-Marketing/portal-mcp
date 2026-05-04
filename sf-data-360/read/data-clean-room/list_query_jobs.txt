@@ -1,0 +1,52 @@
+Tool: list_query_jobs
+
+Description
+List Data Clean Room query jobs — runs of approved query templates
+inside a collaboration. Each job has a status, partner approval
+state, and (when complete) a result reference.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/jobs
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+collaborationIdOrApiName (string, required).
+status (string, optional) - "Queued" | "Running" |
+  "AwaitingApproval" | "Complete" | "Failed".
+limit (number, optional, default 100).
+
+Result
+jobs (array) - Each: { id, collaborationId, templateApiName,
+  status, partnerApprovalStatus, recordsProcessed, resultRef,
+  startedAt, completedAt, runByUserId }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+list_query_jobs({ "collaborationIdOrApiName": "MTG_PartnerX" })
+
+Example result
+{
+  "jobs": [
+    { "id": "JOB_DCR_001", "templateApiName": "OverlapAudience",
+      "status": "Complete", "recordsProcessed": 482000 }
+  ]
+}

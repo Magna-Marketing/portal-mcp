@@ -1,0 +1,57 @@
+Tool: send_transactional_sms
+
+Description
+Send a transactional SMS via a defined Transactional Messaging SMS
+definition. Modern, idempotent, and supports per-recipient attribute
+overrides.
+
+Marketing Cloud API
+REST API (`/messaging/v1/sms/messages/{messageKey}`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages/{messageKey}      (single)
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages                   (batch)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "definitionKey": "MTG_OrderConfirmation_SMS",
+  "recipient": {
+    "contactKey": "MEM-100023",
+    "to": "+15551234567",
+    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345" }
+  }
+}
+
+Input (parameters)
+definitionKey (string, required).
+recipients (object[], required) - Each: { contactKey, to (E.164 phone), attributes (object), messageKey (string, optional) }.
+
+Result
+results (array) - { messageKey, contactKey, status, errors }.
+summary (object) - { queued, failed, total }.
+
+Required scopes
+- `sms_send`.
+
+Idempotency & limits
+- Idempotent on `messageKey`.
+- Subject to MobileConnect SMS rate limits and short-code throughput.
+
+Errors
+- DUPLICATE_MESSAGE_KEY, DEFINITION_INACTIVE, INVALID_PHONE_NUMBER.
+
+Example request
+
+send_transactional_sms({
+  "definitionKey": "MTG_OrderConfirmation_SMS",
+  "recipients": [{
+    "contactKey": "MEM-100023",
+    "to": "+15551234567",
+    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345" },
+    "messageKey": "ORD-12345-SMS"
+  }]
+})

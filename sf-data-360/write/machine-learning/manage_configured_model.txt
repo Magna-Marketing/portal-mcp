@@ -1,0 +1,58 @@
+Tool: manage_configured_model
+
+Description
+Update or delete a Configured Model. The Postman collection only
+exposes `Update` and `Delete` (no Create — register new models via
+Einstein Studio / BYOM in Setup; this tool reflects that scope).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models/:configuredModelIdOrName    (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models/:configuredModelIdOrName    (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (update)
+{
+  "label": "Churn Predictor (production)",
+  "status": "Active",
+  "modelArtifactId": "MA_001"
+}
+
+Input (parameters)
+operation (string, required) - "update" | "delete".
+configuredModelIdOrName (string, required).
+label (string, optional).
+status (string, optional) - "Active" | "Draft" | "Failed".
+modelArtifactId (string, optional) - Re-bind to a different artifact.
+inputSchema (object, optional), outputSchema (object, optional).
+
+Result
+configuredModel (object) - Updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; `predict` calls referencing the model fail
+  immediately.
+
+Errors
+- 404 NOT_FOUND, 409 ARTIFACT_INCOMPATIBLE.
+
+Example request
+
+manage_configured_model({
+  "operation": "update",
+  "configuredModelIdOrName": "ChurnPredictor",
+  "modelArtifactId": "MA_002"
+})
+
+Example result
+{ "configuredModel": { "apiName": "ChurnPredictor", "modelArtifactId": "MA_002" } }

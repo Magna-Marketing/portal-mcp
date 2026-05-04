@@ -1,0 +1,62 @@
+Tool: manage_subscription
+
+Description
+Create / update / delete a Report or Dashboard subscription (scheduled
+email delivery).
+
+Salesforce API
+Analytics REST API, v66.0. `/analytics/notifications`.
+
+Endpoint
+POST   /services/data/v66.0/analytics/notifications
+PATCH  /services/data/v66.0/analytics/notifications/{id}
+DELETE /services/data/v66.0/analytics/notifications/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "name": "Weekly Pipeline",
+  "source": "report",
+  "recordId": "00OQg0000004aBcDE",
+  "schedule": { "type": "weekly", "frequency": 1, "daysOfWeek": ["Monday"], "startTime": "09:00:00" },
+  "recipients": [{ "id": "005Qg0000020aBcDE", "type": "user" }],
+  "conditions": [{ "aggregate": "RowCount", "operator": "greaterThan", "value": "0" }],
+  "active": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+notificationId (string, optional, required for non-create).
+name (string, required for create).
+source (string, required for create) - "report" | "dashboard".
+recordId (string, required for create) - Report Id or Dashboard Id.
+schedule (object, required for create) - { type ("hourly"|"daily"|"weekly"|"monthly"), frequency, daysOfWeek, daysOfMonth, startTime, endTime }.
+recipients (array, required for create) - [{ id, type ("user"|"group"|"role") }].
+conditions (array, optional) - [{ aggregate, operator, value }].
+active (boolean, optional, default true).
+
+Result
+subscription (object) - { id, name, source, recordId, recipients, schedule, active }.
+
+Required permissions
+- "API Enabled" + "Schedule Reports" / "Subscribe to Dashboards".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_REPORT_ID / INVALID_DASHBOARD_ID, INSUFFICIENT_FOLDER_ACCESS.
+
+Example request
+
+manage_subscription({
+  "operation": "create",
+  "name": "Daily Pipeline Email",
+  "source": "report",
+  "recordId": "00OQg0000004aBcDE",
+  "schedule": { "type": "daily", "startTime": "09:00:00" },
+  "recipients": [{ "id": "005Qg0000020aBcDE", "type": "user" }]
+})

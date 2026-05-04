@@ -1,0 +1,50 @@
+Tool: get_member_benefits
+
+Description
+Get the active benefits a member is entitled to via the Loyalty Connect
+API. Includes both tier-based benefits (from `LoyaltyTierBenefit`) and
+member-specific benefits (from `MemberBenefit`).
+
+Salesforce API
+Loyalty Connect API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/members/{memberId}/member-benefits
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+benefitType (string, optional) - Filter by `BenefitType.Name`.
+includeInactive (boolean, optional, default false).
+
+Result
+memberId (string).
+benefits (array) - Each:
+  benefitId (string), benefitName (string), benefitType (string),
+  description (string|null),
+  source (string) - "Tier" | "Member".
+  tierName (string|null) - Populated when source=Tier.
+  effectiveFromDate (string|null), effectiveToDate (string|null),
+  isActive (boolean), parameters (object) - Map of BenefitParameterValue
+    rows: { parameterName: parameterValue }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND.
+- LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+get_member_benefits({ "programName": "MTG_Rewards", "memberId": "0lMQg00000abcDE2" })

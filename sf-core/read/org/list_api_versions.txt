@@ -1,0 +1,39 @@
+Tool: list_api_versions
+
+Description
+List all REST API versions available on the running instance, with
+release labels and root URLs. Use to validate that a chosen `apiVersion`
+in tools is supported.
+
+Salesforce API
+REST API, v66.0. `GET /services/data`.
+
+Endpoint
+GET /services/data
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+versions (array) - Each: { version (string, e.g. "66.0"), label (string, e.g. "Spring '26"), url ("/services/data/v66.0") }.
+latest (string) - Highest version.
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- N/A (no auth required for the GET; tool still uses bearer).
+
+Example request
+
+list_api_versions({})

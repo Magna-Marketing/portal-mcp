@@ -1,0 +1,49 @@
+Tool: get_connection_endpoints
+
+Description
+Read the resolved endpoint URLs for a Connection — useful for
+debugging private-network routing or verifying which OAuth /
+service URL the connector is calling into.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/endpoints
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+connectionId (string, required).
+
+Result
+endpoints (array) - Each: { name, url, isReachable (boolean),
+  authType, lastCheckedDate, error (object|null) }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_connection_endpoints({ "connectionId": "0Z65800000000ABCAA" })
+
+Example result
+{
+  "endpoints": [
+    { "name": "auth", "url": "https://mc7xxxxxxxxxxx.auth.marketingcloudapis.com/v2/token",
+      "isReachable": true, "authType": "OAuth2_ClientCredentials" },
+    { "name": "rest", "url": "https://mc7xxxxxxxxxxx.rest.marketingcloudapis.com",
+      "isReachable": true }
+  ]
+}

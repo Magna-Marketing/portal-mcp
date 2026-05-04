@@ -1,0 +1,39 @@
+Tool: list_dashboard_subscriptions
+
+Description
+List dashboard subscriptions (scheduled refresh + email delivery of a
+dashboard). Returns recipients, schedule, conditions, last run.
+
+Salesforce API
+Analytics REST API, v66.0. `/analytics/notifications?source=dashboard`.
+
+Endpoint
+GET /services/data/v66.0/analytics/notifications?source=dashboard
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dashboardId (string, optional).
+ownerId (string, optional).
+includeInactive (boolean, optional, default false).
+
+Result
+subscriptions (array) - Same shape as `list_report_subscriptions` but `source: "dashboard"` and `dashboardId` instead of `reportId`.
+
+Required permissions
+- "API Enabled" + "Subscribe to Dashboards".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_dashboard_subscriptions({})

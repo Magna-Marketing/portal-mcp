@@ -1,0 +1,48 @@
+Tool: assign_game_to_member
+
+Description
+Make a `GameDefinition` available to a specific member outside normal
+eligibility (e.g. anniversary game, manual override). Creates a
+`GameParticipant` record in "Pending" state which the member can then
+play; the result is recorded by `claim_game_reward`.
+
+Salesforce API
+REST API (Data), v66.0. POST on `GameParticipant`.
+
+Endpoint
+POST /services/data/v66.0/sobjects/GameParticipant
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "GameDefinitionId": "...", "MemberId": "0lMQg00000abcDE2", "ParticipationStatus": "Pending", "ParticipationChannel": "Web" }
+
+Input (parameters)
+gameDefinitionId (string, optional).
+gameName (string, optional).
+  One required.
+members (object[], required) - [{ memberId | membershipNumber }].
+participationChannel (string, optional).
+expiresAt (string|null, optional) - Auto-expire if not played.
+
+Result
+results (array) - { memberId, gameParticipantId, status ("assigned"|"already_eligible"|"failed"), error }.
+summary (object) - { assigned, alreadyEligible, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent — already-eligible member returns "already_eligible".
+
+Errors
+- GAME_INACTIVE, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+assign_game_to_member({
+  "gameName": "Spin_The_Wheel_Q3",
+  "members": [{ "memberId": "0lMQg00000abcDE2" }]
+})

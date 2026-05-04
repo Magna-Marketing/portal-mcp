@@ -1,0 +1,65 @@
+Tool: list_form_handlers
+
+Description
+List Form Handlers (server-side endpoints that accept POSTs from
+externally-hosted forms and create / update prospects). Each handler
+has a unique `embedUrl` to POST x-www-form-urlencoded data to.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/form-handlers?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+campaignId (number, optional).
+folderId (number, optional).
+trackerDomainId (number, optional).
+nameContains (string, optional).
+isDataForwarded (boolean, optional).
+isCookielessTracking (boolean, optional).
+isAlwaysEmail (boolean, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,campaignId,folderId,
+  trackerDomainId,salesforceId,isDataForwarded,isCookielessTracking,
+  isAlwaysEmail,isKioskMode,errorLocation,successLocation,embedUrl,
+  createdAt,updatedAt,createdById,updatedById,isDeleted).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+formHandlers (array) - Each: { id, name, campaignId, folderId,
+  trackerDomainId, embedUrl, errorLocation, successLocation,
+  isDataForwarded, isCookielessTracking, isAlwaysEmail, isKioskMode,
+  salesforceId, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_form_handlers({ "campaignId": 1024 })
+
+Example result
+{
+  "formHandlers": [
+    { "id": 8101, "name": "Marketo replacement",
+      "embedUrl": "https://go.magnatech.com/l/.../forms/8101",
+      "successLocation": "https://magnatech.com/thanks" }
+  ]
+}

@@ -1,0 +1,52 @@
+Tool: list_users
+
+Description
+List users in the org with profile, role, manager, license, and active state. Filterable by IsActive, Profile, UserRole, Department, Title, ManagerId, custom SOQL. Returns the same shape used by other user-centric tools so callers can pipe results into `assign_permission_set`, `bulk_assign_permissions`, `unassign_permission_set_group`, etc. For a single user with full effective access detail use `analyze_user_permissions`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `User`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, Email, Alias, IsActive, ProfileId, Profile.Name, UserRoleId, UserRole.Name, ManagerId, Manager.Name, UserType, Department, Title, Phone, MobilePhone, TimeZoneSidKey, LocaleSidKey, EmailEncodingKey, LanguageLocaleKey, FederationIdentifier, IsPortalEnabled, UserPermissionsMarketingUser, UserPermissionsSupportUser, LastLoginDate, CreatedDate FROM User WHERE ...
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+isActive (boolean, optional, default true).
+profileNames (string[], optional).
+roleNames (string[], optional).
+department (string, optional).
+title (string, optional).
+managerUsername (string, optional).
+userType (string, optional) - "Standard" | "PowerPartner" | "PowerCustomerSuccess" | "CSPLitePortal" | "Guest" | "CustomerSuccess" | "CsnOnly".
+namePattern (string, optional) - Glob on Name or Username.
+modifiedSince (string, optional) - ISO timestamp.
+includeInactive (boolean, optional, default false).
+customWhere (string, optional) - Extra WHERE clause appended.
+limit (number, optional, default 200, max 50000).
+sortBy (string, optional, default "Name") - "Name" | "Username" | "LastLoginDate" | "CreatedDate".
+
+Result
+totalSize (number).
+users (array) - Each: id, name, username, email, alias, isActive, profileId, profileName, userRoleId, userRoleName, managerId, managerName, userType, department, title, phone, mobilePhone, timeZone, locale, language, federationIdentifier, lastLoginDate, createdDate.
+hasMore (boolean).
+nextRecordsUrl (string, optional).
+
+Required permissions
+- "View All Users" or "Manage Users" for full visibility.
+
+Idempotency & limits
+- Read-only; safe to retry. Subject to row-level visibility (a non-admin sees only users they're allowed to).
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- MALFORMED_QUERY on bad customWhere.
+
+Example request
+
+list_users({ "profileNames": ["Standard User"], "department": "Engineering", "isActive": true })

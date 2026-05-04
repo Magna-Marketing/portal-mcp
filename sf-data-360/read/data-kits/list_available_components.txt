@@ -1,0 +1,51 @@
+Tool: list_available_components
+
+Description
+List the components in the org that are eligible to be added to a
+Data Kit (or for browsing what's available before creating one).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-kits/available-components
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+componentType (string, optional) - "DataModelObject" |
+  "DataLakeObject" | "CalculatedInsight" | "DataStream" |
+  "Mapping" | "Segment".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+components (array) - Each: { componentName, componentType, label,
+  isInDataKit (boolean), dataKitName (string|null), createdDate,
+  lastModifiedDate }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_available_components({ "componentType": "DataModelObject" })
+
+Example result
+{
+  "components": [
+    { "componentName": "Order__dlm", "componentType": "DataModelObject",
+      "isInDataKit": true, "dataKitName": "B2C_Retail_Foundation" }
+  ]
+}

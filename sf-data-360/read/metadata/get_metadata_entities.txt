@@ -1,0 +1,48 @@
+Tool: get_metadata_entities
+
+Description
+List the entity-type taxonomy supported by the Data 360 metadata
+service — useful for deciding which `entityType` value to pass to
+`get_metadata`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/metadata-entities
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+entities (array) - Each: { entityType, label, supportsCRUD,
+  supportsActions, isVisibleInUI }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+get_metadata_entities({})
+
+Example result
+{
+  "entities": [
+    { "entityType": "DataStream",         "label": "Data Stream",          "supportsCRUD": true },
+    { "entityType": "DataModelObject",    "label": "Data Model Object",    "supportsCRUD": true },
+    { "entityType": "CalculatedInsight",  "label": "Calculated Insight",   "supportsCRUD": true }
+  ]
+}

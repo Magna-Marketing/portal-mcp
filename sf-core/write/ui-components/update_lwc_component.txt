@@ -1,0 +1,60 @@
+Tool: update_lwc_component
+
+Description
+Update one or more files in an existing LWC bundle in a single deploy.
+Convenience wrapper around `replace_lwc_bundle_files` accepting the
+common file fields by name (js, html, css, xml, svg). Files not
+provided are left untouched. If a provided file doesn't exist in the
+bundle, it is created (use `delete_lwc_file` to remove a file).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST  /services/data/v66.0/tooling/sobjects/LightningComponentResource
+PATCH /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+name (string, required) - LWC bundle name.
+js (string, optional).
+html (string, optional).
+css (string, optional).
+xml (string, optional) - meta XML.
+svg (string, optional).
+description (string, optional) - When also updating description.
+isExposed (boolean, optional) - Convenience: also patch the bundle's
+  IsExposed (writes via meta XML; provide xml together when both change).
+apiVersion (number, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+bundle (object) - { id, name, label, apiVersion, isExposed }.
+fileChanges (array) - [{ fileName, action, sizeBytes }].
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- NOT_FOUND on name.
+- DEPLOY_FAILED with compile errors.
+
+Example request
+
+update_lwc_component({
+  "name": "projectCard",
+  "js": "/* updated */ import { LightningElement, api } from 'lwc';\nexport default class ProjectCard extends LightningElement { @api recordId; }\n",
+  "css": ":host { display: block; padding: 1rem; }"
+})

@@ -1,0 +1,64 @@
+Tool: list_engagement_programs
+
+Description
+List Engagement Studio programs (multi-step nurture / onboarding
+graphs that act on a target list of prospects). Each program runs
+on a schedule (`businessHours`) and exposes its high-level state.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/engagement-studio-programs?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Draft" | "Running" | "Paused" |
+  "Completed" | "Error".
+folderId (number, optional).
+nameContains (string, optional).
+campaignId (number, optional).
+recipientListId (number, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,description,status,
+  recipientListId,suppressionListIds,businessHoursId,scheduleType,
+  campaignId,folderId,isDeleted,createdAt,updatedAt,createdById,
+  updatedById,publishedAt,startedAt,completedAt).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+engagementPrograms (array) - Each: { id, name, description, status,
+  recipientListId, suppressionListIds (array), businessHoursId,
+  scheduleType ("Continuous" | "Schedule"), campaignId, folderId,
+  isDeleted, publishedAt, startedAt, completedAt, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_engagement_programs({ "status": "Running" })
+
+Example result
+{
+  "engagementPrograms": [
+    { "id": 311, "name": "Onboarding 2026", "status": "Running",
+      "recipientListId": 301, "campaignId": 1024,
+      "startedAt": "2026-03-01T00:00:00Z" }
+  ]
+}

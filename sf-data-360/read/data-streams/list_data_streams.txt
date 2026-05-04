@@ -1,0 +1,63 @@
+Tool: list_data_streams
+
+Description
+List Data Streams — the configured pipelines that ingest from a
+source Connection into a Data Lake Object (and downstream into
+DMOs via mappings). Each Data Stream has a refresh mode, schedule,
+and last-run status.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-streams
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+connectionId (string, optional).
+status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
+refreshMode (string, optional) - "Full" | "Incremental" | "Streaming".
+nameContains (string, optional).
+limit (number, optional, default 100).
+offset (number, optional).
+
+Result
+dataStreams (array) - Each: { id, developerName, label,
+  connectionId, sourceObject, refreshMode, schedule (object),
+  status, dataLakeObjectName, lastRunStatus, lastRunDate,
+  recordCount, createdById, createdDate, lastModifiedById,
+  lastModifiedDate }.
+totalSize (number), nextPageUrl (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_streams({ "status": "Active" })
+
+Example result
+{
+  "dataStreams": [
+    { "id": "0bcxx0000000001",
+      "developerName": "mc_sends",
+      "label": "MCE Sends",
+      "connectionId": "0Z65800000000ABCAA",
+      "refreshMode": "Incremental",
+      "status": "Active",
+      "dataLakeObjectName": "mc_sends__dll",
+      "lastRunStatus": "Success", "recordCount": 12450 }
+  ]
+}

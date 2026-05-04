@@ -1,0 +1,63 @@
+Tool: list_visits
+
+Description
+List Visit rows (a session, defined as a contiguous group of page
+views). Pair with `list_visitor_page_views` to see what happened
+inside the session.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visits?fields={fields}&filter[visitorId]=eq,:visitorId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+visitorId (number, optional).
+prospectId (number, optional).
+campaignId (number, optional).
+visitorPageViewCountMin (number, optional).
+firstVisitorPageViewAfter (string, optional) - ISO-8601.
+fields (string[], optional, default: id,visitorId,prospectId,
+  visitorPageViewCount,firstVisitorPageViewAt,lastVisitorPageViewAt,
+  durationInSeconds,campaignParameter,sourceParameter,mediumParameter,
+  contentParameter,termParameter,campaignId,createdAt,updatedAt).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+visits (array) - Each: { id, visitorId, prospectId,
+  visitorPageViewCount, firstVisitorPageViewAt, lastVisitorPageViewAt,
+  durationInSeconds, campaignParameter, sourceParameter,
+  mediumParameter, contentParameter, termParameter, campaignId,
+  createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_visits({ "prospectId": 7745, "limit": 10 })
+
+Example result
+{
+  "visits": [
+    { "id": 11001, "visitorId": 5512001, "prospectId": 7745,
+      "visitorPageViewCount": 5, "durationInSeconds": 412,
+      "firstVisitorPageViewAt": "2026-04-29T13:00:00Z" }
+  ]
+}

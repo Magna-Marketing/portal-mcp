@@ -1,0 +1,45 @@
+Tool: get_sms_message_history
+
+Description
+Get SMS delivery history for a single contact + message + token.
+Returns send attempts, statuses (Queued / Sent / Delivered / Failed),
+timestamps. Pair with `list_sms_subscription_status` for subscription
+state.
+
+Marketing Cloud API
+REST API (`/sms/v1/messageContact/{messageId}/history/{tokenId}/mobileNumber/{number}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/sms/v1/messageContact/{messageId}/history/{tokenId}/mobileNumber/{mobileNumber}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+messageId (number, required).
+tokenId (string, required) - Returned by the original send response.
+mobileNumber (string, required) - E.164.
+
+Result
+history (array) - { sentDate, deliveryStatus ("Queued"|"Sent"|"Delivered"|"Failed"|"Bounced"|"Unsubscribed"), failureReason (string|null), shortCode, content }.
+
+Required scopes
+- `sms_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_sms_message_history({
+  "messageId": 12345,
+  "tokenId": "abc-token",
+  "mobileNumber": "+15551234567"
+})

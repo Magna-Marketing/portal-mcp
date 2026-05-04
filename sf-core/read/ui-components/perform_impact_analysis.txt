@@ -1,0 +1,64 @@
+Tool: perform_impact_analysis
+
+Description
+For a proposed change to a UI component, enumerate all artifacts that
+could be affected and rate the blast radius. Combines
+`get_component_dependencies` (incoming) and `analyze_component_usage`
+(FlexiPage placements), then layers profile/app/recordType assignments
+and traffic statistics to estimate user impact.
+
+Use before deleting, deprecating, or breaking-changing a component.
+For "what depends on what" alone, use `get_component_dependencies`.
+
+Salesforce API
+Tooling API + Lightning Usage REST + Metadata API, v66.0.
+
+Endpoint
+N/A (composite).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - Component name.
+type (string, required) - Tooling component type.
+changeType (string, required) - "delete" | "rename" | "breaking_api_change"
+  | "property_added" | "property_removed".
+includeTraffic (boolean, optional, default true) - Pull Lightning Usage
+  metrics for affected pages.
+
+Result
+component (object) - { id, name, type, label, apiVersion }.
+direct (object):
+  flexiPages (array) - { name, label, type, sObject, region }.
+  apexClasses (array) - For VF or Aura controllers.
+  otherComponents (array) - Other LWC/Aura that import this.
+indirect (object):
+  apps (array) - { name, label, isDefault }.
+  profiles (array) - { name, recordType, formFactor }.
+trafficWindow (object|null) - { sinceDays, totalViews, uniqueUsers }.
+overallRisk (string) - "low" | "medium" | "high".
+riskFactors (string[]) - Bullet reasons.
+recommendations (string[]) - Migration suggestions; e.g. "first add the
+  new property, then deprecate the old one over 2 releases".
+
+Required permissions
+- "Customize Application", "View All Setup".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+perform_impact_analysis({
+  "name": "projectCard",
+  "type": "LightningComponentBundle",
+  "changeType": "breaking_api_change"
+})

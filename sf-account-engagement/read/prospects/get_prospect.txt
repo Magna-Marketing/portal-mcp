@@ -1,0 +1,60 @@
+Tool: get_prospect
+
+Description
+Read a single Prospect by id with custom fields, assigned user,
+campaign, and prospect account expanded. To resolve by email
+instead of id, use `list_prospects?email=...&limit=1` (or
+`upsert_prospect_by_email` for write-side semantics).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/prospects/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `assignedToUser.*`,
+  `prospectAccount.*`, `campaign.*`, `customFields`.
+includeListMemberships (boolean, optional, default false) - When
+  true, runs `list_list_memberships?prospectId=:id`.
+includeRecentActivities (boolean, optional, default false) - When
+  true, runs `list_visitor_activities?prospectId=:id&limit=20`.
+
+Result
+prospect (object) - Same shape as `list_prospects` rows, plus full
+  audit relations.
+listMemberships (array, when includeListMemberships=true).
+recentActivities (array, when includeRecentActivities=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_prospect({ "id": 7745, "includeListMemberships": true })
+
+Example result
+{
+  "prospect": {
+    "id": 7745, "email": "jane@example.com", "firstName": "Jane",
+    "score": 75, "grade": "A", "customFields": { "region__c": "EMEA" }
+  },
+  "listMemberships": [
+    { "id": 4421001, "listId": 301, "optedOut": false }
+  ]
+}

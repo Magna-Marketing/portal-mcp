@@ -1,0 +1,94 @@
+Tool: manage_dashboard_component
+
+Description
+Manage individual components within a Salesforce dashboard. Operations:
+- `list`: list components in a dashboard.
+- `describe`: get full metadata for one component.
+- `add`: add a new component.
+- `update`: change properties of a component.
+- `remove`: remove a component.
+- `layout`: replace the dashboard layout (component positions/spans).
+
+Component types include `Bar`, `Column`, `Line`, `Pie`, `Donut`,
+`Funnel`, `Scatter`, `Gauge`, `Metric`, `Table`.
+
+Salesforce API
+Analytics REST API, v66.0. The dashboard's `components` array is
+modified server-side via `PATCH /analytics/dashboards/{id}` after the
+MCP server reads, splices, and writes back.
+
+Endpoint
+GET   /services/data/v66.0/analytics/dashboards/{dashboardId}                   (read full dashboard incl. components)
+PATCH /services/data/v66.0/analytics/dashboards/{dashboardId}                   (apply add/update/remove/layout)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+Content-Type: application/json    (PATCH)
+
+Body (PATCH partial example)
+{
+  "dashboardMetadata": {
+    "components": [
+      {
+        "id": "<existing-id>",
+        "componentType": "Bar",
+        "header": "Pipeline by Stage",
+        "report": "00OQg0000004aBcDE",
+        "groupingColumn": "STAGE_NAME"
+      }
+    ]
+  }
+}
+
+Input (parameters)
+operation (string, required) - "list" | "describe" | "add" | "update" | "remove" | "layout".
+dashboardId (string, required).
+componentId (string, required for describe / update / remove).
+component (object, required for add / update) - Component definition:
+  componentType (string), header (string), report (string),
+  groupingColumn (string), aggregateColumn (string),
+  displayUnits (string), drillEnabled (boolean), drillToFilter (boolean),
+  drillToUrl (string), filterColumns (array), legendPosition (string),
+  showPercentage (boolean), showValues (boolean), useReportChart (boolean).
+layout (object, required for layout) - Dashboard layout JSON
+  ({ columns: [{ components: [{ id, columnSpan, rowSpan }] }] }).
+
+Result (list)
+components (array) - Each: { id, componentType, header, report,
+  groupingColumn }.
+totalCount (number).
+
+Result (describe)
+component (object) - Full component metadata.
+
+Result (add / update / remove / layout)
+dashboard (object) - Updated dashboard with `components` and `layout`.
+
+Required permissions
+- "Manage Dashboards" (or "Modify All Data").
+- Read on the source report.
+
+Idempotency & limits
+- Add: not idempotent.
+- Update / remove / layout: idempotent on equal input.
+- Dashboards limited to 25 components.
+
+Errors
+- DASHBOARD_COMPONENT_LIMIT.
+- INVALID_REPORT_ID (the report referenced doesn't exist or caller can't read).
+
+Example request (add a bar chart)
+
+manage_dashboard_component({
+  "operation": "add",
+  "dashboardId": "01ZQg0000004ZyAA",
+  "component": {
+    "componentType": "Bar",
+    "header": "Pipeline by Stage",
+    "report": "00OQg0000004aBcDE",
+    "groupingColumn": "STAGE_NAME",
+    "aggregateColumn": "s!AMOUNT",
+    "displayUnits": "Auto"
+  }
+})

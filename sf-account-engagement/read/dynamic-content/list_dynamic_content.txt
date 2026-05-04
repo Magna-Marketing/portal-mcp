@@ -1,0 +1,62 @@
+Tool: list_dynamic_content
+
+Description
+List Dynamic Content blocks (personalized content snippets that
+swap based on prospect rules / custom fields). Each block exposes
+an `embedCode` (HTML script tag) and `embedUrl` for embedding in
+emails, landing pages, or external sites.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/dynamic-contents?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+folderId (number, optional).
+nameContains (string, optional).
+basedOn (string, optional) - "PROSPECT_FIELD" | "TAG" | "GRADE" | "SCORE".
+basedOnProspectApiFieldId (string, optional) - When basedOn=PROSPECT_FIELD.
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,folderId,isDeleted,
+  createdById,updatedById,createdAt,updatedAt,basedOn,
+  basedOnProspectApiFieldId,trackerDomainId,embedCode,embedUrl,
+  tagReplacementLanguage).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+dynamicContents (array) - Each: { id, name, folderId, basedOn,
+  basedOnProspectApiFieldId, trackerDomainId, embedCode, embedUrl,
+  tagReplacementLanguage, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_dynamic_content({ "basedOn": "PROSPECT_FIELD" })
+
+Example result
+{
+  "dynamicContents": [
+    { "id": 41, "name": "Region greeting", "basedOn": "PROSPECT_FIELD",
+      "basedOnProspectApiFieldId": "region__c",
+      "embedUrl": "https://go.magnatech.com/dc/41" }
+  ]
+}

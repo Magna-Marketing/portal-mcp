@@ -1,0 +1,87 @@
+Tool: manage_identity_resolution
+
+Description
+Create, update, or delete an Identity Resolution ruleset.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions                       (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions/:identityResolution   (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions/:identityResolution   (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "UnifiedIndividual_default",
+  "label": "Unified Individual (default)",
+  "unifiedDmoApiName": "UnifiedIndividual__dlm",
+  "sourceDmos": ["Contact__dlm","Lead__dlm","Subscriber__dlm"],
+  "matchRules": [
+    {
+      "apiName": "match_email",
+      "sourceField": "EmailAddress__c",
+      "normalization": "EMAIL",
+      "fuzzy": false,
+      "weight": 0.6
+    }
+  ],
+  "reconciliationRules": [
+    { "targetField": "FirstName__c", "strategy": "Recency" }
+  ],
+  "schedule": { "scheduleType": "Cron", "cronExpression": "0 0 0 * * ?" }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+identityResolution (string, required for update / delete).
+apiName (string, required for create).
+label (string, required for create).
+unifiedDmoApiName (string, required for create).
+sourceDmos (string[], required for create).
+matchRules (array, required for create).
+reconciliationRules (array, optional).
+schedule (object, optional).
+
+Result
+identityResolution (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; the unified DMO retains its current data but no new
+  unification happens.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_RULE, 404 NOT_FOUND.
+
+Example request
+
+manage_identity_resolution({
+  "operation": "create",
+  "apiName": "UnifiedIndividual_default",
+  "label": "Unified Individual (default)",
+  "unifiedDmoApiName": "UnifiedIndividual__dlm",
+  "sourceDmos": ["Contact__dlm","Lead__dlm"],
+  "matchRules": [{
+    "apiName": "match_email",
+    "sourceField": "EmailAddress__c",
+    "normalization": "EMAIL", "fuzzy": false, "weight": 0.6
+  }]
+})
+
+Example result
+{
+  "identityResolution": {
+    "id": "0YR580000000001",
+    "apiName": "UnifiedIndividual_default",
+    "status": "Active"
+  }
+}

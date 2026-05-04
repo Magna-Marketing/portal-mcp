@@ -1,0 +1,43 @@
+Tool: list_apex_test_runs
+
+Description
+List recent Apex test runs (`AsyncApexJob` of type TestRequest /
+TestWorker). Each run shows status, queued/processing/completed/failed
+test counts, who submitted, and start/complete times.
+
+Salesforce API
+REST API (Data) + Tooling, v66.0.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Status, JobType, ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors, CreatedDate, CompletedDate, ParentJobId, ApexClassId, MethodName, CreatedById, CreatedBy.Name FROM AsyncApexJob WHERE JobType IN ('TestRequest','TestWorker') ORDER BY CreatedDate DESC
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string|string[], optional) - "Queued" | "Preparing" | "Processing" | "Aborted" | "Completed" | "Failed".
+sinceHours (number, optional, default 168).
+parentJobId (string, optional).
+createdById (string, optional).
+limit (number, optional, default 100).
+
+Result
+totalSize (number).
+testRuns (array) - { id, status, jobType, extendedStatus, jobItemsProcessed, totalJobItems, numberOfErrors, createdById, createdByName, createdDate, completedDate, parentJobId }.
+
+Required permissions
+- "View All Data" / "Author Apex".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_apex_test_runs({ "sinceHours": 72 })

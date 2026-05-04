@@ -1,0 +1,45 @@
+Tool: list_benefits
+
+Description
+List `Benefit` records (the catalogue of perks the program can grant —
+"Free Checked Bag", "Lounge Access", "10% Discount"). Includes
+parameter values, expiration semantics, redemption channel.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `Benefit` and (optionally)
+`BenefitParameterValue`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, BenefitTypeId, BenefitType.Name, IsActive, EffectiveStartDate, EffectiveEndDate, ImageUrl, CreatedDate FROM Benefit
+GET /services/data/v66.0/query/?q=SELECT Id, BenefitId, Name, Value FROM BenefitParameterValue WHERE BenefitId IN (...)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+benefitTypeName (string, optional).
+isActive (boolean, optional).
+namePattern (string, optional).
+includeParameters (boolean, optional, default true).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+benefits (array) - { id, name, description, benefitTypeId, benefitTypeName, isActive, effectiveStartDate, effectiveEndDate, imageUrl, parameters (object, optional) - { name: value }, createdDate }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_benefits({ "isActive": true })

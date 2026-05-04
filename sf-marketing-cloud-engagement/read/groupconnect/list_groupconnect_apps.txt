@@ -1,0 +1,36 @@
+Tool: list_groupconnect_apps
+
+Description
+List GroupConnect apps (LINE, KakaoTalk, etc.) registered to the BU.
+
+Marketing Cloud API
+REST API (`/legacy/v1/beta/groupconnect/apps`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/apps
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+apps (array) - { id, name, lineAccountName, applicationType, accessToken (masked), webhookUrl, dateCreated }.
+
+Required scopes
+- `messaging_api_app_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_groupconnect_apps({})

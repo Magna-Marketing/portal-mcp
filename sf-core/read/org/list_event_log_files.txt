@@ -1,0 +1,46 @@
+Tool: list_event_log_files
+
+Description
+List `EventLogFile` rows for Event Monitoring. Each row is a CSV file
+of events for a specific event type (Login, API, ApexExecution,
+ReportExport, ContentDocumentLink, etc.) and a date range. Use
+`get_event_log_file` to download.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `EventLogFile`. Requires Event
+Monitoring add-on license.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, EventType, LogDate, LogFileLength, ApiVersion, CreatedDate, Sequence, Interval, LogFileFieldNames, LogFileFieldTypes FROM EventLogFile
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+eventType (string|string[], optional) - "Login" | "Logout" | "API" | "ApexExecution" | "ApexCallout" | "ApexTrigger" | "ApexUnexpectedException" | "ReportExport" | "Report" | "Search" | "URI" | "VisualforceRequest" | "RestApi" | "BulkApi" | "ContentDocumentLink" | "ContentDistribution" | "ContentTransfer" | "DashboardRun" | "ReportRun" | "AsyncReportRun" | "LightningPageView" | "LightningPerformance" | "PlatformEncryptionEvent" | "Sites" | etc.
+dateFrom (string, optional) - YYYY-MM-DD.
+dateTo (string, optional) - YYYY-MM-DD.
+interval (string, optional, default "Hourly") - "Hourly" | "Daily".
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+eventLogFiles (array) - { id, eventType, logDate, logFileLength, apiVersion, sequence, interval, fieldNames (string[]), fieldTypes (string[]) }.
+
+Required permissions
+- "View Event Log Files" + Event Monitoring license.
+
+Idempotency & limits
+- Read-only.
+- Retention: 30 days (or 6 months on Shield Event Monitoring).
+
+Errors
+- LICENSE_NOT_AVAILABLE: Event Monitoring not enabled.
+
+Example request
+
+list_event_log_files({ "eventType": "Login", "dateFrom": "2026-04-22", "dateTo": "2026-04-29" })

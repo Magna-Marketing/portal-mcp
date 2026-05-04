@@ -1,0 +1,58 @@
+Tool: get_data_graph
+
+Description
+Read a single Data Graph definition by developer name. Returns the
+full graph schema (which DMOs are joined how) and the JSON shape
+that runtime queries return.
+
+Salesforce API
+Connect plane (default) or runtime plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/:dataGraphName        (plane="connect")
+GET {cdpTenantUrl}/api/v1/dataGraph/metadata?dataGraphName=:name              (plane="runtime")
+
+Headers
+Authorization: Bearer <core_access_token>      (connect)
+Authorization: Bearer <data_cloud_token>       (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataGraphName (string, required).
+plane (string, optional, default "connect").
+dataSpace (string, optional, default "default").
+
+Result
+dataGraph (object): developerName, label, dataSpace, primaryDmo,
+  includedDmos (array<{ dmoApiName, relationshipName, cardinality,
+    fields (array) }>), refreshFrequency, status, recordCount,
+  lastRefreshDate, createdDate, lastModifiedDate, schema (object).
+
+Required scopes
+- `api` (connect) or `cdp_api` (runtime).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_data_graph({ "dataGraphName": "UnifiedIndividualGraph" })
+
+Example result
+{
+  "dataGraph": {
+    "developerName": "UnifiedIndividualGraph",
+    "primaryDmo": "UnifiedIndividual__dlm",
+    "includedDmos": [
+      { "dmoApiName": "EngagementHistory__dlm",
+        "relationshipName": "EngagementHistory",
+        "cardinality": "OneToMany" }
+    ]
+  }
+}

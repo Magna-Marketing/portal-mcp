@@ -1,0 +1,79 @@
+Tool: generate_permission_matrix
+
+Description
+Generate a 2D permission matrix (rows = permissions, columns = users)
+suitable for compliance reporting, screenshots, or dropping into a
+spreadsheet. Each cell is true / false / "—" (when not applicable to the
+user's license). Use for SOX/SOC2 reviews where you must demonstrate
+who has what at a point in time. The output is structured (JSON), the
+caller renders the table.
+
+Use `compare_user_permissions` for a divergence-focused diff. Use
+`audit_permissions` for risk-focused aggregation across the whole org.
+
+Salesforce API
+REST API + Tooling, v66.0. Composite of analyze_user_permissions over
+each user.
+
+Endpoint
+N/A.
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+users (object[], required) - Each entry: { userId? } or { username? };
+  any number of users (practical limit ~200 to fit on a page).
+permissions (object, required) - One or more of:
+  system (string[]) - System permission names (without "Permissions" prefix).
+  objects (object[]) - { sObject, accessType[] } where accessType is
+    a subset of ["read","create","edit","delete","viewAll","modifyAll"].
+  fields (object[], optional) - { sObject, field, accessType[] } where
+    accessType is ["read","edit"].
+  apexClasses (string[], optional) - Class names.
+  vfPages (string[], optional) - VF page names.
+output (string, optional, default "json") - "json" | "csv" (CSV is
+  produced as a string; the JSON shape below is also returned).
+
+Result
+header (object) - Row/column headers used.
+matrix (array) - Each row:
+  permissionKey (string) - "ModifyAllData" | "Account.read" | ...
+  permissionLabel (string) - Human label.
+  category ("system"|"object"|"field"|"apex"|"vf").
+  values (object) - userId -> true | false | "n/a".
+  totalsTrue (number).
+  totalsFalse (number).
+csv (string, only when output="csv") - First column = permission, then
+  one column per user.
+generatedAt (string) - ISO timestamp.
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- O(users * permissions). With 50 users and 200 permissions, expect 5-10 s.
+
+Errors
+- INVALID_FIELD: unknown system permission.
+- INVALID_TYPE: unknown sObject in `objects[].sObject`.
+
+Example request
+
+generate_permission_matrix({
+  "users": [
+    { "username": "jane.doe@magnatech.com" },
+    { "username": "john.smith@magnatech.com" }
+  ],
+  "permissions": {
+    "system": ["ModifyAllData", "ManageUsers", "ApiEnabled"],
+    "objects": [
+      { "sObject": "Opportunity", "accessType": ["read", "edit", "delete"] }
+    ]
+  }
+})

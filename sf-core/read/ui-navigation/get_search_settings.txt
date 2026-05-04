@@ -1,0 +1,45 @@
+Tool: get_search_settings
+
+Description
+Read the running user's search scope and order ("which objects show up
+first in the global search dropdown") plus org-level search settings
+(`SearchSettings`).
+
+Salesforce API
+REST API, v66.0. `/search/scopeOrder` (per-user) and Metadata API
+`SearchSettings` (org-level).
+
+Endpoint
+GET /services/data/v66.0/search/scopeOrder
+POST /services/Soap/m/66.0   (readMetadata SearchSettings)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeOrgSettings (boolean, optional, default true).
+
+Result
+scopeOrder (array) - Per-user pinned objects: [{ name, label, type ("Default"|"User") }].
+orgSettings (object, when includeOrgSettings=true):
+  documentContentSearchEnabled (boolean).
+  optimizeSearchForCJKEnabled (boolean).
+  recentlyViewedUsersForBlankLookupEnabled (boolean).
+  searchSettingsByObject (array) - [{ sObject, enhancedLookupEnabled, lookupAutoCompleteEnabled, resultsPerPageCount }].
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY for org settings (requires "Customize Application").
+
+Example request
+
+get_search_settings({})

@@ -1,0 +1,45 @@
+Tool: get_token_info
+
+Description
+Inspect the active access token: tenant subdomain, business-unit (MID)
+the token was issued for, granted scopes, expiration, and the Installed
+Package client id. Useful for debugging "why is this call returning
+401 / 403?".
+
+Marketing Cloud API
+OAuth 2.0 (introspection convenience over `/v2/userinfo`).
+
+Endpoint
+GET https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+token (object):
+  tenant (string), tenantSubdomain (string), accountId (number) - MID,
+  enterpriseId (number), userId (number), userName (string|null),
+  userEmail (string|null), preferred_username (string|null),
+  scopes (string[]), expiresAt (string), issuedAt (string),
+  installedPackageClientId (string).
+
+Required scopes
+- The Installed Package needs at least `offline` scope (issued by default).
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- 401 invalid_token if the token is expired (the MCP server refreshes
+  and retries once).
+
+Example request
+
+get_token_info({})

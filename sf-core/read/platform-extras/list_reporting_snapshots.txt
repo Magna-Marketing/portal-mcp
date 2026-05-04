@@ -1,0 +1,39 @@
+Tool: list_reporting_snapshots
+
+Description
+List Reporting Snapshots (`AnalyticSnapshot`): scheduled report runs
+that snapshot results into a custom object for trending. Each snapshot
+shows source report, target sObject + fields, schedule, last run.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `AnalyticSnapshot` and `AnalyticSnapshotState`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, Description, SourceReportId, TargetObject, RunningUserId, GroupName FROM AnalyticSnapshot
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeFieldMappings (boolean, optional, default true).
+
+Result
+totalSize (number).
+reportingSnapshots (array) - { id, name, developerName, description, sourceReportId, targetObject, runningUserId, fieldMappings (array, when includeFieldMappings=true): [{ sourceField, targetField }], lastRunDate, nextRunDate }.
+
+Required permissions
+- "Manage Reporting Snapshots".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_reporting_snapshots({})

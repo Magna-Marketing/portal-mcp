@@ -1,0 +1,44 @@
+Tool: list_audit_events
+
+Description
+List Marketing Cloud Audit & Notifications events: who did what (login,
+data-extension changes, journey publish, send classification edit,
+permission grants, etc.). Useful for compliance / SOX2 reviews.
+
+Marketing Cloud API
+REST API (`/data/v1/audit/auditEvents`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/audit/auditEvents?$orderBy=createdDate desc&$page=1&$pagesize=100
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sinceHours (number, optional, default 24, max 24*180).
+eventType (string|string[], optional) - Filter by audit type (e.g. "Login", "DataExtensionAccessed", "JourneyPublished", "RoleAssigned", "UserCreated").
+userId (number, optional).
+businessUnitId (number, optional).
+limit (number, optional, default 500, max 5000).
+
+Result
+totalCount (number).
+events (array) - { id, eventType, eventDate, userId, userName, accountId, businessUnitId, ipAddress, objectId, objectName, objectType, description, additionalData (object) }.
+
+Required scopes
+- `audit_events_read` (or `accounts_read` for legacy tenants).
+
+Idempotency & limits
+- Read-only.
+- Audit retention: 30 days standard, 13 months on Audit Trail upgrade.
+
+Errors
+- 403 unauthorized.
+
+Example request
+
+list_audit_events({ "eventType": "JourneyPublished", "sinceHours": 168 })

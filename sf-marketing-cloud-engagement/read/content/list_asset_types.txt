@@ -1,0 +1,37 @@
+Tool: list_asset_types
+
+Description
+List Content Builder asset type definitions (the catalogue of
+`assetType.id` and `assetType.name` values used in `list_assets`).
+
+Marketing Cloud API
+REST API (`/asset/v1/content/assets/assettypes`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/assettypes
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+items (array) - { id, name, displayName, contentType, assetTypeGroupId, assetTypeGroupName }.
+
+Required scopes
+- `email_read` / `documents_and_images_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- N/A.
+
+Example request
+
+list_asset_types({})

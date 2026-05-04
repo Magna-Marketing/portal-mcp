@@ -1,0 +1,57 @@
+Tool: get_segment
+
+Description
+Read a single Segment by api name or id. Returns the full criteria
+graph + the latest publish status.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiNameOrId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+segmentApiNameOrId (string, required).
+includeFilter (boolean, optional, default true) - Returns the
+  criteria graph as `filter`.
+
+Result
+segment (object): id, apiName, label, description, status,
+  publishStatus, dmoApiName, populationCount, schedule,
+  filter (object|null) - { rootGroup ("AND"|"OR"), conditions, nestedGroups, sourceDmos },
+  lastPublishedAt, lastPublishStatus, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_segment({ "segmentApiNameOrId": "EMEAHighValue" })
+
+Example result
+{
+  "segment": {
+    "id": "0YS580000000001", "apiName": "EMEAHighValue",
+    "publishStatus": "Published", "populationCount": 18420,
+    "filter": {
+      "rootGroup": "AND",
+      "conditions": [
+        { "field": "Region__c",       "op": "eq",  "value": "EMEA" },
+        { "field": "LifetimeValue__c","op": "gte", "value": 5000 }
+      ]
+    }
+  }
+}

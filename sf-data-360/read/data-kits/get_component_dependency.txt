@@ -1,0 +1,55 @@
+Tool: get_component_dependency
+
+Description
+Read the dependency tree of a single component within a Data Kit
+— which other components must be installed first / are referenced.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitName/components/:componentName/dependencies
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataKitName (string, required).
+componentName (string, required).
+
+Result
+dependencies (object):
+  componentName (string).
+  dependsOn (array<{ componentName, componentType, isResolved }>).
+  dependedOnBy (array<{ componentName, componentType }>).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_component_dependency({
+  "dataKitName": "B2C_Retail_Foundation",
+  "componentName": "OrderToIndividual_mapping"
+})
+
+Example result
+{
+  "dependencies": {
+    "componentName": "OrderToIndividual_mapping",
+    "dependsOn": [
+      { "componentName": "Order__dlm",          "componentType": "DataModelObject", "isResolved": true },
+      { "componentName": "UnifiedIndividual__dlm","componentType": "DataModelObject", "isResolved": true }
+    ]
+  }
+}

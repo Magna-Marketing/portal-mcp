@@ -1,0 +1,76 @@
+Tool: manage_form_handler_field
+
+Description
+Create, update, or delete a Form Handler field — a mapping row
+between an inbound form field name and a Pardot prospect
+`apiFieldId`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/form-handler-fields       (create)
+PATCH  https://{pi-domain}/api/v5/objects/form-handler-fields/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/form-handler-fields/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "formHandlerId": 8101,
+  "name": "email",
+  "prospectApiFieldId": "email",
+  "isRequired": true,
+  "errorMessage": "Email is required",
+  "isMaintainInitialValue": false,
+  "sortOrder": 0,
+  "dataFormat": "Email"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+formHandlerId (number, required for create).
+name (string, required for create) - Inbound field name (must match
+  the external form's input `name`).
+prospectApiFieldId (string, required for create) - Prospect target.
+isRequired (boolean, optional, default false).
+isMaintainInitialValue (boolean, optional, default false) - When
+  true, an existing value is not overwritten.
+errorMessage (string, optional).
+sortOrder (number, optional).
+dataFormat (string, optional) - Validation format ("Email", "Number",
+  "Date", "Text").
+
+Result
+formHandlerField (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- 600 invalid_prospect_field, 53 form_handler_locked, 59 not_found.
+
+Example request
+
+manage_form_handler_field({
+  "operation": "create",
+  "formHandlerId": 8101,
+  "name": "email",
+  "prospectApiFieldId": "email",
+  "isRequired": true
+})
+
+Example result
+{
+  "formHandlerField": { "id": 1101, "formHandlerId": 8101,
+    "name": "email", "prospectApiFieldId": "email" }
+}

@@ -1,0 +1,57 @@
+Tool: manage_custom_tab
+
+Description
+Create / update / delete Custom Tabs (sObject tabs, Web tabs, VF tabs,
+FlexiPage tabs, Lightning Component tabs).
+
+Salesforce API
+Metadata API (`CustomTab`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+type (string, required for create) - "sobject" | "web" | "visualforce" | "flexipage" | "lightningcomponent" | "auracomponent".
+fullName (string, required) - DeveloperName.
+label (string, required for create).
+description (string, optional).
+sObject (string, optional) - For "sobject" tabs (the tab represents a custom object).
+url (string, optional) - For "web" tabs.
+page (string, optional) - For "visualforce" tabs (VF page name).
+flexiPage (string, optional).
+lightningComponent (string, optional).
+motif (string, optional, default "Custom14: Sticky Note") - Icon style.
+isHidden (boolean, optional, default false).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+customTab (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_custom_tab({
+  "operation": "create",
+  "type": "flexipage",
+  "fullName": "MTG_Dashboard",
+  "label": "MTG Dashboard",
+  "flexiPage": "MTG_Dashboard_Page",
+  "motif": "Custom74: Briefcase"
+})

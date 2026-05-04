@@ -1,0 +1,52 @@
+Tool: inject_contacts_into_journey
+
+Description
+Inject one or more contacts into a journey at the entry event. Wraps
+the Journey Audience API (push-style entry). Use for ad-hoc enrollment
+outside the journey's normal trigger.
+
+Marketing Cloud API
+REST API (`/interaction/v1/events`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/events
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "ContactKey": "MEM-100023",
+  "EventDefinitionKey": "APIEvent-MTG-Welcome",
+  "Data": { "FirstName": "Jane", "TierName": "Gold" }
+}
+
+Input (parameters)
+contacts (object[], required) - Each: { contactKey, data (object) - event payload values for the journey's data binding }.
+eventDefinitionKey (string, required) - The journey trigger's event definition key.
+batchSize (number, optional, default 200, max 1000) - Tool batches inputs.
+externalEventId (string, optional) - Stable id for retry semantics.
+
+Result
+results (array) - Per contact: { contactKey, eventInstanceId, status ("queued"|"processed"|"failed"), error }.
+summary (object) - { queued, failed, total }.
+
+Required scopes
+- `journeys_execute`.
+
+Idempotency & limits
+- Marketing Cloud doesn't dedupe by `externalEventId` automatically; inject is not idempotent.
+- 1000 events per call.
+
+Errors
+- 10000 invalid event definition, JOURNEY_INACTIVE.
+
+Example request
+
+inject_contacts_into_journey({
+  "eventDefinitionKey": "APIEvent-MTG-Welcome",
+  "contacts": [
+    { "contactKey": "MEM-100023", "data": { "FirstName": "Jane", "TierName": "Gold" } }
+  ]
+})

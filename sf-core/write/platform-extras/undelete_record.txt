@@ -1,0 +1,42 @@
+Tool: undelete_record
+
+Description
+Undelete one or more records from the Recycle Bin (`IsDeleted=true`),
+restoring them to active status. Records hard-deleted or past the
+15-day window cannot be undeleted.
+
+Salesforce API
+SOAP API `undelete()` (no native REST equivalent for v66.0). Tool wraps
+this via anonymous Apex when REST is unavailable.
+
+Endpoint
+POST /services/Soap/u/66.0   (undelete)
+or executes anonymous Apex `Database.undelete(...)`.
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+SOAP envelope or Apex.
+
+Input (parameters)
+recordIds (string[], required) - Up to 200 per call.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - Per record: { id, success, errors }.
+summary (object) - { undeleted, failed, total }.
+
+Required permissions
+- Object create/edit/delete on the sObject + access to Recycle Bin.
+
+Idempotency & limits
+- 200 records per call.
+- Window: 15 days.
+
+Errors
+- ENTITY_NOT_IN_RECYCLEBIN, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+undelete_record({ "recordIds": ["006Qg0000020aBcDE", "0014Q00000abcDE"] })

@@ -1,0 +1,44 @@
+Tool: manage_custom_redirect_tags
+
+Description
+Add or remove tags on a Custom Redirect.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/custom-redirects/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/custom-redirects/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Spring 2026" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), customRedirectId (number), tag (string),
+operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_custom_redirect_tags({ "id": 612, "operation": "add", "tag": "Spring 2026" })
+
+Example result
+{ "success": true, "customRedirectId": 612, "tag": "Spring 2026", "operation": "add" }

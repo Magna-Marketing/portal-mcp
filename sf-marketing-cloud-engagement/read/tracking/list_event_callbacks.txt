@@ -1,0 +1,39 @@
+Tool: list_event_callbacks
+
+Description
+List Event Notification Service (ENS) callbacks. A callback is a
+webhook (HTTPS endpoint) that ENS pushes events to. Subscriptions
+(see `list_event_subscriptions`) bind event types to callbacks.
+
+Marketing Cloud API
+REST API (`/platform/v1/ens-callbacks`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks/{callbackId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+callbackId (string, optional) - Get a single callback.
+
+Result
+callbacks (array) - { callbackId, callbackName, url, signatureKey (masked), maxBatchSize, status ("Active"|"Verified"|"Unverified"|"Disabled"), verifyMethod, createdDate, lastModifiedDate }.
+
+Required scopes
+- `webhooks_read` (or `event_notifications_read`).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_event_callbacks({})

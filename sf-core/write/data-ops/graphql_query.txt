@@ -1,0 +1,56 @@
+Tool: graphql_query
+
+Description
+Run a GraphQL query (or mutation) against Salesforce's GraphQL endpoint.
+Supports nested reads with relationships, cursor-based pagination,
+filters, and sort. Mutations are limited to UI-API-supported sObjects
+(create/update/delete records and a few specialized actions).
+
+Salesforce API
+GraphQL API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/graphql
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "query": "query Accounts($first: Int) { uiapi { query { Account(first: $first, where: { Industry: { eq: \"Tech\" } }) { edges { node { Id Name Industry { value } } } pageInfo { endCursor hasNextPage } } } } }",
+  "variables": { "first": 50 }
+}
+
+Input (parameters)
+query (string, required) - GraphQL document (query or mutation).
+variables (object, optional).
+operationName (string, optional).
+
+Result
+data (object) - GraphQL data response (shape mirrors query structure).
+errors (array, optional) - GraphQL errors.
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Idempotent for read queries; not for mutations.
+- Cursor pagination via `pageInfo.endCursor` + `after` arg.
+- Counts toward DailyApiRequests.
+
+Errors
+- GraphQL errors with `path`, `extensions.errorType`.
+
+Example request (read)
+
+graphql_query({
+  "query": "query { uiapi { query { Account(where: { Industry: { eq: \"Tech\" } }, first: 25) { edges { node { Id Name Industry { value } } } pageInfo { endCursor hasNextPage } } } } }"
+})
+
+Example request (mutation)
+
+graphql_query({
+  "query": "mutation CreateAccount($input: AccountInput!) { uiapi { AccountCreate(input: { Account: $input }) { Record { Id Name } } } }",
+  "variables": { "input": { "Name": "ACME" } }
+})

@@ -1,0 +1,51 @@
+Tool: manage_custom_label
+
+Description
+Create / update / delete Custom Labels.
+
+Salesforce API
+Metadata API (`CustomLabel`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+fullName (string, required) - Label DeveloperName.
+masterLabel (string, required for create).
+value (string, required for create/update) - The translated text.
+language (string, optional, default org default) - Language code.
+isProtected (boolean, optional, default false).
+categories (string, optional) - Semicolon-separated categories.
+shortDescription (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+customLabel (object).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD.
+
+Example request
+
+manage_custom_label({
+  "operation": "create",
+  "fullName": "MTG_Project_Welcome",
+  "masterLabel": "Project Welcome",
+  "value": "Welcome to MTG Projects.",
+  "language": "en_US"
+})

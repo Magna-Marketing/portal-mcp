@@ -1,0 +1,47 @@
+Tool: list_change_sets
+
+Description
+List inbound and outbound Change Sets and their components. Outbound
+change sets are uploaded packages awaiting send to a target org;
+inbound are received and either deployed, validated, or pending.
+
+Salesforce API
+Tooling API, v66.0. `Package2`/`InstalledSubscriberPackage` are different;
+Change Sets are surfaced via Tooling sObjects: `Package` (legacy) and
+the Setup-only Change Set views (`OutboundChangeSet`, `InboundChangeSet`
+do not have public sObject names; data is exposed through
+`MetadataPackage` + `MetadataPackageVersion` and Setup pages).
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, Description, IsManaged, PackageCategory FROM MetadataPackage
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataPackageId, MajorVersion, MinorVersion, PatchVersion, BuildNumber, IsDeprecated, ReleaseState FROM MetadataPackageVersion
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+direction (string, optional) - "inbound" | "outbound" | "both" (default).
+includeComponents (boolean, optional, default false).
+limit (number, optional, default 100).
+
+Result
+totalSize (number).
+changeSets (array) - { id, name, direction, status, sourceOrgId (when inbound), components (array, optional): [{ type, fullName }] }.
+metadataPackages (array, optional) - Package metadata that overlaps with change sets when applicable.
+
+Required permissions
+- "Deploy Change Sets" / "Modify Metadata Through Metadata API Functions".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_change_sets({ "direction": "inbound" })

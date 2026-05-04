@@ -1,0 +1,38 @@
+Tool: get_journey_publish_status
+
+Description
+Check the status of a journey-publish operation queued by
+`publish_journey`. The publish itself is async; use this to poll
+until "Published" or "Failed" with diagnostics.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/publishStatus/{statusId}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishStatus/{statusId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+statusId (string, required) - Returned by `publish_journey`.
+
+Result
+publish (object) - { statusId, journeyId, version, status ("Pending"|"InProgress"|"Published"|"Failed"|"Cancelled"), startedAt, completedAt, errors (array): [{ key, message, severity }] }.
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 statusId not found.
+
+Example request
+
+get_journey_publish_status({ "statusId": "abc-publish-status-id" })

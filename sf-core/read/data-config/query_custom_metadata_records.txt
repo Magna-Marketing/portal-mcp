@@ -1,0 +1,43 @@
+Tool: query_custom_metadata_records
+
+Description
+Query records of a single Custom Metadata Type via SOQL. Convenience
+wrapper that auto-handles the `__mdt` suffix and lets callers pass
+fields, where, orderBy without writing the full SELECT.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `<CMT>__mdt`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT ... FROM {cmtName}__mdt
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+cmtName (string, required) - Custom Metadata Type API name (with or without `__mdt`).
+fields (string[], optional, default ["Id","DeveloperName","Label","NamespacePrefix"]).
+where (string, optional).
+orderBy (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+records (array) - Each: { Id, DeveloperName, Label, NamespacePrefix, ...selected fields }.
+
+Required permissions
+- "API Enabled".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad cmtName.
+
+Example request
+
+query_custom_metadata_records({ "cmtName": "Feature_Flag__mdt", "fields": ["DeveloperName","Label","Enabled__c"] })

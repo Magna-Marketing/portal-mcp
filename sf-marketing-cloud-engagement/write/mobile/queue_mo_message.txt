@@ -1,0 +1,47 @@
+Tool: queue_mo_message
+
+Description
+Queue an inbound Mobile-Originated (MO) SMS message for processing.
+Used to test MO routing or to inject messages received over a non-MC
+channel into MobileConnect's keyword-routing engine.
+
+Marketing Cloud API
+REST API (`/sms/v1/queueMO`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/queueMO
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "mobileNumber": "+15551234567", "shortCode": "12345", "countryCode": "US", "message": "MTG", "receivedDate": "2026-04-30T15:00:00Z" }
+
+Input (parameters)
+mobileNumber (string, required) - E.164.
+shortCode (string, required).
+countryCode (string, optional, default "US").
+message (string, required) - Text the user "sent" inbound.
+receivedDate (string, optional, default now).
+keyword (string, optional) - Override the parsed keyword.
+
+Result
+result (object) - { queued (boolean), tokenId, routedToKeyword, routedToMessageId, errors }.
+
+Required scopes
+- `sms_send`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- INVALID_PHONE_NUMBER, INVALID_SHORTCODE.
+
+Example request
+
+queue_mo_message({
+  "mobileNumber": "+15551234567",
+  "shortCode": "12345",
+  "message": "MTG"
+})

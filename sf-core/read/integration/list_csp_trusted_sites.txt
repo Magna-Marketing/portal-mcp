@@ -1,0 +1,40 @@
+Tool: list_csp_trusted_sites
+
+Description
+List CSP Trusted Sites (`CspTrustedSite`) — the external endpoints
+explicitly allowed in the org's Content Security Policy for LWC, Aura,
+and Lightning Out.
+
+Salesforce API
+Metadata API + Tooling, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, EndpointUrl, IsActive, Description, Context FROM CspTrustedSite
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeInactive (boolean, optional, default true).
+context (string, optional) - "All" | "LEX" | "Communities" | "PerimeterFirst".
+
+Result
+totalSize (number).
+cspTrustedSites (array) - { id, developerName, endpointUrl, isActive, context, description }.
+
+Required permissions
+- "Modify All Data" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_csp_trusted_sites({})

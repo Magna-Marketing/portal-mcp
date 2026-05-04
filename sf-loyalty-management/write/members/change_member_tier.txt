@@ -1,0 +1,62 @@
+Tool: change_member_tier
+
+Description
+Administratively change a member's tier in a tier group, bypassing
+normal qualification rules. Wraps the Standard Invocable Action
+`ChangeTier`. Use for VIP overrides, customer-service goodwill, or
+tier-group migrations.
+
+For evaluation-driven tier updates use `update_member_tier`.
+
+Salesforce API
+Standard Invocable Action `ChangeTier`, v66.0.
+
+Endpoint
+POST /services/data/v66.0/actions/standard/changeTier
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "inputs": [{
+    "ProgramName": "MTG_Rewards",
+    "LoyaltyProgramMemberId": "0lMQg00000abcDE2",
+    "TierGroupName": "Status_Tiers",
+    "TierName": "Gold",
+    "EffectiveFromDate": "2026-05-01",
+    "TierChangeReason": "Goodwill override"
+  }]
+}
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+tierGroupName (string, required).
+tierName (string, required) - Target tier name.
+effectiveFromDate (string, optional, default today).
+expirationDate (string, optional).
+reason (string, optional).
+
+Result
+result (object) - { isSuccess, errors, currentTierName, previousTierName, effectiveFromDate }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Not idempotent (each call writes a new `LoyaltyMemberTier` row).
+
+Errors
+- LOYALTY_TIER_INVALID, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+change_member_tier({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "tierGroupName": "Status_Tiers",
+  "tierName": "Gold",
+  "reason": "Customer service override"
+})

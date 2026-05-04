@@ -1,0 +1,47 @@
+Tool: get_lifecycle_history
+
+Description
+Read a single Lifecycle History row by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/lifecycle-histories/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands lifecycleStage.* and
+  previousLifecycleStage.*.
+
+Result
+lifecycleHistory (object): id, prospectId, lifecycleStageId,
+  previousLifecycleStageId, secondsElapsedInPreviousStage, createdAt.
+lifecycleStage (object), previousLifecycleStage (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_lifecycle_history({ "id": 1801 })
+
+Example result
+{
+  "lifecycleHistory": { "id": 1801, "prospectId": 7745,
+    "lifecycleStageId": 2, "secondsElapsedInPreviousStage": 86400 }
+}

@@ -1,0 +1,45 @@
+Tool: manage_custom_field_tags
+
+Description
+Add or remove tags on a Custom Field.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/custom-fields/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/custom-fields/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "tag": "PII" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), customFieldId (number), tag (string),
+operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_custom_field_tags({ "id": 71, "operation": "add", "tag": "PII" })
+
+Example result
+{ "success": true, "customFieldId": 71, "tag": "PII", "operation": "add" }

@@ -1,0 +1,40 @@
+Tool: list_attribute_groups
+
+Description
+List Contact Builder attribute groups (e.g. "Demographics", "Email
+Preferences"). Each group bundles attribute sets that share an entity
+type (Person, Behavior, etc.).
+
+Marketing Cloud API
+REST API (`/contacts/v1/attributeSetDefinitions/...` and `/contacts/v1/attributeGroups`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/attributeGroups
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional).
+includeSets (boolean, optional, default true).
+
+Result
+totalCount (number).
+attributeGroups (array) - { name, label, description, isPublishGroup, mid, attributeSets (array, when includeSets=true): [{ name, label, isPrimary }] }.
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+list_attribute_groups({})

@@ -1,0 +1,48 @@
+Tool: list_templates
+
+Description
+List all Data Clean Room templates available across providers in
+the org. Cross-provider catalogue view.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/templates
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+providerIdOrName (string, optional).
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+templates (array) - Each: { id, apiName, label, providerIdOrName,
+  description, parameters, approvalStatus, createdDate }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_templates({})
+
+Example result
+{
+  "templates": [
+    { "id": "tpl_001", "apiName": "OverlapAudience",
+      "providerIdOrName": "MTG_Snowflake_DCR" }
+  ]
+}

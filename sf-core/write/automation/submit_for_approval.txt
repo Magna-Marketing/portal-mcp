@@ -1,0 +1,54 @@
+Tool: submit_for_approval
+
+Description
+Submit a record for approval. Triggers the active approval process for
+the sObject if entry criteria match. Returns the new ProcessInstance.
+
+Salesforce API
+REST API (Process Approvals), v66.0.
+
+Endpoint
+POST /services/data/v66.0/process/approvals/
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "requests": [{
+    "actionType": "Submit",
+    "contextId": "0014Q00000abcDE",
+    "comments": "Please review.",
+    "nextApproverIds": ["005Qg0000020aBcDE"],
+    "skipEntryCriteria": false,
+    "submitterId": null,
+    "processDefinitionNameOrId": null
+  }]
+}
+
+Input (parameters)
+records (object[], required) - Each:
+  recordId (string, required) - Record to submit.
+  comments (string, optional).
+  nextApproverIds (string[], optional) - Override next approver(s).
+  processDefinitionNameOrId (string, optional) - Force a specific process when multiple exist.
+  skipEntryCriteria (boolean, optional, default false).
+
+Result
+results (array) - Per record: { instanceId (ProcessInstance Id), instanceStatus ("Pending"|"Approved"|"Rejected"|"Removed"), entityId, actorIds (next approvers), errors }.
+
+Required permissions
+- The running user must be a permitted submitter for the process.
+
+Idempotency & limits
+- Not idempotent — a record already in pending approval can't be re-submitted (NO_APPLICABLE_PROCESS or ALREADY_IN_PROCESS).
+
+Errors
+- NO_APPLICABLE_PROCESS, ALREADY_IN_PROCESS, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+submit_for_approval({
+  "records": [{ "recordId": "006Qg0000020aBcDE", "comments": "Pricing locked at 10% discount" }]
+})

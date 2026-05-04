@@ -1,0 +1,87 @@
+Tool: manage_bulk_ingest_job
+
+Description
+Create, close, abort, or delete a Data 360 Bulk Ingestion job.
+Lifecycle:
+
+1. `manage_bulk_ingest_job operation="create"` → returns `jobId` in
+   state `Open`.
+2. `upload_bulk_ingest_data` → upload one or more CSV/JSON chunks.
+3. `manage_bulk_ingest_job operation="close"` → moves job to
+   `UploadComplete`; the platform processes asynchronously.
+4. Poll with `read/ingest/get_ingest_job` until terminal state.
+5. (Optional) `operation="abort"` while running, or `operation="delete"`
+   after completion.
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+POST   {cdpTenantUrl}/api/v1/ingest/jobs                      (operation="create")
+PATCH  {cdpTenantUrl}/api/v1/ingest/jobs/:jobId               (operation="close" / "abort")
+DELETE {cdpTenantUrl}/api/v1/ingest/jobs/:jobId               (operation="delete")
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "object": "Order",
+  "sourceName": "ecommerce",
+  "operation": "upsert",
+  "contentType": "CSV",
+  "columnDelimiter": "COMMA",
+  "lineEnding": "LF"
+}
+
+Body (close)
+{ "state": "UploadComplete" }
+
+Body (abort)
+{ "state": "Aborted" }
+
+Input (parameters)
+operation (string, required) - "create" | "close" | "abort" | "delete".
+jobId (string, required for close / abort / delete).
+object (string, required for create).
+sourceName (string, required for create).
+ingestOperation (string, optional, default "upsert") - "upsert" |
+  "insert" | "delete".
+contentType (string, optional, default "CSV") - "CSV" | "JSON".
+columnDelimiter (string, optional, default "COMMA") - "COMMA" |
+  "PIPE" | "SEMICOLON" | "TAB".
+lineEnding (string, optional, default "LF") - "LF" | "CRLF".
+
+Result
+job (object).
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Not idempotent on create.
+- 150GB per job; max 100 active jobs per tenant.
+
+Errors
+- 400 INVALID_STATE_TRANSITION, 404 NOT_FOUND, 409 JOB_NOT_OPEN,
+  401 invalid_token.
+
+Example request
+
+manage_bulk_ingest_job({
+  "operation": "create",
+  "object": "Order",
+  "sourceName": "ecommerce",
+  "ingestOperation": "upsert"
+})
+
+Example result
+{
+  "job": {
+    "id": "JOB_001", "sourceApiName": "ecommerce",
+    "objectApiName": "Order", "state": "Open"
+  }
+}

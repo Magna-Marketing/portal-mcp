@@ -1,0 +1,62 @@
+Tool: list_files
+
+Description
+List Files (uploaded assets — images, PDFs, attachments) in the BU's
+file library. Returns each file's `url` (CDN-served), `size`,
+`mimeType`, and `folderId`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/files?fields={fields}&filter[folderId]=eq,33
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+folderId (number, optional).
+nameContains (string, optional).
+mimeType (string, optional) - Exact match (e.g. "image/png").
+isTracked (boolean, optional) - Whether download clicks are tracked.
+campaignId (number, optional).
+trackerDomainId (number, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,name,size,mimeType,
+  folderId,trackerDomainId,campaignId,vanityUrl,vanityUrlPath,
+  trackedUrl,url,bitlyShortUrl,bitlyIsPersonalized,salesforceId,
+  isTracked,isDeleted,createdAt,updatedAt,createdById,updatedById).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+files (array) - Each: { id, name, size, mimeType, url, vanityUrl,
+  trackedUrl, folderId, trackerDomainId, campaignId, salesforceId,
+  isTracked, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_files({ "folderId": 33, "mimeType": "image/png" })
+
+Example result
+{
+  "files": [
+    { "id": 901, "name": "logo.png", "mimeType": "image/png",
+      "size": 18244, "url": "https://go.magnatech.com/l/.../logo.png" }
+  ]
+}

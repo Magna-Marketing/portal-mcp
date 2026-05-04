@@ -1,0 +1,54 @@
+Tool: list_loyalty_programs
+
+Description
+List Loyalty Programs in the org. Returns identity, status, member
+count summary, default currency, and primary tier group. Use to pick a
+`programName` for downstream member / voucher / promotion calls.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `LoyaltyProgram`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, Status, ProgramType, StartDate, EndDate, ProgramCurrencyName, DefaultProgramCurrencyId, PrimaryTierGroupId, MemberPrimaryAddrAddrType, OwnerId, Owner.Name, CreatedDate, LastModifiedDate FROM LoyaltyProgram
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional) - Glob/substring match on Name.
+status (string, optional) - "Active" | "Inactive" | "Draft".
+includeMemberCount (boolean, optional, default false) - Adds COUNT() on LoyaltyProgramMember per program (heavier).
+limit (number, optional, default 200, max 2000).
+
+Result
+totalSize (number).
+programs (array) - Each:
+  id (string).
+  name (string) - Use as `programName` in Loyalty Connect endpoints.
+  description (string|null).
+  status (string).
+  programType (string) - "Engagement" | "Reward" | "TierBased" | etc.
+  startDate (string|null).
+  endDate (string|null).
+  defaultProgramCurrencyId (string|null).
+  primaryTierGroupId (string|null).
+  ownerId, ownerName (string).
+  memberCount (number, optional, when includeMemberCount=true).
+  createdDate, lastModifiedDate (string).
+
+Required permissions
+- `Loyalty Management` permission set (read).
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_loyalty_programs({ "status": "Active", "includeMemberCount": true })

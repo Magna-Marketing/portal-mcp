@@ -1,0 +1,57 @@
+Tool: manage_external_client_app
+
+Description
+Create / update / delete External Client Apps (`ExternalClientApplication`).
+Modern OAuth-managed app surface; supersedes Connected Apps for new
+integrations.
+
+Salesforce API
+Metadata API (`ExternalClientApplication`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+fullName (string, required) - DeveloperName.
+masterLabel (string, required for create).
+contactEmail (string, required for create).
+description (string, optional).
+isActive (boolean, optional, default true).
+isClientCredentialsFlowEnabled (boolean, optional, default false).
+isHybridAppFlowEnabled (boolean, optional, default false).
+isPkceRequired (boolean, optional, default true).
+oauth (object, optional) - { scopes, callbackUrl, idTokenConfig, refreshTokenPolicy }.
+policies (object, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+externalClientApp (object) - { id, fullName, masterLabel }.
+
+Required permissions
+- "Manage Connected Apps".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_external_client_app({
+  "operation": "create",
+  "fullName": "MTG_Partner_Integration",
+  "masterLabel": "MTG Partner Integration",
+  "contactEmail": "ops@magnatech.com",
+  "isPkceRequired": true,
+  "oauth": { "scopes": ["api", "refresh_token"], "callbackUrl": "https://ops.magnatech.com/cb" }
+})

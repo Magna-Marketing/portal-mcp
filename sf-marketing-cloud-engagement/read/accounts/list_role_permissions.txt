@@ -1,0 +1,41 @@
+Tool: list_role_permissions
+
+Description
+List the granular permissions assigned to a single role
+(`RolePermission`).
+
+Marketing Cloud API
+SOAP API (`RolePermission.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on RolePermission filtered by RoleID.
+
+Input (parameters)
+roleId (number, optional).
+roleName (string, optional).
+  One required.
+allowedOnly (boolean, optional, default false) - Only return permissions where IsAllowed=true.
+
+Result
+role (object) - { id, name }.
+permissions (array) - { permissionId, name, description, isAllowed }.
+
+Required scopes
+- `users_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- ROLE_NOT_FOUND.
+
+Example request
+
+list_role_permissions({ "roleName": "Marketing Cloud Administrator" })

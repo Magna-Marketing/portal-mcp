@@ -1,0 +1,47 @@
+Tool: list_member_games
+
+Description
+List the games available / played by a single member. Combines
+`GameDefinition` (currently active games for the member's program/tier
++ eligibility) with the member's `GameParticipant` history. Use to
+build a member-facing "My Games" view.
+
+Salesforce API
+Loyalty Connect API + REST (Data) composite, v66.0.
+
+Endpoint
+GET /services/data/v66.0/connect/loyalty/programs/{programName}/members/{memberId}/games   (when available)
+GET /services/data/v66.0/query/?q=SELECT ... FROM GameDefinition WHERE ProgramId = '...' AND IsActive = true
+GET /services/data/v66.0/query/?q=SELECT ... FROM GameParticipant WHERE MemberId = '...' ORDER BY ParticipationDate DESC
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+includeUpcoming (boolean, optional, default true).
+includeHistory (boolean, optional, default true).
+historyDays (number, optional, default 90).
+
+Result
+memberId (string).
+availableGames (array) - { gameId, gameName, gameType, eligible (boolean), reasonNotEligible (string|null), playsRemaining (number, optional) }.
+history (array) - Compact participation rows for the member: { gameId, gameName, participationDate, participationStatus, rewardName, rewardType }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LOYALTY_PROGRAM_NOT_FOUND, LOYALTY_MEMBER_NOT_FOUND.
+
+Example request
+
+list_member_games({ "programName": "MTG_Rewards", "memberId": "0lMQg00000abcDE2" })

@@ -1,0 +1,73 @@
+Tool: get_ui_usage_statistics
+
+Description
+Org-wide UI inventory and usage statistics:
+- Counts of LWC, Aura, VF, FlexiPage, CustomTab, CustomApplication.
+- Custom vs managed breakdown.
+- Average / median components per Lightning Page.
+- Most-used custom components (rank).
+- Unused-component count (cross-checked with `find_unused_components`).
+- API version distribution.
+
+Use as a once-a-quarter dashboard input or before a UI cleanup project.
+
+Salesforce API
+Tooling API + Lightning Usage REST endpoints, v66.0.
+- `LightningComponentBundle`, `AuraDefinitionBundle`, `ApexPage`,
+  `FlexiPage` for inventory.
+- `LightningUsageByPageMetrics`, `LightningUsageByFlexiPageMetrics`
+  (`/services/data/v66.0/lightning/...`) for actual user-traffic stats.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=...   (inventory queries)
+GET /services/data/v66.0/lightning/usagebyflexipagemetrics?startDate=...&endDate=...
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeUsageMetrics (boolean, optional, default true) - Pull traffic
+  stats from Lightning Usage. Requires "Modify All Data" or specific
+  permset.
+sinceDays (number, optional, default 30) - Window for traffic stats.
+includeBreakdownByApi (boolean, optional, default true).
+
+Result
+generatedAt (string).
+inventory (object):
+  lwc (object) - { total, custom, managed, exposed, byApiVersion: { "62.0": 30 } }.
+  aura (object) - same shape minus exposed.
+  visualforce (object) - { total, custom, managed }.
+  flexiPage (object) - { total, byType: { "RecordPage": ..., "AppPage": ... } }.
+  customTab (object) - { total, custom }.
+  customApplication (object) - { total, custom }.
+flexiPageStats (object):
+  averageComponentsPerPage (number).
+  medianComponentsPerPage (number).
+  maxComponentsOnAnyPage (number).
+  pageWithMost (object) - { name, label, count }.
+mostUsedCustomComponents (array) - { name, type, usageCount, pages[] }.
+unusedComponents (object) - { lwc: number, aura: number, visualforce: number }.
+trafficStats (object|null, when includeUsageMetrics=true) - { topPages: [{ pageName, views, uniqueUsers }], topAppPages, dailyAverage }.
+apiVersionDistribution (object) - Across all UI components.
+
+Required permissions
+- "Customize Application", "View All Setup".
+- Lightning Usage stats require "Modify All Data" or the
+  "View Setup and Configuration" + "Lightning Usage" permset.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Heavy: O(LWC count) due to file enumeration; ~5–10 s in big orgs.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY for traffic stats; tool falls back
+  with trafficStats=null.
+
+Example request
+
+get_ui_usage_statistics({ "includeUsageMetrics": false })

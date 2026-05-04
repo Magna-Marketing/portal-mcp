@@ -1,0 +1,89 @@
+Tool: manage_email_template
+
+Description
+Create, update, delete, or clone a CMS Email Template
+(`cms_email_template__c`) — a reusable shell that emails are spun
+off of. Same shape as `manage_email` but with `type=cms_email_template__c`
+and component / placeholder semantics for tokens.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/connect/cms/contents                    (operation="create")
+PUT    {instanceUrl}/services/data/v{ver}/connect/cms/contents/variants/:variantId (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/connect/cms/contents/variants/:variantId (operation="delete")
+POST   {instanceUrl}/services/data/v{ver}/connect/cms/contents/:contentKey/clone   (operation="clone")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create with components)
+{
+  "type": "cms_email_template__c",
+  "contentKey": "welcome_template_2026",
+  "title": "Welcome Template 2026",
+  "contentSpaceId": "0Z0xx0000000001AAA",
+  "language": "en_US",
+  "components": [
+    { "type": "Header",      "logoUrl": "https://cdn.magnatech.com/logo.png" },
+    { "type": "TextBlock",   "html": "<h1>{{Recipient.FirstName}}</h1>" },
+    { "type": "Footer",      "address": "Magna, 1 Way St" }
+  ],
+  "placeholders": [
+    { "name": "Recipient.FirstName", "type": "merge_field" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "clone".
+contentKey (string, required for create / clone).
+variantId (string, required for update / delete).
+title (string, required for create).
+contentSpaceId (string, required for create).
+language (string, optional, default "en_US").
+htmlBody (string, optional) - HTML-only template.
+components (object[], optional) - Component-based template.
+placeholders (object[], optional) - Declared merge fields the
+  template exposes.
+cloneTargetContentKey (string, required for clone).
+cloneTargetTitle (string, optional, clone-only).
+
+Result
+content (object, for create / update / clone).
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `cms_api`.
+
+Idempotency & limits
+- Idempotent on `contentKey` for create.
+- Deleting a template referenced by published emails returns
+  `409 IN_USE`; remove or republish dependents first.
+
+Errors
+- 409 DUPLICATE_VALUE, 409 IN_USE, 400 INVALID_FIELD, 404 NOT_FOUND.
+
+Example request
+
+manage_email_template({
+  "operation": "create",
+  "contentKey": "welcome_template_2026",
+  "title": "Welcome Template",
+  "contentSpaceId": "0Z0xx0000000001AAA",
+  "components": [
+    { "type": "Header", "logoUrl": "https://cdn.magnatech.com/logo.png" }
+  ]
+})
+
+Example result
+{
+  "content": {
+    "id": "0Q0xx000000tmplEAA",
+    "contentKey": "welcome_template_2026",
+    "type": "cms_email_template__c",
+    "status": "Draft"
+  }
+}

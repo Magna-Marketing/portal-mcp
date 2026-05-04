@@ -1,0 +1,69 @@
+Tool: create_or_update_contact
+
+Description
+Create or update one or more Contacts via the Contact Builder REST
+API. Used to author / refresh contact records along with their
+attribute set values. For the legacy Subscriber model use
+`manage_subscriber`; this tool is the modern Contact Builder path.
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts`).
+
+Endpoint
+POST  https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts        (create)
+PATCH https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts        (update; bulk)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "contactKey": "MEM-100023",
+  "attributeSets": [{
+    "name": "Email Addresses",
+    "items": [{
+      "values": [
+        { "name": "Email Address", "value": "jane.doe@example.com" },
+        { "name": "HTML Enabled", "value": "true" }
+      ]
+    }]
+  }]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert".
+contacts (object[], required) - Each:
+  contactKey (string, required).
+  contactId (number, optional).
+  attributeSets (array, optional) - [{ name, items: [{ values: [{ name, value }] }] }].
+  channelAddresses (array, optional) - [{ channelAddress, addressType ("Email"|"MobileNumber"|"PushTag"|"Line"), isPrimary }].
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - { contactKey, contactId, status ("created"|"updated"|"failed"), errors }.
+summary (object) - { created, updated, failed, total }.
+
+Required scopes
+- `audiences_write`.
+
+Idempotency & limits
+- upsert idempotent on `contactKey`.
+- Bulk PATCH up to 100 contacts per call.
+
+Errors
+- 30002 not found (update), DUPLICATE_VALUE on contactKey collision (create).
+
+Example request
+
+create_or_update_contact({
+  "operation": "upsert",
+  "contacts": [{
+    "contactKey": "MEM-100023",
+    "channelAddresses": [{ "channelAddress": "jane.doe@example.com", "addressType": "Email", "isPrimary": true }],
+    "attributeSets": [{
+      "name": "Email Addresses",
+      "items": [{ "values": [{ "name": "Email Address", "value": "jane.doe@example.com" }] }]
+    }]
+  }]
+})

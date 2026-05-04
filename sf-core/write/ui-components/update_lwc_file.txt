@@ -1,0 +1,54 @@
+Tool: update_lwc_file
+
+Description
+Update a single file in an existing LWC bundle. The platform validates
+the change as part of the save; compile errors are returned with file +
+line + column. If the file doesn't exist, the call **fails** (use
+`add_lwc_file` instead).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET   /services/data/v66.0/tooling/query/?q=SELECT Id FROM LightningComponentResource WHERE LightningComponentBundleId = '...' AND FilePath LIKE '%{fileName}'
+POST  /services/data/v66.0/tooling/sobjects/MetadataContainer
+PATCH /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}
+POST  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (member update)
+{ "MetadataContainerId": "<id>", "Source": "..." }
+
+Input (parameters)
+bundleName (string, required) - LWC bundle name.
+fileName (string, required) - File name including extension.
+source (string, required) - New contents.
+checkOnly (boolean, optional, default false).
+expectedFormat (string, optional) - Validate the format inferred from
+  fileName matches: "js" | "html" | "css" | "xml" | "svg".
+
+Result
+deploy (object) - state, componentSuccesses, componentFailures.
+file (object, on success) - { id, fileName, format, sizeBytes,
+  lastModifiedDate }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal source.
+
+Errors
+- NOT_FOUND if bundle or file doesn't exist.
+- DEPLOY_FAILED with line/column on syntax errors.
+
+Example request
+
+update_lwc_file({
+  "bundleName": "projectCard",
+  "fileName": "projectCard.js",
+  "source": "import { LightningElement, api } from 'lwc';\nexport default class ProjectCard extends LightningElement { @api recordId; }\n"
+})

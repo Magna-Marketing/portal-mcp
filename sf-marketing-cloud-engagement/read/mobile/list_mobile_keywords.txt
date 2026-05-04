@@ -1,0 +1,43 @@
+Tool: list_mobile_keywords
+
+Description
+List MobileConnect keywords (the SMS short codes / long codes plus the
+keyword(s) that route opt-in / opt-out / response messages to a flow
+or campaign).
+
+Marketing Cloud API
+REST API (`/sms/v1/keyword`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/sms/v1/keyword
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+codeId (number, optional).
+isInherited (boolean, optional).
+keywordType (string, optional) - "MO" | "MT" | "Information" | "Help" | "Stop".
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalCount (number).
+keywords (array) - { id, keyword, codeId, codeShortCode, keywordType, isInherited, restriction, dateCreated, dateModified }.
+
+Required scopes
+- `mobile_connect_read` (or relevant mobile scope).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_mobile_keywords({ "codeId": 12345 })

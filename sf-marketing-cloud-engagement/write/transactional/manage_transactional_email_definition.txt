@@ -1,0 +1,65 @@
+Tool: manage_transactional_email_definition
+
+Description
+Create / update / delete a Transactional Messaging email definition.
+This is the modern transactional API; prefer it over Triggered Send
+Definitions for new integrations.
+
+Marketing Cloud API
+REST API (`/messaging/v1/email/definitions`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions
+PATCH  https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}
+DELETE https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "definitionKey": "MTG_OrderConfirmation",
+  "name": "MTG Order Confirmation",
+  "classification": "Default Transactional",
+  "status": "Active",
+  "description": "Sent on order confirmation",
+  "content": { "customerKey": "MTG_OrderConfirmation_Email" },
+  "subscriptions": { "list": "All Subscribers" },
+  "options": { "createJourney": false }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+definitionKey (string, required) - Stable Id you choose.
+name (string, required for create).
+description (string, optional).
+classification (string, optional, default "Default Transactional") - SendClassification name.
+status (string, optional) - "Active" | "Inactive".
+contentCustomerKey (string, optional, required for create) - Reference to a Content Builder email asset.
+subscriptionsList (string, optional, default "All Subscribers") - Or a custom list.
+subscriptionsDataExtension (string, optional) - DE External Key for sendable DE list.
+options (object, optional) - { createJourney (boolean) }.
+
+Result
+definition (object) - { definitionKey, definitionId, name, status, classification, content, subscriptions, options }.
+
+Required scopes
+- `email_send`.
+
+Idempotency & limits
+- update idempotent.
+- create not idempotent on duplicate definitionKey.
+
+Errors
+- DUPLICATE_VALUE on definitionKey, INVALID_CLASSIFICATION.
+
+Example request
+
+manage_transactional_email_definition({
+  "operation": "create",
+  "definitionKey": "MTG_OrderConfirmation",
+  "name": "MTG Order Confirmation",
+  "contentCustomerKey": "MTG_OrderConfirmation_Email",
+  "classification": "Default Transactional"
+})

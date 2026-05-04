@@ -1,0 +1,58 @@
+Tool: manage_outbound_message
+
+Description
+Create / update / delete a Workflow Outbound Message (SOAP webhook
+fired by a Workflow Rule). Configures endpoint URL, fields included,
+and integration user used to authenticate the message.
+
+Salesforce API
+Metadata API (`Workflow.outboundMessages`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+sObject (string, required).
+fullName (string, required) - Outbound message DeveloperName (within the sObject's Workflow).
+name (string, required for create).
+endpointUrl (string, required for create/update).
+integrationUserId (string, optional).
+integrationUsername (string, optional).
+fields (string[], optional) - Field API names to include in the SOAP message.
+apiVersion (number, optional, default = org default).
+includeSessionId (boolean, optional, default false).
+useDeadLetterQueue (boolean, optional, default false).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+outboundMessage (object) - { fullName, name, endpointUrl, fields }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad fields list.
+
+Example request
+
+manage_outbound_message({
+  "operation": "create",
+  "sObject": "Opportunity",
+  "fullName": "Notify_Partner_On_Won",
+  "name": "Notify Partner on Won",
+  "endpointUrl": "https://webhook.partner.com/sf/opportunity",
+  "fields": ["Id", "Name", "Amount", "CloseDate"],
+  "integrationUsername": "integration@magnatech.com"
+})

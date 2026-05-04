@@ -1,0 +1,81 @@
+Tool: upsert_prospect_by_email
+
+Description
+Idempotent prospect upsert keyed on email. The recommended write
+for inbound integrations: repeat calls with the same email return
+the same prospect, preserving id and existing relationships.
+Behavior:
+
+- Email match found → update the matched prospect with the supplied
+  fields (only fields you pass are changed).
+- No match → create a new prospect.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/prospects/do/upsertLatestByEmail
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "matchEmail": "jane@example.com",
+  "prospect": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "company": "Acme",
+    "campaignId": 1024,
+    "customFields": { "region__c": "EMEA" }
+  }
+}
+
+Input (parameters)
+matchEmail (string, required) - Email to match on. Case-insensitive.
+prospect (object, required) - Same shape as `manage_prospect` body
+  (without `email`; the email is taken from `matchEmail`). All
+  fields optional; only set fields are updated.
+secondaryDeletedSearch (boolean, optional, default false) - When
+  true, also matches against soft-deleted prospects (and restores
+  them).
+restoreDeleted (boolean, optional, default false) - With
+  secondaryDeletedSearch=true, restores a soft-deleted prospect.
+
+Result
+prospect (object) - Resolved row (created or updated).
+created (boolean) - true when a new prospect was created.
+restored (boolean) - true when a soft-deleted prospect was restored.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent on `matchEmail`. Repeat calls return the same
+  prospect id.
+- Subject to BU `apiCallsUsed` quota.
+
+Errors
+- 11 invalid_email, 12 multiple_email_matches (if BU has duplicate
+  emails — fix by enabling email uniqueness), 184 daily_limit_reached.
+
+Example request
+
+upsert_prospect_by_email({
+  "matchEmail": "jane@example.com",
+  "prospect": {
+    "firstName": "Jane",
+    "company": "Acme",
+    "campaignId": 1024
+  }
+})
+
+Example result
+{
+  "prospect": { "id": 7745, "email": "jane@example.com", "firstName": "Jane" },
+  "created": false,
+  "restored": false
+}

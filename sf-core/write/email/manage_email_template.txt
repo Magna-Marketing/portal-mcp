@@ -1,0 +1,70 @@
+Tool: manage_email_template
+
+Description
+Create / update / delete email templates (Classic + Lightning). Sets
+folder, type, subject, body (text/html), brand template, encoding.
+
+Salesforce API
+REST API (Data) or Metadata API (`EmailTemplate`), v66.0. Tool uses
+`POST /sobjects/EmailTemplate` for create/update and Metadata API for
+deeper folder ops.
+
+Endpoint
+POST /services/data/v66.0/sobjects/EmailTemplate
+PATCH /services/data/v66.0/sobjects/EmailTemplate/{id}
+DELETE /services/data/v66.0/sobjects/EmailTemplate/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "Name": "MTG Project Status",
+  "DeveloperName": "MTG_Project_Status_Email",
+  "FolderId": "00lQg0000008abcAB",
+  "TemplateType": "html",
+  "Subject": "Status update: {!Project__c.Name}",
+  "HtmlValue": "<html>...</html>",
+  "Body": "Status update for {!Project__c.Name}.",
+  "Encoding": "UTF-8",
+  "IsActive": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+templateId (string, optional) - For non-create.
+name (string, required for create) - UI name.
+developerName (string, optional, default = name normalized).
+folderId (string, required for create).
+type (string, required for create) - "text" | "html" | "custom" | "visualforce".
+subject (string, optional).
+htmlBody (string, optional).
+textBody (string, optional).
+brandTemplateId (string, optional).
+encoding (string, optional, default "UTF-8").
+description (string, optional).
+
+Result
+template (object) - { id, name, developerName, folderId, type, isActive }.
+
+Required permissions
+- "Manage Public Templates" / "Manage Public Documents".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_email_template({
+  "operation": "create",
+  "name": "MTG Project Status",
+  "folderId": "00lQg0000008abcAB",
+  "type": "html",
+  "subject": "Status update: {!Project__c.Name}",
+  "htmlBody": "<p>Status: <b>{!Project__c.Status__c}</b></p>",
+  "textBody": "Status: {!Project__c.Status__c}"
+})

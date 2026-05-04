@@ -1,0 +1,72 @@
+Tool: get_data_graph_record
+
+Description
+Pull the denormalized profile-and-children record for a single
+primary entity from a Data Graph. The Postman collection exposes
+two access patterns:
+
+- By primary key (id): hits `/data-graphs/data/:entity/:id` (connect)
+  or `/api/v1/dataGraph/:name/:recordId` (runtime).
+- By lookup keys: hits `/data-graphs/data/:entity?lookup1=...&...`
+  (connect) or `/api/v1/dataGraph/:name?key=...` (runtime).
+
+Use the runtime plane for high-throughput personalization queries.
+
+Salesforce API
+Connect plane or runtime plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/data/:dataGraphEntityName/:id     (connect, by id)
+GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/data/:dataGraphEntityName         (connect, by lookup)
+GET {cdpTenantUrl}/api/v1/dataGraph/:dataGraphName/:dataGraphRecordId                     (runtime, by id)
+GET {cdpTenantUrl}/api/v1/dataGraph/:dataGraphName                                        (runtime, by lookup)
+
+Headers
+Authorization: Bearer <core_access_token> (connect) or <data_cloud_token> (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+plane (string, optional, default "runtime") - "connect" | "runtime".
+dataGraphName (string, required for runtime) - Graph developer name.
+dataGraphEntityName (string, required for connect) - The primary
+  entity name (typically same as graph name).
+id (string, optional) - Primary-key value; required when looking up
+  by id.
+lookupKeys (object, optional) - Map of `{ field: value }` for
+  lookup-by-key access. Mutually exclusive with `id`.
+fields (string[], optional) - Subset of fields to return.
+
+Result
+record (object|null) - The denormalized record matching the request
+  (with related DMOs nested as arrays).
+
+Required scopes
+- `api` (connect) or `cdp_api` / `cdp_profile_api_read` (runtime).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 invalid_token.
+
+Example request
+
+get_data_graph_record({
+  "plane": "runtime",
+  "dataGraphName": "UnifiedIndividualGraph",
+  "id": "IND_001"
+})
+
+Example result
+{
+  "record": {
+    "Id__c": "IND_001",
+    "FirstName__c": "Jane",
+    "EngagementHistory": [
+      { "EventType__c": "EmailOpen", "EventTimestamp__c": "2026-04-29T13:05:12Z" }
+    ]
+  }
+}

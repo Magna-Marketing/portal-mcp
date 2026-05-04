@@ -1,0 +1,75 @@
+Tool: manage_alert
+
+Description
+Create or update a Data Alert — a rule that fires (e.g. notifies an
+operator) when a Configured Model's prediction or feature drift
+metric crosses a threshold. Postman exposes only `Create` and
+`Update`; alerts are deactivated by setting `isActive=false` on
+update.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST  {instanceUrl}/services/data/v{ver}/ssot/machine-learning/alerts                  (operation="create")
+PATCH {instanceUrl}/services/data/v{ver}/ssot/machine-learning/alerts/:alertId         (operation="update")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "label": "Churn drift > 0.1",
+  "configuredModelApiName": "ChurnPredictor",
+  "metric": "FeatureDrift",
+  "operator": "gt",
+  "threshold": 0.1,
+  "channel": "Email",
+  "recipients": ["ops@magnatech.com"],
+  "isActive": true
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update".
+alertId (string, required for update).
+label (string, required for create).
+configuredModelApiName (string, required for create).
+metric (string, required for create) - "Accuracy" | "F1" |
+  "Precision" | "Recall" | "FeatureDrift" | "PredictionDrift" |
+  "Latency" | "ErrorRate".
+operator (string, required for create) - "gt" | "lt" | "gte" |
+  "lte" | "eq".
+threshold (number, required for create).
+channel (string, optional, default "Email") - "Email" | "Slack" |
+  "Webhook".
+recipients (string[], optional).
+webhookUrl (string, optional).
+isActive (boolean, optional).
+
+Result
+alert (object) - Created / updated row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `(configuredModelApiName, metric, threshold, operator)`.
+
+Errors
+- 404 NOT_FOUND, 400 INVALID_METRIC.
+
+Example request
+
+manage_alert({
+  "operation": "create",
+  "label": "Churn accuracy < 0.7",
+  "configuredModelApiName": "ChurnPredictor",
+  "metric": "Accuracy",
+  "operator": "lt",
+  "threshold": 0.7
+})
+
+Example result
+{ "alert": { "alertId": "AL_001", "isActive": true } }

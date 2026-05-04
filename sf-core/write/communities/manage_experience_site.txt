@@ -1,0 +1,58 @@
+Tool: manage_experience_site
+
+Description
+Create / update / delete an Experience Cloud site (`Network`). For
+LWR/Aura Experience sites, content/page editing is via the
+`ExperienceBundle` Metadata API; this tool covers the site-level
+identity, status, login policy, and accepted profiles.
+
+Salesforce API
+Connect API + Metadata API (`CommunityTemplateDefinition`,
+`Network`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/communities                         (create from template)
+PATCH /services/data/v66.0/connect/communities/{communityId}          (update)
+DELETE /services/data/v66.0/connect/communities/{communityId}         (delete)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "name": "Customer Hub", "urlPathPrefix": "customer", "templateName": "Customer Service", "templateOptions": { } }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+siteId (string, optional) - Required for non-create.
+siteName (string, optional) - Or use as create input.
+urlPathPrefix (string, required for create).
+templateName (string, optional, default "Customer Service") - Salesforce-provided template.
+description (string, optional).
+status (string, optional) - "Live" | "DownForMaintenance" | "UnderConstruction".
+allowMembersToFlag (boolean, optional).
+contentVisibility (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+site (object) - { id, name, urlPathPrefix, status, siteUrl, template }.
+
+Required permissions
+- "Create and Set Up Experiences".
+
+Idempotency & limits
+- Not idempotent on create.
+
+Errors
+- DUPLICATE_VALUE on urlPathPrefix.
+- TEMPLATE_NOT_FOUND.
+
+Example request
+
+manage_experience_site({
+  "operation": "create",
+  "siteName": "Customer Hub",
+  "urlPathPrefix": "customer",
+  "templateName": "Customer Service",
+  "description": "Self-service portal"
+})

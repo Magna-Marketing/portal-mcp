@@ -1,0 +1,48 @@
+Tool: get_prospect_account
+
+Description
+Read a single Prospect Account by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/prospect-accounts/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `assignedToUser.*`,
+  `createdBy.*`, `updatedBy.*`.
+
+Result
+prospectAccount (object): id, name, salesforceId, assignedToUserId,
+  industry, website, billingAddressOne, billingAddressTwo, billingCity,
+  billingState, billingZip, billingCountry, number, annualRevenue,
+  employees, ownership, sicCode, tickerSymbol, createdAt, updatedAt.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_prospect_account({ "id": 5512 })
+
+Example result
+{
+  "prospectAccount": { "id": 5512, "name": "Acme",
+    "salesforceId": "001580000A1B2C3DEAQ", "industry": "Technology" }
+}

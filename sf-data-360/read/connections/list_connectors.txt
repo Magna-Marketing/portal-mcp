@@ -1,0 +1,53 @@
+Tool: list_connectors
+
+Description
+List the Connector types available to this org (the catalogue of
+"what kinds of connections can I create"). Each connector type
+declares its required configuration fields.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/connectors
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+category (string, optional) - "Storage" | "DataWarehouse" |
+  "MarketingPlatform" | "CRM" | "AdNetwork" | "Other".
+limit (number, optional).
+
+Result
+connectors (array) - Each: { connectorType, label, category,
+  description, isAvailable, supportedAuthTypes (array),
+  configFields (array<{ apiName, label, dataType, isRequired,
+  isSecret }>), supportedActions (array) }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only. Catalog-style; cache per session.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_connectors({ "category": "MarketingPlatform" })
+
+Example result
+{
+  "connectors": [
+    { "connectorType": "MarketingCloudEngagement",
+      "label": "Marketing Cloud Engagement",
+      "category": "MarketingPlatform",
+      "supportedAuthTypes": ["OAuth2_ClientCredentials"] }
+  ]
+}

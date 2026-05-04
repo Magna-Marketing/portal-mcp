@@ -1,0 +1,50 @@
+Tool: list_custom_apps
+
+Description
+List Custom Applications (Lightning Apps and Classic apps): label, default tabs, navigation type (Standard | Console), utility bar items, branding, and which profiles have access.
+
+Salesforce API
+Metadata API (`CustomApplication`) + Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, Label, NamespacePrefix, ManageableState FROM CustomApplication
+POST /services/Soap/m/66.0     (readMetadata CustomApplication)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional).
+includeNavigation (boolean, optional, default true) - Tabs and utility bar.
+includeProfileAccess (boolean, optional, default false) - Profiles with this app visible.
+includeManaged (boolean, optional, default false).
+
+Result
+totalSize (number).
+customApps (array) - Each:
+  id, developerName, label, namespacePrefix, manageableState.
+  isLightning (boolean).
+  navType (string) - "Standard" | "Console".
+  formFactor (string) - "Large" | "Small".
+  defaultLandingTab (string|null).
+  tabs (string[], when includeNavigation=true) - Tab DeveloperNames.
+  utilityBar (object|null) - { label, items: [{ componentName, label, height, width, startAutomatically }] }.
+  brand (object|null) - { headerColor, logoImageUrl, secondaryColor }.
+  profileAccess (array, when includeProfileAccess=true) - [{ profileName, default, visible }].
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_custom_apps({ "includeNavigation": true })

@@ -1,0 +1,40 @@
+Tool: truncate_data_extension
+
+Description
+Remove all rows from a Data Extension while preserving its schema.
+Equivalent to a SQL `TRUNCATE TABLE`.
+
+Marketing Cloud API
+SOAP API (`PerformRequest` with `ClearData` action).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP PerformRequest with `Action=ClearData` on the DataExtension.
+
+Input (parameters)
+customerKey (string, required) - DE External Key.
+async (boolean, optional, default true) - Truncates run async; setting false waits for completion (small DEs only).
+
+Result
+status (string) - "Pending" | "InProgress" | "Complete" | "Failed".
+requestId (string).
+truncatedRows (number, optional, when sync).
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Truncate is idempotent (a second call truncates an already-empty DE).
+
+Errors
+- 30002 not found.
+
+Example request
+
+truncate_data_extension({ "customerKey": "Members_DE" })

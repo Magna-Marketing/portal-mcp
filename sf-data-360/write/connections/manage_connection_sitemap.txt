@@ -1,0 +1,65 @@
+Tool: manage_connection_sitemap
+
+Description
+Upsert the site map (curated path / bucket / folder list) on a
+file-based Connection. Replaces the existing site map.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+PUT {instanceUrl}/services/data/v{ver}/ssot/connections/:connectionId/sitemap
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "paths": [
+    {
+      "path": "s3://magnatech-data/customers/",
+      "type": "Prefix",
+      "includeRecursive": true,
+      "fileFormat": "CSV"
+    }
+  ]
+}
+
+Input (parameters)
+connectionId (string, required).
+operation (string, required) - "upsert" only.
+paths (array, required) - [{ path, type ("Bucket" | "Prefix" |
+  "File" | "Folder"), label?, includeRecursive?, fileFormat? }].
+
+Result
+sitemap (object) - Refreshed site map.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on (path, type) pair.
+
+Errors
+- 404 NOT_FOUND, 400 INVALID_CONNECTOR_TYPE.
+
+Example request
+
+manage_connection_sitemap({
+  "connectionId": "0Z65800000000ABCAA",
+  "operation": "upsert",
+  "paths": [
+    { "path": "s3://magnatech-data/customers/", "type": "Prefix",
+      "includeRecursive": true, "fileFormat": "CSV" }
+  ]
+})
+
+Example result
+{
+  "sitemap": {
+    "connectionId": "0Z65800000000ABCAA", "version": 4,
+    "paths": [{ "path": "s3://magnatech-data/customers/", "type": "Prefix" }]
+  }
+}

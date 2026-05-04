@@ -1,0 +1,55 @@
+Tool: manage_currency
+
+Description
+Create / update / activate / deactivate / delete a `LoyaltyProgramCurrency`
+in a program. Currencies map to point-types ("Points", "Miles",
+"Status Points") and are referenced by all credit/debit operations.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyProgramCurrency`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyProgramCurrency
+PATCH  /services/data/v66.0/sobjects/LoyaltyProgramCurrency/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyProgramCurrency/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "Miles", "ProgramId": "...", "Description": "Frequent flyer miles", "IsPrimary": false, "IsActive": true }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+currencyId (string, optional, required for non-create).
+programName (string, optional, required for create) - Or programId.
+programId (string, optional).
+name (string, required for create).
+description (string, optional).
+isPrimary (boolean, optional, default false) - Setting true demotes the existing primary currency.
+isActive (boolean, optional).
+
+Result
+currency (object) - { id, name, programId, programName, isPrimary, isActive }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+- Cannot delete a currency that has any TransactionJournal or member balance.
+
+Errors
+- DUPLICATE_VALUE on (programId, name).
+- DELETE_FAILED with referenceTo on existing balances.
+
+Example request
+
+manage_currency({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "Status Points",
+  "description": "Used to qualify for tier upgrades",
+  "isPrimary": false
+})

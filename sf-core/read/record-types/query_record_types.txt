@@ -1,0 +1,111 @@
+Tool: query_record_types
+
+Description
+Discover record types across one or more sObjects. Returns the standard
+RecordType row plus visibility settings for the running user's profile
+and (optionally) for all profiles. Use this to resolve a developer name
+to a record type Id (needed by `get_picklist_values`,
+`manage_field_permissions`, page assignments, etc.) and to audit which
+profiles can see which record types.
+
+Use `describe_object` if you only need the record type list for a single
+object — it returns the same recordTypeInfos plus everything else.
+
+Salesforce API
+REST API (Data) + Tooling API, v66.0.
+- Identity rows from `RecordType` (data SOQL).
+- Visibility (per profile) from `Profile.recordTypeVisibilities` via the
+  Tooling API or Metadata API. The MCP layer prefers
+  `Tooling SOQL` against `RecordType` joined with describe layouts.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, SobjectType, IsActive, BusinessProcessId, Description FROM RecordType WHERE ...
+GET /services/data/v66.0/sobjects/{sObject}/describe                  (recordTypeInfos)
+GET /services/data/v66.0/tooling/query/?q=SELECT Profile.Name, RecordType.SobjectType, RecordType.DeveloperName, Visible, Default FROM ProfileRecordTypeVisibility   (or composite)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+sObject (string, optional) - Restrict to one sObject API name. Omit for
+  all sObjects.
+namePattern (string, optional) - Glob/substring filter on DeveloperName
+  or Name. Supports `*`.
+includeInactive (boolean, optional, default false) - Include IsActive=false.
+includeVisibility (boolean, optional, default false) - When true, also
+  return visibility per profile (one row per profile per record type).
+profile (string, optional) - When set, restrict visibility to this profile
+  developer name.
+
+Result
+recordTypes (array) - Each:
+  id (string) - 18-char Record Type Id.
+  name (string) - UI label.
+  developerName (string) - API-safe name.
+  sObject (string) - Owning sObject API name.
+  isActive (boolean).
+  isMaster (boolean) - true for the master record type per object.
+  description (string|null).
+  businessProcessId (string|null) - Used by Lead/Opportunity/Case stages.
+  defaultRecordTypeMapping (boolean) - Default for the running profile.
+  available (boolean) - Visible to the running user.
+  urls.layout (string).
+visibility (array, only when includeVisibility=true) - Each:
+  recordTypeId (string).
+  profileName (string).
+  profileId (string).
+  visible (boolean).
+  default (boolean).
+
+Required permissions
+- API Enabled.
+- Read on RecordType (granted by default).
+- Tooling API access for visibility data ("View Setup and Configuration").
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Visibility query may be heavy in orgs with many profiles; pre-filter
+  with `profile`.
+
+Errors
+- INVALID_TYPE: sObject doesn't exist.
+
+Example request
+
+query_record_types({
+  "sObject": "Opportunity",
+  "includeVisibility": true,
+  "profile": "MTG_Project_Manager"
+})
+
+Example result
+
+{
+  "recordTypes": [
+    {
+      "id": "012Qg0000004aBcDE",
+      "name": "Internal Project",
+      "developerName": "Internal_Project",
+      "sObject": "Opportunity",
+      "isActive": true,
+      "isMaster": false,
+      "businessProcessId": "0203000000000XYAB",
+      "available": true,
+      "defaultRecordTypeMapping": true,
+      "urls": { "layout": "/services/data/v66.0/sobjects/Opportunity/describe/layouts/012Qg0000004aBcDE" }
+    }
+  ],
+  "visibility": [
+    {
+      "recordTypeId": "012Qg0000004aBcDE",
+      "profileName": "MTG Project Manager",
+      "profileId": "00eQg0000008ZyXAB",
+      "visible": true,
+      "default": true
+    }
+  ]
+}

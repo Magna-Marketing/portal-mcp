@@ -1,0 +1,38 @@
+Tool: manage_cors_origin
+
+Description
+Add / remove an entry in the org's CORS allowlist (`CorsWhitelistEntry`).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+POST   /services/data/v66.0/tooling/sobjects/CorsWhitelistEntry
+DELETE /services/data/v66.0/tooling/sobjects/CorsWhitelistEntry/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "UrlPattern": "https://app.mtg.example.com" }
+
+Input (parameters)
+operation (string, required) - "add" | "remove".
+urlPattern (string, required) - Domain or URL pattern (e.g. "https://*.magnatech.com").
+
+Result
+corsOrigin (object) - { id, urlPattern, status }.
+
+Required permissions
+- "Modify All Data".
+
+Idempotency & limits
+- add idempotent (existing entry returns DUPLICATE_VALUE — tool surfaces "already_exists").
+
+Errors
+- DUPLICATE_VALUE, INVALID_URL_PATTERN.
+
+Example request
+
+manage_cors_origin({ "operation": "add", "urlPattern": "https://*.magnatech.com" })

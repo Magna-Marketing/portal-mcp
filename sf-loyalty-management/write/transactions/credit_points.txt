@@ -1,0 +1,66 @@
+Tool: credit_points
+
+Description
+Credit points to a member. Wraps the Loyalty Program Process
+"Credit Points to Members" — the recommended way to manually grant
+points outside of a normal Accrual journal (e.g. customer-service
+goodwill, marketing bonus, manual reconciliation).
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Credit Points to Members", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Credit Points to Members",
+  "processParameters": {
+    "ProgramName": "MTG_Rewards",
+    "ProgramCurrencyName": "Points",
+    "Credits": [
+      { "MemberId": "0lMQg00000abcDE2", "Points": 500, "ExternalTransactionId": "GOODWILL-2026-04-001", "Comments": "Service recovery" }
+    ]
+  }
+}
+
+Input (parameters)
+programName (string, required).
+programCurrencyName (string, required).
+credits (object[], required) - Each:
+  memberId (string, optional) - Or membershipNumber.
+  membershipNumber (string, optional).
+  points (number, required).
+  externalTransactionId (string, optional, recommended) - Idempotency key.
+  comments (string, optional).
+  expirationDate (string|null, optional) - When the points expire.
+  qualifyingFlag (boolean, optional, default true) - Whether the points count toward tier qualification.
+
+Result
+processResult (object) - { isSuccess, processStatus }.
+results (array) - Per credit: { memberId, points, journalId, status ("credited"|"failed"), error }.
+summary (object) - { credited, failed, total }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent when `externalTransactionId` is set and unique per credit.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, INVALID_CURRENCY_NAME, DUPLICATE_VALUE on externalTransactionId.
+
+Example request
+
+credit_points({
+  "programName": "MTG_Rewards",
+  "programCurrencyName": "Points",
+  "credits": [
+    { "memberId": "0lMQg00000abcDE2", "points": 500, "externalTransactionId": "GOODWILL-2026-04-001", "comments": "Service recovery" }
+  ]
+})

@@ -1,0 +1,77 @@
+Tool: manage_dmo_relationship
+
+Description
+Create or delete a DMO-to-DMO relationship. Relationships unlock
+Profile API child reads, Data Graph traversals, and Segment joins
+across DMOs.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName/relationships     (operation="create")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/relationships/:name                    (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "EngagementHistory",
+  "label": "Engagement History",
+  "fromField": "Id__c",
+  "toDmo": "EngagementHistory__dlm",
+  "toField": "IndividualId__c",
+  "cardinality": "OneToMany"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "delete".
+dataModelObjectName (string, required for create) - The "from" DMO.
+name (string, required) - Relationship name.
+label (string, required for create).
+fromField (string, required for create).
+toDmo (string, required for create).
+toField (string, required for create).
+cardinality (string, optional, default "OneToMany") - "OneToOne" |
+  "OneToMany" | "ManyToMany".
+isRequired (boolean, optional, default false).
+
+Result
+relationship (object) - Created row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; existing Data Graphs / Segments referencing the
+  relationship break.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND, 400 INVALID_FIELD.
+
+Example request
+
+manage_dmo_relationship({
+  "operation": "create",
+  "dataModelObjectName": "UnifiedIndividual__dlm",
+  "name": "EngagementHistory",
+  "label": "Engagement History",
+  "fromField": "Id__c",
+  "toDmo": "EngagementHistory__dlm",
+  "toField": "IndividualId__c",
+  "cardinality": "OneToMany"
+})
+
+Example result
+{
+  "relationship": {
+    "name": "EngagementHistory",
+    "fromDmo": "UnifiedIndividual__dlm",
+    "toDmo": "EngagementHistory__dlm",
+    "cardinality": "OneToMany"
+  }
+}

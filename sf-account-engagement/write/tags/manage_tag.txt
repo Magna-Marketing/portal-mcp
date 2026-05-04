@@ -1,0 +1,54 @@
+Tool: manage_tag
+
+Description
+Create, update, or delete a Tag. Tags are auto-created when first
+applied via `manage_*_tags` (e.g. `manage_prospect_tags`); use this
+tool to rename, audit, or proactively delete one.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/tags       (create)
+PATCH  https://{pi-domain}/api/v5/objects/tags/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/tags/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{ "name": "Welcome 2026" }
+
+Body (update — rename)
+{ "name": "Welcome FY26" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create / update).
+
+Result
+tag (object) - Created / updated row.
+deleted (boolean, when operation="delete") - Deleting a tag also
+  removes all `tagged-objects` join rows.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent on `(operation, name)` — recreating an existing tag by
+  name is a no-op.
+- Hard delete; cannot be undone.
+
+Errors
+- 600 duplicate_tag, 53 not_permitted, 59 not_found.
+
+Example request
+
+manage_tag({ "operation": "update", "id": 211, "name": "Welcome FY26" })
+
+Example result
+{ "tag": { "id": 211, "name": "Welcome FY26" } }

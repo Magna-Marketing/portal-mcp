@@ -1,0 +1,52 @@
+Tool: manage_tier_benefit
+
+Description
+Link / unlink a `Benefit` to a `LoyaltyTier` via `LoyaltyTierBenefit`.
+Determines which benefits a member earns once they reach a tier.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyTierBenefit`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyTierBenefit
+PATCH  /services/data/v66.0/sobjects/LoyaltyTierBenefit/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyTierBenefit/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "LoyaltyTierId": "...", "BenefitId": "...", "IsActive": true, "EffectiveStartDate": "2026-05-01" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
+tierBenefitId (string, optional, required for non-create).
+tierId (string, optional).
+tierName (string, optional).
+benefitId (string, optional).
+benefitName (string, optional).
+isActive (boolean, optional).
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+
+Result
+tierBenefit (object) - { id, tierId, tierName, benefitId, benefitName, isActive }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on (tierId, benefitId).
+
+Example request
+
+manage_tier_benefit({
+  "operation": "create",
+  "tierName": "Gold",
+  "benefitName": "Free_Checked_Bag",
+  "isActive": true
+})

@@ -1,0 +1,50 @@
+Tool: update_search_settings
+
+Description
+Update org-level Search Settings (`SearchSettings`) — per-sObject
+search behavior, document content search, CJK optimization, and the
+running user's pinned search scope order.
+
+Salesforce API
+Metadata API (`SearchSettings`) + REST API (`/search/scopeOrder`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest                 (org settings)
+PATCH /services/data/v66.0/search/scopeOrder                     (running user's scope order)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+target (string, required) - "org" | "user".
+documentContentSearchEnabled (boolean, optional, target=org).
+optimizeSearchForCJKEnabled (boolean, optional, target=org).
+recentlyViewedUsersForBlankLookupEnabled (boolean, optional, target=org).
+searchSettingsByObject (array, optional, target=org) - [{ sObject, enhancedLookupEnabled, lookupAutoCompleteEnabled, resultsPerPageCount }].
+scopeOrder (string[], optional, target=user) - Ordered sObject names for the user's pinned global search scope.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object|null).
+settings (object) - Updated values.
+
+Required permissions
+- "Customize Application" for org-level.
+- Running user only for user scope order.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- INVALID_FIELD on bad sObject.
+
+Example request
+
+update_search_settings({
+  "target": "org",
+  "searchSettingsByObject": [{ "sObject": "Project__c", "enhancedLookupEnabled": true, "lookupAutoCompleteEnabled": true, "resultsPerPageCount": 25 }]
+})

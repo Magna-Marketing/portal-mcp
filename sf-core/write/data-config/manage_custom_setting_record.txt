@@ -1,0 +1,55 @@
+Tool: manage_custom_setting_record
+
+Description
+Create / update / delete records in a Custom Setting (List or
+Hierarchy). Custom Settings are sObjects so direct DML works; this tool
+adds hierarchy-aware semantics (per-user / per-profile / org-default
+selection).
+
+Salesforce API
+REST API (Data), v66.0. POST/PATCH/DELETE on the custom setting sObject.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/{customSetting}
+PATCH  /services/data/v66.0/sobjects/{customSetting}/{id}
+DELETE /services/data/v66.0/sobjects/{customSetting}/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+customSetting (string, required) - Custom Setting API name.
+records (object[], required) - Each:
+  id (string, optional).
+  name (string, optional, required for List type create).
+  setupOwnerId (string, optional, for hierarchy) - User or Profile Id, or "Organization" string for org-default.
+  fields (object, required for create/update) - Map of field API name -> value.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - { id, name, status, errors }.
+
+Required permissions
+- Object create/update/delete on the Custom Setting sObject.
+
+Idempotency & limits
+- upsert idempotent on Name (list) or SetupOwnerId (hierarchy).
+
+Errors
+- DUPLICATE_VALUE, INVALID_FIELD.
+
+Example request (hierarchy)
+
+manage_custom_setting_record({
+  "operation": "upsert",
+  "customSetting": "MTG_Feature_Defaults__c",
+  "records": [
+    { "setupOwnerId": "Organization", "fields": { "Use_New_Form__c": true } },
+    { "setupOwnerId": "00eQg0000008abcAB", "fields": { "Use_New_Form__c": false } }
+  ]
+})

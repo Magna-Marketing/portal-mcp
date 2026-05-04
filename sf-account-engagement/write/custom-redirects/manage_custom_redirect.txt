@@ -1,0 +1,78 @@
+Tool: manage_custom_redirect
+
+Description
+Create, update, or delete a Custom Redirect. Custom Redirects
+attribute clicks to a campaign and translate a vanity URL on a
+tracker domain into a destination URL with optional UTM parameters.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/custom-redirects        (create)
+PATCH  https://{pi-domain}/api/v5/objects/custom-redirects/:id    (update)
+DELETE https://{pi-domain}/api/v5/objects/custom-redirects/:id    (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "Spring promo",
+  "destinationUrl": "https://magnatech.com/spring",
+  "campaignId": 1024,
+  "trackerDomainId": 7,
+  "vanityUrlPath": "r/spring",
+  "gaSource": "email",
+  "gaMedium": "promo",
+  "gaCampaign": "spring-2026"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create).
+destinationUrl (string, required for create).
+campaignId (number, required for create).
+trackerDomainId (number, optional).
+vanityUrlPath (string, optional) - Slug after the tracker domain.
+folderId (number, optional).
+gaSource (string, optional), gaMedium (string, optional),
+  gaTerm (string, optional), gaContent (string, optional),
+  gaCampaign (string, optional).
+bitlyIsPersonalized (boolean, optional).
+
+Result
+customRedirect (object) - Created/updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Soft-delete via `delete`; the row remains queryable with
+  `isDeleted=true`.
+
+Errors
+- 600 duplicate_vanity (path collision on tracker domain),
+  53 tracker_domain_not_validated, 59 not_found.
+
+Example request
+
+manage_custom_redirect({
+  "operation": "create",
+  "name": "Spring promo",
+  "destinationUrl": "https://magnatech.com/spring",
+  "campaignId": 1024,
+  "trackerDomainId": 7,
+  "vanityUrlPath": "r/spring"
+})
+
+Example result
+{
+  "customRedirect": { "id": 612, "name": "Spring promo",
+    "vanityUrl": "https://go.magnatech.com/r/spring" }
+}

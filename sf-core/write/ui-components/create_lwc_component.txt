@@ -1,0 +1,64 @@
+Tool: create_lwc_component
+
+Description
+Create a new Lightning Web Component with full file contents in one
+call. Convenience wrapper around `create_lwc_bundle` for the case where
+you already have the JS / HTML / CSS / XML drafted (no template-based
+generation). Validates the name format (lowercase first char,
+alphanumeric only, max 40 chars).
+
+Salesforce API
+Tooling API, v66.0. Same container/save pattern as `create_lwc_bundle`.
+
+Endpoint
+See `create_lwc_bundle`.
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+name (string, required) - Component name. Must match `^[a-z][a-zA-Z0-9]{0,39}$`.
+label (string, required) - Master label.
+description (string, optional).
+apiVersion (number, optional, default = org default).
+isExposed (boolean, optional, default false).
+js (string, required) - `<name>.js` source.
+html (string, required) - `<name>.html` source.
+css (string, optional) - `<name>.css` source.
+xml (string, required) - `<name>.js-meta.xml` source. Must be valid
+  Lightning meta XML; the tool validates it before creating the bundle.
+svg (string, optional) - `<name>.svg` source.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+bundle (object, on success) - { id, name, label, apiVersion, isExposed,
+  files }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent — fails on duplicate name.
+
+Errors
+- INVALID_FIELD: name doesn't match the regex.
+- DUPLICATE_DEVELOPER_NAME.
+- DEPLOY_FAILED with line/column on compile errors.
+
+Example request
+
+create_lwc_component({
+  "name": "projectStatusBadge",
+  "label": "Project Status Badge",
+  "apiVersion": 62.0,
+  "isExposed": true,
+  "html": "<template><span class={cssClass}>{status}</span></template>",
+  "js": "import { LightningElement, api } from 'lwc';\nexport default class ProjectStatusBadge extends LightningElement { @api status; get cssClass() { return `slds-badge slds-theme_${this.status}`; } }",
+  "css": ".slds-badge { padding: 0.25rem 0.5rem; }",
+  "xml": "<?xml version=\"1.0\"?><LightningComponentBundle xmlns=\"http://soap.sforce.com/2006/04/metadata\"><apiVersion>62.0</apiVersion><isExposed>true</isExposed><targets><target>lightning__RecordPage</target></targets></LightningComponentBundle>"
+})

@@ -1,0 +1,96 @@
+Tool: manage_profiles
+
+Description
+Manage Profiles via Metadata API. Operations: create (clone-only),
+update, clone, compare, delete (custom only), and record-type
+visibility management. Salesforce does **not** support creating a
+profile from scratch via API — `create` always requires `cloneFrom`.
+Bulk operations across many profiles are supported.
+
+Use `extract_permissions_from_profile` to peel permissions off into
+permission sets, and `create_differential_permission_set` to capture
+deltas between profiles.
+
+Salesforce API
+Metadata API (`Profile` type), v66.0. Deploy via `metadata/deployRequest`.
+SOQL on `Profile` for read parts of compare.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+operation-specific.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "clone" | "compare"
+  | "delete" | "manageRecordTypeVisibility".
+profiles (object[], required for bulk; otherwise single object) - Each:
+  fullName (string) - Profile DeveloperName.
+  label (string) - Master label (used on create/clone).
+  cloneFrom (string) - Source profile DeveloperName for create/clone.
+  description (string|null).
+  userLicense (string) - When create/clone (e.g. "Salesforce", "Salesforce Platform").
+  applicationVisibilities (array, optional) - { application, default, visible }.
+  classAccesses (array, optional) - { apexClass, enabled }.
+  customMetadataTypeAccesses (array, optional) - { name, enabled }.
+  customSettingAccesses (array, optional) - { name, enabled }.
+  externalDataSourceAccesses (array, optional).
+  fieldPermissions (array, optional) - { field, readable, editable }.
+  loginIpRanges (array, optional) - { startAddress, endAddress, description }.
+  objectPermissions (array, optional) - { object, allowCreate, allowDelete, allowEdit, allowRead, viewAllRecords, modifyAllRecords }.
+  pageAccesses (array, optional) - { apexPage, enabled }.
+  recordTypeVisibilities (array, optional) - { recordType, visible, default, personAccountDefault }.
+  tabVisibilities (array, optional) - { tab, visibility ("DefaultOff"|"DefaultOn"|"Hidden") }.
+  userPermissions (array, optional) - { name, enabled }.
+compareWith (string, required for compare) - Other profile DeveloperName.
+checkOnly (boolean, optional, default false).
+
+Result (deploy operations)
+Same shape as `manage_object` deploy result.
+profiles (array, on success) - { id, fullName, label, userLicense }.
+
+Result (compare)
+profileA, profileB (object) - Identity.
+diff (array) - Each: { category, key, a, b }.
+similarity (number) - 0..1.
+
+Required permissions
+- "Manage Profiles and Permission Sets" + "Modify All Data".
+- "Customize Application" for application/tab visibilities.
+
+Idempotency & limits
+- Create/clone is **not** idempotent (fails on duplicate fullName).
+- Update is idempotent (re-applies same XML safely).
+- Profile XML can exceed 10 MB on long-lived orgs; deploy can be slow.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request (clone)
+
+manage_profiles({
+  "operation": "clone",
+  "profiles": [{
+    "fullName": "MTG_Project_Manager",
+    "label": "MTG Project Manager",
+    "cloneFrom": "Standard_User",
+    "userLicense": "Salesforce",
+    "description": "Profile for MTG Project Managers (Q2 2026)"
+  }]
+})
+
+Example request (record-type visibility)
+
+manage_profiles({
+  "operation": "manageRecordTypeVisibility",
+  "profiles": [{
+    "fullName": "MTG_Project_Manager",
+    "recordTypeVisibilities": [
+      { "recordType": "Opportunity.Internal_Project", "visible": true, "default": true }
+    ]
+  }]
+})

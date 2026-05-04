@@ -1,0 +1,44 @@
+Tool: get_async_query_status
+
+Description
+Check the status of an asynchronous Data Extension retrieve job
+(started by `start_async_retrieve` on the write side). Returns running
+state and (when complete) a downloadable result Id.
+
+Marketing Cloud API
+REST API (`/data/v1/async/{requestId}/status` and `.../results`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/{requestId}/status
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/{requestId}/results
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+requestId (string, required).
+fetchResultsOnComplete (boolean, optional, default true) - When status is `Complete`, also fetch result rows in the response.
+
+Result
+status (string) - "Pending" | "InProgress" | "Complete" | "Failed".
+requestId (string).
+resultMessages (string[], optional).
+durationMs (number).
+results (object|null, when fetchResultsOnComplete=true and status=Complete) - { count, items: [...rows] }.
+
+Required scopes
+- `data_extensions_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- ASYNC_REQUEST_NOT_FOUND, REQUEST_FAILED.
+
+Example request
+
+get_async_query_status({ "requestId": "abc123-def456" })

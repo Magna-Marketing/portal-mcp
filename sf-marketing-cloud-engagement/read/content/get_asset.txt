@@ -1,0 +1,43 @@
+Tool: get_asset
+
+Description
+Get a single Content Builder asset by Id, customerKey, or shared key.
+Returns full body (HTML, text, image bytes via separate call), metadata,
+and version history.
+
+Marketing Cloud API
+REST API (`/asset/v1/content/assets/{id}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+assetId (number, optional).
+customerKey (string, optional).
+  One required.
+includeVersions (boolean, optional, default false).
+includeContent (boolean, optional, default true).
+
+Result
+asset (object) - { id, customerKey, name, description, assetType, category, createdDate, modifiedDate, owner, status, version, content (string|null) - HTML/Text/Markup body, contentType, fileProperties (when file), data (object|null) - asset-type-specific block data, slots (object|null) - for templates }.
+versions (array, optional) - [{ version, modifiedDate, modifiedBy }].
+
+Required scopes
+- `email_read` or `documents_and_images_read` depending on assetType.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_asset({ "customerKey": "MTG_Welcome_Email" })

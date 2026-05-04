@@ -1,0 +1,48 @@
+Tool: get_global_config
+
+Description
+Read the global Document AI configuration — model selection, default
+storage, OCR language preferences, retention.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/document-processing/global-config
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+globalConfig (object): defaultModel, ocrLanguages (array),
+  storageBucket, retentionDays, extractionConcurrency,
+  alertEmail, lastUpdatedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+get_global_config({})
+
+Example result
+{
+  "globalConfig": {
+    "defaultModel": "einstein.docai.v3",
+    "ocrLanguages": ["en","fr","de"],
+    "retentionDays": 90
+  }
+}

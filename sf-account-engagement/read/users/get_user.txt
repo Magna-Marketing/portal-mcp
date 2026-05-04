@@ -1,0 +1,44 @@
+Tool: get_user
+
+Description
+Read a single Account Engagement User by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/users/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `createdBy.*`,
+  `updatedBy.*`.
+
+Result
+user (object): id, email, firstName, lastName, username, jobTitle,
+  role, roleName, salesforceId, isDeleted, createdAt, updatedAt,
+  tagReplacementLanguage.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_user({ "id": 421 })
+
+Example result
+{ "user": { "id": 421, "email": "ops@magnatech.com", "role": "Administrator" } }

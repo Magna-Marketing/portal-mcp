@@ -1,0 +1,57 @@
+Tool: manage_loyalty_badge
+
+Description
+Create / update / activate / deactivate / delete a `LoyaltyProgramBadge`
+record.
+
+Salesforce API
+REST API (Data), v66.0. SOQL/CRUD on `LoyaltyProgramBadge`.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyProgramBadge
+PATCH  /services/data/v66.0/sobjects/LoyaltyProgramBadge/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyProgramBadge/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "First_Purchase", "ProgramId": "...", "BadgeType": "Achievement", "Description": "Awarded after first purchase", "ImageUrl": "https://...", "IsActive": true, "MaxIssuanceCount": null }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+badgeId (string, optional, required for non-create).
+programName (string, optional, required for create).
+programId (string, optional).
+name (string, required for create).
+description (string, optional).
+badgeType (string, optional) - "Achievement" | "Milestone" | "Recognition".
+imageUrl (string, optional).
+isActive (boolean, optional).
+maxIssuanceCount (number|null, optional).
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+
+Result
+badge (object) - { id, name, programId, badgeType, isActive, imageUrl }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+- Cannot delete a badge with current member assignments.
+
+Errors
+- DUPLICATE_VALUE on (programId, name).
+
+Example request
+
+manage_loyalty_badge({
+  "operation": "create",
+  "programName": "MTG_Rewards",
+  "name": "First_Purchase",
+  "badgeType": "Achievement",
+  "description": "Awarded after a member's first purchase"
+})

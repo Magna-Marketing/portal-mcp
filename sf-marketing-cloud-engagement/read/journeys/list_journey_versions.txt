@@ -1,0 +1,39 @@
+Tool: list_journey_versions
+
+Description
+List all versions of a single journey. Each version has its own
+status, lifetime stats, and definition.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/?id={id}&extras=all&mostRecentVersionOnly=false`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/?id={id}&extras=all&mostRecentVersionOnly=false
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+journeyId (string, optional).
+journeyKey (string, optional).
+  One required.
+
+Result
+versions (array) - Each: { version, status, lastPublishedDate, createdDate, modifiedDate, definitionType, totalEntries, currentPopulation }.
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_journey_versions({ "journeyKey": "MTG_Welcome_Series" })

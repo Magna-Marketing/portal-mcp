@@ -1,0 +1,89 @@
+Tool: create_permission_set
+
+Description
+Create a new permission set. Permission sets are additive grants on top
+of a profile. Specify the user license (must be compatible with the
+licenses of users you'll assign it to), then any combination of system
+permissions, object permissions, field permissions, Apex/VF access, and
+tab settings.
+
+Use `clone_permission_set` to copy an existing one. Use
+`update_permission_set` for incremental edits.
+
+Salesforce API
+Metadata API (`PermissionSet` type), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "fullName": "MTG_Project_Manager",
+  "label": "MTG Project Manager",
+  "description": "Project Manager core perms",
+  "license": "Salesforce",
+  "hasActivationRequired": false,
+  "userPermissions": [
+    { "name": "ApiEnabled", "enabled": true },
+    { "name": "RunReports", "enabled": true }
+  ],
+  "objectPermissions": [
+    { "object": "Project__c", "allowRead": true, "allowCreate": true, "allowEdit": true, "allowDelete": false, "viewAllRecords": false, "modifyAllRecords": false }
+  ],
+  "fieldPermissions": [
+    { "field": "Project__c.Status__c", "readable": true, "editable": true }
+  ],
+  "tabSettings": [
+    { "tab": "Project__c", "visibility": "Available" }
+  ]
+}
+
+Input (parameters)
+fullName (string, required) - Permset DeveloperName (e.g. "MTG_Project_Manager").
+label (string, required).
+description (string, optional).
+license (string, optional) - "Salesforce" | "Salesforce Platform" |
+  "Chatter Free" | etc. Omit for "no license restriction".
+hasActivationRequired (boolean, optional, default false) - Session-based
+  activation (only effective in user sessions that activate it).
+userPermissions (array, optional) - System perms.
+objectPermissions (array, optional).
+fieldPermissions (array, optional).
+classAccesses (array, optional) - { apexClass, enabled }.
+pageAccesses (array, optional) - { apexPage, enabled }.
+applicationVisibilities (array, optional) - { application, visible }.
+tabSettings (array, optional) - { tab, visibility ("None"|"Available"|"Visible") }.
+recordTypeVisibilities (array, optional) - { recordType, visible }.
+customMetadataTypeAccesses, customSettingAccesses, externalDataSourceAccesses (array, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+Standard deploy result, plus `permissionSet` on success: { id, fullName,
+  label, license, isCustom: true }.
+
+Required permissions
+- "Manage Profiles and Permission Sets".
+
+Idempotency & limits
+- Create is **not** idempotent (fails on duplicate fullName).
+- License compatibility: a permset assigned to a user must use a license
+  compatible with the user's user-license; "no license" permsets work
+  for everyone.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+- INVALID_LICENSE: license name not present in the org.
+
+Example request
+
+create_permission_set({
+  "fullName": "MTG_Time_Logger",
+  "label": "MTG Time Logger",
+  "description": "Allow time logging on Project__c",
+  "userPermissions": [{ "name": "ApiEnabled", "enabled": true }],
+  "objectPermissions": [{ "object": "Time_Entry__c", "allowRead": true, "allowCreate": true, "allowEdit": true }]
+})

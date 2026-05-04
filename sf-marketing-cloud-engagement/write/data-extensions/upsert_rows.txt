@@ -1,0 +1,49 @@
+Tool: upsert_rows
+
+Description
+Insert-or-update rows in a Data Extension keyed on its primary key.
+Idempotent on the PK — the recommended write tool for ETL syncs.
+
+Marketing Cloud API
+REST API (`/hub/v1/dataevents/key:{key}/rowset`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/hub/v1/dataevents/key:{customerKey}/rowset
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+[
+  { "keys": { "MemberId": "MEM-100023" }, "values": { "Email": "jane.doe@new.com", "TierName": "Platinum" } }
+]
+
+Input (parameters)
+customerKey (string, required).
+rows (object[], required) - Each: { keys (object) - PK fields, values (object) - non-PK fields to upsert }.
+async (boolean, optional, default = auto).
+
+Result
+results (array) - { rowIndex, action ("inserted"|"updated"), success, errors }.
+totalUpserted (number).
+totalFailed (number).
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Idempotent on PK.
+- DE must have at least one `IsPrimaryKey=true` field.
+
+Errors
+- 30002 not found, NO_PRIMARY_KEY (DE has no PK), INVALID_FIELD.
+
+Example request
+
+upsert_rows({
+  "customerKey": "Members_DE",
+  "rows": [
+    { "keys": { "MemberId": "MEM-100023" }, "values": { "Email": "jane.doe@new.com", "TierName": "Platinum" } }
+  ]
+})

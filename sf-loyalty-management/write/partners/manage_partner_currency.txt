@@ -1,0 +1,55 @@
+Tool: manage_partner_currency
+
+Description
+Create / update / delete a `LoyaltyPgmPartnerCurrency` mapping (partner
+currency -> program currency conversion rate).
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+POST   /services/data/v66.0/sobjects/LoyaltyPgmPartnerCurrency
+PATCH  /services/data/v66.0/sobjects/LoyaltyPgmPartnerCurrency/{id}
+DELETE /services/data/v66.0/sobjects/LoyaltyPgmPartnerCurrency/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "Coins_To_Points", "LoyaltyProgramPartnerId": "...", "ProgramCurrencyId": "...", "ConversionRate": 0.5, "IsActive": true }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+partnerCurrencyId (string, optional, required for non-create).
+partnerId (string, optional, required for create).
+partnerName (string, optional).
+name (string, required for create).
+programCurrencyId (string, optional, required for create).
+programCurrencyName (string, optional).
+conversionRate (number, required for create).
+isActive (boolean, optional).
+effectiveStartDate (string, optional).
+effectiveEndDate (string, optional).
+
+Result
+partnerCurrency (object) - { id, name, partnerId, programCurrencyId, conversionRate, isActive }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE, INVALID_FIELD on bad conversionRate.
+
+Example request
+
+manage_partner_currency({
+  "operation": "create",
+  "partnerName": "MTG_Hotel_Partner",
+  "name": "Coins_To_Points",
+  "programCurrencyName": "Points",
+  "conversionRate": 0.5
+})

@@ -1,0 +1,42 @@
+Tool: get_list
+
+Description
+Get a single list with subscriber count summary, member status
+breakdown, and folder location.
+
+Marketing Cloud API
+SOAP API (`List.Retrieve` filtered + `ListSubscriber.Retrieve` for counts).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve.
+
+Input (parameters)
+listId (number, optional).
+listName (string, optional).
+customerKey (string, optional).
+  One required.
+includeStatusBreakdown (boolean, optional, default true).
+
+Result
+list (object) - Same fields as a `list_lists` row, plus:
+  statusBreakdown (object, when includeStatusBreakdown=true) - { active, unsubscribed, held, bounced, total }.
+
+Required scopes
+- `list_and_subscribers_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- LIST_NOT_FOUND.
+
+Example request
+
+get_list({ "listName": "Q3_Newsletter" })

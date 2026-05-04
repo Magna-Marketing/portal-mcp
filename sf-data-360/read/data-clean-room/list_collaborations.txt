@@ -1,0 +1,53 @@
+Tool: list_collaborations
+
+Description
+List Data Clean Room collaborations — privacy-preserving data
+exchanges with another Data Cloud tenant or partner platform.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Pending" | "Accepted" | "Declined" |
+  "Active" | "Ended".
+role (string, optional) - "Initiator" | "Participant".
+providerIdOrName (string, optional).
+limit (number, optional, default 100).
+
+Result
+collaborations (array) - Each: { id, apiName, label, role, status,
+  providerIdOrName, partnerOrgName, sharedDmos (array),
+  createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_collaborations({ "status": "Active" })
+
+Example result
+{
+  "collaborations": [
+    { "id": "0YC580000000001", "apiName": "MTG_PartnerX",
+      "role": "Initiator", "status": "Active",
+      "partnerOrgName": "Partner X" }
+  ]
+}

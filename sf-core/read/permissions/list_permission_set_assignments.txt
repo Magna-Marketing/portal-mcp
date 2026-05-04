@@ -1,0 +1,93 @@
+Tool: list_permission_set_assignments
+
+Description
+List all users with a given permission set assigned. Returns assignment
+rows joined to the User: name, username, email, isActive, profile, and
+the assignment Id (needed by `unassign_permission_set`). Use this to
+audit current scope before bulk operations or after migrations.
+
+For permission set groups use `list_permission_set_group_assignments`.
+For "what does THIS user have?" use `analyze_user_permissions`.
+
+Salesforce API
+REST API (Data), v66.0. Backed by `PermissionSetAssignment` joined to `User`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, ExpirationDate, SystemModstamp FROM PermissionSetAssignment WHERE PermissionSetId = '{permsetId}' AND PermissionSetGroupId = NULL ORDER BY Assignee.Name
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+permissionSetName (string, optional) - PermissionSet.Name.
+permissionSetId (string, optional) - 18-char PermissionSet Id.
+  One of permissionSetName or permissionSetId is required.
+includeInactiveUsers (boolean, optional, default false) - When true,
+  include assignments to users where IsActive=false.
+includeExpired (boolean, optional, default false) - Include assignments
+  with ExpirationDate < today.
+limit (number, optional, default 2000, max 50000).
+sortBy (string, optional, default "Name") - "Name" | "Username" |
+  "Email" | "ProfileName" | "AssignedDate".
+
+Result
+permissionSet (object) - { id, name, label }.
+totalSize (number) - Number of assignments returned (use with hasMore).
+assignments (array) - Each:
+  assignmentId (string) - PermissionSetAssignment Id (use to unassign).
+  userId (string).
+  name (string).
+  username (string).
+  email (string).
+  isActive (boolean).
+  profileName (string).
+  expirationDate (string|null) - ISO date.
+  assignedDate (string) - SystemModstamp.
+hasMore (boolean) - true when limit was hit.
+nextRecordsUrl (string, optional) - Pagination locator.
+
+Required permissions
+- API Enabled.
+- "View Setup and Configuration" or "Manage Users".
+- Read on `PermissionSetAssignment`, `User`, `Profile`.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Permsets used by hundreds of users return paginated; the tool follows
+  nextRecordsUrl until limit or end.
+
+Errors
+- NOT_FOUND: permset name/id not found.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_permission_set_assignments({
+  "permissionSetName": "MTG_Project_Manager",
+  "includeInactiveUsers": false
+})
+
+Example result
+
+{
+  "permissionSet": { "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager" },
+  "totalSize": 23,
+  "assignments": [
+    {
+      "assignmentId": "0Pa4Q00000abcDEF",
+      "userId": "005Qg0000020aBcDE",
+      "name": "Jane Doe",
+      "username": "jane.doe@magnatech.com",
+      "email": "jane.doe@magnatech.com",
+      "isActive": true,
+      "profileName": "Standard User",
+      "expirationDate": null,
+      "assignedDate": "2026-02-14T18:23:09.000+0000"
+    }
+  ],
+  "hasMore": false
+}

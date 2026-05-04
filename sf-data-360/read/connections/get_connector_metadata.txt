@@ -1,0 +1,54 @@
+Tool: get_connector_metadata
+
+Description
+Read the full config metadata for one connector type — the schema
+of fields the caller needs to populate when creating a Connection
+of that type.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/connectors/:connectorType
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+connectorType (string, required).
+
+Result
+connector (object): connectorType, label, category, description,
+  isAvailable, supportedAuthTypes, configFields (array), supportedActions
+  (array<{ command, label, parameters }>), supportedObjects (array, when
+  the connector exposes a fixed object catalogue).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 401 INVALID_SESSION_ID.
+
+Example request
+
+get_connector_metadata({ "connectorType": "Snowflake" })
+
+Example result
+{
+  "connector": {
+    "connectorType": "Snowflake", "label": "Snowflake",
+    "supportedAuthTypes": ["OAuth2_AuthorizationCode","KeyPair"],
+    "configFields": [
+      { "apiName": "account",  "label": "Account",   "dataType": "TEXT", "isRequired": true },
+      { "apiName": "database", "label": "Database",  "dataType": "TEXT", "isRequired": true },
+      { "apiName": "warehouse","label": "Warehouse", "dataType": "TEXT", "isRequired": true }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+Tool: list_custom_fields
+
+Description
+List the BU's prospect custom fields. Each field has a stable
+`apiFieldId` that's the API name to use on prospect writes
+(`/objects/prospects` POST/PATCH); `fieldId` is the legacy v4 id
+(also called the "FID"). Distinct from picklist values — use
+`type=DROPDOWN`/`RADIO_BUTTON`/`MULTI_SELECT`/`CHECKBOX` to spot
+fields that have a values list.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/custom-fields?fields={fields}&filter[isRequired]=eq,true
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+type (string, optional) - "TEXT" | "DROPDOWN" | "RADIO_BUTTON" |
+  "CHECKBOX" | "MULTI_SELECT" | "TEXTAREA" | "DATE" | "NUMBER" |
+  "CRM_USER" | "HIDDEN".
+isRequired (boolean, optional).
+isAnalyticsSynced (boolean, optional) - Mirrored to B2B Marketing Analytics.
+nameContains (string, optional).
+fields (string[], optional, default: id,name,fieldId,apiFieldId,type,
+  isRecordMultipleResponses,salesforceId,isUseValues,isAnalyticsSynced,
+  isRequired,createdAt,updatedAt,createdById,updatedById).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+customFields (array) - Each: { id, name, fieldId, apiFieldId, type,
+  isRequired, isUseValues, isRecordMultipleResponses, isAnalyticsSynced,
+  salesforceId, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_custom_fields({ "isRequired": true })
+
+Example result
+{
+  "customFields": [
+    { "id": 71, "name": "Region", "fieldId": "region",
+      "apiFieldId": "region__c", "type": "DROPDOWN", "isRequired": true,
+      "isUseValues": true }
+  ]
+}

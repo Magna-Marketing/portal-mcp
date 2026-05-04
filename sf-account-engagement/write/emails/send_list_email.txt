@@ -1,0 +1,62 @@
+Tool: send_list_email
+
+Description
+Fire (or schedule) a List Email blast. v5 exposes only
+`Create` on list emails; the actual send still uses the legacy v4
+endpoint `/api/email/version/4/do/send`. The MCP server wraps both
+the v5 draft and the v4 fire so callers see a single tool.
+
+Use `send_one_to_one_email` for single-recipient transactional sends.
+
+Salesforce API
+Account Engagement v4 (legacy XML).
+
+Endpoint
+POST https://{pi-domain}/api/email/version/4/do/send/list_email_id/:listEmailId
+POST https://{pi-domain}/api/email/version/4/do/sendBatch          (alternative for multi-list)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+Body (form-urlencoded)
+format=json&campaign_id=1024&list_ids=301,302
+
+Input (parameters)
+listEmailId (number, required) - From `create_list_email_draft`.
+operation (string, optional, default "send") - "send" | "test" -
+  v4 also exposes `/do/test` to fire to a single recipient for QA.
+testProspectId (number, optional) - Required when operation="test".
+sendDate (string, optional) - ISO-8601; if set, the email is
+  scheduled instead of sent immediately.
+clientReference (string, optional) - Caller-side dedupe key surfaced
+  on the resulting `Email` rows.
+
+Result
+listEmail (object) - Refreshed list email row (status moves to
+  `Scheduled` or `Sending`).
+sendCount (number) - Resolved recipients (post-suppression).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent only when `clientReference` matches a prior call within
+  the same hour; otherwise repeated calls send the email twice.
+- Subject to BU send-rate ceilings.
+
+Errors
+- 71 list_email_already_sent (cannot resend a sent list email),
+  15 daily_send_limit_reached, 53 not_permitted, 59 not_found.
+
+Example request
+
+send_list_email({ "listEmailId": 8821 })
+
+Example result
+{
+  "listEmail": { "id": 8821, "status": "Sending" },
+  "sendCount": 12450
+}

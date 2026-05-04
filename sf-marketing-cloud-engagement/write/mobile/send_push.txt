@@ -1,0 +1,60 @@
+Tool: send_push
+
+Description
+Send a MobilePush push notification to one or more contacts. Supports
+templated content, custom keys (deeplink), badge, sound, action.
+
+Marketing Cloud API
+REST API (`/push/v1/message/{messageId}/send`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/push/v1/message/{messageId}/send
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "audience": { "type": "ContactKeys", "contactKeys": ["MEM-100023"] },
+  "alert": "Your reward is ready!",
+  "title": "MTG Rewards",
+  "badge": 1,
+  "sound": "default",
+  "customKeys": { "deeplink": "mtg://rewards" }
+}
+
+Input (parameters)
+messageId (number, required) - MobilePush message Id.
+contactKeys (string[], optional).
+deviceTokens (string[], optional).
+audienceQuery (object, optional) - Query against an audience (advanced).
+alert (string, optional) - Push body override.
+title (string, optional).
+badge (number, optional).
+sound (string, optional).
+customKeys (object, optional) - Deeplink, action keys.
+sendDate (string, optional, default now).
+
+Result
+sendId (string).
+status (string) - "Queued" | "Sending" | "Sent" | "Failed".
+audienceCount (number).
+
+Required scopes
+- `push_send`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- 30002 message not found, INVALID_AUDIENCE.
+
+Example request
+
+send_push({
+  "messageId": 67890,
+  "contactKeys": ["MEM-100023"],
+  "alert": "Your reward is ready!",
+  "customKeys": { "deeplink": "mtg://rewards" }
+})

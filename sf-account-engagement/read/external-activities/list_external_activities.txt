@@ -1,0 +1,63 @@
+Tool: list_external_activities
+
+Description
+List previously-ingested External Activities (events submitted via
+`submit_external_activity`). Each row is keyed by
+`(extensionSalesforceId, externalId)`; the same key in a fresh ingest
+is a no-op.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/external-activities?fields={fields}&filter[extensionSalesforceId]=eq,...
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+extensionSalesforceId (string, optional) - SFDC id (`0Wx...`) of the
+  External Activity Type extension.
+typeName (string, optional).
+prospectId (number, optional).
+prospectEmail (string, optional).
+activityDateAfter (string, optional) - ISO-8601.
+activityDateBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,extensionSalesforceId,
+  typeName,prospectId,externalId,value,activityDate,createdAt,
+  updatedAt,createdById,updatedById).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+externalActivities (array) - Each: { id, extensionSalesforceId,
+  typeName, prospectId, externalId, value, activityDate, createdAt,
+  updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_external_activities({ "prospectId": 7745, "typeName": "Webinar Attended" })
+
+Example result
+{
+  "externalActivities": [
+    { "id": 4421, "typeName": "Webinar Attended", "prospectId": 7745,
+      "externalId": "WEB-2026-04-22-S1", "value": "Spring Webinar",
+      "activityDate": "2026-04-22T15:00:00Z" }
+  ]
+}

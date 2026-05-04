@@ -1,0 +1,50 @@
+Tool: update_login_ip_ranges
+
+Description
+Update Login IP Ranges on a profile or org-level Trusted IP Ranges.
+Profile login IP ranges restrict where users with that profile can log
+in from; trusted IP ranges skip MFA challenges.
+
+Salesforce API
+Metadata API (`Profile.loginIpRanges`) + Tooling (`NetworkAccess`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest                   (profile-level)
+POST /services/data/v66.0/tooling/sobjects/NetworkAccess          (trusted IP)
+DELETE /services/data/v66.0/tooling/sobjects/NetworkAccess/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+target (string, required) - "profile" | "trustedIp".
+profileName (string, required when target="profile").
+operation (string, required) - "add" | "remove" | "set".
+ranges (object[], required) - Each: { startAddress, endAddress, description }.
+checkOnly (boolean, optional, default false, only for profile updates).
+
+Result
+deploy (object|null) - Metadata deploy result for profile updates.
+ranges (array) - Final state of ranges after the operation.
+
+Required permissions
+- "Manage Profiles and Permission Sets" / "Manage IP Addresses".
+
+Idempotency & limits
+- add/remove are idempotent.
+
+Errors
+- INVALID_IP_ADDRESS.
+
+Example request
+
+update_login_ip_ranges({
+  "target": "profile",
+  "profileName": "System_Administrator",
+  "operation": "set",
+  "ranges": [{ "startAddress": "203.0.113.0", "endAddress": "203.0.113.255", "description": "MTG Office" }]
+})

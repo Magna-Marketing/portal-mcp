@@ -1,0 +1,84 @@
+Tool: manage_email_template
+
+Description
+Create, update, or delete an Email Template. Templates feed
+auto-responders, drip campaigns, list emails, and one-to-one sends.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/email-templates       (create)
+PATCH  https://{pi-domain}/api/v5/objects/email-templates/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/email-templates/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "Welcome",
+  "subject": "Welcome to Magna",
+  "htmlMessage": "<html>...</html>",
+  "textMessage": "...",
+  "type": "HtmlAndText",
+  "isOneToOneEmail": true,
+  "isAutoResponderEmail": true,
+  "campaignId": 1024,
+  "trackerDomainId": 7,
+  "senderOptions": { "type": "GENERAL_USER", "address": "noreply@magnatech.com", "name": "Magna" },
+  "replyToOptions": { "type": "GENERAL_USER", "address": "support@magnatech.com" },
+  "tagReplacementLanguage": "ENGLISH"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create).
+subject (string, required for create).
+htmlMessage (string, optional), textMessage (string, optional).
+type (string, optional, default "HtmlAndText") - "HtmlAndText" |
+  "HtmlOnly" | "TextOnly".
+isOneToOneEmail (boolean, optional).
+isAutoResponderEmail (boolean, optional).
+isDripEmail (boolean, optional).
+isListEmail (boolean, optional).
+campaignId (number, optional).
+trackerDomainId (number, optional).
+folderId (number, optional).
+senderOptions (object, optional) - See `send_one_to_one_email`.
+replyToOptions (object, optional).
+tagReplacementLanguage (string, optional, default "ENGLISH").
+
+Result
+emailTemplate (object) - Created/updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Hard delete: deleted templates can't be referenced; existing
+  scheduled list emails using the template fail at send.
+
+Errors
+- 53 not_permitted, 600 missing_required_field
+  (subject / sender required), 59 not_found.
+
+Example request
+
+manage_email_template({
+  "operation": "create",
+  "name": "Welcome",
+  "subject": "Welcome to Magna",
+  "htmlMessage": "<html>...</html>",
+  "isAutoResponderEmail": true,
+  "campaignId": 1024,
+  "senderOptions": { "type": "GENERAL_USER", "address": "noreply@magnatech.com" }
+})
+
+Example result
+{ "emailTemplate": { "id": 451, "name": "Welcome", "isAutoResponderEmail": true } }

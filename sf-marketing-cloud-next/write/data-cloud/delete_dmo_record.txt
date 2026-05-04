@@ -1,0 +1,61 @@
+Tool: delete_dmo_record
+
+Description
+Delete a single record from a Data Model Object by primary key.
+Used for **right-to-be-forgotten** workflows and selective cleanup.
+For bulk deletes, create a Bulk Ingestion job with `operation=delete`.
+
+Salesforce API
+Data Cloud Records API.
+
+Endpoint
+DELETE {cdpInstanceUrl}/api/v1/dmo/:dmoApiName/:recordId
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dmoApiName (string, required) - e.g. "UnifiedIndividual__dlm".
+recordId (string, required) - Primary-key value.
+dataSpace (string, optional, default "default").
+deleteRelated (boolean, optional, default false) - When true, related
+  records on child DMOs are also deleted (cascading). Use for full
+  RTBF.
+
+Result
+success (boolean).
+dmoApiName (string), recordId (string).
+relatedDeleted (object, when deleteRelated=true) - Per-DMO counts
+  of related records removed.
+
+Required scopes
+- `cdp_api`.
+
+Idempotency & limits
+- Idempotent: deleting a missing record returns `success=true` with
+  `wasMissing=true`.
+- Synchronous; cascading deletes can take a few minutes.
+
+Errors
+- 404 NOT_FOUND, 403 INSUFFICIENT_ACCESS_OR_READONLY,
+  401 invalid_token.
+
+Example request
+
+delete_dmo_record({
+  "dmoApiName": "UnifiedIndividual__dlm",
+  "recordId": "IND_001",
+  "deleteRelated": true
+})
+
+Example result
+{
+  "success": true,
+  "dmoApiName": "UnifiedIndividual__dlm",
+  "recordId": "IND_001",
+  "relatedDeleted": { "EngagementHistory__dlm": 18, "Order__dlm": 3 }
+}

@@ -1,0 +1,44 @@
+Tool: manage_layout_template_tags
+
+Description
+Add or remove tags on a Layout Template.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/layout-templates/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/layout-templates/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Brand" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), layoutTemplateId (number), tag (string),
+operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_layout_template_tags({ "id": 71, "operation": "add", "tag": "Brand" })
+
+Example result
+{ "success": true, "layoutTemplateId": 71, "tag": "Brand", "operation": "add" }

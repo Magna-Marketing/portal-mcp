@@ -1,0 +1,44 @@
+Tool: update_rows
+
+Description
+Update existing rows in a Data Extension by primary key. Fails for
+rows that don't exist (use `upsert_rows` for insert-or-update).
+
+Marketing Cloud API
+SOAP API (`DataExtensionObject[ExternalKey]` Update).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP UpdateRequest with `Properties[]` matching DE fields.
+
+Input (parameters)
+customerKey (string, required).
+rows (object[], required) - Each row must include PK fields + the values to update.
+allOrNone (boolean, optional, default false).
+
+Result
+results (array) - { keys, success, errors }.
+totalUpdated (number), totalFailed (number).
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Idempotent on equal input.
+- 200-row batch cap per SOAP call; tool batches.
+
+Errors
+- 30002 not found, NO_PRIMARY_KEY.
+
+Example request
+
+update_rows({
+  "customerKey": "Members_DE",
+  "rows": [{ "MemberId": "MEM-100023", "TierName": "Platinum" }]
+})

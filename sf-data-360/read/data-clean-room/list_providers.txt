@@ -1,0 +1,50 @@
+Tool: list_providers
+
+Description
+List Data Clean Room providers — partner platforms (Snowflake Data
+Clean Rooms, AWS Clean Rooms, etc.) that the org has registered
+with.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/providers
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Active" | "Inactive".
+providerType (string, optional) - "Snowflake" | "AwsCleanRooms" |
+  "Habu" | "InfoSum" | "DataCloud".
+limit (number, optional, default 50).
+
+Result
+providers (array) - Each: { id, name, label, providerType,
+  status, configuration (object), createdDate, lastModifiedDate }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_providers({ "status": "Active" })
+
+Example result
+{
+  "providers": [
+    { "id": "0YP580000000001", "name": "MTG_Snowflake_DCR",
+      "providerType": "Snowflake", "status": "Active" }
+  ]
+}

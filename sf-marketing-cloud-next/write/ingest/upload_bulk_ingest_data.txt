@@ -1,0 +1,69 @@
+Tool: upload_bulk_ingest_data
+
+Description
+Upload a CSV (or JSON) chunk to an open Bulk Ingestion job. Up to
+100MB per chunk; multiple chunks per job. The job must be in `Open`
+state — call `manage_bulk_ingest_job operation="close"` after the
+final chunk to start processing.
+
+Salesforce API
+Data Cloud Bulk Ingestion API.
+
+Endpoint
+PUT {cdpInstanceUrl}/api/v1/ingest/jobs/:jobId/batches
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: text/csv         (CSV)  or application/json   (JSON)
+Accept: application/json
+
+Body (CSV — first row is header matching the source object's columns)
+Id__c,OrderDate__c,Amount__c,Currency__c
+ORDER-100023,2026-04-29T13:02:11Z,199.99,USD
+ORDER-100024,2026-04-29T13:05:00Z,89.50,USD
+
+Body (JSON)
+{ "data": [ { "Id__c": "ORDER-100023", "Amount__c": 199.99 } ] }
+
+Input (parameters)
+jobId (string, required).
+csv (string, optional) - Inline CSV. The MCP server selects
+  Content-Type based on which body field is supplied.
+csvBase64 (string, optional) - Alternative for binary-safe
+  transport.
+data (object[], optional) - JSON rows; mutually exclusive with `csv`.
+
+Result
+batchId (string).
+jobId (string).
+state (string) - "Queued".
+sizeBytes (number) - Bytes uploaded.
+rowCountEstimate (number).
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Not idempotent — repeated uploads of the same CSV will ingest
+  duplicate rows. Use a primary-key column for upstream dedupe.
+- 100MB per chunk; many chunks per job.
+
+Errors
+- 400 INVALID_CSV_HEADER, 409 JOB_NOT_OPEN,
+  413 PAYLOAD_TOO_LARGE, 401 invalid_token.
+
+Example request
+
+upload_bulk_ingest_data({
+  "jobId": "JOB_001",
+  "csv": "Id__c,Amount__c\nORDER-100023,199.99\nORDER-100024,89.50"
+})
+
+Example result
+{
+  "batchId": "BATCH_001",
+  "jobId": "JOB_001",
+  "state": "Queued",
+  "sizeBytes": 1284,
+  "rowCountEstimate": 2
+}

@@ -1,0 +1,70 @@
+Tool: update_permission_set
+
+Description
+Update an existing permission set by adding, removing, or replacing
+specific permissions. Operations are atomic per Metadata deploy and
+return per-component success/failure. Three modes:
+- `add`: append/enable specified perms (existing perms untouched).
+- `remove`: remove/disable specified perms.
+- `set`: replace the entire perms array of the chosen categories.
+  Use carefully — anything not listed is dropped.
+
+For complete view, use `view_permission_set` first.
+
+Salesforce API
+Metadata API (`PermissionSet` type), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (add)
+{
+  "operation": "add",
+  "fullName": "MTG_Project_Manager",
+  "userPermissions": [{ "name": "ManageDataIntegrations", "enabled": true }],
+  "objectPermissions": [{ "object": "Account", "allowRead": true, "allowEdit": true }]
+}
+
+Input (parameters)
+operation (string, required) - "add" | "remove" | "set".
+fullName (string, required) - Permset DeveloperName.
+label (string, optional) - When changing label.
+description (string, optional).
+userPermissions (array, optional).
+objectPermissions (array, optional) - For `add`, only true flags are
+  applied; for `remove`, listed perms are turned off; for `set`,
+  replaces the entire ObjectPermissions list for matched sObjects.
+fieldPermissions (array, optional).
+classAccesses, pageAccesses (array, optional).
+tabSettings, recordTypeVisibilities, applicationVisibilities (array, optional).
+customMetadataTypeAccesses, customSettingAccesses (array, optional).
+checkOnly (boolean, optional, default false).
+allOrNone (boolean, optional, default true).
+
+Result
+Deploy result + `permissionSet` summary. For `set`, the response
+indicates removed-vs-added per category for visibility into the diff.
+
+Required permissions
+- "Manage Profiles and Permission Sets".
+
+Idempotency & limits
+- `add` is idempotent (no-op if perm already present).
+- `remove` is idempotent (no-op if not present).
+- `set` is idempotent on equal input.
+
+Errors
+- NOT_FOUND on fullName.
+- INVALID_FIELD on bad field reference.
+
+Example request (remove a system permission)
+
+update_permission_set({
+  "operation": "remove",
+  "fullName": "MTG_Project_Manager",
+  "userPermissions": [{ "name": "ModifyAllData", "enabled": false }]
+})

@@ -1,0 +1,53 @@
+Tool: get_dmo_metadata
+
+Description
+Read the metadata of a single Profile-category DMO — the
+queryable fields, the primary key, the searchable keys, and the
+related-object relationship list.
+
+Salesforce API
+Connect plane (default) or runtime plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/profile/metadata/:dataModelName  (plane="connect")
+GET {cdpTenantUrl}/api/v1/profile/metadata/:dmoApiName                       (plane="runtime")
+
+Headers
+Authorization: Bearer <core_access_token>     (connect)
+Authorization: Bearer <data_cloud_token>      (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dmoApiName (string, required).
+plane (string, optional, default "connect").
+
+Result
+dmoMetadata (object): dmoApiName, label, primaryKeyField,
+  searchableFields, fields (array), relationships (array).
+
+Required scopes
+- `api` or `cdp_profile_api_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_dmo_metadata({ "dmoApiName": "UnifiedIndividual__dlm" })
+
+Example result
+{
+  "dmoMetadata": {
+    "dmoApiName": "UnifiedIndividual__dlm",
+    "primaryKeyField": "Id__c",
+    "fields": [
+      { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true }
+    ]
+  }
+}

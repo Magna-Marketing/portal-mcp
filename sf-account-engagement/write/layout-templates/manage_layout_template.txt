@@ -1,0 +1,67 @@
+Tool: manage_layout_template
+
+Description
+Create, update, or delete a Layout Template. Layout Templates wrap
+Forms and Landing Pages with branded HTML / CSS shells.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/layout-templates       (create)
+PATCH  https://{pi-domain}/api/v5/objects/layout-templates/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/layout-templates/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "Default LP shell",
+  "folderId": 33,
+  "isIncludeDefaultCss": true,
+  "layoutContent": "<div class=\"page\">%%content%%</div>",
+  "formContent": "<form>%%form-fields%%</form>",
+  "siteSearchContent": "",
+  "css": "body { font-family: sans-serif; }"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create).
+folderId (number, optional).
+isIncludeDefaultCss (boolean, optional, default true).
+layoutContent (string, optional).
+formContent (string, optional).
+siteSearchContent (string, optional).
+css (string, optional).
+
+Result
+layoutTemplate (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Hard delete; Forms / Landing Pages referencing the template fall
+  back to default styling.
+
+Errors
+- 53 not_permitted, 59 not_found.
+
+Example request
+
+manage_layout_template({
+  "operation": "create",
+  "name": "Default LP shell",
+  "isIncludeDefaultCss": true,
+  "layoutContent": "<div>%%content%%</div>"
+})
+
+Example result
+{ "layoutTemplate": { "id": 71, "name": "Default LP shell", "isIncludeDefaultCss": true } }

@@ -1,0 +1,57 @@
+Tool: list_ingest_jobs
+
+Description
+List Bulk Ingestion jobs (runtime plane). Each job moves through
+`Open → UploadComplete → JobComplete` (or `Failed | Aborted`).
+
+Salesforce API
+Runtime plane.
+
+Endpoint
+GET {cdpTenantUrl}/api/v1/ingest/jobs
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+state (string, optional) - "Open" | "UploadComplete" |
+  "InProgress" | "JobComplete" | "Aborted" | "Failed".
+sourceApiName (string, optional).
+objectApiName (string, optional).
+operation (string, optional) - "upsert" | "insert" | "delete".
+createdAfter (string, optional) - ISO-8601.
+limit (number, optional, default 50, max 1000).
+nextPageToken (string, optional).
+
+Result
+jobs (array) - Each: { id, sourceApiName, objectApiName, operation,
+  state, contentType, columnDelimiter, lineEnding, jobType,
+  recordsProcessed, recordsRejected, errorMessage, createdById,
+  createdDate, systemModstamp }.
+nextPageToken (string|null).
+
+Required scopes
+- `cdp_ingest_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+list_ingest_jobs({ "state": "JobComplete" })
+
+Example result
+{
+  "jobs": [
+    { "id": "JOB_001", "sourceApiName": "ecommerce",
+      "objectApiName": "Order", "operation": "upsert",
+      "state": "JobComplete", "recordsProcessed": 12450 }
+  ]
+}

@@ -1,0 +1,43 @@
+Tool: list_journey_audiences
+
+Description
+List the audiences (entry events / data extensions) feeding a journey.
+Returns each event source type, the DE / API event being listened to,
+and the current entry count.
+
+Marketing Cloud API
+REST API (`/interaction/v1/eventDefinitions`) + journey definition.
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+journeyId (string, optional).
+journeyKey (string, optional).
+type (string|string[], optional) - "DataExtension" | "APIEvent" | "AudienceBuilder" | "SalesforceObject" | "ContactEvent".
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalCount (number).
+audiences (array) - { eventDefinitionKey, name, description, type, dataExtensionId, dataExtensionName, isPlatformObject, mode, sourceApplicationExtensionId, totalEntriesLast30Days (when retrievable) }.
+
+Required scopes
+- `journeys_read`, `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 10000 bad request.
+
+Example request
+
+list_journey_audiences({ "type": "DataExtension" })

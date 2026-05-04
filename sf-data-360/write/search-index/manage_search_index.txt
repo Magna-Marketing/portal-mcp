@@ -1,0 +1,71 @@
+Tool: manage_search_index
+
+Description
+Create, update, or delete a Semantic Search index over a DMO.
+Indexing is asynchronous; once `status=Active` the index is
+queryable from Agentforce / RAG flows.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/search-index                                  (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/search-index/:searchIndexApiNameOrId          (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/search-index/:searchIndexApiNameOrId          (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "apiName": "ProductCatalog__si",
+  "label": "Product catalogue",
+  "sourceDmoApiName": "Product__dlm",
+  "embeddingModel": "openai.text-embedding-3-small",
+  "vectorDimension": 1536,
+  "fields": [
+    { "apiName": "Name__c",        "isIndexed": true },
+    { "apiName": "Description__c", "isIndexed": true },
+    { "apiName": "Category__c",    "isFilterable": true }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+searchIndexApiNameOrId (string, required for update / delete).
+apiName (string, required for create).
+label (string, required for create).
+sourceDmoApiName (string, required for create).
+embeddingModel (string, optional).
+vectorDimension (number, optional).
+fields (array, required for create) - [{ apiName, isIndexed,
+  isFilterable }].
+
+Result
+searchIndex (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; consumers (RAG / Agentforce) lose access.
+- Re-indexing is auto-triggered on update.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_FIELD, 404 NOT_FOUND.
+
+Example request
+
+manage_search_index({
+  "operation": "create",
+  "apiName": "ProductCatalog__si",
+  "label": "Product catalogue",
+  "sourceDmoApiName": "Product__dlm",
+  "fields": [{ "apiName": "Name__c", "isIndexed": true }]
+})
+
+Example result
+{ "searchIndex": { "apiName": "ProductCatalog__si", "status": "Indexing" } }

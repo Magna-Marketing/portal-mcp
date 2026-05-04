@@ -1,0 +1,56 @@
+Tool: get_calculated_insight_metadata
+
+Description
+Read just the metadata for a Calculated Insight (or all CIOs if no
+`ciName` supplied) — measure / dimension definitions without the
+underlying SQL. Useful for cataloguing.
+
+Salesforce API
+Connect plane (default) or runtime plane (`plane="runtime"`).
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/insight/metadata                       (connect, all)
+GET {instanceUrl}/services/data/v{ver}/ssot/insight/metadata/:ciName               (connect, one)
+GET {cdpTenantUrl}/api/v1/insight/metadata                                         (runtime, all)
+GET {cdpTenantUrl}/api/v1/insight/metadata/:ci_name                                (runtime, one)
+
+Headers
+Authorization: Bearer <core_access_token>     (connect)
+Authorization: Bearer <data_cloud_token>      (runtime)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+plane (string, optional, default "connect").
+ciName (string, optional) - When supplied, returns metadata for one CI.
+
+Result
+metadata (object|array) - Single CI shape when `ciName` is set,
+  array of CIs otherwise. Each: { apiName, label, measures (array<{
+  apiName, label, dataType, aggregation }>), dimensions (array<{
+  apiName, label, dataType }>) }.
+
+Required scopes
+- `api` or `cdp_calculated_insight_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_calculated_insight_metadata({ "ciName": "CustomerLTV__cio" })
+
+Example result
+{
+  "metadata": {
+    "apiName": "CustomerLTV__cio",
+    "measures": [
+      { "apiName": "LifetimeValue__c", "dataType": "DECIMAL", "aggregation": "SUM" }
+    ]
+  }
+}

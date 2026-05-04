@@ -1,0 +1,38 @@
+Tool: list_push_apps
+
+Description
+List MobilePush applications registered to the BU. Each app has
+identity, platform (iOS / Android / FireOS), bundle Id, and certificate
+expiration.
+
+Marketing Cloud API
+REST API (`/push/v1/application/`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/application/
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+applications (array) - { id, applicationId, name, description, applicationType ("iOS"|"Android"|"FireOS"), bundleIdentifier, locationEnabled, analyticsEnabled, iconBadgeEnabled, certExpirationDate, gcmSenderId, dateCreated, dateModified }.
+
+Required scopes
+- `push_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_push_apps({})

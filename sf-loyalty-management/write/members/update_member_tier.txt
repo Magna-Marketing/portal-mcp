@@ -1,0 +1,58 @@
+Tool: update_member_tier
+
+Description
+Update a member's tier through the Loyalty Program Process "Update
+Member Tier". Use this for evaluation-driven tier progressions where
+the platform should recompute eligibility for benefits, reset
+qualifying-points clocks, etc.
+
+For administrative override (skip rules), use `change_member_tier`
+which calls the `ChangeTier` standard invocable directly.
+
+Salesforce API
+Loyalty Program Process API, v66.0.
+
+Endpoint
+POST /services/data/v66.0/connect/loyalty-program-process/run-program-process
+Body { "processName": "Update Member Tier", "processParameters": { ... } }
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "processName": "Update Member Tier",
+  "processParameters": {
+    "MemberId": "0lMQg00000abcDE2",
+    "ProgramName": "MTG_Rewards",
+    "TierGroupName": "Status_Tiers"
+  }
+}
+
+Input (parameters)
+programName (string, required).
+memberId (string, required).
+tierGroupName (string, optional) - Restrict to one tier group; omit to evaluate all.
+asOfDate (string, optional) - YYYY-MM-DD; default = today.
+
+Result
+processResult (object) - { isSuccess, errors, processStatus }.
+tiers (array) - Resulting tier per group: { tierGroupName, previousTierName, newTierName, effectiveFromDate }.
+
+Required permissions
+- `Loyalty Management Admin` permission set.
+
+Idempotency & limits
+- Idempotent within the same evaluation window.
+
+Errors
+- LOYALTY_MEMBER_NOT_FOUND, LOYALTY_PROCESS_NOT_FOUND.
+
+Example request
+
+update_member_tier({
+  "programName": "MTG_Rewards",
+  "memberId": "0lMQg00000abcDE2",
+  "tierGroupName": "Status_Tiers"
+})

@@ -1,0 +1,48 @@
+Tool: get_activation
+
+Description
+Read a single Activation by id with full target config and contact
+points.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+activationId (string, required).
+
+Result
+activation (object): id, apiName, label, segmentId, targetType,
+  targetConfig, status, schedule, contactPoints, lastRunStatus,
+  lastRunDate, populationCount, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_activation({ "activationId": "0YA580000000001" })
+
+Example result
+{
+  "activation": {
+    "id": "0YA580000000001", "apiName": "EMEA_to_MC",
+    "targetType": "MarketingCloudEngagement",
+    "targetConfig": { "memberId": 5001234, "dataExtensionExternalKey": "DE_EMEA_HIGH_VALUE" }
+  }
+}

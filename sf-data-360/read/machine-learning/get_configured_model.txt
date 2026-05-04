@@ -1,0 +1,46 @@
+Tool: get_configured_model
+
+Description
+Read a single Configured Model by id or api name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models/:configuredModelIdOrName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+configuredModelIdOrName (string, required).
+
+Result
+configuredModel (object): id, apiName, label, modelType, status,
+  modelArtifactId, version, predictionEndpoint, inputSchema,
+  outputSchema, runtimeFramework, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_configured_model({ "configuredModelIdOrName": "ChurnPredictor" })
+
+Example result
+{
+  "configuredModel": {
+    "apiName": "ChurnPredictor", "modelType": "Classification",
+    "status": "Active", "version": "1.2.0"
+  }
+}

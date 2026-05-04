@@ -1,0 +1,46 @@
+Tool: manage_user_tags
+
+Description
+Add or remove tags on an Account Engagement User. Note that
+Account Engagement v5 does not yet expose user CRUD; users are
+provisioned through Salesforce SSO and the Pardot setup pages.
+Only tags are writable from the API.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/users/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/users/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+
+Body
+{ "tag": "Marketing Ops" }
+
+Input (parameters)
+id (number, required).
+operation (string, required) - "add" | "remove".
+tag (string, required).
+
+Result
+success (boolean), userId (number), tag (string), operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent.
+
+Errors
+- 59 not_found.
+
+Example request
+
+manage_user_tags({ "id": 421, "operation": "add", "tag": "Marketing Ops" })
+
+Example result
+{ "success": true, "userId": 421, "tag": "Marketing Ops", "operation": "add" }

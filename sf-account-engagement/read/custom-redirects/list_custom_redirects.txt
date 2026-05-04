@@ -1,0 +1,63 @@
+Tool: list_custom_redirects
+
+Description
+List Custom Redirects (vanity / trackable links). Each redirect
+captures clicks against a campaign and rewrites a tracker-domain URL
+to a destination. UTM parameters (`gaSource`, `gaMedium`, etc.) are
+appended automatically when set.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/custom-redirects?fields={fields}&filter[campaignId]=eq,1024
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+campaignId (number, optional).
+trackerDomainId (number, optional).
+folderId (number, optional).
+nameContains (string, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,salesforceId,folderId,name,
+  destinationUrl,campaignId,trackerDomainId,vanityUrlPath,vanityUrl,
+  trackedUrl,url,gaSource,gaMedium,gaTerm,gaContent,gaCampaign,
+  bitlyIsPersonalized,bitlyShortUrl,createdAt,updatedAt,createdById,
+  updatedById,isDeleted).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+customRedirects (array) - Each: { id, name, destinationUrl, vanityUrl,
+  vanityUrlPath, trackedUrl, url, campaignId, trackerDomainId, folderId,
+  gaSource, gaMedium, gaTerm, gaContent, gaCampaign, bitlyShortUrl,
+  bitlyIsPersonalized, salesforceId, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_custom_redirects({ "campaignId": 1024 })
+
+Example result
+{
+  "customRedirects": [
+    { "id": 612, "name": "Spring promo", "vanityUrl": "https://go.magnatech.com/r/spring",
+      "destinationUrl": "https://magnatech.com/spring", "campaignId": 1024 }
+  ]
+}

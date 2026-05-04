@@ -1,0 +1,97 @@
+Tool: read_flow
+
+Description
+Read a Salesforce Flow's definition: the FlowDefinition row, the active
+Flow version, and (optionally) the raw XML metadata. Use this to inspect
+how a flow runs, which sObjects it touches, and to copy/migrate its
+shape. Supply `flowName` (DeveloperName) for a single flow or use
+`list_flows` to discover candidates first.
+
+Salesforce API
+Tooling API + Metadata API, v66.0.
+- Tooling: `Flow` and `FlowDefinition` sObjects.
+- Metadata API (`Flow` type) for the XML body when requested.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MasterLabel, ApiName, ProcessType, Status, ActiveVersion.VersionNumber, ActiveVersionId, LatestVersionId, Description FROM FlowDefinition WHERE DeveloperName = '{flowName}'
+GET /services/data/v66.0/tooling/sobjects/Flow/{flowVersionId}
+POST /services/Soap/m/66.0   (Metadata API readMetadata for raw XML)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None for the GETs. SOAP envelope for the readMetadata call (handled by MCP).
+
+Input (parameters)
+flowName (string, required) - DeveloperName of the FlowDefinition (e.g.
+  "Account_Trigger_Flow").
+version (number, optional) - Specific version number. Defaults to the
+  active version if any, else the latest version.
+includeXml (boolean, optional, default false) - When true, also return
+  the Flow XML retrieved via the Metadata API. Heavier; off by default.
+
+Result
+flow (object):
+  definitionId (string) - FlowDefinition Id.
+  flowName (string) - DeveloperName.
+  label (string) - MasterLabel.
+  description (string|null).
+  processType (string) - "Flow", "AutoLaunchedFlow", "RecordTrigger",
+    "ScreenFlow", "Workflow", "InvocableProcess", "PlatformEvent",
+    "ApprovalProcess", etc.
+  status (string) - "Active", "Draft", "Obsolete", "InvalidDraft".
+  activeVersionId (string|null), activeVersionNumber (number|null),
+  latestVersionId (string), latestVersionNumber (number).
+  versions (array, when listing) - { id, versionNumber, status,
+    apiVersion, createdDate, lastModifiedDate }.
+  selectedVersion (object) - The version actually returned:
+    id, versionNumber, status, apiVersion, runInMode, recordTriggerType
+    (BeforeSave|AfterSave|...), triggerType (RecordAfterSave|...),
+    objectType (sObject the flow operates on, when applicable).
+  xml (string, only when includeXml=true) - Raw <Flow> XML.
+
+Required permissions
+- API Enabled.
+- "View All Data" + "Manage Flow" to read flow XML.
+- Without "Manage Flow", metadata is returned but xml may be omitted.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Metadata API readMetadata is heavier; cache when possible.
+
+Errors
+- NOT_FOUND: flowName doesn't match a FlowDefinition.
+- INSUFFICIENT_ACCESS_OR_READONLY: caller lacks "View All Data".
+
+Example request
+
+read_flow({ "flowName": "Account_Trigger_Flow", "includeXml": false })
+
+Example result
+
+{
+  "flow": {
+    "definitionId": "300Qg000000aBcDEF",
+    "flowName": "Account_Trigger_Flow",
+    "label": "Account Trigger Flow",
+    "description": "Sets default region on Account create",
+    "processType": "AutoLaunchedFlow",
+    "status": "Active",
+    "activeVersionId": "301Qg000000aBcD12",
+    "activeVersionNumber": 4,
+    "latestVersionId": "301Qg000000aBcD12",
+    "latestVersionNumber": 4,
+    "selectedVersion": {
+      "id": "301Qg000000aBcD12",
+      "versionNumber": 4,
+      "status": "Active",
+      "apiVersion": 62.0,
+      "runInMode": "DefaultMode",
+      "triggerType": "RecordBeforeSave",
+      "objectType": "Account",
+      "recordTriggerType": "Create"
+    }
+  }
+}

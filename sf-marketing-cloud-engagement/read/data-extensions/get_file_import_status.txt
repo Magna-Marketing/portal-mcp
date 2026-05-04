@@ -1,0 +1,46 @@
+Tool: get_file_import_status
+
+Description
+Get the status / validation result of a file import queued by
+`queue_file_import`. Three views:
+- summary: high-level state, processed/failed counts.
+- validationsummary: per-validation-rule counts.
+- validationresult: detailed per-row validation errors.
+
+Marketing Cloud API
+REST API (`/data/v1/async/import/{id}/...`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import/{operationId}/summary
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import/{operationId}/validationsummary
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import/{operationId}/validationresult
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+operationId (string, required).
+view (string, optional, default "summary") - "summary" | "validationsummary" | "validationresult".
+limit (number, optional, default 1000) - Only for `validationresult`.
+
+Result
+For summary: { operationId, status ("Pending"|"InProgress"|"Complete"|"Failed"|"Cancelled"), startedAt, completedAt, totalRows, totalProcessed, totalErrors, totalDuplicates, totalSkipped, fileName }.
+For validationsummary: { rules: [{ ruleName, errorCount, sampleMessage }] }.
+For validationresult: { errors: [{ rowNumber, errorMessage, fieldName, ruleName }], hasMore }.
+
+Required scopes
+- `data_extensions_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 operationId not found.
+
+Example request
+
+get_file_import_status({ "operationId": "abc123-def456", "view": "summary" })

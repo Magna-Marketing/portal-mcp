@@ -1,0 +1,61 @@
+Tool: list_campaigns
+
+Description
+List Account Engagement campaigns (the default attribution / source
+of new prospects). When **Connected Campaigns** is enabled in the
+SFDC org, each Pardot campaign is bidirectionally linked with a
+Salesforce Campaign and `salesforceId` is populated.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/campaigns?fields={fields}&filter[name]=like,Welcome*&orderBy=updatedAt desc
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+nameContains (string, optional) - `like` filter on `name`.
+folderId (number, optional).
+parentCampaignId (number, optional) - Direct children only.
+isDeleted (boolean, optional, default false).
+hasSalesforceId (boolean, optional) - Filter to Connected Campaigns when true.
+fields (string[], optional, default: id,name,folderId,cost,
+  parentCampaignId,salesforceId,isDeleted,createdAt,updatedAt,
+  createdById,updatedById).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+campaigns (array) - Each: { id, name, folderId, cost (number|null),
+  parentCampaignId (number|null), salesforceId (string|null), isDeleted,
+  createdAt, updatedAt, createdById, updatedById }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. Costs 1 v5 call per page.
+
+Errors
+- 65 invalid_field_projection, 184 daily_limit_reached.
+
+Example request
+
+list_campaigns({ "nameContains": "Welcome", "limit": 20 })
+
+Example result
+{
+  "campaigns": [
+    { "id": 1024, "name": "Welcome 2026", "folderId": 33, "cost": 1500.00,
+      "salesforceId": "7015800000xyz123", "isDeleted": false }
+  ],
+  "nextPageToken": null
+}

@@ -1,0 +1,48 @@
+Tool: schedule_apex_job
+
+Description
+Schedule an Apex class implementing `Schedulable` to run on a cron
+expression. Wraps `System.schedule(name, cron, instance)` (executed via
+anonymous Apex) and surfaces the resulting `CronTrigger` Id for
+observability.
+
+Salesforce API
+Tooling API + Anonymous Apex, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody=...
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None — executed as anonymous Apex string built by the tool.
+
+Input (parameters)
+className (string, required) - Apex class implementing `Schedulable`.
+jobName (string, required) - Job display name (must be unique among scheduled jobs).
+cronExpression (string, required) - Salesforce cron format, e.g. "0 0 9 ? * MON-FRI" (every weekday 9am).
+arguments (object, optional) - Constructor arguments passed to the class via anonymous Apex.
+
+Result
+job (object) - { cronTriggerId, jobName, className, cronExpression, nextFireTime, state }.
+
+Required permissions
+- "Author Apex".
+
+Idempotency & limits
+- Not idempotent — re-running with the same `jobName` fails (DUPLICATE_VALUE).
+- Max 100 active scheduled jobs per org.
+
+Errors
+- DUPLICATE_VALUE on jobName already used.
+- INVALID_CRON.
+
+Example request
+
+schedule_apex_job({
+  "className": "MTG_Daily_Project_Recalc",
+  "jobName": "MTG Daily Project Recalc",
+  "cronExpression": "0 0 1 * * ?"
+})

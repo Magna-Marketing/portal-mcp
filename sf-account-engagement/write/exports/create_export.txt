@@ -1,0 +1,83 @@
+Tool: create_export
+
+Description
+Start an async export of a filtered set of records from a single
+object. Choose one of the canned procedures
+(`Prospect.FilterByCreatedAt`, `ListMembership.FilterByUpdatedAt`,
+`VisitorActivity.FilterByCreatedAt`, etc.) and pass `arguments` for
+the date range.
+
+Poll status with `get_export`; once `status=Complete`, walk
+`resultRefs` and download chunks via `download_export_results`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/exports
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "object": "Prospect",
+  "procedure": "Prospect.FilterByUpdatedAt",
+  "arguments": {
+    "updated_after": "2026-04-01T00:00:00Z",
+    "updated_before": "2026-04-30T00:00:00Z"
+  },
+  "fields": ["id","email","firstName","lastName","score","grade",
+             "campaignId","createdAt","updatedAt"]
+}
+
+Input (parameters)
+object (string, required) - "Prospect" | "ListMembership" |
+  "VisitorActivity" | "Visit" | "Visitor" | "VisitorPageView" |
+  "Email" | "ListEmail" | "Form" | "FormField" | "FormHandler" |
+  "FormHandlerField" | "Folder" | "FolderContents" |
+  "BulkAction" | "Campaign" | "CustomField" | "CustomRedirect" |
+  "DynamicContent" | "EmailTemplate" | "EngagementStudioProgram" |
+  "ExternalActivity" | "File" | "LandingPage" | "LayoutTemplate" |
+  "LifecycleHistory" | "LifecycleStage" | "LifecycleStageProspect" |
+  "List" | "Opportunity" | "ProspectAccount" | "Tag" |
+  "TrackerDomain" | "User".
+procedure (string, required) - "<Object>.FilterByCreatedAt" |
+  "<Object>.FilterByUpdatedAt" | "<Object>.FilterByActivityDate"
+  (External Activity) | "<Object>.FilterByProspectUpdatedAt"
+  (ProspectAccount, Visitor).
+arguments (object, required) - Procedure-specific date / filter args.
+fields (string[], required) - Output column projection.
+
+Result
+export (object) - { id, object, status: "Waiting", procedure,
+  arguments, fields, createdAt }.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent. Up to 5 concurrent exports per BU.
+- Result CSV chunks ≈ 250MB each, retained 30 days.
+
+Errors
+- 20 invalid_input (procedure not allowed for object), 184
+  daily_limit_reached, 53 concurrency_limit (5 concurrent exports
+  per BU).
+
+Example request
+
+create_export({
+  "object": "Prospect",
+  "procedure": "Prospect.FilterByUpdatedAt",
+  "arguments": { "updated_after": "2026-04-01T00:00:00Z" },
+  "fields": ["id","email","firstName","score"]
+})
+
+Example result
+{
+  "export": { "id": 7782, "status": "Waiting", "object": "Prospect" }
+}

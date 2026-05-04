@@ -1,0 +1,92 @@
+Tool: get_profile_record
+
+Description
+Read one or more profile records from a DMO. Unifies the various
+Postman read patterns under `lookupBy`:
+
+- `id` (default) - Read by primary-key value.
+- `searchKey` - Read by a configured searchable key (e.g.
+  `EmailAddress__c`, `PhoneNumber__c`).
+- `withChildren` - Read by id and expand a related child DMO via
+  the relationship name.
+- `withCalculatedInsight` - Read by id and join in a CIO's measures.
+
+Optionally projects fields and expands related records via
+`relationships`.
+
+Salesforce API
+Runtime plane (default — faster) or Connect plane (when
+`plane="connect"`).
+
+Endpoint
+GET {cdpTenantUrl}/api/v1/profile/:dmoApiName                                                            (runtime, list / search)
+GET {cdpTenantUrl}/api/v1/profile/:dmoApiName/:dmoRecordId                                                (runtime, by id)
+GET {cdpTenantUrl}/api/v1/profile/:dmoApiName/:searchKey                                                  (runtime, by search key)
+GET {cdpTenantUrl}/api/v1/profile/:dmoParentApiName/:dmoParentRecordId/:dmoChildApiName                   (runtime, with children)
+GET {cdpTenantUrl}/api/v1/profile/:dmoApiName/:dmoRecordId/calculated-insights/:insightName               (runtime, with CI)
+GET {instanceUrl}/services/data/v{ver}/ssot/profile/:dataModelName[/:id[/calculated-insights/:ciName | /:childDataModelName]]   (connect)
+
+Headers
+Authorization: Bearer <data_cloud_token>     (runtime)  or <core_access_token> (connect)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dmoApiName (string, required) - Primary DMO.
+lookupBy (string, optional, default "id") - "id" | "searchKey" |
+  "withChildren" | "withCalculatedInsight".
+recordId (string, required for id / withChildren / withCalculatedInsight).
+searchKey (string, required for "searchKey") - Value of the search
+  key (server picks the appropriate column from `searchableFields`).
+childDmoApiName (string, required for "withChildren") - Related DMO
+  via a defined relationship.
+calculatedInsightName (string, required for "withCalculatedInsight").
+fields (string[], optional) - Projection.
+relationships (string[], optional) - Expand relationships.
+limit (number, optional, default 1, max 25, list mode only).
+plane (string, optional, default "runtime") - "runtime" | "connect".
+dataSpace (string, optional, default "default").
+
+Result
+record (object|null) - Single profile record (when lookupBy is
+  "id" / "searchKey" / "withCalculatedInsight").
+records (array, when lookupBy="withChildren") - Child records
+  matching the parent.
+relatedRecords (object, when relationships supplied) - Keyed by
+  relationship name.
+calculatedInsight (object, when lookupBy="withCalculatedInsight") -
+  CI measures joined to the record.
+
+Required scopes
+- `cdp_profile_api_read` (runtime) or `api` (connect).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND, 400 INVALID_FIELD, 401 invalid_token.
+
+Example request
+
+get_profile_record({
+  "dmoApiName": "UnifiedIndividual__dlm",
+  "recordId": "IND_001",
+  "fields": ["Id__c","FirstName__c","EmailAddress__c"],
+  "relationships": ["EngagementHistory"]
+})
+
+Example result
+{
+  "record": {
+    "Id__c": "IND_001",
+    "FirstName__c": "Jane",
+    "EmailAddress__c": "jane@example.com"
+  },
+  "relatedRecords": {
+    "EngagementHistory": [
+      { "EventType__c": "EmailOpen", "EventTimestamp__c": "2026-04-29T13:05:12Z" }
+    ]
+  }
+}

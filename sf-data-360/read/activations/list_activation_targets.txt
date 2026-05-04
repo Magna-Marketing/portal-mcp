@@ -1,0 +1,52 @@
+Tool: list_activation_targets
+
+Description
+List Activation Targets — the destination end-points (a specific
+MCE BU + DE, an S3 bucket, an ad network connector) that an
+Activation can publish to. One row per configured target.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/activation-targets
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+targetType (string, optional).
+status (string, optional) - "Active" | "Paused" | "Failed".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+activationTargets (array) - Each: { id, name, label, targetType,
+  status, targetConfig (object), createdDate, lastModifiedDate,
+  externalPlatformName }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_activation_targets({ "targetType": "MarketingCloudEngagement" })
+
+Example result
+{
+  "activationTargets": [
+    { "id": "0YT580000000001", "name": "MTG_MCE_DE_EMEA",
+      "targetType": "MarketingCloudEngagement", "status": "Active" }
+  ]
+}

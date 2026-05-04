@@ -1,0 +1,60 @@
+Tool: update_flexipage
+
+Description
+Update FlexiPage metadata: label, description, regions structural
+changes (add/remove a region with `add_region_to_page` /
+`remove_component_from_region`). For component-level edits use
+`add_component_to_region`, `remove_component_from_region`,
+`update_component_properties`, `reorder_region_components`.
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "fullName": "Project__c_Record_Page",
+  "label": "Project Record Page (v2)",
+  "description": "Updated for Q3 2026 redesign"
+}
+
+Input (parameters)
+fullName (string, required).
+label (string, optional).
+description (string, optional).
+template (string, optional) - Change template; structural impact.
+regions (array, optional) - Replace/extend region list:
+  name (string), type (string), appendable (boolean).
+  Note: when present, this overwrites the page's region list. To add a
+  single region see `add_region_to_page`.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object) - Updated identity + region count.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal input.
+- Reducing regions or removing components requires a re-validation by
+  the platform; expect 5–15 s.
+
+Errors
+- NOT_FOUND on fullName.
+- INVALID_FIELD on bad template or region type.
+
+Example request (rename + describe)
+
+update_flexipage({
+  "fullName": "Project__c_Record_Page",
+  "label": "Project Record Page (v2)",
+  "description": "Adds the new Status panel"
+})

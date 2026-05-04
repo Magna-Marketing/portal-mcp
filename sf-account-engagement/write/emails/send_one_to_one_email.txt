@@ -1,0 +1,96 @@
+Tool: send_one_to_one_email
+
+Description
+Send a one-to-one email (transactional) from a known Pardot user to
+a single prospect. The email content can be inline (`htmlMessage` /
+`textMessage` / `subject`) or referenced from an Email Template
+(`emailTemplateId`). Requires either `prospectId` or `prospectFid`
+(the prospect's external `crmId`). For bulk sends to a list, use
+`send_list_email`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/emails
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (use template)
+{
+  "prospectId": 7745,
+  "campaignId": 1024,
+  "emailTemplateId": 451,
+  "userId": 421
+}
+
+Body (inline content)
+{
+  "prospectId": 7745,
+  "campaignId": 1024,
+  "name": "Re: Demo follow-up",
+  "subject": "Following up on your demo",
+  "htmlMessage": "<html><body>...{{Recipient.FirstName}}...</body></html>",
+  "textMessage": "Hi ...",
+  "userId": 421,
+  "senderOptions": { "type": "USER", "userId": 421 },
+  "replyToOptions": { "type": "USER", "userId": 421 }
+}
+
+Input (parameters)
+prospectId (number, optional) - Prospect to send to (Pardot id).
+prospectEmail (string, optional) - Resolved server-side via
+  `upsert_prospect_by_email`-style lookup (cheaper than ID).
+campaignId (number, required).
+emailTemplateId (number, optional) - Use template content; omit
+  inline body fields.
+userId (number, optional) - Pardot user that the send is "from".
+name (string, required when no template) - Internal email name.
+subject (string, required when no template).
+htmlMessage (string, optional).
+textMessage (string, optional).
+senderOptions (object, optional) - { type: "USER" | "ASSIGNED_USER" |
+  "SPECIFIC_SENDER" | "ACCOUNT_OWNER" | "GENERAL_USER" |
+  "PROSPECT_CUSTOM_FIELD" | "ACCOUNT_CUSTOM_FIELD",
+  userId | address | name | prospectCustomFieldId | accountCustomFieldId }.
+replyToOptions (object, optional) - Same shape as senderOptions.
+trackerDomainId (number, optional).
+folderId (number, optional).
+isOperational (boolean, optional, default false) - Operational
+  emails ignore opt-out preferences (use sparingly; only for password
+  resets, transactional notifications).
+
+Result
+email (object) - Created Email row with `id`, `sentAt`, etc.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent. There's no `messageKey` equivalent — implement
+  caller-side dedupe.
+- Subject to BU-level send rate; over-quota sends queue.
+
+Errors
+- 14 prospect_opted_out (skipped unless isOperational=true),
+  15 daily_send_limit, 30 invalid_template, 59 not_found
+  (prospect / template / campaign), 53 user_not_authorized.
+
+Example request
+
+send_one_to_one_email({
+  "prospectId": 7745,
+  "campaignId": 1024,
+  "emailTemplateId": 451,
+  "userId": 421
+})
+
+Example result
+{
+  "email": { "id": 99821, "name": "Welcome",
+    "type": "OneToOneEmail", "sentAt": "2026-04-29T13:02:11Z" }
+}

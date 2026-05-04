@@ -1,0 +1,61 @@
+Tool: manage_specification
+
+Description
+Create a Data Clean Room specification — a binding of a provider +
+template + output target. Postman exposes only `Create`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/specifications
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "apiName": "PartnerX_OverlapSpec",
+  "label": "Partner X overlap (audience minimum 1000)",
+  "providerIdOrName": "MTG_Snowflake_DCR",
+  "templateApiName": "OverlapAudience",
+  "parameters": { "minOverlapCount": 1000 },
+  "outputDmoApiName": "PartnerXOverlap__dlm"
+}
+
+Input (parameters)
+operation (string, required) - "create" only.
+apiName (string, required).
+label (string, required).
+providerIdOrName (string, required).
+templateApiName (string, required).
+parameters (object, required) - Default parameter map.
+outputDmoApiName (string, optional).
+
+Result
+specification (object) - Created row.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `apiName`.
+
+Errors
+- 409 DUPLICATE_VALUE, 404 NOT_FOUND (provider or template).
+
+Example request
+
+manage_specification({
+  "operation": "create",
+  "apiName": "PartnerX_OverlapSpec",
+  "label": "Partner X overlap",
+  "providerIdOrName": "MTG_Snowflake_DCR",
+  "templateApiName": "OverlapAudience",
+  "parameters": { "minOverlapCount": 1000 }
+})
+
+Example result
+{ "specification": { "id": "spec_001", "apiName": "PartnerX_OverlapSpec" } }

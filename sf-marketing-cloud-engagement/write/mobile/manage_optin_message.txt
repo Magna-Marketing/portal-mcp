@@ -1,0 +1,60 @@
+Tool: manage_optin_message
+
+Description
+Create / update an SMS opt-in (double opt-in) message — the message
+sent in response to an MO opt-in keyword to confirm consent.
+
+Marketing Cloud API
+REST API (`/sms/v1/message/optin`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/message/optin
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "name": "MTG_Opt_In",
+  "message": "Reply YES to confirm your subscription to MTG alerts.",
+  "shortCodes": ["12345"],
+  "keywordsToTriggerOptIn": ["MTG"],
+  "keywordsForConfirmation": ["YES"],
+  "confirmationMessage": "Thanks! You're subscribed to MTG alerts."
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+optInMessageId (number, optional, required for non-create).
+name (string, required for create).
+message (string, required for create) - Initial opt-in prompt.
+confirmationMessage (string, required for create) - Sent on successful confirm.
+shortCodes (string[], required for create).
+keywordsToTriggerOptIn (string[], required for create).
+keywordsForConfirmation (string[], required for create).
+locale (string, optional).
+
+Result
+optInMessage (object) - { id, name, message, confirmationMessage, status }.
+
+Required scopes
+- `sms_send`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_KEYWORD, DUPLICATE_NAME.
+
+Example request
+
+manage_optin_message({
+  "operation": "create",
+  "name": "MTG_Opt_In",
+  "message": "Reply YES to confirm your subscription to MTG alerts.",
+  "confirmationMessage": "Thanks! You're subscribed.",
+  "shortCodes": ["12345"],
+  "keywordsToTriggerOptIn": ["MTG"],
+  "keywordsForConfirmation": ["YES"]
+})

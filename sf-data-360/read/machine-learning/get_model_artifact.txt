@@ -1,0 +1,46 @@
+Tool: get_model_artifact
+
+Description
+Read a single Model Artifact by id or name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-artifacts/:modelArtifactIdOrName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+modelArtifactIdOrName (string, required).
+
+Result
+modelArtifact (object): id, apiName, label, version,
+  runtimeFramework, status, sourceUrl, sizeBytes,
+  configuredModelCount, createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_model_artifact({ "modelArtifactIdOrName": "ChurnArtifact_v12" })
+
+Example result
+{
+  "modelArtifact": {
+    "apiName": "ChurnArtifact_v12", "version": "1.2.0",
+    "runtimeFramework": "TensorFlow", "status": "Active"
+  }
+}

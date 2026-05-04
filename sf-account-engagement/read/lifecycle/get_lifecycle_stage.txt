@@ -1,0 +1,42 @@
+Tool: get_lifecycle_stage
+
+Description
+Read a single Lifecycle Stage by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/lifecycle-stages/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional).
+
+Result
+lifecycleStage (object): id, name, position, matchType, isLocked,
+  isDeleted, createdAt, updatedAt, createdBy, updatedBy.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_lifecycle_stage({ "id": 2 })
+
+Example result
+{ "lifecycleStage": { "id": 2, "name": "MQL", "position": 1 } }

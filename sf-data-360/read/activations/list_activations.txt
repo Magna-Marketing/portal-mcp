@@ -1,0 +1,58 @@
+Tool: list_activations
+
+Description
+List Activations — the bridges from Segments to external Data
+Action Targets (Marketing Cloud Engagement, S3, AppExchange,
+Snowflake share, ad networks, etc.).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/activations
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional).
+segmentId (string, optional).
+targetType (string, optional) - "MarketingCloudEngagement" |
+  "MarketingCloudNext" | "S3" | "Snowflake" | "AppExchange" |
+  "AdNetwork".
+status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+activations (array) - Each: { id, apiName, label, segmentId,
+  targetType, targetConfig (object), status, schedule, contactPoints
+  (array), lastRunStatus, lastRunDate, populationCount, createdDate,
+  lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_activations({ "targetType": "MarketingCloudEngagement" })
+
+Example result
+{
+  "activations": [
+    { "id": "0YA580000000001", "apiName": "EMEA_to_MC",
+      "segmentId": "0YS580000000001", "targetType": "MarketingCloudEngagement",
+      "status": "Active" }
+  ]
+}

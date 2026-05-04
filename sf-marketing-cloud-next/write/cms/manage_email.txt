@@ -1,0 +1,114 @@
+Tool: manage_email
+
+Description
+Create, update, delete, or clone a CMS Email (`cms_email__c`) — a
+sendable marketing email instance. The email body can be supplied
+either as raw HTML (`htmlBody`) or as a structured component graph
+(`components[]`); the resource type is set automatically based on
+which one is present.
+
+To publish the email after authoring, call `publish_content`.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/connect/cms/contents                    (operation="create")
+PUT    {instanceUrl}/services/data/v{ver}/connect/cms/contents/variants/:variantId (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/connect/cms/contents/variants/:variantId (operation="delete")
+POST   {instanceUrl}/services/data/v{ver}/connect/cms/contents/:contentKey/clone   (operation="clone")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create with HTML)
+{
+  "type": "cms_email__c",
+  "contentKey": "welcome_email_2026",
+  "title": "Welcome 2026",
+  "contentSpaceId": "0Z0xx0000000001AAA",
+  "language": "en_US",
+  "subject": "Welcome to Magna",
+  "fromName": "Magna",
+  "fromAddress": "noreply@magnatech.com",
+  "replyToAddress": "support@magnatech.com",
+  "preheader": "Quick tips to get started",
+  "htmlBody": "<html>...</html>"
+}
+
+Body (create with components)
+{
+  "type": "cms_email__c",
+  "contentKey": "spring_promo_2026",
+  "title": "Spring Promo",
+  "contentSpaceId": "0Z0xx0000000001AAA",
+  "language": "en_US",
+  "subject": "Save 30% this week",
+  "components": [
+    { "type": "ButtonComponent", "label": "Shop now", "href": "https://magnatech.com/spring" },
+    { "type": "TextComponent", "html": "<p>Limited time...</p>" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "clone".
+contentKey (string, required for create / clone; for update if no variantId).
+variantId (string, required for update / delete).
+title (string, required for create).
+contentSpaceId (string, required for create).
+language (string, optional, default "en_US").
+subject (string, optional).
+fromName (string, optional), fromAddress (string, optional),
+  replyToAddress (string, optional).
+preheader (string, optional).
+htmlBody (string, optional) - Use for HTML email.
+components (object[], optional) - Use for component-based email.
+  Each component: { type, ...typeSpecificProps }.
+cloneTargetContentKey (string, required for clone) - The new
+  contentKey for the cloned email.
+cloneTargetTitle (string, optional, clone-only).
+
+Result
+content (object, for create / update / clone) - Created or updated
+  CMS content envelope with `id`, `contentKey`, `variants[]`.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `cms_api`.
+
+Idempotency & limits
+- Idempotent on `contentKey` for create — repeating with the same
+  key returns the existing content.
+- 1MB max body per variant.
+
+Errors
+- 409 DUPLICATE_VALUE (contentKey collision), 400 INVALID_FIELD
+  (unknown component type), 404 NOT_FOUND.
+
+Example request
+
+manage_email({
+  "operation": "create",
+  "contentKey": "welcome_email_2026",
+  "title": "Welcome 2026",
+  "contentSpaceId": "0Z0xx0000000001AAA",
+  "subject": "Welcome to Magna",
+  "fromAddress": "noreply@magnatech.com",
+  "htmlBody": "<html><body>Welcome!</body></html>"
+})
+
+Example result
+{
+  "content": {
+    "id": "0Q0xx000000abcdEAA",
+    "contentKey": "welcome_email_2026",
+    "type": "cms_email__c",
+    "status": "Draft",
+    "variants": [
+      { "id": "0Q1xx000000xyzABC", "language": "en_US",
+        "subject": "Welcome to Magna" }
+    ]
+  }
+}

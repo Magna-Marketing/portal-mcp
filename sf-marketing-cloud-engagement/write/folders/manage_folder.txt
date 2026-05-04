@@ -1,0 +1,51 @@
+Tool: manage_folder
+
+Description
+Create / update / move / delete a folder (`DataFolder`) in any content
+space (Email, Data Extension, Triggered Send, Automation, Asset, etc.).
+For Content Builder folders specifically, prefer `manage_category`
+which uses the modern REST API.
+
+Marketing Cloud API
+SOAP API (`DataFolder` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest / DeleteRequest on DataFolder.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "move" | "delete".
+folderId (number, optional, required for non-create).
+contentType (string, required) - "email" | "dataextension" | "triggered_send" | "automation_run" | "asset" | "list" | "queryactivity" | "filter" | "import" | etc.
+name (string, required for create).
+description (string, optional).
+parentFolderId (number, optional, required for create / move).
+allowChildren (boolean, optional, default true).
+
+Result
+folder (object) - { id, customerKey, name, contentType, parentFolderId, isActive, isEditable }.
+
+Required scopes
+- Varies per `contentType`.
+
+Idempotency & limits
+- update / move idempotent.
+- Cannot delete a folder containing items.
+
+Errors
+- INVALID_FOLDER_TYPE, FOLDER_NOT_EMPTY.
+
+Example request
+
+manage_folder({
+  "operation": "create",
+  "contentType": "dataextension",
+  "name": "MTG Member DEs",
+  "parentFolderId": 12345
+})

@@ -1,0 +1,112 @@
+Tool: generate_migration_plan
+
+Description
+Generate a profile-to-permission-sets migration plan. Salesforce is
+moving away from per-profile permission management toward minimal
+profiles + permission sets / permission set groups. This tool inspects
+the existing profiles, their object/field/system perms, and current
+assignments, then produces:
+- A recommended minimal profile (login defaults only).
+- A list of permission sets / permission set groups to extract.
+- Per-user delta showing which permsets each currently active user
+  would receive after the migration.
+- A phased timeline with batch-size suggestions.
+
+Read-only; produces a plan but does not modify any metadata. Apply with
+`extract_permissions_from_profile`, `create_permission_set`,
+`create_permission_set_group`, `bulk_assign_permissions` etc.
+
+Salesforce API
+REST API + Tooling, v66.0. SOQL across:
+- `Profile`, `User WHERE ProfileId IN ...`.
+- `ObjectPermissions`, `FieldPermissions`, `SetupEntityAccess` (with
+  ParentId on Profile).
+- `PermissionSetAssignment` for current state.
+
+Endpoint
+N/A (the tool runs many SOQL queries; no single endpoint).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (read-only analysis).
+
+Input (parameters)
+sourceProfiles (string[], required) - Profile DeveloperNames or Ids to
+  migrate. Use ["*"] for all custom profiles in the org.
+keepBaselineOn (string, optional, default "Standard User") - Profile to
+  use as the post-migration baseline (everything else moves to permsets).
+groupingStrategy (string, optional, default "by_role") - "by_role" |
+  "by_object_cluster" | "by_app". Controls how the recommended permsets
+  are split.
+includeStandardObjects (boolean, optional, default true).
+includeFieldPermissions (boolean, optional, default true) - Detailed FLS
+  delta. Skip for a faster, system+object-only plan.
+maxBatchSize (number, optional, default 50) - Users per migration batch.
+horizonWeeks (number, optional, default 8) - Total rollout horizon.
+
+Result
+summary (object):
+  profilesAnalyzed (number).
+  usersAffected (number).
+  proposedPermsetCount (number).
+  proposedGroupCount (number).
+  estimatedDuration (string) - "8 weeks".
+recommendedBaselineProfile (object) - { name, retainedPermissions }.
+proposedPermsets (array) - Each:
+  name (string) - Suggested DeveloperName.
+  label (string).
+  source (string) - "extracted from <profile>" or "common across N profiles".
+  systemPermissions (object) - Perms to put in this permset.
+  objectPermissions (array) - Same shape as view_permission_set.
+  fieldPermissions (array, optional).
+  rationale (string).
+proposedGroups (array) - Each: { developerName, label, members[] }.
+userPlan (array) - Each user:
+  userId, name, currentProfile, newProfile, addedPermsets[], addedGroups[],
+  riskLevel ("low"|"medium"|"high") - high when user loses any perm.
+  netPermissionDelta (object) - { added: [], removed: [], unchanged: count }.
+phases (array) - Each: { phase: 1, weeks: "1-2", scope: "...",
+  userBatch: 50, dependencies: [] }.
+
+Required permissions
+- "View All Setup" / "Modify All Data" recommended (read-only here, but
+  some setup queries require elevated perms).
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Can be expensive: in a 50-profile org with FLS expansion, expect 5-10
+  minutes of internal queries.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- INVALID_FIELD on bad sourceProfiles entries.
+
+Example request
+
+generate_migration_plan({
+  "sourceProfiles": ["MTG_Project_Manager_Profile", "MTG_Delivery_Profile"],
+  "groupingStrategy": "by_role",
+  "horizonWeeks": 6
+})
+
+Example result (skeleton)
+
+{
+  "summary": {
+    "profilesAnalyzed": 2,
+    "usersAffected": 41,
+    "proposedPermsetCount": 5,
+    "proposedGroupCount": 2,
+    "estimatedDuration": "6 weeks"
+  },
+  "recommendedBaselineProfile": { "name": "Standard User", "retainedPermissions": ["LoginIPRanges", "PasswordPolicy"] },
+  "proposedPermsets": [ /* ... */ ],
+  "phases": [
+    { "phase": 1, "weeks": "1-2", "scope": "Create permsets and groups in sandbox; smoke test", "userBatch": 0 },
+    { "phase": 2, "weeks": "3-4", "scope": "Migrate first 50 users",                                "userBatch": 50 },
+    { "phase": 3, "weeks": "5-6", "scope": "Migrate remaining users; deprecate source profiles",     "userBatch": 50 }
+  ]
+}

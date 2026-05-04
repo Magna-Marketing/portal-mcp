@@ -1,0 +1,78 @@
+Tool: manage_form_field
+
+Description
+Create a Form Field on an existing Form. v5 supports `Create` only
+on form-fields (PATCH / DELETE not exposed); to remove a field,
+delete and recreate the parent form, or rebuild the field list
+through `reorder_form_fields`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/form-fields
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "formId": 4421,
+  "prospectApiFieldId": "first_name",
+  "name": "FirstName",
+  "label": "First name",
+  "type": "Text",
+  "isRequired": true,
+  "sortOrder": 1,
+  "errorMessage": "First name is required"
+}
+
+Input (parameters)
+operation (string, required) - "create" only.
+formId (number, required).
+prospectApiFieldId (string, required) - Built-in or custom-field
+  apiFieldId.
+name (string, required) - Field's UI name.
+label (string, required).
+type (string, required) - "Text" | "TextArea" | "Email" | "Number" |
+  "RadioButton" | "Checkbox" | "Dropdown" | "MultiSelect" | "Hidden" |
+  "Date" | "CrmUser".
+isRequired (boolean, optional, default false).
+isAlwaysDisplay (boolean, optional, default false).
+isMaintainInitialValue (boolean, optional, default false).
+isUseValuesPreFromField (boolean, optional, default false).
+sortOrder (number, optional, default appended).
+errorMessage (string, optional).
+cssClasses (string, optional).
+hasValues (boolean, optional, default false) - Add picklist values
+  via `manage_form_field_options`.
+
+Result
+formField (object) - Created row.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Not idempotent.
+
+Errors
+- 53 form_locked, 600 invalid_prospect_field, 59 not_found.
+
+Example request
+
+manage_form_field({
+  "operation": "create",
+  "formId": 4421,
+  "prospectApiFieldId": "first_name",
+  "name": "FirstName",
+  "label": "First name",
+  "type": "Text",
+  "isRequired": true
+})
+
+Example result
+{ "formField": { "id": 52, "formId": 4421, "name": "FirstName", "type": "Text" } }

@@ -1,0 +1,41 @@
+Tool: validate_email
+
+Description
+Validate an email address through Marketing Cloud's Address Validation
+API. Returns deliverability score, flagged status (Risky / High Risk /
+Invalid), and lightweight syntactic + DNS checks. Use to scrub lists
+before sends.
+
+Marketing Cloud API
+REST API (`/address/v1/validateEmail`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/address/v1/validateEmail
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "email": "jane.doe@example.com", "validators": ["SyntaxValidator", "MXValidator", "ListDetectiveValidator"] }
+
+Input (parameters)
+email (string, required) - Address to validate.
+validators (string[], optional, default ["SyntaxValidator","MXValidator","ListDetectiveValidator"]) - Validator chain.
+
+Result
+result (object) - { email, valid (boolean), failedValidation ("None"|"Syntax"|"MX"|"ListDetective"), level (string), description (string|null) }.
+
+Required scopes
+- `email_send` (or default Installed Package scope).
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Subject to per-tenant validation rate limits (~10/sec default).
+
+Errors
+- 10000 invalid email format.
+
+Example request
+
+validate_email({ "email": "jane.doe@example.com" })

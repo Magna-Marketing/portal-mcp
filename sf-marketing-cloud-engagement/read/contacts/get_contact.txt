@@ -1,0 +1,43 @@
+Tool: get_contact
+
+Description
+Get a single contact by ContactKey or ContactID. Returns the contact's
+full attribute payload across attribute groups + sets, plus channel
+addresses and contact status.
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts/{contactKey}`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/{contactKey}
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/id/{contactId}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+contactKey (string, optional).
+contactId (number, optional).
+  One required.
+includeAttributeSets (boolean, optional, default true).
+attributeGroupName (string, optional) - Restrict to one attribute group.
+
+Result
+contact (object) - { contactKey, contactId, contactStatus, dateCreated, dateModified, lastUpdatedDate, source, channelAddresses (array), attributeGroups (array): [{ groupName, attributeSets: [{ setName, values }] }] }.
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_contact({ "contactKey": "MEM-100023" })

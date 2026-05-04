@@ -1,0 +1,50 @@
+Tool: manage_event_relay
+
+Description
+Create / update / delete / start / stop Event Relay configurations
+(forward Platform Events to AWS EventBridge).
+
+Salesforce API
+Tooling API, v66.0. `EventRelayConfig`.
+
+Endpoint
+POST   /services/data/v66.0/tooling/sobjects/EventRelayConfig
+PATCH  /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}
+DELETE /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "DeveloperName": "MTG_Project_To_AWS", "MasterLabel": "MTG Project To AWS", "EventChannel": "MTG_Project_Stream__chn", "DestinationResourceName": "arn:aws:events:us-east-1:..." }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "start" | "stop".
+developerName (string, required).
+masterLabel (string, required for create).
+eventChannel (string, required for create) - Channel DeveloperName.
+destinationResourceName (string, required for create) - AWS EventBridge ARN.
+state (string, optional) - For start (set "Run") / stop (set "Stop"); ignored otherwise.
+
+Result
+eventRelay (object) - { id, developerName, masterLabel, eventChannel, destinationResourceName, state }.
+
+Required permissions
+- "Customize Application" + "Modify All Data".
+
+Idempotency & limits
+- start / stop idempotent.
+
+Errors
+- INVALID_AWS_ARN.
+
+Example request
+
+manage_event_relay({
+  "operation": "create",
+  "developerName": "MTG_Project_To_AWS",
+  "masterLabel": "MTG Project to AWS",
+  "eventChannel": "MTG_Project_Stream__chn",
+  "destinationResourceName": "arn:aws:events:us-east-1:123456789012:event-bus/MTG"
+})

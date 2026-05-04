@@ -1,0 +1,52 @@
+Tool: reorder_region_components
+
+Description
+Reorder components within a FlexiPage region by specifying the desired
+order of component identifiers. Pass identifiers exactly in the new
+order; any identifier missing from the input is dropped to the end in
+its original relative order, and any unknown identifier is rejected.
+
+Salesforce API
+Metadata API (`FlexiPage`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+flexiPageName (string, required).
+region (string, required).
+order (string[], required) - Desired component identifier order.
+strict (boolean, optional, default true) - When true, reject if `order`
+  doesn't include every existing identifier in the region. When false,
+  identifiers not in `order` slide to the end keeping relative order.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object).
+region (object) - { name, before: string[], after: string[] }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Idempotent on equal input.
+
+Errors
+- INVALID_REQUEST: `order` contains unknown identifiers or duplicates.
+- INVALID_REQUEST: `strict=true` and order is not exhaustive.
+
+Example request
+
+reorder_region_components({
+  "flexiPageName": "Project__c_Record_Page",
+  "region": "right",
+  "order": ["card_main", "highlights_panel", "tabs_main"]
+})

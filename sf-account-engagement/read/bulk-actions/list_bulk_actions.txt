@@ -1,0 +1,63 @@
+Tool: list_bulk_actions
+
+Description
+List Bulk Action jobs (filtered prospect updates). Used to monitor an
+async bulk job: shows the target object, action type, status,
+progress percent, error count, and originating user. Pair with
+`manage_bulk_action` to start one.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/bulk-actions?fields={fields}&filter[status]={status}&orderBy=createdAt desc
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Pending" | "Running" | "Complete" | "Error".
+object (string, optional) - "Prospect" only at this time.
+bulkAction (string, optional) - "AddTag" | "RemoveTag" | "AddToList" |
+  "RemoveFromList" | "Delete" | "Undelete" | "ChangeAssignment".
+createdAfter (string, optional) - ISO-8601.
+createdBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,object,bulkAction,status,
+  origin,count,createdAt,updatedAt,createdById,errorCount,fileName,
+  processedCount).
+limit (number, optional, default 50, max 1000).
+nextPageToken (string, optional).
+
+Result
+bulkActions (array) - Each: { id, object, bulkAction, status, origin,
+  count, processedCount, errorCount, fileName, createdAt, updatedAt,
+  createdById }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 4 invalid_business_unit_id, 65 invalid_field_projection.
+
+Example request
+
+list_bulk_actions({ "status": "Running", "limit": 25 })
+
+Example result
+{
+  "bulkActions": [
+    { "id": 88421, "object": "Prospect", "bulkAction": "AddToList",
+      "status": "Running", "count": 12450, "processedCount": 8412,
+      "errorCount": 0, "createdAt": "2026-04-29T13:02:11Z" }
+  ],
+  "nextPageToken": null
+}

@@ -1,0 +1,56 @@
+Tool: analyze_component_usage
+
+Description
+For a single UI component, list every Lightning Page that uses it, with
+the region, identifier, and any property overrides. Reverse of
+`get_component_dependencies` (incoming side, narrowed to FlexiPage).
+Use to safely change or remove a component.
+
+Salesforce API
+Tooling API, v66.0. `MetadataComponentDependency` filtered to FlexiPage
+parents, plus FlexiPage metadata reads for identifier/region.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT MetadataComponentName, MetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentName = '{name}' AND RefMetadataComponentType = '{type}' AND MetadataComponentType = 'FlexiPage'
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}     (per match)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+name (string, required) - Component name (LWC DeveloperName,
+  "lightning:relatedList", etc.).
+type (string, required) - "LightningComponentBundle" | "AuraDefinitionBundle"
+  | "ApexPage" | "StandardLightningComponent".
+includePropertyValues (boolean, optional, default true).
+
+Result
+component (object) - { name, type }.
+totalPages (number).
+pages (array) - Each:
+  pageId, pageName, pageLabel, pageType ("RecordPage"|"AppPage"|"HomePage"),
+  sObject (string|null).
+  occurrences (array) - Each occurrence within the page:
+    region (string).
+    identifier (string).
+    propertyValues (object|null) - { propName: value } when
+      includePropertyValues=true.
+    visibilityRule (object|null).
+summary (object) - { byPageType: {...}, bySObject: {...} }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- NOT_FOUND on name.
+
+Example request
+
+analyze_component_usage({ "name": "projectCard", "type": "LightningComponentBundle" })

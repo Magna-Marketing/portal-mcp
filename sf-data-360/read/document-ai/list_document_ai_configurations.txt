@@ -1,0 +1,54 @@
+Tool: list_document_ai_configurations
+
+Description
+List Document AI configurations — schemas + extraction logic for
+processing documents (invoices, contracts, PDFs) into Data Cloud
+DMOs.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/document-processing/configurations
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Active" | "Draft" | "Failed".
+documentType (string, optional) - "Invoice" | "Contract" |
+  "PurchaseOrder" | "Receipt" | "Custom".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+configurations (array) - Each: { id, apiName, label, documentType,
+  status, schema (object), targetDmoApiName, extractionRules (array),
+  createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_document_ai_configurations({ "documentType": "Invoice" })
+
+Example result
+{
+  "configurations": [
+    { "id": "0YE580000000001", "apiName": "Invoice_Default",
+      "documentType": "Invoice", "status": "Active",
+      "targetDmoApiName": "Invoice__dlm" }
+  ]
+}

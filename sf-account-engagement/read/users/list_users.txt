@@ -1,0 +1,62 @@
+Tool: list_users
+
+Description
+List Account Engagement Users (the staff with login access to this
+BU). Cross-references SFDC User via `salesforceId` once SSO is set up.
+Useful for auditing role assignments and finding the right user id
+for `assign_prospect`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/users?fields={fields}&filter[role]=eq,Marketing
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+role (string, optional) - "Administrator" | "Marketing" |
+  "SalesManager" | "Sales".
+roleName (string, optional) - Custom role name.
+emailContains (string, optional).
+isVerified (boolean, optional).
+isCrmUser (boolean, optional).
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,email,firstName,lastName,
+  username,jobTitle,role,roleName,salesforceId,createdAt,updatedAt,
+  isDeleted,createdById,updatedById,tagReplacementLanguage).
+limit (number, optional, default 200).
+nextPageToken (string, optional).
+
+Result
+users (array) - Each: { id, email, firstName, lastName, username,
+  jobTitle, role, roleName, salesforceId, isDeleted, createdAt,
+  updatedAt, tagReplacementLanguage }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_users({ "role": "Administrator" })
+
+Example result
+{
+  "users": [
+    { "id": 421, "email": "ops@magnatech.com", "role": "Administrator",
+      "salesforceId": "00558000001abCdEAA" }
+  ]
+}

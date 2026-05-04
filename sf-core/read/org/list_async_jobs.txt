@@ -1,0 +1,46 @@
+Tool: list_async_jobs
+
+Description
+List `AsyncApexJob` rows: Queueable, Batchable, Future, Apex test runs,
+and the Bulk-side scheduled Apex / Scheduled Apex one-off entries. Each
+row shows status (Queued, Preparing, Processing, Aborted, Completed,
+Failed), submitted by, processed batches/items, total batches/items,
+and class.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `AsyncApexJob`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Status, JobType, ApexClass.Name, ApexClassId, MethodName, Status, ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors, CreatedDate, CompletedDate, CreatedById, CreatedBy.Name FROM AsyncApexJob
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string|string[], optional) - "Queued" | "Preparing" | "Processing" | "Aborted" | "Completed" | "Failed".
+jobType (string|string[], optional) - "Future" | "Queueable" | "BatchApex" | "BatchApexWorker" | "ScheduledApex" | "TestRequest" | "TestWorker" | "ApexToken".
+className (string, optional) - Restrict to one Apex class name.
+sinceHours (number, optional, default 24).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+asyncJobs (array) - { id, status, jobType, className, methodName, jobItemsProcessed, totalJobItems, numberOfErrors, extendedStatus, createdById, createdByName, createdDate, completedDate }.
+hasMore (boolean).
+
+Required permissions
+- "View All Data" / "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_async_jobs({ "status": ["Failed", "Processing"], "sinceHours": 72 })

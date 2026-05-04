@@ -1,0 +1,81 @@
+Tool: query_data_cloud_sql
+
+Description
+Run an ANSI-SQL query against Data Cloud — DMOs (`__dlm`),
+Calculated Insights (`__cio`), DLOs (`__dll`), and lakehouse views
+are all addressable. Synchronous response up to 100k rows;
+beyond that, the API returns a `nextBatchId` to fetch the next
+chunk. For very large pulls, prefer creating a Data Activation
+or scheduled query.
+
+Salesforce API
+Data Cloud Query API v2.
+
+Endpoint
+POST {cdpInstanceUrl}/api/v2/query
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "sql": "SELECT Id__c, FirstName__c, EmailAddress__c FROM UnifiedIndividual__dlm WHERE LastModifiedDate__c >= '2026-04-01' LIMIT 1000"
+}
+
+Input (parameters)
+sql (string, required) - ANSI SQL. DMO field names case-sensitive
+  (suffix `__c`); DMO table names case-sensitive too.
+dataSpace (string, optional, default "default").
+includeMetadata (boolean, optional, default true) - When true, the
+  response includes a `metadata` block describing each column.
+nextBatchId (string, optional) - Pass back the id from a previous
+  response to fetch the next chunk.
+rowLimit (number, optional) - Server-side cap; mirrors `LIMIT N` in
+  the SQL. Max 100000 per call.
+
+Result
+data (array<array>) - Row-major result set. Index per column matches
+  `metadata` order.
+metadata (object|null) - { columns: [{ name, type, length }] }.
+done (boolean) - false when more chunks are available.
+nextBatchId (string|null) - Cursor for the next chunk.
+queryId (string) - Server-side query identifier for support tracing.
+rowCount (number) - Rows returned in this response.
+
+Required scopes
+- `cdp_query_api_read` (or broader `cdp_api`).
+
+Idempotency & limits
+- Read-only. Concurrent queries are subject to a 1000 / tenant cap.
+- Per-query timeout: 5 minutes.
+
+Errors
+- 400 INVALID_QUERY (compile error), 401 invalid_token,
+  403 INSUFFICIENT_ACCESS_OR_READONLY, 408 QUERY_TIMEOUT,
+  429 REQUEST_LIMIT_EXCEEDED.
+
+Example request
+
+query_data_cloud_sql({
+  "sql": "SELECT Id__c, EmailAddress__c FROM UnifiedIndividual__dlm LIMIT 5"
+})
+
+Example result
+{
+  "data": [
+    ["IND_001","jane@example.com"],
+    ["IND_002","john@example.com"]
+  ],
+  "metadata": {
+    "columns": [
+      { "name": "Id__c",          "type": "TEXT" },
+      { "name": "EmailAddress__c","type": "TEXT" }
+    ]
+  },
+  "done": true,
+  "nextBatchId": null,
+  "queryId": "Q-2026-04-29-abc",
+  "rowCount": 2
+}

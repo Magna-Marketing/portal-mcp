@@ -1,0 +1,61 @@
+Tool: manage_quick_action
+
+Description
+Create / update / delete Quick Actions (object-specific or global).
+Supports Create, Update, LogACall, SendEmail, VisualforcePage,
+LightningComponent, Flow, and InvocableAction types.
+
+Salesforce API
+Metadata API (`QuickAction`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+object (string, optional, default "Global") - sObject API name or "Global".
+fullName (string, required) - DeveloperName (e.g. "Project__c.New_Status_Update").
+label (string, required for create).
+type (string, required for create) - "Create" | "Update" | "LogACall" | "SendEmail" | "VisualforcePage" | "LightningComponent" | "Flow" | "InvocableAction" | "CustomVisualforce".
+targetObject (string, optional) - For type=Create the target sObject; for global Quick Actions of type=Create.
+recordTypeId (string, optional).
+flowDefinition (string, optional) - For type=Flow.
+flowAction (string, optional).
+visualforcePage (string, optional).
+lightningComponent (string, optional) - LWC or Aura name.
+height (number, optional, default 250) - For VF / Lightning.
+fields (array, optional) - For Create / Update / LogACall: [{ field, isRequired, defaultValue }].
+description (string, optional).
+iconName (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+quickAction (object) - Updated identity.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_FIELD on bad type.
+
+Example request
+
+manage_quick_action({
+  "operation": "create",
+  "object": "Project__c",
+  "fullName": "Project__c.Update_Status",
+  "label": "Update Status",
+  "type": "Update",
+  "fields": [{ "field": "Status__c", "isRequired": true }]
+})

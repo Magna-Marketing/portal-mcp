@@ -1,0 +1,66 @@
+Tool: clone_lwc_bundle
+
+Description
+Clone an existing LWC bundle to a new name. The tool reads every file
+in the source bundle, rewrites references that include the original
+class name (the JS class name and `<c-...>` tag references in HTML
+templates), and creates a new bundle.
+
+Salesforce API
+Tooling API, v66.0.
+- `GET /tooling/query/?q=...` to read source bundle and files.
+- Same container/save pattern as `create_lwc_bundle`.
+
+Endpoint
+GET  /services/data/v66.0/tooling/sobjects/LightningComponentBundle/{id}
+GET  /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{id}'
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/LightningComponentBundle
+POST /services/data/v66.0/tooling/sobjects/LightningComponentResource
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+sourceName (string, required) - Existing bundle name.
+newName (string, required) - New bundle name (lowercase first char,
+  alphanumeric, max 40).
+newLabel (string, required).
+newDescription (string, optional).
+copyApiVersion (boolean, optional, default true) - When false, use the
+  org's current default API version.
+includeFileTypes (string[], optional, default ["js","html","css","xml","svg"]) -
+  Subset of file types to copy.
+checkOnly (boolean, optional, default false).
+rewriteReferences (boolean, optional, default true) - Replace the JS
+  class name and `<c-original-name>` tag references with the new name.
+
+Result
+deploy (object).
+bundle (object, on success) - { id, name, label, apiVersion, isExposed }.
+filesCopied (array) - [{ fileName, sizeBytes, hadReferenceRewrite }].
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent.
+- Source bundle must be unmanaged (managed bundles cannot be cloned).
+
+Errors
+- NOT_FOUND on sourceName.
+- DUPLICATE_DEVELOPER_NAME on newName.
+
+Example request
+
+clone_lwc_bundle({
+  "sourceName": "projectCard",
+  "newName": "projectCardV2",
+  "newLabel": "Project Card V2",
+  "newDescription": "Cloned for Q3 2026 redesign"
+})

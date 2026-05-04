@@ -1,0 +1,72 @@
+Tool: queue_file_import
+
+Description
+Queue an asynchronous one-time file import into a Data Extension. The
+file (CSV / TSV) must already be uploaded to a Marketing Cloud FTP /
+file-transfer location. Returns an import operation Id you can poll
+with `get_file_import_status`.
+
+For inline row writes use `insert_rows` / `upsert_rows`; for ongoing
+scheduled imports configure an Automation with an Import activity
+(`manage_automation_activity`).
+
+Marketing Cloud API
+REST API (`/data/v1/async/import`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "name": "MTG Members Nightly",
+  "customerKey": "MTG_Members_Import",
+  "destination": { "dataExtensionCustomerKey": "Members_DE" },
+  "format": { "fieldMappingType": "InferFromColumnHeadings", "delimiter": "Comma", "qualifier": "DoubleQuote", "dateFormatLocale": "en-US" },
+  "source": { "location": { "id": 12345 }, "filename": "members-2026-04-30.csv" },
+  "notifications": { "email": "ops@magnatech.com", "format": "Multipart" },
+  "options": { "updateType": "AddAndUpdate" }
+}
+
+Input (parameters)
+name (string, required).
+customerKey (string, optional).
+dataExtensionCustomerKey (string, required) - Target DE.
+fileLocationId (number, required) - File transfer location Id (FTP / Safehouse).
+fileName (string, required).
+delimiter (string, optional, default "Comma") - "Comma" | "Tab" | "Semicolon" | "Pipe" | "Other".
+qualifier (string, optional, default "DoubleQuote").
+dateFormatLocale (string, optional, default "en-US").
+fieldMappingType (string, optional, default "InferFromColumnHeadings") - "MapByOrdinal" | "MapByHeaderMatch" | "MapManually" | "InferFromColumnHeadings".
+fieldMappings (object[], optional) - Required when fieldMappingType="MapManually": [{ source, destination }].
+updateType (string, optional, default "AddAndUpdate") - "AddOnly" | "UpdateOnly" | "AddAndUpdate" | "Overwrite".
+notificationsEmail (string, optional).
+hasColumnHeader (boolean, optional, default true).
+
+Result
+operationId (string) - Pass to `get_file_import_status`.
+status (string) - "Pending" | "InProgress".
+queuedAt (string).
+
+Required scopes
+- `data_extensions_write`.
+
+Idempotency & limits
+- Not idempotent; each call queues a new import.
+- Subject to file-storage quotas and concurrent import caps.
+
+Errors
+- 30002 destination not found, INVALID_FILE_LOCATION.
+
+Example request
+
+queue_file_import({
+  "name": "MTG Members Nightly",
+  "dataExtensionCustomerKey": "Members_DE",
+  "fileLocationId": 12345,
+  "fileName": "members-2026-04-30.csv",
+  "updateType": "AddAndUpdate"
+})

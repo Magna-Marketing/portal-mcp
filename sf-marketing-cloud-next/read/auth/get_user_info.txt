@@ -1,0 +1,70 @@
+Tool: get_user_info
+
+Description
+Resolve the Salesforce identity that the MCP server's access token
+represents and confirm Data Cloud connectivity. Returns the SFDC
+userinfo response (id, organization id, email, preferred username),
+the Data Cloud tenant URL the cdpAuthExchange token resolved to, and
+the Connected App scopes granted on this token.
+
+Salesforce API
+Salesforce OAuth (`/services/oauth2/userinfo`) + Data Cloud
+`/api/v1/identity` health check.
+
+Endpoint
+GET https://login.salesforce.com/services/oauth2/userinfo
+GET https://{cdp}.c360a.salesforce.com/api/v1/identity        (health check on the CDP token)
+
+Headers
+Authorization: Bearer <core_access_token>   (userinfo)
+Authorization: Bearer <data_cloud_token>    (CDP identity)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeCdpHealth (boolean, optional, default true) - When true, also
+  hits the CDP `/api/v1/identity` endpoint to confirm the exchanged
+  token is alive.
+
+Result
+identity (object):
+  user_id (string), organization_id (string), username (string),
+  email (string), name (string), locale (string).
+core (object) - { instanceUrl, scopes (array) }.
+dataCloud (object|null, when includeCdpHealth=true):
+  cdpInstanceUrl (string).
+  alive (boolean) - true when CDP /identity returns 200.
+  expiresIn (number, seconds remaining on the data-cloud token).
+
+Required scopes
+- `id`, `profile`, `email`, plus `cdp_api` (for the CDP health check).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_session_id (core token), 401 invalid_token
+  (data-cloud token expired — re-run `exchange_data_cloud_token`).
+
+Example request
+
+get_user_info({})
+
+Example result
+{
+  "identity": {
+    "user_id": "00558000001abCdEAA",
+    "organization_id": "00D58000000IFx0EAG",
+    "username": "ops@magnatech.com",
+    "email": "ops@magnatech.com"
+  },
+  "core": { "instanceUrl": "https://magnatech.my.salesforce.com",
+            "scopes": ["api","cms_api","cdp_api","refresh_token"] },
+  "dataCloud": {
+    "cdpInstanceUrl": "https://magnatech.c360a.salesforce.com",
+    "alive": true,
+    "expiresIn": 7100
+  }
+}

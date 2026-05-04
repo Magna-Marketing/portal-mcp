@@ -1,0 +1,121 @@
+Tool: aggregate_query
+
+Description
+Run an aggregate SOQL query (`COUNT`, `COUNT_DISTINCT`, `SUM`, `AVG`,
+`MIN`, `MAX`) optionally grouped with `GROUP BY` and filtered with
+`HAVING`. Use this for summary reporting; use `query_records` for raw
+rows. For a single total count without grouping, omit `groupByFields` (or
+pass an empty array) — the tool will run `SELECT COUNT() FROM Object
+[WHERE ...]` which returns just `totalSize`.
+
+Salesforce API
+REST API (Data), v66.0. SOQL aggregate via `GET /query`.
+
+Endpoint
+GET https://{instance}.my.salesforce.com/services/data/v66.0/query/?q={SOQL}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+sObject (string, required) - sObject API name (e.g. Opportunity, Project__c).
+aggregates (array, required) - Aggregate clauses, each:
+  function (string, required) - COUNT | COUNT_DISTINCT | SUM | AVG | MIN | MAX.
+  field (string, required for non-COUNT) - Field API name; for COUNT alone
+    use field "Id" or omit (COUNT()).
+  alias (string, optional) - Output alias (e.g. "totalAmount").
+groupByFields (string[], optional) - Fields to GROUP BY. Omit or [] for a
+  single aggregate row. Date-grouping helpers: CALENDAR_YEAR(field),
+  CALENDAR_MONTH(field), FISCAL_YEAR(field). Pass them as the field string.
+where (string, optional) - WHERE clause without the WHERE keyword (e.g.
+  "IsClosed = false AND CloseDate = THIS_QUARTER").
+having (string, optional) - HAVING clause without the HAVING keyword
+  (only valid with groupByFields).
+orderBy (string, optional) - ORDER BY clause without the keyword.
+limit (number, optional) - Cap on grouped rows returned (max 2000).
+
+Result
+When groupByFields is empty/omitted:
+  totalSize (number) - The COUNT() value.
+  done (true), records: [].
+When grouping:
+  totalSize (number) - Number of grouping rows.
+  done (boolean), records (array of grouping rows):
+    attributes.type "AggregateResult".
+    <groupByField>: value (string|number|date).
+    <alias or expr0..N>: aggregate value.
+
+Required permissions
+- API Enabled.
+- Read on sObject and all fields referenced.
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Max 2,000 grouping rows. Add LIMIT or refine groupByFields to fit.
+- CPU/heap limits apply to the host transaction.
+
+Errors
+- MALFORMED_QUERY: aggregates require GROUP BY when mixing fields and
+  aggregates. Mixing non-grouped fields and aggregates is rejected.
+- HAVING_WITH_NO_GROUP_BY: HAVING used without grouping.
+- AGGREGATE_QUERY_TOO_LARGE: result exceeds 2,000 rows.
+
+Example request (simple count)
+
+aggregate_query({
+  "sObject": "Opportunity",
+  "aggregates": [{ "function": "COUNT", "field": "Id", "alias": "total" }],
+  "where": "IsClosed = false"
+})
+
+URL: GET /query/?q=SELECT+COUNT(Id)+total+FROM+Opportunity+WHERE+IsClosed=false
+
+Result:
+{
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    { "attributes": { "type": "AggregateResult" }, "total": 312 }
+  ]
+}
+
+Example request (group by stage with sum)
+
+aggregate_query({
+  "sObject": "Opportunity",
+  "aggregates": [
+    { "function": "SUM", "field": "Amount", "alias": "totalAmount" },
+    { "function": "COUNT", "field": "Id", "alias": "count" }
+  ],
+  "groupByFields": ["StageName"],
+  "where": "CloseDate = THIS_QUARTER",
+  "orderBy": "SUM(Amount) DESC",
+  "limit": 20
+})
+
+Result:
+{
+  "totalSize": 5,
+  "done": true,
+  "records": [
+    { "attributes": { "type": "AggregateResult" },
+      "StageName": "Negotiation", "totalAmount": 1250000, "count": 8 },
+    { "attributes": { "type": "AggregateResult" },
+      "StageName": "Proposal", "totalAmount": 980000, "count": 12 }
+  ]
+}
+
+Example with date grouping and HAVING
+
+aggregate_query({
+  "sObject": "Opportunity",
+  "aggregates": [{ "function": "SUM", "field": "Amount", "alias": "totalAmount" }],
+  "groupByFields": ["CALENDAR_MONTH(CloseDate)"],
+  "where": "IsWon = true AND CloseDate = THIS_YEAR",
+  "having": "SUM(Amount) > 100000",
+  "orderBy": "CALENDAR_MONTH(CloseDate)"
+})

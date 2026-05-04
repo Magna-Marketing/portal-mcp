@@ -1,0 +1,66 @@
+Tool: manage_triggered_send_definition
+
+Description
+Create / update / start / pause / cancel / delete a
+`TriggeredSendDefinition`. Triggered Sends are the recommended legacy
+mechanism for transactional and event-driven email; modern projects
+should use `manage_transactional_email_definition` instead.
+
+Marketing Cloud API
+SOAP API (`TriggeredSendDefinition` Create / Update / Delete /
+SaveOptions for state changes).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP envelope.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "start" | "pause" | "cancel" | "delete".
+customerKey (string, optional, required for non-create).
+name (string, required for create).
+description (string, optional).
+emailId (number, optional, required for create) - Or emailCustomerKey.
+emailCustomerKey (string, optional).
+sendClassificationCustomerKey (string, required for create).
+senderProfileCustomerKey (string, optional).
+deliveryProfileCustomerKey (string, optional).
+fromName (string, optional).
+fromAddress (string, optional).
+isMultipart (boolean, optional, default true).
+suppressTracking (boolean, optional, default false).
+batchInterval (number, optional, default 30) - Minutes between batches when AutoAddSubscribers is true.
+autoAddSubscribers (boolean, optional, default false).
+autoUpdateSubscribers (boolean, optional, default false).
+refreshContent (boolean, optional, default true).
+folderId (number, optional).
+keepExistingSubscribers (boolean, optional, default true) - Some operations.
+
+Result
+triggeredSend (object) - { id, customerKey, name, status ("New"|"Active"|"Paused"|"Inactive"|"Cancelled"), emailId }.
+
+Required scopes
+- `email_write`, `email_send`.
+
+Idempotency & limits
+- start/pause/cancel idempotent.
+- Triggered Send must be Active before `send_triggered_email` succeeds.
+
+Errors
+- DUPLICATE_VALUE, INVALID_STATE_TRANSITION.
+
+Example request (create + start)
+
+manage_triggered_send_definition({
+  "operation": "create",
+  "customerKey": "MTG_Welcome_TS",
+  "name": "MTG Welcome TS",
+  "emailCustomerKey": "MTG_Welcome",
+  "sendClassificationCustomerKey": "Default Transactional"
+})
+manage_triggered_send_definition({ "operation": "start", "customerKey": "MTG_Welcome_TS" })

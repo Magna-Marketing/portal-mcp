@@ -1,0 +1,46 @@
+Tool: update_subscriber_status
+
+Description
+Update a subscriber's overall status (or unsubscribe them at the
+master / list level).
+
+Marketing Cloud API
+SOAP API (`Subscriber` Update).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP UpdateRequest on Subscriber.
+
+Input (parameters)
+subscribers (object[], required) - Each:
+  subscriberKey (string, optional) - Or email.
+  email (string, optional).
+  status (string, required) - "Active" | "Unsubscribed" | "Held" | "Bounced".
+  reason (string, optional).
+  scope (string, optional, default "Master") - "Master" (global) | "List" (single list).
+  listId (number, optional, required when scope="List").
+
+Result
+results (array) - { subscriberKey, status, scope, listId, error }.
+
+Required scopes
+- `list_and_subscribers_write`.
+
+Idempotency & limits
+- Idempotent on equal status.
+
+Errors
+- SUBSCRIBER_NOT_FOUND.
+
+Example request (master unsubscribe)
+
+update_subscriber_status({
+  "subscribers": [{ "subscriberKey": "MEM-100023", "status": "Unsubscribed", "reason": "User request" }],
+  "scope": "Master"
+})

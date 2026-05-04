@@ -1,0 +1,40 @@
+Tool: list_business_units
+
+Description
+List all business units (child accounts) under the enterprise. Each
+entry has its MID, name, account type, and parent. Use to pick a
+target MID for tools that accept `accountId`.
+
+Marketing Cloud API
+SOAP API (`Account.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP RetrieveRequest on `Account` filtered to `ParentID != 0`.
+
+Input (parameters)
+includeInactive (boolean, optional, default false).
+namePattern (string, optional) - Substring filter on name.
+
+Result
+totalSize (number).
+businessUnits (array) - Each: { id (MID), name, accountType ("Enterprise2"|"BusinessUnit"|"EnterpriseLite"), parentId, isActive, dateCreated, dateModified, brandName, description }.
+
+Required scopes
+- `accounts_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS for non-enterprise accounts (returns only the calling MID).
+
+Example request
+
+list_business_units({})

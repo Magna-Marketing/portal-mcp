@@ -1,0 +1,67 @@
+Tool: manage_automation_activity
+
+Description
+Create / update / delete activity definitions used inside automations:
+SQL Query, Filter, Import, Export, Send Email, Verification, Data
+Extract, File Transfer, Wait, Refresh, Script.
+
+Marketing Cloud API
+REST API (varies by activity type) and SOAP for some.
+
+Endpoint
+POST/PATCH/DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/{activityPath}/{id}
+
+Examples:
+- SQL Query: `/automation/v1/queries`
+- Filter: `/automation/v1/filterdefinitions`
+- Import: `/automation/v1/imports`
+- Send Email: `/automation/v1/sendemail`
+- Data Extract: `/automation/v1/extracts`
+- File Transfer: `/automation/v1/fileTransferActivity`
+- Verification: `/automation/v1/verifications`
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Per activity-type schema. The MCP server provides validation helpers.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "validate".
+activityType (string, required) - "Query" | "Filter" | "Import" | "Export" | "SendEmail" | "DataExtract" | "FileTransfer" | "Verification" | "Wait" | "Refresh" | "Script".
+activityId (string, optional, required for non-create).
+key (string, optional).
+name (string, required for create).
+description (string, optional).
+config (object, required for create / update) - Activity-specific schema:
+  Query: { queryText, targetKey, targetUpdateTypeName ("Append"|"Overwrite"|"Update") }.
+  Filter: { sourceObjectId, destinationObjectId, filterDefinitionId }.
+  Import: { destinationObjectId, fileTransferLocationId, fileSpec, dateFormatLocale, fileType ("CSV"), updateTypeName }.
+  SendEmail: { emailId, sendClassificationId, audience, sendTime }.
+  ... other types per docs.
+
+Result
+activity (object) - { id, key, name, type, status, configurationArguments }.
+
+Required scopes
+- `automations_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- INVALID_ACTIVITY_CONFIG.
+
+Example request (SQL Query activity)
+
+manage_automation_activity({
+  "operation": "create",
+  "activityType": "Query",
+  "name": "Compute_Top_Members",
+  "config": {
+    "queryText": "SELECT MemberId, Email, TierName FROM Members_DE WHERE LifetimePoints > 50000",
+    "targetKey": "Top_Members_DE",
+    "targetUpdateTypeName": "Overwrite"
+  }
+})

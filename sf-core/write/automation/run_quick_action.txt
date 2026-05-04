@@ -1,0 +1,49 @@
+Tool: run_quick_action
+
+Description
+Invoke a Quick Action against a record (Update, LogACall) or globally
+(Create). Returns the affected record's Id and any field updates.
+
+Salesforce API
+REST API, v66.0. `POST /sobjects/{sObject}/quickActions/{actionName}`.
+
+Endpoint
+POST /services/data/v66.0/sobjects/{sObject}/quickActions/{actionName}                  (object-specific)
+POST /services/data/v66.0/quickActions/{actionName}                                     (global)
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "contextId": "0014Q00000abcDE",
+  "record": { "Status__c": "Active" }
+}
+
+Input (parameters)
+sObject (string, optional) - For object-specific actions. Use "Global" for global.
+actionName (string, required) - DeveloperName of the quick action.
+contextId (string, optional) - Record Id (required for object-specific Update/LogACall).
+record (object, optional) - Field values to apply.
+
+Result
+result (object) - { id, success, errors, feedItemIds (when feed item created) }.
+
+Required permissions
+- Quick Action visibility on the running user's profile/permset.
+
+Idempotency & limits
+- Not idempotent (each call creates a feed item / updates fields).
+
+Errors
+- INVALID_QUICK_ACTION, INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+run_quick_action({
+  "sObject": "Project__c",
+  "actionName": "Update_Status",
+  "contextId": "a01Qg0000004ZyAA",
+  "record": { "Status__c": "Active" }
+})

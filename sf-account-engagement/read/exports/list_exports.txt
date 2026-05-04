@@ -1,0 +1,65 @@
+Tool: list_exports
+
+Description
+List async export jobs. Exports are created by `create_export` and
+move through `WAITING -> PROCESSING -> COMPLETE` (or `ERROR`).
+Each export targets one object (Prospect, ListMembership, Email,
+VisitorActivity, etc.) with a date-range filter.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/exports?fields={fields}&filter[status]=eq,Complete
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+status (string, optional) - "Waiting" | "Processing" |
+  "Complete" | "Error" | "Cancelled".
+object (string, optional) - "Prospect" | "ListMembership" |
+  "VisitorActivity" | "Email" | "ListEmail" | "Form" | "Folder" |
+  "Tag" | "Visitor" | "Visit" | "VisitorPageView" | "User" |
+  "Opportunity" | etc.
+createdAfter (string, optional) - ISO-8601.
+createdBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,object,status,fields,
+  resultRefs,createdAt,updatedAt,createdById,procedure,arguments,
+  errorRef,fileName,counter).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+exports (array) - Each: { id, object, status, fields (string[]),
+  procedure (string), arguments (object), counter (number) - rows so
+  far, resultRefs (array<{fileId,sizeBytes}>), errorRef (string|null),
+  fileName, createdAt, updatedAt, createdById }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_exports({ "status": "Complete", "object": "Prospect" })
+
+Example result
+{
+  "exports": [
+    { "id": 7782, "object": "Prospect", "status": "Complete",
+      "counter": 28412,
+      "resultRefs": [{ "fileId": 1, "sizeBytes": 38421100 }] }
+  ]
+}

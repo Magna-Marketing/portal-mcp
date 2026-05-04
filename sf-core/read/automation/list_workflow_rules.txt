@@ -1,0 +1,45 @@
+Tool: list_workflow_rules
+
+Description
+List Workflow Rules (legacy automation; mostly migrated to Flow but still common in older orgs). Returns the trigger criteria, evaluation criteria, time-based triggers, and the actions invoked (field updates, email alerts, outbound messages, tasks).
+
+Salesforce API
+Metadata API (`Workflow` per sObject), v66.0.
+
+Endpoint
+POST /services/Soap/m/66.0    (readMetadata Workflow per sObject)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, TableEnumOrId, Active FROM WorkflowRule
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], optional).
+includeInactive (boolean, optional, default true).
+namePattern (string, optional).
+
+Result
+totalSize (number).
+workflowRules (array) - Each:
+  id, fullName, sObject, label, active, description.
+  evaluationCriteria (string) - "OnAllChanges" | "OnCreateOnly" | "OnCreateOrTriggeringUpdate".
+  formula (string|null), criteriaItems (array|null) - Filter logic.
+  actions (object) - { fieldUpdates: string[], alerts: string[], tasks: string[], outboundMessages: string[], flowTriggers: string[] }.
+  timeTriggers (array) - Each: { offsetFromField, timeLength, workflowTimeTriggerUnit, actions }.
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_workflow_rules({ "sObjects": ["Opportunity"] })

@@ -1,0 +1,55 @@
+Tool: list_data_transforms
+
+Description
+List Data Transforms — SQL-based transformations that shape DLO /
+DMO data into curated datasets. Each transform has a target DMO
+(or DLO), a SQL definition, a schedule, and a run history.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-transforms
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+type (string, optional) - "Batch" | "Streaming".
+status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+dataTransforms (array) - Each: { id, developerName, label, type,
+  targetObject, sourceObjects (array), status, schedule (object),
+  lastRunStatus, lastRunDate, createdDate, lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_data_transforms({ "type": "Batch" })
+
+Example result
+{
+  "dataTransforms": [
+    { "developerName": "build_unified_individual",
+      "type": "Batch",
+      "targetObject": "UnifiedIndividual__dlm",
+      "status": "Active", "lastRunStatus": "Success" }
+  ]
+}

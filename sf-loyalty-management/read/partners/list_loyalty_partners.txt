@@ -1,0 +1,46 @@
+Tool: list_loyalty_partners
+
+Description
+List `LoyaltyProgramPartner` records — partner accounts associated
+with the program (e.g. co-brand cards, hotel chains, retail partners).
+Each row includes contractual info and partner-currency conversion
+configuration.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `LoyaltyProgramPartner`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, ProgramId, Program.Name, AccountId, Account.Name, ContactId, Contact.Name, PartnerType, Status, EffectiveStartDate, EffectiveEndDate, CurrencyConversionRate, CreatedDate FROM LoyaltyProgramPartner
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+programName (string, optional).
+programId (string, optional).
+status (string, optional) - "Active" | "Inactive".
+partnerType (string, optional).
+accountId (string, optional).
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+partners (array) - { id, name, programId, programName, accountId, accountName, contactId, contactName, partnerType, status, effectiveStartDate, effectiveEndDate, currencyConversionRate, createdDate }.
+
+Required permissions
+- `Loyalty Management` permission set.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_loyalty_partners({ "programName": "MTG_Rewards", "status": "Active" })

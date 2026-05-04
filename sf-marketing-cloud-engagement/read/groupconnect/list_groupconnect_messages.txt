@@ -1,0 +1,40 @@
+Tool: list_groupconnect_messages
+
+Description
+List GroupConnect messages sent or scheduled to send.
+
+Marketing Cloud API
+REST API (`/legacy/v1/beta/groupconnect/messages`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/messages
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+appId (string, optional).
+status (string, optional) - "Draft" | "Scheduled" | "Sent" | "Failed".
+sinceDays (number, optional, default 30).
+limit (number, optional, default 200).
+
+Result
+messages (array) - { id, appId, name, messageType ("Text"|"Image"|"Video"|"Sticker"|"Audio"|"Location"|"Carousel"), content, status, scheduledTime, sentTime, recipientCount, dateCreated }.
+hasMore (boolean).
+
+Required scopes
+- `messaging_api_app_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 unauthorized.
+
+Example request
+
+list_groupconnect_messages({ "status": "Sent" })

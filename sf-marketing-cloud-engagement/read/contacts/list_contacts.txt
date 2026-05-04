@@ -1,0 +1,57 @@
+Tool: list_contacts
+
+Description
+Search Marketing Cloud Contacts via the Contact Search API. Returns
+contacts matching a value across one or more identifiers (Email,
+SubscriberKey, MobileNumber, Push Tag, GroupConnect Id, etc.).
+
+Marketing Cloud API
+REST API (`/contacts/v1/contacts/search`).
+
+Endpoint
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/search
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "channelAddressList": ["jane.doe@example.com"],
+  "channelAddressType": "Email",
+  "additionalFilterValues": [],
+  "maximumCount": 50
+}
+
+Input (parameters)
+searchValue (string|string[], required) - One or more channel address values.
+searchType (string, required) - "Email" | "MobileNumber" | "SubscriberKey" | "ContactKey" | "PushTag" | "Line".
+maximumCount (number, optional, default 50, max 500).
+includeChannelAddresses (boolean, optional, default true).
+
+Result
+totalCount (number).
+contacts (array) - Each:
+  contactKey (string).
+  contactId (number).
+  contactStatus (string) - "Active" | "Held" | "Deleted".
+  channelAddressList (array) - [{ channelAddressId, channelAddress, addressType, isPrimary, status }].
+  attributeSetValues (array, optional) - Compact attribute values.
+hasMore (boolean).
+
+Required scopes
+- `audiences_read`.
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- 10000 (bad request) on invalid searchType.
+
+Example request
+
+list_contacts({
+  "searchType": "Email",
+  "searchValue": ["jane.doe@example.com"]
+})

@@ -1,0 +1,44 @@
+Tool: list_event_definitions
+
+Description
+List Journey Builder event definitions: the entry-event schemas
+(API events, Data Extension events, Salesforce events, Audience
+Builder events) that journeys can listen to. The `eventDefinitionKey`
+is what you pass to `inject_contacts_into_journey` /
+`fire_journey_entry_event`.
+
+Marketing Cloud API
+REST API (`/interaction/v1/eventDefinitions`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{eventDefinitionKey}
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+eventDefinitionKey (string, optional) - Get a single event definition.
+type (string|string[], optional) - "APIEvent" | "DataExtension" | "SalesforceObject" | "AudienceBuilder" | "ContactEvent".
+namePattern (string, optional).
+
+Result
+totalCount (number).
+items (array) - { id, key, name, description, type, mode, isVisibleInPicker, dataExtensionId, dataExtensionName, sourceApplicationExtensionId, schema (object) - { fields: [...] }, createdDate, modifiedDate }.
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+list_event_definitions({ "type": "APIEvent" })

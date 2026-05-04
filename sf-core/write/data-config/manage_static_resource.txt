@@ -1,0 +1,51 @@
+Tool: manage_static_resource
+
+Description
+Create / update / delete a Static Resource. Body is sent base64-encoded
+in the create/update.
+
+Salesforce API
+Tooling API, v66.0. `StaticResource`.
+
+Endpoint
+POST  /services/data/v66.0/tooling/sobjects/StaticResource
+PATCH /services/data/v66.0/tooling/sobjects/StaticResource/{id}
+DELETE /services/data/v66.0/tooling/sobjects/StaticResource/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{ "Name": "MTG_BrandLogo", "ContentType": "image/png", "CacheControl": "Public", "Body": "<base64>" }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+name (string, required for create) - Resource name (no extension).
+contentType (string, required for create/update) - MIME type.
+cacheControl (string, optional, default "Public") - "Public" | "Private".
+description (string, optional).
+base64 (string, required for create/update) - Base64-encoded body.
+namespacePrefix (string, optional).
+
+Result
+staticResource (object) - { id, name, contentType, bodyLength, cacheControl }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+- Body cap 5 MB.
+
+Errors
+- DUPLICATE_VALUE on name; FILE_TOO_LARGE.
+
+Example request
+
+manage_static_resource({
+  "operation": "create",
+  "name": "MTG_BrandLogo",
+  "contentType": "image/png",
+  "base64": "iVBORw0KG..."
+})

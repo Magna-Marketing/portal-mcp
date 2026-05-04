@@ -1,0 +1,61 @@
+Tool: get_user_info
+
+Description
+Resolve the Salesforce identity, the Connect plane base URL, and
+(when the Data Cloud token is healthy) the runtime plane CDP tenant
+URL. Useful as a sanity check before running a multi-call flow.
+
+Salesforce API
+Salesforce OAuth `/services/oauth2/userinfo` (Connect token) +
+Data 360 runtime `/api/v1/identity` ping (Data Cloud token).
+
+Endpoint
+GET https://login.salesforce.com/services/oauth2/userinfo
+GET {cdpTenantUrl}/api/v1/identity                            (runtime health check)
+
+Headers
+Authorization: Bearer <core_access_token>   (userinfo)
+Authorization: Bearer <data_cloud_token>    (CDP identity)
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeRuntimeHealth (boolean, optional, default true) - When true,
+  also calls the CDP `/api/v1/identity` to confirm the exchanged
+  token works.
+
+Result
+identity (object): user_id, organization_id, username, email, name,
+  locale, language, timezone.
+connect (object): instanceUrl, scopes (array).
+runtime (object|null, when includeRuntimeHealth=true):
+  cdpTenantUrl (string), alive (boolean), expiresIn (number).
+
+Required scopes
+- `id`, `profile`, `email`, plus `cdp_api` (for the runtime check).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_session_id (core), 401 invalid_token (data cloud —
+  re-run `exchange_data_cloud_token`).
+
+Example request
+
+get_user_info({})
+
+Example result
+{
+  "identity": {
+    "user_id": "00558000001abCdEAA",
+    "organization_id": "00D58000000IFx0EAG",
+    "username": "ops@magnatech.com"
+  },
+  "connect": { "instanceUrl": "https://magnatech.my.salesforce.com",
+               "scopes": ["api","cdp_api","cdp_query_api_read","refresh_token"] },
+  "runtime": { "cdpTenantUrl": "https://magnatech.c360a.salesforce.com",
+               "alive": true, "expiresIn": 7100 }
+}

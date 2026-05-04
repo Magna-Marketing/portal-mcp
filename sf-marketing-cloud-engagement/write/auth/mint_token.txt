@@ -1,0 +1,49 @@
+Tool: mint_token
+
+Description
+Mint a fresh OAuth access token. Useful when impersonating a different
+business unit (`accountId`) than the default, or when an explicit
+short-lived token is needed for downstream systems.
+
+Marketing Cloud API
+OAuth 2.0 (`/v2/token`).
+
+Endpoint
+POST https://{tenant}.auth.marketingcloudapis.com/v2/token
+
+Headers
+Content-Type: application/json
+
+Body
+{
+  "grant_type": "client_credentials",
+  "client_id": "<package client id>",
+  "client_secret": "<package secret>",
+  "account_id": 5001234,
+  "scope": "email_read email_send journeys_execute"
+}
+
+Input (parameters)
+accountId (number, optional) - Target MID (business unit). When omitted, default MID is used.
+scopes (string[], optional) - Subset of the package's granted scopes; default = all granted.
+grantType (string, optional, default "client_credentials") - "client_credentials" | "authorization_code" (with `code` + `redirectUri`) | "refresh_token" (with `refreshToken`).
+code (string, optional, only authorization_code).
+redirectUri (string, optional).
+refreshToken (string, optional).
+
+Result
+token (object) - { access_token, token_type ("Bearer"), expires_in (seconds), expiresAt (ISO), scope (string), rest_instance_url, soap_instance_url, accountId }.
+
+Required scopes
+- N/A — depends on the underlying Installed Package's grant.
+
+Idempotency & limits
+- Repeated calls return new tokens; the previous token remains valid until expiry (≈20 minutes default).
+- Tenant-wide token-mint rate limits apply.
+
+Errors
+- 400 invalid_scope, 400 invalid_client, 401 unauthorized_client.
+
+Example request
+
+mint_token({ "accountId": 5001234 })

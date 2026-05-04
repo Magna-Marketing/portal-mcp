@@ -1,0 +1,72 @@
+Tool: list_ui_components
+
+Description
+List all UI components of a given type with names, labels, and API
+versions. Three component types are supported, each from its own
+Tooling sObject:
+- LWC -> `LightningComponentBundle`.
+- Aura -> `AuraDefinitionBundle`.
+- VisualForce -> `ApexPage`.
+For LWCs use `read_lwc` / `get_lwc_bundle_info` to drill in. For
+FlexiPages (Lightning Pages) use `list_lightning_pages` (different
+sObject `FlexiPage`).
+
+Salesforce API
+Tooling API, v66.0.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, IsExposed, ManageableState, CreatedDate, LastModifiedDate FROM LightningComponentBundle [WHERE ...]
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, ManageableState, Description, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle [WHERE ...]
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ManageableState, IsAvailableInTouch, ControllerKey FROM ApexPage [WHERE ...]
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None (GET request).
+
+Input (parameters)
+type (string, required) - "lwc" | "aura" | "visualforce".
+namespacePrefix (string, optional) - Filter by namespace; "" for default.
+managedOnly (boolean, optional, default false).
+includeUnmanaged (boolean, optional, default true).
+modifiedSince (string, optional) - ISO date.
+limit (number, optional, default 200, max 2000).
+
+Result
+type (string).
+totalSize (number).
+components (array) - Each:
+  id (string) - Tooling Id.
+  name (string) - DeveloperName (LWC/Aura) or Name (VF).
+  label (string) - MasterLabel.
+  apiVersion (number).
+  namespacePrefix (string|null).
+  manageableState (string).
+  isExposed (boolean, only for lwc).
+  isAvailableInTouch (boolean, only for visualforce).
+  description (string|null).
+  createdDate, lastModifiedDate (string).
+
+Required permissions
+- "Customize Application" or "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- INVALID_FIELD: invalid type value.
+
+Example request
+
+list_ui_components({ "type": "lwc", "namespacePrefix": "" })
+
+Example result (truncated)
+
+{
+  "type": "lwc", "totalSize": 47,
+  "components": [
+    { "id": "0Rb4Q00000abcDE", "name": "projectCard", "label": "Project Card", "apiVersion": 62.0, "isExposed": true, "manageableState": "unmanaged", "lastModifiedDate": "2026-04-22T13:18:09.000+0000" }
+  ]
+}

@@ -1,0 +1,51 @@
+Tool: get_form_field
+
+Description
+Read a single Form Field by id. Includes any picklist values
+(`hasValues=true`) and dependent / progressive-profiling
+configuration when applicable.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/form-fields/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `form.*` and
+  `prospectField.*` (the underlying custom-field).
+
+Result
+formField (object): id, formId, prospectApiFieldId, type, name, label,
+  isRequired, isAlwaysDisplay, isMaintainInitialValue,
+  isUseValuesPreFromField, sortOrder, errorMessage, cssClasses,
+  hasDependents, hasProgressiveProfiling, hasValues, createdAt, updatedAt.
+form (object|null), prospectField (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_form_field({ "id": 51 })
+
+Example result
+{
+  "formField": { "id": 51, "name": "Email", "type": "Email",
+    "isRequired": true, "prospectApiFieldId": "email" }
+}

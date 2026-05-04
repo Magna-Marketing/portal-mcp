@@ -1,0 +1,54 @@
+Tool: manage_sender_profile
+
+Description
+Create / update / delete a Sender Profile (From-name + From-address +
+Reply-to settings).
+
+Marketing Cloud API
+SOAP API (`SenderProfile` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP CreateRequest / UpdateRequest.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+customerKey (string, required).
+name (string, required for create).
+description (string, optional).
+fromName (string, required for create).
+fromAddress (string, required for create).
+replyToName (string, optional).
+replyToAddress (string, optional).
+useDefaultRMMRules (boolean, optional, default true).
+autoForwardToAddress (string, optional).
+autoForwardSubject (string, optional).
+
+Result
+senderProfile (object) - { id, customerKey, name, fromName, fromAddress, replyToName, replyToAddress }.
+
+Required scopes
+- `email_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE.
+
+Example request
+
+manage_sender_profile({
+  "operation": "create",
+  "customerKey": "MTG_Sender",
+  "name": "MTG Sender",
+  "fromName": "MTG",
+  "fromAddress": "noreply@magnatech.com",
+  "replyToAddress": "support@magnatech.com"
+})

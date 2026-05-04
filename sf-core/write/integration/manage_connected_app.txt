@@ -1,0 +1,58 @@
+Tool: manage_connected_app
+
+Description
+Create / update / delete Connected Apps. Configure OAuth scopes,
+callback URL, IP relaxation, refresh token policy, and admin-pre-
+approval. For modern apps, prefer External Client Apps
+(`manage_external_client_app`).
+
+Salesforce API
+Metadata API (`ConnectedApp`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+fullName (string, required) - DeveloperName.
+label (string, required for create).
+contactEmail (string, required for create).
+description (string, optional).
+oauth (object, optional) - { scopes (string[]), callbackUrl (string), consumerKey (auto-generated if omitted), isPkceRequired, isSecretRequiredForRefreshToken, idTokenConfig }.
+policies (object, optional) - { ipRelaxation, ipAllowlist, refreshTokenPolicy ("specific_lifetime"|"infinite"|"expire_immediate"|"expire_on_logout"), sessionTimeout, requireUsersToInstallApp, isAdminApprovedUsersOnly }.
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+connectedApp (object) - { id, fullName, label, consumerKey }.
+
+Required permissions
+- "Manage Connected Apps".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+
+Example request
+
+manage_connected_app({
+  "operation": "create",
+  "fullName": "MTG_External_Integration",
+  "label": "MTG External Integration",
+  "contactEmail": "ops@magnatech.com",
+  "oauth": {
+    "scopes": ["Api", "RefreshToken"],
+    "callbackUrl": "https://ops.magnatech.com/oauth/callback",
+    "isPkceRequired": true
+  },
+  "policies": { "isAdminApprovedUsersOnly": true, "refreshTokenPolicy": "specific_lifetime" }
+})

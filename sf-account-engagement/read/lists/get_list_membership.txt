@@ -1,0 +1,46 @@
+Tool: get_list_membership
+
+Description
+Read a single List Membership row by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/list-memberships/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands list.* and prospect.*.
+
+Result
+listMembership (object): id, listId, prospectId, optedOut,
+  createdAt, updatedAt.
+list (object|null), prospect (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_list_membership({ "id": 4421001 })
+
+Example result
+{
+  "listMembership": { "id": 4421001, "listId": 301,
+    "prospectId": 7745, "optedOut": false }
+}

@@ -1,0 +1,57 @@
+Tool: run_identity_resolution
+
+Description
+Trigger an on-demand Identity Resolution run. Async; returns a
+`runId` that's poll-able via the IR ruleset's main GET endpoint.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions/:identityResolution/actions/run-now
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "runMode": "Incremental" }
+
+Input (parameters)
+identityResolution (string, required).
+runMode (string, optional, default "Incremental") - "Full" |
+  "Incremental".
+runIdempotencyKey (string, optional).
+
+Result
+runId (string).
+identityResolution (string).
+status (string) - "Queued".
+submittedAt (ISO-8601).
+
+Required scopes
+- `api` (or `cdp_identityresolution_api` for runtime).
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- 1 in-flight run per ruleset.
+- A `Full` run on a 10M+ record graph can take 30-90 minutes.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS, 503 SOURCE_DMO_UNAVAILABLE.
+
+Example request
+
+run_identity_resolution({
+  "identityResolution": "UnifiedIndividual_default",
+  "runMode": "Incremental"
+})
+
+Example result
+{
+  "runId": "RUN_IR_2026-04-29T13",
+  "identityResolution": "UnifiedIndividual_default",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

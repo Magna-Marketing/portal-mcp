@@ -1,0 +1,42 @@
+Tool: list_user_roles
+
+Description
+List all UserRoles in the org with parent links so the role hierarchy is reconstructable. Each row includes the role's parent, opportunity-access setting, case-access setting, and number of users currently assigned. Use to plan reorgs, hierarchy edits via `manage_user_role`, or owner-based sharing analysis.
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `UserRole`.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, ParentRoleId, ParentRole.Name, OpportunityAccessForAccountOwner, CaseAccessForAccountOwner, ContactAccessForAccountOwner, MayForecastManagerShare, RollupDescription, PortalType, PortalAccountId FROM UserRole
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+namePattern (string, optional) - Glob on Name or DeveloperName.
+parentRoleName (string, optional) - Restrict to direct children of this role.
+includeUserCount (boolean, optional, default true) - Adds one COUNT() per role (heavier).
+includeHierarchy (boolean, optional, default false) - Returns roles arranged as a tree.
+portalType (string, optional) - "None" | "CustomerPortal" | "Partner".
+
+Result
+totalSize (number).
+roles (array, when not hierarchy) - Each: id, name, developerName, parentRoleId, parentRoleName, opportunityAccess, caseAccess, contactAccess, portalType, userCount (optional).
+hierarchy (object, when includeHierarchy=true) - Tree { role, children: [...] }.
+
+Required permissions
+- "View Setup and Configuration".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_user_roles({ "includeHierarchy": true, "includeUserCount": true })

@@ -1,0 +1,54 @@
+Tool: manage_journey
+
+Description
+Create / update / delete a Journey Builder journey definition. Journey
+canvases are large JSON documents (triggers + activities + connections
++ goals) — pass `definition` for full-fidelity authoring.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+PUT    https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}/version/{versionNumber}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+Full journey definition (`{ id, key, name, version, workflowApiVersion: 1.0, triggers: [...], activities: [...], goals: [...] }`).
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete" | "createDraftVersion".
+journeyId (string, optional).
+journeyKey (string, optional).
+versionNumber (number, optional).
+definition (object, required for create / update / createDraftVersion) - Full canvas JSON.
+
+Result
+journey (object) - { id, key, name, version, status, createdDate, modifiedDate }.
+
+Required scopes
+- `journeys_write`.
+
+Idempotency & limits
+- update / createDraftVersion idempotent on equal definition.
+- Soft-deletes preserve history.
+
+Errors
+- 10000 invalid definition, 30002 not found.
+
+Example request (create draft)
+
+manage_journey({
+  "operation": "create",
+  "definition": {
+    "key": "MTG_Welcome_Series",
+    "name": "MTG Welcome Series",
+    "workflowApiVersion": 1.0,
+    "triggers": [{ "type": "EmailAudience", "configurationArguments": {} }],
+    "activities": []
+  }
+})

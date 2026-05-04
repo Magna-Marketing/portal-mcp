@@ -1,0 +1,41 @@
+Tool: get_journey_history
+
+Description
+Get audit history for a journey: who made changes, when, what changed
+(version-bumping events). Surfaces `journeyHistory` audit data.
+
+Marketing Cloud API
+REST API (`/interaction/v1/interactions/{id}/audit/all`).
+
+Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}/audit/all
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+journeyId (string, optional).
+journeyKey (string, optional).
+  One required.
+sinceDays (number, optional, default 90).
+
+Result
+journeyId (string).
+events (array) - { date, userName, userId, action ("Created"|"Modified"|"Published"|"Stopped"|"Paused"|"Resumed"|"Versioned"), version, description }.
+
+Required scopes
+- `journeys_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_journey_history({ "journeyKey": "MTG_Welcome_Series" })

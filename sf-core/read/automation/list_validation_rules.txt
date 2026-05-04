@@ -1,0 +1,42 @@
+Tool: list_validation_rules
+
+Description
+List validation rules for one or more sObjects with their formula, error message, error display field, and active status. Use to understand "why is this insert failing?" and to plan rule cleanup.
+
+Salesforce API
+Tooling API, v66.0. `ValidationRule` sObject.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, ValidationName, EntityDefinition.QualifiedApiName, Active, Description, ErrorDisplayField, ErrorMessage, Metadata FROM ValidationRule WHERE EntityDefinition.QualifiedApiName IN (...)
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObjects (string[], optional) - Restrict to these sObjects.
+namePattern (string, optional) - Glob on ValidationName.
+includeInactive (boolean, optional, default true).
+includeFormula (boolean, optional, default true) - Include the boolean formula body.
+limit (number, optional, default 500).
+
+Result
+totalSize (number).
+validationRules (array) - Each:
+  id, validationName, sObject, active, description, errorDisplayField, errorMessage, errorConditionFormula (when includeFormula=true), createdDate, lastModifiedDate.
+
+Required permissions
+- "View Setup and Configuration" / "Customize Application".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_TYPE on bad sObject.
+
+Example request
+
+list_validation_rules({ "sObjects": ["Opportunity"], "includeInactive": false })

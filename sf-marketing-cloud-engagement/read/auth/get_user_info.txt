@@ -1,0 +1,46 @@
+Tool: get_user_info
+
+Description
+Get the OAuth-mapped user info for the current token (the integration
+user the Installed Package authenticates as). Returns identity claims
+similar to OpenID Connect.
+
+Marketing Cloud API
+OAuth 2.0 `/v2/userinfo`.
+
+Endpoint
+GET https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+None.
+
+Result
+user (object):
+  sub (string) - User Id (subject).
+  preferred_username (string|null).
+  email (string|null).
+  given_name, family_name (string|null).
+  zoneinfo (string|null), locale (string|null).
+  organization (object) - { enterpriseId, accountId, accountType, accountName }.
+  permissions (string[]).
+  rest (object) - { rest_instance_url, soap_instance_url, auth_url }.
+
+Required scopes
+- N/A (issued automatically with most package tokens).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 invalid_token.
+
+Example request
+
+get_user_info({})

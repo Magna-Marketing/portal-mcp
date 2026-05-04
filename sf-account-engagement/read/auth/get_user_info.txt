@@ -1,0 +1,65 @@
+Tool: get_user_info
+
+Description
+Resolve the Salesforce identity that the MCP server's access token
+represents, plus the Pardot Business Unit it can call into. Returns
+the Salesforce userinfo response (id, organization id, email,
+preferred username, locale) and the BU's connector status. Handy for
+"which BU am I about to write to?" before any destructive call.
+
+Salesforce API
+Salesforce OAuth (`/services/oauth2/userinfo`) +
+Account Engagement v5 (`GET /objects/users/:id` for the run-as user).
+
+Endpoint
+GET https://login.salesforce.com/services/oauth2/userinfo
+GET https://{pi-domain}/api/v5/objects/users/:id
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+includeBuUser (boolean, optional, default true) - Calls v5 to find
+  the matching `User` row (matched on `salesforceId`).
+
+Result
+identity (object):
+  user_id (string) - 18-char SFDC user id.
+  organization_id (string) - 18-char SFDC org id.
+  username (string), email (string), name (string).
+  locale (string), language (string), timezone (string).
+businessUnit (object):
+  id (string) - 18-char Pardot BU id.
+  domain (string) - e.g. "go.magnatech.my.pardot.com".
+buUser (object|null) - When `includeBuUser=true`:
+  { id, email, firstName, lastName, role, roleName, isVerified }.
+
+Required scopes
+- `pardot_api`, `id`, `profile`, `email`.
+
+Idempotency & limits
+- Read-only. Costs 1 v5 call when `includeBuUser=true`.
+
+Errors
+- 401 invalid_session_id, 4 invalid_business_unit_id.
+
+Example request
+
+get_user_info({})
+
+Example result
+{
+  "identity": {
+    "user_id": "00558000001abCdEAA",
+    "organization_id": "00D58000000IFx0EAG",
+    "username": "ops@magnatech.com.prod",
+    "email": "ops@magnatech.com"
+  },
+  "businessUnit": { "id": "0Uv5800000004RZCAY", "domain": "go.magnatech.my.pardot.com" },
+  "buUser": { "id": 421, "role": "Administrator", "isVerified": true }
+}

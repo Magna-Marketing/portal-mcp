@@ -1,0 +1,73 @@
+Tool: list_visitor_activities
+
+Description
+List Visitor Activity rows — the unified activity feed (form
+submission, email click, file download, custom redirect click,
+external activity ingest, page view, etc.). The `type` field is
+the discriminator.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visitor-activities?fields={fields}&filter[prospectId]=eq,:prospectId
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+prospectId (number, optional).
+visitorId (number, optional).
+type (number, optional) - Activity type (1 Form, 2 EmailClick, 4
+  EmailOpen, 11 FormHandler, 13 EmailSend, 14 LandingPage,
+  20 CustomRedirect, 21 File, 22 ExternalActivity, etc.).
+typeName (string, optional) - Human-readable type filter.
+campaignId (number, optional).
+emailId (number, optional).
+formId (number, optional).
+formHandlerId (number, optional).
+landingPageId (number, optional).
+customRedirectId (number, optional).
+fileId (number, optional).
+listEmailId (number, optional).
+createdAfter (string, optional) - ISO-8601.
+createdBefore (string, optional) - ISO-8601.
+fields (string[], optional, default: id,prospectId,visitorId,type,
+  typeName,details,campaignId,emailId,formId,formHandlerId,
+  landingPageId,customRedirectId,fileId,listEmailId,
+  emailTemplateId,multivariateTestVariationId,createdAt).
+limit (number, optional, default 100).
+nextPageToken (string, optional).
+
+Result
+visitorActivities (array) - Each: { id, prospectId, visitorId, type,
+  typeName, details, campaignId, emailId, formId, formHandlerId,
+  landingPageId, customRedirectId, fileId, listEmailId,
+  emailTemplateId, createdAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_visitor_activities({ "prospectId": 7745, "limit": 25 })
+
+Example result
+{
+  "visitorActivities": [
+    { "id": 99100, "type": 4, "typeName": "Email Open",
+      "prospectId": 7745, "emailId": 99821, "createdAt": "2026-04-29T13:05:12Z" }
+  ]
+}

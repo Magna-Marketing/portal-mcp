@@ -1,0 +1,65 @@
+Tool: write_apex_trigger
+
+Description
+Create or update an Apex trigger. Same Tooling API container pattern as
+`write_apex` but for `ApexTrigger` / `ApexTriggerMember`. The trigger's
+declared sObject (e.g. `trigger Foo on Account (before insert)`) must
+match the running org's metadata.
+
+Salesforce API
+Tooling API, v66.0.
+- `MetadataContainer`.
+- `ApexTriggerMember` for the source.
+- `ContainerAsyncRequest` to compile/save.
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/ApexTriggerMember
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+ApexTriggerMember (create):   { "MetadataContainerId": "<id>", "ContentEntityId": null, "FullName": "ProjectTrigger", "Body": "trigger ..." }
+ApexTriggerMember (update):   { "MetadataContainerId": "<id>", "ContentEntityId": "<existing apexTriggerId>", "Body": "..." }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert".
+name (string, required) - Trigger name (must equal the API name in the
+  source).
+sObject (string, required for create) - Target sObject API name; must
+  match `trigger X on <sObject>` in the body.
+body (string, required) - Full trigger source.
+apiVersion (number, optional).
+status (string, optional, default "Active") - "Active" | "Inactive".
+checkOnly (boolean, optional, default false).
+testLevel, specifiedTests (string/string[], optional) - Same as write_apex.
+
+Result
+Same shape as write_apex.deploy + apexTrigger object on success.
+
+Required permissions
+- "Author Apex".
+- Production deploys require tests with ≥75% org coverage.
+
+Idempotency & limits
+- `upsert` idempotent on `name`.
+- A trigger can only be defined once per (sObject, name) tuple.
+
+Errors
+- DEPLOY_FAILED with line/column on compile error.
+- INVALID_TRIGGER_TYPE: target sObject is not triggerable.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+write_apex_trigger({
+  "operation": "upsert",
+  "name": "ProjectTrigger",
+  "sObject": "Project__c",
+  "apiVersion": 62.0,
+  "body": "trigger ProjectTrigger on Project__c (before insert, before update) {\n    ProjectTriggerHandler.run();\n}\n"
+})

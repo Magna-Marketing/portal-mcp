@@ -1,0 +1,54 @@
+Tool: list_calculated_insights
+
+Description
+List Calculated Insight Objects (CIOs) — derived metrics computed
+from DMOs (lifetime value, propensity scores, engagement recency).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/calculated-insights
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Inactive" | "Failed" | "Draft".
+nameContains (string, optional).
+limit (number, optional, default 100).
+
+Result
+calculatedInsights (array) - Each: { id, apiName, label, dataSpace,
+  status, refreshFrequency, sourceDmos, measures (array),
+  dimensions (array), lastRunStatus, lastRunDate, createdDate,
+  lastModifiedDate }.
+totalSize (number).
+
+Required scopes
+- `api` (or `cdp_calculated_insight_api` for the runtime fall-through).
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_calculated_insights({ "status": "Active" })
+
+Example result
+{
+  "calculatedInsights": [
+    { "apiName": "CustomerLTV__cio",
+      "label": "Customer LTV",
+      "status": "Active",
+      "refreshFrequency": "Daily" }
+  ]
+}

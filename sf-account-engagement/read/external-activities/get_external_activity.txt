@@ -1,0 +1,49 @@
+Tool: get_external_activity
+
+Description
+Read a single External Activity by id.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/external-activities/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional).
+
+Result
+externalActivity (object): id, extensionSalesforceId, typeName,
+  prospectId, externalId, value, activityDate, createdAt, updatedAt,
+  createdById, updatedById.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_external_activity({ "id": 4421 })
+
+Example result
+{
+  "externalActivity": {
+    "id": 4421, "typeName": "Webinar Attended", "prospectId": 7745,
+    "externalId": "WEB-2026-04-22-S1",
+    "activityDate": "2026-04-22T15:00:00Z"
+  }
+}

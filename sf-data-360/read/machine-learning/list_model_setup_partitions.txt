@@ -1,0 +1,52 @@
+Tool: list_model_setup_partitions
+
+Description
+List the data partitions associated with a Model Setup Version —
+the dataset slices used for training / validation / testing.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-setups/:modelSetupIdOrName/setup-versions/:modelSetupVersionId/partitions
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+modelSetupIdOrName (string, required).
+modelSetupVersionId (string, required).
+
+Result
+partitions (array) - Each: { id, name, partitionType ("Train" |
+  "Validation" | "Test" | "Holdout"), recordCount, datasetRef,
+  metrics (object) }.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+list_model_setup_partitions({
+  "modelSetupIdOrName": "ChurnModel",
+  "modelSetupVersionId": "MSV_001"
+})
+
+Example result
+{
+  "partitions": [
+    { "id": "P_001", "partitionType": "Train",      "recordCount": 800000 },
+    { "id": "P_002", "partitionType": "Validation", "recordCount": 100000 },
+    { "id": "P_003", "partitionType": "Test",       "recordCount": 100000 }
+  ]
+}

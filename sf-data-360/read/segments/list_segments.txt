@@ -1,0 +1,57 @@
+Tool: list_segments
+
+Description
+List Data 360 Segments — saved population queries against a
+DMO. Each segment can be published to materialize the membership
+list and then activated downstream.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/segments
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataSpace (string, optional, default "default").
+status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
+publishStatus (string, optional) - "Published" | "Publishing" |
+  "Stale" | "NotPublished".
+nameContains (string, optional).
+limit (number, optional, default 100).
+offset (number, optional).
+
+Result
+segments (array) - Each: { id, apiName, label, description, status,
+  publishStatus, dmoApiName, populationCount, schedule,
+  lastPublishedAt, lastPublishStatus, createdDate, lastModifiedDate,
+  createdById }.
+totalSize (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 401 INVALID_SESSION_ID.
+
+Example request
+
+list_segments({ "publishStatus": "Published" })
+
+Example result
+{
+  "segments": [
+    { "id": "0YS580000000001", "apiName": "EMEAHighValue",
+      "label": "EMEA High-value Customers",
+      "publishStatus": "Published", "populationCount": 18420 }
+  ]
+}

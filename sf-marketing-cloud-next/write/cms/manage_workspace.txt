@@ -1,0 +1,81 @@
+Tool: manage_workspace
+
+Description
+Create or update a CMS Workspace (Content Space). Workspaces are
+top-level containers; they can't be deleted via the API (do that in
+Setup if needed). To list workspaces, use `read/cms/list_workspaces`.
+
+Salesforce API
+Connect CMS API.
+
+Endpoint
+POST  {instanceUrl}/services/data/v{ver}/connect/cms/spaces                              (operation="create")
+PATCH {instanceUrl}/services/data/v{ver}/connect/cms/spaces/:contentSpaceOrFolderId      (operation="update")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "name": "marketing_main",
+  "label": "Marketing Main",
+  "description": "Outbound marketing assets",
+  "isDefault": false,
+  "languages": ["en_US","fr_FR"],
+  "channels": ["MarketingCloudNext_Email"]
+}
+
+Body (update)
+{
+  "label": "Marketing — Main",
+  "description": "Outbound marketing emails and templates"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update".
+contentSpaceOrFolderId (string, required for update).
+name (string, required for create) - Developer name (snake_case).
+label (string, required for create).
+description (string, optional).
+isDefault (boolean, optional).
+languages (string[], optional, default ["en_US"]).
+channels (string[], optional) - Channel ids the workspace publishes
+  to (e.g. "MarketingCloudNext_Email").
+
+Result
+workspace (object) - Created / updated row with `id`, `name`,
+  `label`, `channels[]`, `languages[]`.
+
+Required scopes
+- `cms_api`.
+
+Idempotency & limits
+- Idempotent on `name` for create.
+- One default workspace per org; setting a new default unsets the
+  previous default.
+
+Errors
+- 409 DUPLICATE_VALUE (name collision), 400 INVALID_FIELD (unknown
+  channel id), 404 NOT_FOUND (on update).
+
+Example request
+
+manage_workspace({
+  "operation": "create",
+  "name": "marketing_main",
+  "label": "Marketing Main",
+  "channels": ["MarketingCloudNext_Email"]
+})
+
+Example result
+{
+  "workspace": {
+    "id": "0Z0xx0000000001AAA",
+    "name": "marketing_main",
+    "label": "Marketing Main",
+    "channels": ["MarketingCloudNext_Email"],
+    "languages": ["en_US"]
+  }
+}

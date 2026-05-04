@@ -1,0 +1,55 @@
+Tool: get_visitor_page_view
+
+Description
+Read a single Visitor Page View row by id. Page views are the most
+granular tracking record — one row per page hit recorded by the
+Pardot tracking pixel. For aggregated session views, use
+`get_visit`; for cross-channel activity (form submits, email
+clicks, downloads), use `get_visitor_activity`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visitor-page-views/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `visit.*`,
+  `visitor.*`, `prospect.*`, `campaign.*`.
+
+Result
+visitorPageView (object): id, visitId, visitorId, prospectId, url,
+  title, campaignId, durationInSeconds, createdAt.
+visit (object|null), visitor (object|null), prospect (object|null),
+  campaign (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_visitor_page_view({ "id": 22101 })
+
+Example result
+{
+  "visitorPageView": {
+    "id": 22101, "visitId": 11001, "visitorId": 5512001,
+    "prospectId": 7745, "url": "/pricing", "title": "Pricing",
+    "durationInSeconds": 88, "createdAt": "2026-04-29T13:01:11Z"
+  }
+}

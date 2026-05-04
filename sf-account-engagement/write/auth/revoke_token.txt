@@ -1,0 +1,48 @@
+Tool: revoke_token
+
+Description
+Revoke a Salesforce OAuth access or refresh token. Use this when
+rotating credentials or burning a compromised token. After revoke,
+the cached server token is dropped — the next API call will mint a
+fresh token via `refresh_access_token`.
+
+Salesforce API
+Salesforce OAuth 2.0 (`/services/oauth2/revoke`).
+
+Endpoint
+POST https://login.salesforce.com/services/oauth2/revoke
+POST https://test.salesforce.com/services/oauth2/revoke   (sandbox)
+
+Headers
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+Body
+token={accessOrRefreshToken}
+
+Input (parameters)
+token (string, required) - Either an access token or a refresh
+  token (Salesforce determines which).
+sandbox (boolean, optional, default false).
+
+Result
+revoked (boolean) - true on HTTP 200.
+status (number) - HTTP status (200 success).
+
+Required scopes
+- None — the token endpoint is public for revocation.
+
+Idempotency & limits
+- Idempotent: revoking an already-revoked token returns 200.
+
+Errors
+- 400 unsupported_token_type (token was malformed),
+- 401 invalid_token (token already invalid/revoked - some tenants
+  return this instead of 200).
+
+Example request
+
+revoke_token({ "token": "5Aep861KIwKdekT..." })
+
+Example result
+{ "revoked": true, "status": 200 }

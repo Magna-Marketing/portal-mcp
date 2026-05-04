@@ -1,0 +1,49 @@
+Tool: manage_campaign_tags
+
+Description
+Add or remove tags on a Campaign. Tags are free-text labels;
+unknown tag names are auto-created.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST https://{pi-domain}/api/v5/objects/campaigns/:id/do/addTag
+POST https://{pi-domain}/api/v5/objects/campaigns/:id/do/removeTag
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{ "tag": "Welcome 2026" }
+
+Input (parameters)
+id (number, required) - Campaign id.
+operation (string, required) - "add" | "remove".
+tag (string, required) - Tag name (case-insensitive match).
+
+Result
+success (boolean).
+campaignId (number).
+tag (string).
+operation (string).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Idempotent: adding an already-applied tag is a no-op; removing a
+  missing tag is a no-op.
+
+Errors
+- 59 not_found, 53 not_permitted.
+
+Example request
+
+manage_campaign_tags({ "id": 1024, "operation": "add", "tag": "Welcome 2026" })
+
+Example result
+{ "success": true, "campaignId": 1024, "tag": "Welcome 2026", "operation": "add" }

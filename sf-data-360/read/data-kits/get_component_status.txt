@@ -1,0 +1,53 @@
+Tool: get_component_status
+
+Description
+Read the deployment status of a single component within a Data Kit
+(installed / pending / failed / orphaned).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitName/components/:componentName/deployment-status
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+dataKitName (string, required).
+componentName (string, required).
+
+Result
+status (object): dataKitName, componentName, componentType,
+  state ("Installed" | "Pending" | "Failed" | "Orphaned"),
+  installedAt, errorMessage (string|null).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_component_status({
+  "dataKitName": "B2C_Retail_Foundation",
+  "componentName": "Order__dlm"
+})
+
+Example result
+{
+  "status": {
+    "dataKitName": "B2C_Retail_Foundation",
+    "componentName": "Order__dlm",
+    "state": "Installed",
+    "installedAt": "2026-04-01T08:00:00Z"
+  }
+}

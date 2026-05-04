@@ -1,0 +1,46 @@
+Tool: get_private_network_route
+
+Description
+Read a single Private Network Route by id or name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/private-network-routes/:routeIdOrName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+routeIdOrName (string, required).
+
+Result
+route (object): id, name, label, networkType, status, endpoint,
+  vpcEndpointId, region, configuration (object), connectionCount,
+  createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_private_network_route({ "routeIdOrName": "MTG_Snowflake_PL" })
+
+Example result
+{
+  "route": {
+    "id": "0YN580000000001", "name": "MTG_Snowflake_PL",
+    "networkType": "AwsPrivateLink", "status": "Active"
+  }
+}

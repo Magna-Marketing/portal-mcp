@@ -1,0 +1,49 @@
+Tool: get_opportunity
+
+Description
+Read a single Opportunity by id. Cross-reference `salesforceId` to
+pull the matching SFDC `Opportunity` via the Salesforce REST API
+(see sf-core).
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/opportunities/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands campaign.* and audit users.
+
+Result
+opportunity (object): id, name, value, probability, stage, status,
+  closedAt, salesforceId, campaignId, type, prospectIds, isDeleted,
+  createdAt, updatedAt.
+campaign (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_opportunity({ "id": 1101 })
+
+Example result
+{
+  "opportunity": { "id": 1101, "name": "Acme renewal", "value": 50000,
+    "salesforceId": "0065800000xyzABC" }
+}

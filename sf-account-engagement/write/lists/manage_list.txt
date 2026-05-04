@@ -1,0 +1,80 @@
+Tool: manage_list
+
+Description
+Create, update, or delete a List. Static lists hold prospects via
+explicit `manage_list_membership` writes; dynamic lists evaluate
+their `criteria` (Pardot DSL) and recompute hourly.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+POST   https://{pi-domain}/api/v5/objects/lists       (create)
+PATCH  https://{pi-domain}/api/v5/objects/lists/:id   (update)
+DELETE https://{pi-domain}/api/v5/objects/lists/:id   (delete)
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Content-Type: application/json
+Accept: application/json
+
+Body (create static list)
+{
+  "name": "New customers",
+  "description": "Closed-won in last 30 days",
+  "isPublic": true,
+  "isDynamic": false,
+  "isCrmVisible": true,
+  "folderId": 33,
+  "campaignId": 1024,
+  "title": "New customers"
+}
+
+Body (create dynamic list)
+{
+  "name": "MQL EMEA",
+  "isDynamic": true,
+  "criteria": "prospectField.score >= 50 AND prospectField.region__c == 'EMEA'"
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+id (number, required for update / delete).
+name (string, required for create).
+description (string, optional).
+isPublic (boolean, optional, default true).
+isDynamic (boolean, optional, default false).
+isCrmVisible (boolean, optional, default false) - Surface as a SFDC
+  Lead/Contact list view.
+folderId (number, optional).
+campaignId (number, optional).
+title (string, optional).
+criteria (string, optional) - Required for dynamic lists; Pardot's
+  segmentation DSL.
+
+Result
+list (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Soft-delete on lists. Deleted lists drop from list-emails / EE
+  programs that reference them at next send.
+
+Errors
+- 53 not_permitted, 600 invalid_criteria, 59 not_found.
+
+Example request
+
+manage_list({
+  "operation": "create",
+  "name": "New customers",
+  "isPublic": true,
+  "isDynamic": false
+})
+
+Example result
+{ "list": { "id": 301, "name": "New customers", "isDynamic": false } }

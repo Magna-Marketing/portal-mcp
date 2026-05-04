@@ -1,0 +1,63 @@
+Tool: manage_automation
+
+Description
+Create / update / delete an Automation Studio automation. The
+automation includes ordered steps, each with one or more activities.
+For activity-level edits use `manage_automation_activity`.
+
+Marketing Cloud API
+REST API (`/automation/v1/automations`).
+
+Endpoint
+POST   https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations
+PATCH  https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+{
+  "name": "MTG_Nightly_Member_Sync",
+  "description": "Sync members nightly from CRM to MC",
+  "key": "mtg_nightly_member_sync",
+  "categoryId": 12345,
+  "steps": [{
+    "name": "Step 1: Import",
+    "annotation": "Import latest members",
+    "stepNumber": 1,
+    "activities": [{ "name": "Import Members", "objectTypeId": 43, "displayOrder": 1 }]
+  }]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+automationId (string, optional, required for non-create).
+automationKey (string, optional).
+name (string, required for create).
+description (string, optional).
+categoryId (number, optional).
+steps (object[], optional) - Each: { stepNumber, name, annotation, activities: [{ name, objectTypeId, activityObjectId | activityKey, displayOrder }] }.
+
+Result
+automation (object) - { id, key, name, description, status, categoryId, stepCount }.
+
+Required scopes
+- `automations_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- 30002 not found, INVALID_ACTIVITY_TYPE.
+
+Example request
+
+manage_automation({
+  "operation": "create",
+  "name": "MTG_Nightly_Member_Sync",
+  "key": "mtg_nightly_member_sync",
+  "categoryId": 12345,
+  "steps": [{ "stepNumber": 1, "name": "Step 1", "activities": [] }]
+})

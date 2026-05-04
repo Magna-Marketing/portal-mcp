@@ -1,0 +1,44 @@
+Tool: get_data_extension
+
+Description
+Get a single Data Extension by Id, External Key, or name. Returns
+identity, schema (fields), retention policy, sendable settings, and row
+count.
+
+Marketing Cloud API
+SOAP API (`DataExtension.Retrieve` filtered) + `DataExtensionField.Retrieve` for schema.
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on DataExtension + DataExtensionField.
+
+Input (parameters)
+id (string, optional) - DataExtension ObjectID.
+customerKey (string, optional) - External Key.
+name (string, optional).
+  One required.
+includeFields (boolean, optional, default true).
+includeRowCount (boolean, optional, default true).
+
+Result
+dataExtension (object) - Same fields as `list_data_extensions` row, plus:
+  fields (array, when includeFields=true) - [{ name, fieldType ("Text"|"Number"|"Date"|"Boolean"|"EmailAddress"|"Phone"|"Decimal"|"Locale"), maxLength, isPrimaryKey, isRequired, defaultValue, ordinal, scale, customerKey }].
+
+Required scopes
+- `data_extensions_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 30002 not found.
+
+Example request
+
+get_data_extension({ "customerKey": "Members_DE" })

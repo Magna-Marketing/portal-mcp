@@ -1,0 +1,62 @@
+Tool: publish_segment
+
+Description
+Trigger a Segment publish run — re-evaluates the segment criteria
+against the live DMOs and refreshes the membership snapshot. Async:
+returns a `runId`; poll via `get_segment includeRunHistory=true`
+until `status=Success | Failed`.
+
+Salesforce API
+Data Cloud Segmentation API.
+
+Endpoint
+POST {cdpInstanceUrl}/api/v1/segments/:segmentId/actions/publish
+
+Headers
+Authorization: Bearer <data_cloud_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "publishType": "FULL"
+}
+
+Input (parameters)
+segmentId (string, required).
+dataSpace (string, optional, default "default").
+publishType (string, optional, default "FULL") - "FULL" |
+  "INCREMENTAL".
+runIdempotencyKey (string, optional) - Caller-defined key; if a run
+  with the same key is in flight, returns the existing `runId`
+  instead of starting a new run.
+
+Result
+runId (string) - Server-assigned id for the publish run.
+segmentId (string).
+status (string) - "Queued" at submission.
+submittedAt (ISO-8601).
+
+Required scopes
+- `cdp_segment_api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`. Without it, repeated calls
+  while a publish is in flight return `409 JOB_IN_PROGRESS`.
+- 1 in-flight publish per segment.
+
+Errors
+- 404 NOT_FOUND, 409 JOB_IN_PROGRESS, 400 INVALID_FIELD
+  (publishType not allowed for this segment), 401 invalid_token.
+
+Example request
+
+publish_segment({ "segmentId": "SEG_HIGH_VALUE_EMEA" })
+
+Example result
+{
+  "runId": "RUN_2026-04-29T13",
+  "segmentId": "SEG_HIGH_VALUE_EMEA",
+  "status": "Queued",
+  "submittedAt": "2026-04-29T13:02:11Z"
+}

@@ -1,0 +1,55 @@
+Tool: bulk_remove_permissions
+
+Description
+Mass-remove permission sets and / or permission set groups from users
+selected by criteria. Mirrors `bulk_assign_permissions` but issues
+`DELETE` on existing `PermissionSetAssignment` rows.
+
+Salesforce API
+REST API (Data), v66.0.
+- Resolve assignments to delete via SOQL.
+- `DELETE /composite/sobjects?ids=...` in batches of ≤200.
+
+Endpoint
+GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetAssignment WHERE PermissionSetId IN (...) OR PermissionSetGroupId IN (...)
+DELETE /services/data/v66.0/composite/sobjects?ids=...
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None (DELETE).
+
+Input (parameters)
+selection (object, required) - Same as bulk_assign_permissions.
+permissionSetNames (string[], optional).
+permissionSetGroupNames (string[], optional).
+dryRun (boolean, optional, default false).
+batchSize (number, optional, default 200).
+allOrNone (boolean, optional, default false).
+skipIfNotAssigned (boolean, optional, default true).
+
+Result
+selection (object).
+operationCount (number).
+removed (number).
+notAssigned (number).
+failed (number).
+results (array) - Per row: { userId, username, target, status, error }.
+durationMs (number).
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users".
+
+Idempotency & limits
+- Idempotent with `skipIfNotAssigned=true`.
+
+Errors
+- ENTITY_IS_DELETED on already-deleted assignments.
+
+Example request
+
+bulk_remove_permissions({
+  "selection": { "profileNames": ["MTG_Project_Manager_Profile"] },
+  "permissionSetNames": ["Old_VPN_Access"]
+})

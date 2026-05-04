@@ -1,0 +1,44 @@
+Tool: list_knowledge_articles
+
+Description
+List Salesforce Knowledge articles (`KnowledgeArticleVersion`) with
+status (Draft|Online|Archived), language, validation status, and
+categorization. Filter by article type.
+
+Salesforce API
+REST API (Data), v66.0.
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, KnowledgeArticleId, Title, UrlName, ArticleNumber, ArticleType, Language, PublishStatus, ValidationStatus, IsLatestVersion, IsVisibleInPkb, IsVisibleInCsp, IsVisibleInPrm, FirstPublishedDate, LastPublishedDate FROM KnowledgeArticleVersion WHERE PublishStatus IN ('Online','Draft','Archived')
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+articleType (string, optional).
+language (string, optional, default org default).
+status (string|string[], optional) - "Draft" | "Online" | "Archived".
+isLatestVersionOnly (boolean, optional, default true).
+namePattern (string, optional).
+limit (number, optional, default 200).
+
+Result
+totalSize (number).
+articles (array) - { id, knowledgeArticleId, title, urlName, articleNumber, articleType, language, publishStatus, validationStatus, isLatestVersion, isVisibleInPkb, isVisibleInCsp, isVisibleInPrm, firstPublishedDate, lastPublishedDate }.
+
+Required permissions
+- "Read Knowledge".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, KNOWLEDGE_NOT_ENABLED.
+
+Example request
+
+list_knowledge_articles({ "status": "Online", "language": "en_US" })

@@ -1,0 +1,76 @@
+Tool: manage_data_model_object
+
+Description
+Create, update, or delete a Data Model Object. Standard DMOs
+(provided by Data Cloud / packaged Data Kits) cannot be deleted;
+only Custom DMOs are removable.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-model-objects                          (operation="create")
+PATCH  {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName     (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName     (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "developerName": "ExtOrder__dlm",
+  "label": "External Order",
+  "category": "Engagement",
+  "primaryKeyField": "Id__c",
+  "fields": [
+    { "apiName": "Id__c",        "dataType": "TEXT",     "isPrimaryKey": true },
+    { "apiName": "Amount__c",    "dataType": "DECIMAL" },
+    { "apiName": "OrderDate__c", "dataType": "DATE_TIME" }
+  ]
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+dataModelObjectName (string, required for update / delete).
+developerName (string, required for create).
+label (string, required for create).
+category (string, optional, default "Other") - "Profile" |
+  "Engagement" | "Other" | "Account" | "Contact".
+primaryKeyField (string, required for create).
+fields (array, required for create) - [{ apiName, dataType,
+  isPrimaryKey, isExternalId, isRequired, defaultValue, length }].
+
+Result
+dataModelObject (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Standard DMOs error on `delete` with `409 STANDARD_DMO_PROTECTED`.
+- Removing a field on update fails if any mapping uses it; remove
+  the mapping first.
+
+Errors
+- 409 DUPLICATE_VALUE, 409 STANDARD_DMO_PROTECTED, 400 INVALID_FIELD,
+  404 NOT_FOUND.
+
+Example request
+
+manage_data_model_object({
+  "operation": "create",
+  "developerName": "ExtOrder__dlm",
+  "label": "External Order",
+  "category": "Engagement",
+  "primaryKeyField": "Id__c",
+  "fields": [
+    { "apiName": "Id__c",     "dataType": "TEXT", "isPrimaryKey": true },
+    { "apiName": "Amount__c", "dataType": "DECIMAL" }
+  ]
+})
+
+Example result
+{ "dataModelObject": { "developerName": "ExtOrder__dlm", "category": "Engagement" } }

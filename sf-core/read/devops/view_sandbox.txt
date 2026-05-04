@@ -1,0 +1,44 @@
+Tool: view_sandbox
+
+Description
+Get detailed sandbox info: identity, status, source org, refresh
+history, post-copy script class, activation timestamps, host name (if
+provisioned).
+
+Salesforce API
+Tooling API, v66.0. `SandboxInfo` + `SandboxProcess` for refresh
+history.
+
+Endpoint
+GET /services/data/v66.0/tooling/sobjects/SandboxInfo/{id}
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, SandboxInfoId, SandboxName, Status, ActivatedDate, EndDate, LicenseType, CopyArchivedActivities, CopyChatter, Description FROM SandboxProcess WHERE SandboxInfoId = '{id}'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sandboxId (string, optional).
+sandboxName (string, optional).
+  One required.
+includeRefreshHistory (boolean, optional, default true).
+
+Result
+sandbox (object) - { id, sandboxName, licenseType, description, status, autoActivate, copyChatter, historyDays, apexClassId (post-copy), sourceId, templateId, createdBy, createdDate }.
+refreshHistory (array, when includeRefreshHistory=true) - { id, status, activatedDate, endDate, licenseType }.
+
+Required permissions
+- "Manage Sandboxes".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- NOT_FOUND.
+
+Example request
+
+view_sandbox({ "sandboxName": "DEV1" })

@@ -1,0 +1,41 @@
+Tool: list_event_relays
+
+Description
+List Event Relay configurations (forward Salesforce Platform Events to
+AWS EventBridge) with their state, target ARN, and feedback (success
+counts, last error).
+
+Salesforce API
+Tooling API, v66.0. `EventRelayConfig`, `EventRelayFeedback`.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, EventChannel, DestinationResourceName, State FROM EventRelayConfig
+GET /services/data/v66.0/tooling/query/?q=SELECT EventRelayConfigId, RelayedEventCount, FailedEventCount, LastError, LastEventReplayId, LastEventTimestamp FROM EventRelayFeedback
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+state (string, optional) - "Run" | "Stop" | "Failed".
+includeFeedback (boolean, optional, default true).
+
+Result
+totalSize (number).
+eventRelays (array) - Each: { id, developerName, masterLabel, eventChannel, destinationResourceName (AWS ARN), state, feedback (object): { relayedEventCount, failedEventCount, lastError, lastEventReplayId, lastEventTimestamp } }.
+
+Required permissions
+- "View Setup and Configuration" / "Modify All Data".
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+list_event_relays({})

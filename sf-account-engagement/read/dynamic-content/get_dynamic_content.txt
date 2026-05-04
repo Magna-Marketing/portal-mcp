@@ -1,0 +1,58 @@
+Tool: get_dynamic_content
+
+Description
+Read a single Dynamic Content block by id. Returns the
+`baseContent` (default HTML rendered when no variation matches)
+and the parent folder. Pair with `list_dynamic_content_variations`
+to see the per-rule variants.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/dynamic-contents/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `folder.*` and
+  `createdBy.*`/`updatedBy.*`. Includes `baseContent`.
+includeVariations (boolean, optional, default false) - When true,
+  list_dynamic_content_variations is invoked for the same id.
+
+Result
+dynamicContent (object): id, name, folderId, basedOn,
+  basedOnProspectApiFieldId, trackerDomainId, embedCode, embedUrl,
+  baseContent, tagReplacementLanguage, isDeleted, createdAt, updatedAt.
+folder (object|null).
+variations (array, when includeVariations=true) - See
+  `list_dynamic_content_variations` shape.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_dynamic_content({ "id": 41, "includeVariations": true })
+
+Example result
+{
+  "dynamicContent": { "id": 41, "name": "Region greeting", "baseContent": "<p>Hello!</p>" },
+  "variations": [
+    { "id": 92, "comparison": "is", "operator": "EQUAL", "value1": "EMEA",
+      "content": "<p>Bonjour!</p>" }
+  ]
+}

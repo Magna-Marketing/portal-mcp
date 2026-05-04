@@ -1,0 +1,56 @@
+Tool: get_visit
+
+Description
+Read a single Visit (web session) by id with the visitor and
+prospect expanded.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/visits/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `visitor.*`,
+  `prospect.*`, `campaign.*`.
+includePageViews (boolean, optional, default false) - Runs
+  `list_visitor_page_views?visitId=:id`.
+
+Result
+visit (object): id, visitorId, prospectId, visitorPageViewCount,
+  firstVisitorPageViewAt, lastVisitorPageViewAt, durationInSeconds,
+  campaignParameter, sourceParameter, mediumParameter, contentParameter,
+  termParameter, campaignId, createdAt, updatedAt.
+visitor (object|null), prospect (object|null), campaign (object|null).
+pageViews (array, when includePageViews=true).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_visit({ "id": 11001, "includePageViews": true })
+
+Example result
+{
+  "visit": { "id": 11001, "durationInSeconds": 412, "visitorPageViewCount": 5 },
+  "pageViews": [
+    { "id": 22101, "visitId": 11001, "url": "/pricing",
+      "title": "Pricing", "createdAt": "2026-04-29T13:01:11Z" }
+  ]
+}

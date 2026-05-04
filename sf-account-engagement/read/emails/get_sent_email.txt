@@ -1,0 +1,55 @@
+Tool: get_sent_email
+
+Description
+Read a single Email send by id, including the rendered HTML
+(`htmlMessage`) and text (`textMessage`) bodies as the recipient
+saw them. Tokens are already merged.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/emails/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `htmlMessage`,
+  `textMessage`, `user.*`, `createdBy.*`.
+
+Result
+email (object): id, name, subject, htmlMessage, textMessage, type,
+  userId, campaignId, listId, clientType, sentAt, prospectId,
+  listEmailId, emailTemplateId, salesforceCmsId, isOperational,
+  senderOptions, replyToOptions, trackerDomainId, folderId.
+user (object|null), createdBy (object|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only. `htmlMessage`/`textMessage` add ~50KB-200KB to the response.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_sent_email({ "id": 99821 })
+
+Example result
+{
+  "email": {
+    "id": 99821, "name": "Welcome", "subject": "Welcome, Jane",
+    "htmlMessage": "<html>...</html>",
+    "sentAt": "2026-04-29T13:02:11Z",
+    "type": "AutoresponderEmail"
+  }
+}

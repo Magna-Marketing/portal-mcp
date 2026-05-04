@@ -1,0 +1,62 @@
+Tool: deploy_data_kit
+
+Description
+Deploy (install) the components of a Data Kit into the current org.
+Async; the platform creates the underlying DMOs / DLOs / Mappings /
+Calculated Insights / Segments. Poll via `get_component_status`.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitDevName
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body
+{
+  "components": [
+    { "componentName": "Order__dlm" }
+  ],
+  "dataSpace": "default"
+}
+
+Input (parameters)
+dataKitDevName (string, required).
+components (object[], optional) - Subset to deploy. Omit to deploy
+  every component in the kit.
+dataSpace (string, optional, default "default").
+runIdempotencyKey (string, optional).
+
+Result
+deploymentId (string).
+dataKitDevName (string).
+status (string) - "Queued".
+submittedAt (ISO-8601).
+componentCount (number).
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Idempotent on `runIdempotencyKey`.
+- Components already installed are skipped.
+
+Errors
+- 404 NOT_FOUND, 409 DEPLOYMENT_IN_PROGRESS,
+  400 UNRESOLVED_DEPENDENCIES.
+
+Example request
+
+deploy_data_kit({ "dataKitDevName": "MTG_Retail_Foundation" })
+
+Example result
+{
+  "deploymentId": "DEP_DK_2026-04-29T13",
+  "dataKitDevName": "MTG_Retail_Foundation",
+  "status": "Queued",
+  "componentCount": 14
+}

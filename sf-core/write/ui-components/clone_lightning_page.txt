@@ -1,0 +1,55 @@
+Tool: clone_lightning_page
+
+Description
+Clone an existing Lightning Page (FlexiPage) to a new name and label.
+The new page is a faithful copy: same regions, components, properties,
+and visibility rules. The clone has no app/profile assignments — those
+must be added later (`get_page_assignments` to inspect, then
+`add_region_to_page` / Setup UI to assign).
+
+Salesforce API
+Tooling API + Metadata API, v66.0.
+- Read source FlexiPage metadata.
+- Submit a Metadata API `create` for FlexiPage with the new fullName
+  and label.
+
+Endpoint
+GET  /services/data/v66.0/tooling/sobjects/FlexiPage/{id}
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+sourceName (string, required) - Source FlexiPage DeveloperName.
+newName (string, required) - New FlexiPage DeveloperName.
+newLabel (string, required) - Master label.
+newDescription (string, optional).
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+flexiPage (object, on success) - { id, name, label, type, sObject (when
+  RecordPage), region count, component count }.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Not idempotent (fails on duplicate newName).
+
+Errors
+- DUPLICATE_DEVELOPER_NAME.
+- NOT_FOUND on sourceName.
+
+Example request
+
+clone_lightning_page({
+  "sourceName": "Project__c_Record_Page",
+  "newName": "Project__c_Record_Page_Sales",
+  "newLabel": "Project Record - Sales"
+})

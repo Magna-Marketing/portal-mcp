@@ -1,0 +1,60 @@
+Tool: manage_duplicate_rule
+
+Description
+Create / update / activate / deactivate / delete Duplicate Rules and
+their Matching Rules.
+
+Salesforce API
+Metadata API (`DuplicateRule`, `MatchingRule`), v66.0.
+
+Endpoint
+POST /services/data/v66.0/metadata/deployRequest
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+N/A.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
+target (string, required) - "duplicateRule" | "matchingRule".
+sObject (string, required).
+fullName (string, required) - "Account.MTG_Duplicate_Account" or matching rule fullName.
+masterLabel (string, required for create).
+description (string, optional).
+isActive (boolean, optional, default true).
+operationsOnInsert (string[], optional) - For DuplicateRule: ["Allow"|"Block"|"Alert"|"Report"].
+operationsOnUpdate (string[], optional).
+matchingRule (object, optional) - For DuplicateRule create: target matching rule fullName.
+matchEngine (string, optional, only matchingRule) - "Standard" | "Fuzzy".
+ruleFields (array, optional, only matchingRule) - [{ fieldName, matchingMethod ("Exact"|"Fuzzy"|"None"), blankValueBehavior ("MatchBlanks"|"NullNotAllowed") }].
+checkOnly (boolean, optional, default false).
+
+Result
+deploy (object).
+rule (object) - Updated identity.
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD.
+
+Example request
+
+manage_duplicate_rule({
+  "operation": "create",
+  "target": "duplicateRule",
+  "sObject": "Account",
+  "fullName": "Account.MTG_Duplicate_Account",
+  "masterLabel": "MTG Duplicate Account Detection",
+  "isActive": true,
+  "operationsOnInsert": ["Alert", "Report"],
+  "operationsOnUpdate": ["Alert"],
+  "matchingRule": "Standard_Account_Match_Rule_v1_1"
+})

@@ -1,0 +1,41 @@
+Tool: publish_experience_site
+
+Description
+Publish (deploy) the staged content of an Experience site to its live
+URL. Required after editing pages / branding / navigation in
+`ExperienceBundle`.
+
+Salesforce API
+Connect API, v66.0. `/connect/communities/{communityId}/publish`.
+
+Endpoint
+POST /services/data/v66.0/connect/communities/{communityId}/publish
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body
+None.
+
+Input (parameters)
+siteId (string, optional).
+siteName (string, optional).
+  One required.
+notify (string, optional, default "publisher") - "publisher" | "all" - whether to email when complete.
+
+Result
+publication (object) - { siteId, status ("Queued"|"InProgress"|"Succeeded"|"Failed"), submittedAt, completedAt }.
+
+Required permissions
+- "Create and Set Up Experiences" + "Publish Experience Cloud Sites".
+
+Idempotency & limits
+- Not idempotent (each call creates a new publication record).
+
+Errors
+- INSUFFICIENT_ACCESS_OR_READONLY, NOT_FOUND.
+
+Example request
+
+publish_experience_site({ "siteName": "Customer_Hub" })

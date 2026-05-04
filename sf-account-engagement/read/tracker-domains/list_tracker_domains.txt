@@ -1,0 +1,61 @@
+Tool: list_tracker_domains
+
+Description
+List Tracker Domains configured on the BU (vanity domains used to
+serve forms, landing pages, custom redirects, and email click links).
+The `validationStatus` and `sslStatus` fields surface DNS / cert
+health.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/objects/tracker-domains?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+isPrimary (boolean, optional).
+validationStatus (string, optional) - "validated" | "pending" |
+  "not_validated".
+sslStatus (string, optional) - "active" | "pending" | "not_validated".
+isDeleted (boolean, optional, default false).
+fields (string[], optional, default: id,domain,isPrimary,
+  defaultCampaignId,validationStatus,sslStatus,trackingCode,
+  createdAt,updatedAt,createdById,updatedById,isDeleted,
+  vanityUrlStatus,sslStatusDetails).
+limit (number, optional, default 50).
+nextPageToken (string, optional).
+
+Result
+trackerDomains (array) - Each: { id, domain, isPrimary,
+  defaultCampaignId, validationStatus, sslStatus, sslStatusDetails,
+  trackingCode, vanityUrlStatus, isDeleted, createdAt, updatedAt }.
+nextPageToken (string|null).
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 65 invalid_field_projection.
+
+Example request
+
+list_tracker_domains({})
+
+Example result
+{
+  "trackerDomains": [
+    { "id": 7, "domain": "go.magnatech.com", "isPrimary": true,
+      "validationStatus": "validated", "sslStatus": "active" }
+  ]
+}

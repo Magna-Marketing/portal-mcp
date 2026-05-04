@@ -1,0 +1,51 @@
+Tool: list_record_shares
+
+Description
+List `*Share` rows for a record (manual + rule + apex managed sharing). Each row has the user/group sharing target, access level, row cause (Manual, Rule, ImplicitChild, Owner, Team, etc.). Use to debug "why does X have access to record Y?".
+
+Salesforce API
+REST API (Data), v66.0. SOQL on `<sObject>Share` (e.g. `AccountShare`, `OpportunityShare`, `Project__Share`).
+
+Endpoint
+GET /services/data/v66.0/query/?q=SELECT Id, ParentId, UserOrGroupId, AccessLevel, RowCause FROM AccountShare WHERE ParentId = '...'
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, required) - Record's sObject API name.
+recordId (string, required) - 18-char record Id.
+includeUserOrGroupName (boolean, optional, default true) - Resolve UserOrGroupId.
+rowCause (string, optional) - "Manual" | "Rule" | "ImplicitChild" | "Owner" | "Team" | "Territory" | etc.
+limit (number, optional, default 500).
+
+Result
+record (object) - { sObject, recordId, ownerId, ownerName }.
+totalSize (number).
+shares (array) - Each:
+  shareId (string).
+  userOrGroupId (string).
+  userOrGroupType ("User"|"Group"|"Role"|"Queue"|"PartnerUser"|"PortalRole"|...).
+  userOrGroupName (string|null).
+  accessLevel (string) - sObject-specific (e.g. "Read", "Edit", "All", or for Account: "AccountAccessLevel").
+  caseAccessLevel, contactAccessLevel, opportunityAccessLevel (string|null) - For AccountShare.
+  rowCause (string).
+hasMore (boolean).
+
+Required permissions
+- Read on the parent sObject + "View All Data" for full visibility.
+
+Idempotency & limits
+- Read-only.
+- ImplicitChild and Owner rows are managed by the platform; you cannot delete them.
+
+Errors
+- INVALID_TYPE if sObject doesn't have a Share table.
+
+Example request
+
+list_record_shares({ "sObject": "Account", "recordId": "0014Q00000abcDE" })

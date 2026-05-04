@@ -1,0 +1,47 @@
+Tool: get_document_ai_configuration
+
+Description
+Read a single Document AI configuration by id or api name.
+
+Salesforce API
+Connect plane.
+
+Endpoint
+GET {instanceUrl}/services/data/v{ver}/ssot/document-processing/configurations/:idOrApiName
+
+Headers
+Authorization: Bearer <core_access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+idOrApiName (string, required).
+
+Result
+configuration (object): id, apiName, label, documentType, status,
+  schema, targetDmoApiName, extractionRules, sampleDocumentRef,
+  createdDate, lastModifiedDate.
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 404 NOT_FOUND.
+
+Example request
+
+get_document_ai_configuration({ "idOrApiName": "Invoice_Default" })
+
+Example result
+{
+  "configuration": {
+    "apiName": "Invoice_Default",
+    "documentType": "Invoice",
+    "targetDmoApiName": "Invoice__dlm"
+  }
+}

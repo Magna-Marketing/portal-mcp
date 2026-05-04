@@ -1,0 +1,92 @@
+Tool: write_apex
+
+Description
+Create or update an Apex class. Uses the Tooling API
+container/member/save pattern (a `MetadataContainer`, an
+`ApexClassMember` with the new Body, then a synchronous
+`ContainerAsyncRequest` that compiles and saves). On success the class
+is `IsValid=true` and ready to be invoked.
+
+To read existing classes, use `read_apex`. To run anonymous Apex without
+saving, use `execute_anonymous`. For triggers, use `write_apex_trigger`.
+
+Salesforce API
+Tooling API, v66.0.
+- `POST /tooling/sobjects/MetadataContainer` (create container).
+- `POST /tooling/sobjects/ApexClassMember` (create member with new Body).
+- `POST /tooling/sobjects/ContainerAsyncRequest` with `IsCheckOnly=false`.
+- `GET /tooling/sobjects/ContainerAsyncRequest/{id}` polled until `State`
+  is "Completed", "Failed", "Aborted", or "Invalidated".
+
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+POST /services/data/v66.0/tooling/sobjects/ApexClassMember
+POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+Body (per call)
+MetadataContainer:           { "Name": "mcpDeploy_<timestamp>" }
+ApexClassMember (create):    { "MetadataContainerId": "<id>", "ContentEntityId": null, "FullName": "ProjectService", "Body": "public ..." }
+ApexClassMember (update):    { "MetadataContainerId": "<id>", "ContentEntityId": "<existing apexClassId>", "Body": "..." }
+ContainerAsyncRequest:       { "MetadataContainerId": "<id>", "IsCheckOnly": false }
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert".
+name (string, required) - Class name (must equal the class's API name in
+  the source).
+body (string, required) - Full Apex source. Must compile.
+apiVersion (number, optional, default = current org default) - Class
+  ApiVersion (>= 27.0).
+status (string, optional, default "Active") - "Active" | "Inactive".
+checkOnly (boolean, optional, default false) - Compile-only; do not
+  save. Useful for syntax verification.
+runTests (boolean, optional, default false) - Force-run org tests after
+  save. Ignored in production where tests are mandatory.
+testLevel (string, optional, default "NoTestRun" in sandbox,
+  "RunLocalTests" in production) - "NoTestRun" | "RunSpecifiedTests" |
+  "RunLocalTests" | "RunAllTestsInOrg".
+specifiedTests (string[], optional) - When testLevel="RunSpecifiedTests".
+
+Result
+deploy (object):
+  containerId (string).
+  state (string) - "Completed" | "Failed" | "Aborted" | "Invalidated".
+  done (boolean).
+  errorMessage (string|null) - Top-level deploy error.
+  componentSuccesses (array) - Per-class success rows.
+  componentFailures (array) - { problemType, problem, lineNumber,
+    columnNumber, fileName }.
+  symbolTable (object|null) - When successful and SymbolTable computed.
+apexClass (object, when successful) - { id, name, apiVersion, status,
+  isValid, length, lastModifiedDate }.
+
+Required permissions
+- "Author Apex" (also requires the user license to allow Apex authoring;
+  not all licenses do).
+- In production orgs: deploys must include or pass tests achieving 75%+
+  org-wide coverage on the changed classes.
+
+Idempotency & limits
+- `upsert` idempotent on `name`. `create` fails on conflict. `update`
+  fails if class doesn't exist.
+- Class Body up to ~1 MB.
+- Compile errors return `componentFailures` with line/column.
+
+Errors
+- INVALID_FIELD: bad ApiVersion.
+- DEPLOY_FAILED with componentFailures list.
+- INSUFFICIENT_ACCESS_OR_READONLY: caller lacks Author Apex.
+- DEPENDENT_CLASS_INVALID: dependency referenced from this class is broken.
+
+Example request
+
+write_apex({
+  "operation": "upsert",
+  "name": "ProjectService",
+  "apiVersion": 62.0,
+  "body": "public with sharing class ProjectService {\n    public static void doWork() {}\n}\n"
+})

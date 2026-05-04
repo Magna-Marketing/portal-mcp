@@ -1,0 +1,64 @@
+Tool: list_lightning_pages
+
+Description
+List Lightning Pages (FlexiPages) for a specific sObject (or across the
+org). Returns each page's name, label, and type. Use this before drilling
+in with `read_flexipage` / `read_flexipage_detailed`. For a generic
+component search across LWC/Aura/VF/FlexiPage use `search_ui_components`.
+
+Salesforce API
+Tooling API, v66.0. `FlexiPage` sObject.
+
+Endpoint
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, NamespacePrefix, ManageableState FROM FlexiPage [WHERE EntityDefinitionId = '{sObject}'] ORDER BY MasterLabel
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+sObject (string, optional) - Restrict to RecordPage FlexiPages for this
+  sObject API name (e.g. "Account", "Project__c"). Omit to list all
+  pages org-wide.
+type (string|string[], optional) - "RecordPage" | "AppPage" | "HomePage"
+  | "EmbeddedServiceMinView" | "CommApp". Default: all.
+namePattern (string, optional) - Glob filter on DeveloperName.
+includeManaged (boolean, optional, default false).
+limit (number, optional, default 200, max 2000).
+
+Result
+totalSize (number).
+pages (array) - Each:
+  id (string).
+  name (string) - DeveloperName.
+  label (string) - MasterLabel.
+  type (string).
+  sObject (string|null) - Resolved from EntityDefinitionId.
+  namespacePrefix (string|null).
+  manageableState (string).
+
+Required permissions
+- "Customize Application".
+
+Idempotency & limits
+- Read-only; safe to retry.
+
+Errors
+- INVALID_TYPE: bad sObject.
+
+Example request
+
+list_lightning_pages({ "sObject": "Project__c" })
+
+Example result
+
+{
+  "totalSize": 2,
+  "pages": [
+    { "id": "0M04Q00000aBcDef", "name": "Project__c_Record_Page",      "label": "Project Record Page",      "type": "RecordPage", "sObject": "Project__c" },
+    { "id": "0M04Q00000aBcDfg", "name": "Project__c_Record_Page_Sales","label": "Project Record - Sales",   "type": "RecordPage", "sObject": "Project__c" }
+  ]
+}

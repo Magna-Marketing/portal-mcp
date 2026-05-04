@@ -1,0 +1,56 @@
+Tool: get_import
+
+Description
+Read a single Import job. Reports per-batch progress, the resolved
+import settings (campaign, visibility lists, opt-in semantics), and
+an `errorRef` URL to download per-row errors when `state=Complete`
+with `errorCount > 0`.
+
+Salesforce API
+Account Engagement v5 REST API.
+
+Endpoint
+GET https://{pi-domain}/api/v5/imports/:id?fields={fields}
+
+Headers
+Authorization: Bearer <salesforce-access-token>
+Pardot-Business-Unit-Id: <buId>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+id (number, required).
+fields (string[], optional) - Default expands `createdBy.*`,
+  `campaign.*`, `visibilityLists.*`.
+
+Result
+import (object): id, object, operation, state, errorRef,
+  errorCount, batchProgress, campaignId, restoreDeleted,
+  isAllowFieldUpdates, visibility ("public" | "private"),
+  visibilityListIds, isAllowUserToManageProspects,
+  isMatchedOnEmailNotIdsAndCrmId, trackerDomainId, visitorId,
+  createdAt, updatedAt.
+
+Required scopes
+- `pardot_api`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- 59 not_found.
+
+Example request
+
+get_import({ "id": 5512 })
+
+Example result
+{
+  "import": {
+    "id": 5512, "object": "Prospect", "operation": "Upsert",
+    "state": "Complete", "errorCount": 12,
+    "batchProgress": { "totalBatches": 5, "completedBatches": 5 }
+  }
+}

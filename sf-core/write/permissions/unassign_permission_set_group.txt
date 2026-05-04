@@ -1,0 +1,49 @@
+Tool: unassign_permission_set_group
+
+Description
+Remove a permission set group assignment from one or more users. Same
+shape as `unassign_permission_set` but on PSG.
+
+Salesforce API
+REST API (Data), v66.0. Bulk DELETE on `PermissionSetAssignment` rows.
+
+Endpoint
+GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetAssignment WHERE PermissionSetGroupId = '...' AND AssigneeId IN (...)
+DELETE /services/data/v66.0/composite/sobjects?ids=...
+
+Headers
+Authorization: Bearer <access_token>
+
+Body
+None.
+
+Input (parameters)
+groupName (string, optional) - PSG DeveloperName.
+groupId (string, optional) - PSG Id.
+  One required.
+userIds (string[], optional).
+usernames (string[], optional).
+  One required.
+allOrNone (boolean, optional, default false).
+skipIfNotAssigned (boolean, optional, default true).
+
+Result
+group (object).
+results (array) - { userId, username, status ("removed"|"not_assigned"|"failed"), assignmentId, error }.
+summary (object) - { removed, notAssigned, failed, total }.
+
+Required permissions
+- "Assign Permission Sets" + "Manage Users".
+
+Idempotency & limits
+- Idempotent with `skipIfNotAssigned=true`.
+
+Errors
+- ENTITY_IS_DELETED, INVALID_CROSS_REFERENCE_KEY.
+
+Example request
+
+unassign_permission_set_group({
+  "groupName": "MTG_Delivery_Bundle",
+  "usernames": ["jane.doe@magnatech.com"]
+})

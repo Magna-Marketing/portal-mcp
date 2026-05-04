@@ -1,0 +1,104 @@
+Tool: analyze_user_permissions
+
+Description
+For one user, return the full effective permission set: profile baseline
++ direct permission set assignments + permission set group memberships,
+unioned. Includes system permissions, object CRUD/viewAll/modifyAll, and
+(optionally) field-level read/edit. This is the single source of truth
+for "what can this user do today?". Pair with `audit_permissions` to
+flag risk.
+
+Use `analyze_user_permissions_from_groups` if you only want the
+group-derived slice. Use `compare_user_permissions` to diff users.
+
+Salesforce API
+REST API + Tooling, v66.0. Composite of:
+- `User WHERE Id = '<id>'` (profile, license).
+- `Profile.Permissions*` and related `ObjectPermissions`/`FieldPermissions WHERE ParentId = ProfileId`.
+- `PermissionSetAssignment WHERE AssigneeId = '<id>'`.
+- For each PSG/PS in those assignments, the same metadata queries.
+
+Endpoint
+N/A (composite).
+
+Headers
+Authorization: Bearer <access_token>
+Accept: application/json
+
+Body
+None.
+
+Input (parameters)
+userId (string, optional) - 18-char User Id.
+username (string, optional) - User.Username.
+  One of userId or username required.
+includeProfile (boolean, optional, default true) - Include profile-derived
+  permissions in the union.
+includeFieldPermissions (boolean, optional, default false) - Detailed FLS.
+includeApexAccess (boolean, optional, default true) - Include
+  SetupEntityAccess for Apex/VF.
+onlyTrueSystemPerms (boolean, optional, default true).
+
+Result
+user (object) - { id, name, username, email, isActive, profileName,
+  userLicense, profileLicense }.
+sourcing (object):
+  profileSource (string) - Profile DeveloperName.
+  permissionSets (array) - Direct (non-group) assignments: { id, name, label }.
+  permissionSetGroups (array) - { id, developerName, label, status }.
+effective (object):
+  systemPermissions (object) - Map of permission -> true.
+  objectPermissions (array) - { sObject, read, create, edit, delete,
+    viewAll, modifyAll }.
+  fieldPermissions (array, optional) - { sObject, field, read, edit }.
+  apexClassAccess (array, optional) - { id, name }.
+  vfPageAccess (array, optional) - { id, name }.
+sources (object) - For each effective permission, which profile/permset
+  contributed it. Useful for "why does this user have ModifyAllData?".
+  Example: { "ModifyAllData": ["Profile: System Administrator"] }.
+
+Required permissions
+- "View Setup and Configuration" or "Manage Users".
+
+Idempotency & limits
+- Read-only; safe to retry.
+- Heavy when the user has many assignments; expect 0.5–3 s.
+
+Errors
+- NOT_FOUND: user not found / inactive.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+
+Example request
+
+analyze_user_permissions({
+  "username": "jane.doe@magnatech.com",
+  "includeFieldPermissions": false
+})
+
+Example result (truncated)
+
+{
+  "user": {
+    "id": "005Qg0000020aBcDE", "name": "Jane Doe",
+    "username": "jane.doe@magnatech.com", "email": "jane.doe@magnatech.com",
+    "isActive": true, "profileName": "Standard User"
+  },
+  "sourcing": {
+    "profileSource": "Standard_User",
+    "permissionSets": [{ "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager" }],
+    "permissionSetGroups": [{ "id": "0PGQg00000004abAB", "developerName": "MTG_Delivery_Bundle", "label": "MTG Delivery Bundle", "status": "Updated" }]
+  },
+  "effective": {
+    "systemPermissions": { "ApiEnabled": true, "RunReports": true },
+    "objectPermissions": [
+      { "sObject": "Account",     "read": true, "edit": true,  "create": false, "delete": false, "viewAll": false, "modifyAll": false },
+      { "sObject": "Opportunity", "read": true, "edit": true,  "create": true,  "delete": false, "viewAll": false, "modifyAll": false },
+      { "sObject": "Project__c",  "read": true, "edit": true,  "create": true,  "delete": false, "viewAll": false, "modifyAll": false }
+    ]
+  },
+  "sources": {
+    "ApiEnabled": ["Profile: Standard_User", "PermissionSet: MTG_Project_Manager"],
+    "RunReports": ["Profile: Standard_User"],
+    "Project__c.create": ["PermissionSetGroup: MTG_Delivery_Bundle"]
+  }
+}

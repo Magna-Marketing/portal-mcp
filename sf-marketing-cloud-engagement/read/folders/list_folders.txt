@@ -1,0 +1,42 @@
+Tool: list_folders
+
+Description
+List folders (`DataFolder` SOAP / `Category` REST) across any object
+type (Email, Data Extension, Triggered Send, Automation, Asset, etc.).
+Marketing Cloud has separate folder spaces per content type — pass
+`contentType` to scope.
+
+Marketing Cloud API
+SOAP API (`DataFolder.Retrieve`).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP retrieve on DataFolder.
+
+Input (parameters)
+contentType (string, required) - "email" | "dataextension" | "triggered_send" | "automation_run" | "asset" | "list" | "queryactivity" | "filter" | "import" | etc.
+parentFolderId (number, optional).
+namePattern (string, optional).
+
+Result
+totalSize (number).
+folders (array) - { id, customerKey, name, description, contentType, parentFolderId, isActive, isEditable, allowChildren, dateCreated, dateModified }.
+
+Required scopes
+- Varies by `contentType`. Most use `email_read` / `data_extensions_read` / `automations_read`.
+
+Idempotency & limits
+- Read-only.
+
+Errors
+- INVALID_FOLDER_TYPE.
+
+Example request
+
+list_folders({ "contentType": "dataextension" })

@@ -1,0 +1,49 @@
+Tool: manage_list
+
+Description
+Create / update / delete a subscriber list.
+
+Marketing Cloud API
+SOAP API (`List` Create / Update / Delete).
+
+Endpoint
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+
+Headers
+Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
+
+Body
+SOAP Create / Update / Delete on List.
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+listId (number, optional, required for non-create).
+customerKey (string, optional).
+listName (string, required for create).
+description (string, optional).
+type (string, optional, default "Public") - "Public" | "Private" | "Salesforce" | "GlobalUnsubscribe".
+listClassification (string, optional, default "ExactTargetList") - "ExactTargetList" | "PublicationList" | "SuppressionList".
+folderId (number, optional).
+sendClassification (string, optional) - For PublicationList.
+
+Result
+list (object) - { id, customerKey, listName, type, listClassification, folderId }.
+
+Required scopes
+- `list_and_subscribers_write`.
+
+Idempotency & limits
+- update idempotent.
+
+Errors
+- DUPLICATE_VALUE on listName.
+
+Example request
+
+manage_list({
+  "operation": "create",
+  "listName": "Q3_Newsletter",
+  "type": "Public",
+  "listClassification": "ExactTargetList"
+})

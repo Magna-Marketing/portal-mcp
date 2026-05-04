@@ -1,0 +1,71 @@
+Tool: manage_data_transform
+
+Description
+Create, update, or delete a Data Transform. Use PUT for replace-
+update semantics (the v1 API doesn't expose PATCH on data
+transforms).
+
+Salesforce API
+Connect plane.
+
+Endpoint
+POST   {instanceUrl}/services/data/v{ver}/ssot/data-transforms                                  (operation="create")
+PUT    {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId           (operation="update")
+DELETE {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId           (operation="delete")
+
+Headers
+Authorization: Bearer <core_access_token>
+Content-Type: application/json
+Accept: application/json
+
+Body (create)
+{
+  "developerName": "build_unified_individual",
+  "label": "Build Unified Individual",
+  "type": "Batch",
+  "targetObject": "UnifiedIndividual__dlm",
+  "sql": "SELECT Id__c, FirstName__c FROM Contact__dlm",
+  "schedule": { "scheduleType": "Cron", "cronExpression": "0 0 * * * ?" }
+}
+
+Input (parameters)
+operation (string, required) - "create" | "update" | "delete".
+dataTransformNameOrId (string, required for update / delete).
+developerName (string, required for create).
+label (string, required for create).
+type (string, optional, default "Batch") - "Batch" | "Streaming".
+targetObject (string, required for create).
+sql (string, required for create) - ANSI SQL on DMOs / DLOs.
+schedule (object, optional) - Initial schedule (else Manual).
+
+Result
+dataTransform (object) - Created / updated row.
+deleted (boolean, when operation="delete").
+
+Required scopes
+- `api`.
+
+Idempotency & limits
+- Hard delete; in-flight runs are aborted.
+
+Errors
+- 409 DUPLICATE_VALUE, 400 INVALID_QUERY (sql compile error),
+  404 NOT_FOUND.
+
+Example request
+
+manage_data_transform({
+  "operation": "create",
+  "developerName": "build_unified_individual",
+  "label": "Build Unified Individual",
+  "targetObject": "UnifiedIndividual__dlm",
+  "sql": "SELECT Id__c, FirstName__c FROM Contact__dlm"
+})
+
+Example result
+{
+  "dataTransform": {
+    "developerName": "build_unified_individual",
+    "type": "Batch", "status": "Draft"
+  }
+}
