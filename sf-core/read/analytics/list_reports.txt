@@ -2,19 +2,31 @@ Tool: list_reports
 
 Description
 List reports with optional filtering and pagination. Returns name,
-folder, owner, format, last-run timestamp. The Analytics REST list
-endpoint is paginated by `pageToken` (returned in the response when
-there are more results).
+folder, owner, format, last-run timestamp. Uses SOQL on the `Report`
+object via the REST Query resource. The API returns `records`, `done`,
+and `totalSize`; when `done` is false, repeat `GET` on `nextRecordsUrl`
+with the same `Authorization` header until all needed batches are read
+(continuation requests must not include the `q` parameter).
 
 Use `describe_report` for a single report's full metadata, `run_report`
 to execute one synchronously, or `manage_report_instance` to run async.
 
 Salesforce API
-Analytics REST API, v66.0.
-- `GET /analytics/reports?pageToken=...`.
+REST API Query resource, v66.0; SOQL `SELECT` on `Report`. See
+https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query.htm
+and SOQL field list syntax:
+https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_fields.htm
 
 Endpoint
-GET /services/data/v66.0/analytics/reports?pageToken={pageToken}
+GET /services/data/v66.0/query/?q={{soql}}
+
+Example SOQL (filters composed as needed):
+
+SELECT Id, Name, DeveloperName, FolderId, FolderName, OwnerId,
+Owner.Name, Format, LastRunDate, LastModifiedDate, CreatedDate
+FROM Report
+WHERE ...
+ORDER BY Name
 
 Headers
 Authorization: Bearer <access_token>
@@ -24,61 +36,74 @@ Body
 None.
 
 Input (parameters)
-pageToken (string, optional) - Continue from a previous page.
-folderId (string, optional) - Filter to one folder Id (Folder.Id 18-char).
-ownerId (string, optional) - Filter to one User Id.
-namePattern (string, optional) - Glob/substring filter on report name
-  (applied client-side after the API page).
-limitPages (number, optional, default 1, max 50) - How many API pages
-  to traverse before returning. Each page is ~200 reports.
+nextRecordsUrl (string, optional) - Continue from a previous response's
+  `nextRecordsUrl` (e.g. `/services/data/v66.0/query/01gD0000002HU6KIAW-2000`).
+  `GET` that path on the same instance with Bearer auth only—no `q=`
+  (per REST Query pagination).
+folderId (string, optional) - Filter to one folder Id (Report.FolderId).
+ownerId (string, optional) - Filter to one User Id (Report.OwnerId).
+namePattern (string, optional) - Substring filter on report name
+  (SOQL `Name LIKE '%...%'`; escape single quotes in the pattern).
+limitPages (number, optional, default 1, max 50) - How many query
+  result batches to traverse before returning (each batch follows
+  `nextRecordsUrl` until `done` or limit reached).
 
 Result
-reports (array) - Each entry (raw Analytics REST shape):
-  id (string) - Report Id (18-char).
-  name (string).
-  describeUrl (string).
-  instancesUrl (string).
-  folderId (string).
-  folderName (string).
-  ownerId (string).
-  ownerName (string).
-  format (string) - "Tabular" | "Summary" | "Matrix" | "Joined".
-  lastRunDate (string|null).
-  modifiedDate (string).
-  createdDate (string).
-hasNextPage (boolean).
-nextPageToken (string|null).
+totalSize (number) - Same meaning as Query response `totalSize` (size of
+  the full result set, not only the current batch).
+reports (array) - Query `records[]` rows for `Report` (tool-level name):
+  attributes (object).
+  Id (string).
+  Name (string).
+  DeveloperName (string).
+  FolderId (string).
+  FolderName (string).
+  OwnerId (string).
+  Owner (object, optional) - { Name } when selected.
+  Format (string) - "Tabular" | "Summary" | "Matrix" | "Joined".
+  LastRunDate (string|null).
+  LastModifiedDate (string).
+  CreatedDate (string).
+hasMore (boolean) - `!done` from the Query response.
+nextRecordsUrl (string|null) - Same as Query response when `done` is false;
+  omit or null when `done` is true.
 
 Required permissions
 - "API Enabled".
+- User must be allowed to see reports per org sharing (folder/report access).
 
 Idempotency & limits
 - Read-only; safe to retry.
-- API returns up to 200 reports per page.
+- Query batches use the platform batch size (locator suffix often reflects
+  row chunk size, e.g. `...-2000` in docs); follow `nextRecordsUrl` for more.
 
 Errors
-- INVALID_PAGE_TOKEN.
+- MALFORMED_QUERY / INVALID_FIELD on invalid SOQL or field list (see SOQL
+  SELECT reference).
+- INSUFFICIENT_ACCESS_OR_READONLY when `Report` rows are not visible.
 
 Example request
 
-list_reports({ "namePattern": "*Pipeline*", "limitPages": 3 })
+list_reports({ "namePattern": "Pipeline", "limitPages": 3 })
 
 Example result (truncated)
 
 {
+  "totalSize": 42,
   "reports": [
     {
-      "id": "00OQg0000004aBcDE",
-      "name": "Pipeline This Quarter",
-      "folderId": "00lQg0000008abcAB",
-      "folderName": "Sales Reports",
-      "ownerId": "005Qg0000020aBcDE",
-      "ownerName": "Yamin Haji",
-      "format": "Matrix",
-      "lastRunDate": "2026-04-28T18:21:00.000+0000",
-      "modifiedDate": "2026-04-12T16:08:11.000+0000"
+      "attributes": { "type": "Report", "url": "/services/data/v66.0/sobjects/Report/00OQg0000004aBcDE" },
+      "Id": "00OQg0000004aBcDE",
+      "Name": "Pipeline This Quarter",
+      "FolderId": "00lQg0000008abcAB",
+      "FolderName": "Sales Reports",
+      "OwnerId": "005Qg0000020aBcDE",
+      "Owner": { "Name": "Yamin Haji" },
+      "Format": "Matrix",
+      "LastRunDate": "2026-04-28T18:21:00.000+0000",
+      "LastModifiedDate": "2026-04-12T16:08:11.000+0000"
     }
   ],
-  "hasNextPage": false,
-  "nextPageToken": null
+  "hasMore": false,
+  "nextRecordsUrl": null
 }
