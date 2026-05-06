@@ -17,7 +17,7 @@ Tooling API, v66.0.
 - `GET /tooling/sobjects/ApexTrigger/{id}`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=...
+GET /services/data/v66.0/tooling/query/?q=... (use knowledge base to pull up the fields for soql) use soql results to get ApexTrigger id and pass it into next api
 GET /services/data/v66.0/tooling/sobjects/ApexTrigger/{id}
 
 Headers

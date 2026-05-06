@@ -1,12 +1,13 @@
 Tool: list_reports
 
 Description
-List reports with optional filtering and pagination. Returns name,
-folder, owner, format, last-run timestamp. Uses SOQL on the `Report`
-object via the REST Query resource. The API returns `records`, `done`,
-and `totalSize`; when `done` is false, repeat `GET` on `nextRecordsUrl`
-with the same `Authorization` header until all needed batches are read
-(continuation requests must not include the `q` parameter).
+List reports with pagination. Returns report Id, name, folder name,
+description, creator name, and last-run timestamp. Uses SOQL on the
+`Report` object via the REST Query resource. The API returns `records`,
+`done`, and `totalSize`; when
+`done` is false, repeat `GET` on `nextRecordsUrl` until all needed
+batches are read (continuation requests must not include the `q`
+parameter).
 
 Use `describe_report` for a single report's full metadata, `run_report`
 to execute one synchronously, or `manage_report_instance` to run async.
@@ -20,13 +21,10 @@ https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforc
 Endpoint
 GET /services/data/v66.0/query/?q={{soql}}
 
-Example SOQL (filters composed as needed):
+SOQL:
 
-SELECT Id, Name, DeveloperName, FolderId, FolderName, OwnerId,
-Owner.Name, Format, LastRunDate, LastModifiedDate, CreatedDate
+SELECT Id,Name,FolderName,Description,CreatedBy.Name,LastRunDate
 FROM Report
-WHERE ...
-ORDER BY Name
 
 Headers
 Authorization: Bearer <access_token>
@@ -40,10 +38,6 @@ nextRecordsUrl (string, optional) - Continue from a previous response's
   `nextRecordsUrl` (e.g. `/services/data/v66.0/query/01gD0000002HU6KIAW-2000`).
   `GET` that path on the same instance with Bearer auth only—no `q=`
   (per REST Query pagination).
-folderId (string, optional) - Filter to one folder Id (Report.FolderId).
-ownerId (string, optional) - Filter to one User Id (Report.OwnerId).
-namePattern (string, optional) - Substring filter on report name
-  (SOQL `Name LIKE '%...%'`; escape single quotes in the pattern).
 limitPages (number, optional, default 1, max 50) - How many query
   result batches to traverse before returning (each batch follows
   `nextRecordsUrl` until `done` or limit reached).
@@ -55,15 +49,10 @@ reports (array) - Query `records[]` rows for `Report` (tool-level name):
   attributes (object).
   Id (string).
   Name (string).
-  DeveloperName (string).
-  FolderId (string).
   FolderName (string).
-  OwnerId (string).
-  Owner (object, optional) - { Name } when selected.
-  Format (string) - "Tabular" | "Summary" | "Matrix" | "Joined".
+  Description (string|null).
+  CreatedBy (object) - { attributes, Name }.
   LastRunDate (string|null).
-  LastModifiedDate (string).
-  CreatedDate (string).
 hasMore (boolean) - `!done` from the Query response.
 nextRecordsUrl (string|null) - Same as Query response when `done` is false;
   omit or null when `done` is true.
@@ -84,7 +73,7 @@ Errors
 
 Example request
 
-list_reports({ "namePattern": "Pipeline", "limitPages": 3 })
+list_reports({ "limitPages": 3 })
 
 Example result (truncated)
 
@@ -95,13 +84,16 @@ Example result (truncated)
       "attributes": { "type": "Report", "url": "/services/data/v66.0/sobjects/Report/00OQg0000004aBcDE" },
       "Id": "00OQg0000004aBcDE",
       "Name": "Pipeline This Quarter",
-      "FolderId": "00lQg0000008abcAB",
       "FolderName": "Sales Reports",
-      "OwnerId": "005Qg0000020aBcDE",
-      "Owner": { "Name": "Yamin Haji" },
-      "Format": "Matrix",
-      "LastRunDate": "2026-04-28T18:21:00.000+0000",
-      "LastModifiedDate": "2026-04-12T16:08:11.000+0000"
+      "Description": "How many activities are my users completing?",
+      "CreatedBy": {
+        "attributes": {
+          "type": "User",
+          "url": "/services/data/v66.0/sobjects/User/0051I000000V696QAC"
+        },
+        "Name": "Peyton Smith"
+      },
+      "LastRunDate": "2026-04-28T18:21:00.000+0000"
     }
   ],
   "hasMore": false,
