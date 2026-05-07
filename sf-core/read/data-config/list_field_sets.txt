@@ -6,11 +6,11 @@ list of fields used in Visualforce, LWC, and Apex to drive dynamic UIs
 without code changes.
 
 Salesforce API
-REST API + Metadata API, v66.0. Returned in `describe_object` under `fieldSets[]`; this tool surfaces them across many sObjects.
+Tooling API + Metadata API, v66.0. Tooling API lists FieldSet records across sObjects; Metadata API returns the fields inside each FieldSet.
 
 Endpoint
-GET /services/data/v66.0/sobjects/{sObject}/describe                              (extract `fieldSets`)
-POST /services/Soap/m/66.0   (readMetadata FieldSet)
+GET /services/data/v66.0/tooling/query?q=SELECT Id, DeveloperName, EntityDefinitionId FROM FieldSet
+POST /services/Soap/m/66.0   (readMetadata FieldSet, when includeFields=true)
 
 Headers
 Authorization: Bearer <access_token>

@@ -8,7 +8,7 @@ Salesforce API
 Tooling API + Metadata API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, MasterLabel, DeveloperName, Description, Sorted, Standard FROM GlobalValueSet
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName,Description,MasterLabel FROM GlobalValueSet
 POST /services/Soap/m/66.0    (readMetadata GlobalValueSet for values)
 
 Headers

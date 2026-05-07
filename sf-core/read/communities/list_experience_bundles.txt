@@ -1,4 +1,6 @@
-Tool: list_experience_bundles
+Tool: list_experience_bundles //not needed
+
+Error encountered: 'ExperienceBundle' is not supported. 
 
 Description
 List `ExperienceBundle` records — the static-resource backed source for

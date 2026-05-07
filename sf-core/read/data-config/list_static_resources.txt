@@ -10,7 +10,7 @@ Salesforce API
 Tooling API, v66.0. `StaticResource` sObject.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ContentType, BodyLength, CacheControl, Description, ManageableState, LastModifiedDate FROM StaticResource
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ContentType, BodyLength, CacheControl, Description, LastModifiedDate FROM StaticResource
 
 Headers
 Authorization: Bearer <access_token>

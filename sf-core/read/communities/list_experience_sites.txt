@@ -9,7 +9,7 @@ Salesforce API
 REST API + Connect API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, UrlPathPrefix, Status, OptionsHttps, Description, CreatedDate FROM Network
+GET /services/data/v66.0/query/?q=SELECT Id, Name, UrlPathPrefix, Status, Description, CreatedDate FROM Network
 GET /services/data/v66.0/connect/communities                                  (richer Connect API view)
 
 Headers

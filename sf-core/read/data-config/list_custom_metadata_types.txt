@@ -10,7 +10,7 @@ Salesforce API
 Tooling API + REST API, v66.0. SOQL on `EntityDefinition` filtered to `IsCustomMetadataType=true`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, NamespacePrefix, ManageableState FROM EntityDefinition WHERE IsCustomMetadataType = true
+GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, NamespacePrefix FROM EntityDefinition
 GET /services/data/v66.0/sobjects/{cmtName}/describe                       (per CMT for fields)
 GET /services/data/v66.0/query/?q=SELECT COUNT() FROM {cmtName}            (record count)
 

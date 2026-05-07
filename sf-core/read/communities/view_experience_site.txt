@@ -9,7 +9,6 @@ Connect API, v66.0. `/connect/communities/{communityId}`.
 
 Endpoint
 GET /services/data/v66.0/connect/communities/{communityId}
-GET /services/data/v66.0/connect/communities/{communityId}/membership
 
 Headers
 Authorization: Bearer <access_token>
@@ -25,7 +24,6 @@ siteName (string, optional).
 
 Result
 site (object) - { id, name, description, urlPathPrefix, status, siteUrl, template, allowMembersToFlag, contentVisibility }.
-membership (object) - { profiles: [{ profileId, name }], permissionSets: [{ id, name }], hasAccessToInternalUsers (boolean) }.
 
 Required permissions
 - "Create and Set Up Experiences".

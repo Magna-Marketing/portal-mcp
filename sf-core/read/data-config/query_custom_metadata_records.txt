@@ -9,8 +9,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL on `<CMT>__mdt`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT ... FROM {cmtName}__mdt
-
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel FROM {cmtName}__mdt
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
