@@ -15,6 +15,7 @@ Headers
 Authorization: Bearer <access_token>
 Accept: <content type>
 
+
 Body
 None.
 
