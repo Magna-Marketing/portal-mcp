@@ -12,7 +12,7 @@ Salesforce API
 Tooling API, v66.0. Backed by `FlowDefinition` and `Flow` sObjects.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT ... FROM FlowDefinition WHERE ...
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, ActiveVersionId FROM FlowDefinition
 
 Headers
 Authorization: Bearer <access_token>

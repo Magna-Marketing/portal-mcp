@@ -19,7 +19,6 @@ For all picklist fields on a record type at once:
 
 Endpoint
 GET https://{instance}.my.salesforce.com/services/data/v66.0/ui-api/object-info/{sObject}/picklist-values/{recordTypeId}/{field}
-GET https://{instance}.my.salesforce.com/services/data/v66.0/ui-api/object-info/{sObject}/picklist-values/{recordTypeId}
 
 Headers
 Authorization: Bearer <access_token>

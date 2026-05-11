@@ -8,7 +8,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL on `BrandTemplate`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, IsActive, Description FROM BrandTemplate
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description FROM EnhancedLetterhead
 
 Headers
 Authorization: Bearer <access_token>
