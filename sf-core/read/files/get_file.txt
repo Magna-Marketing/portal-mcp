@@ -9,7 +9,7 @@ Salesforce API
 REST API (Data) + Connect API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/sobjects/ContentDocument/{id}
+GET /services/data/v66.0/sobjects/ContentDocument/{contentDocumentId}
 GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, VersionNumber, Title, FileExtension, ContentSize, FileType, IsLatest, CreatedDate, ContentModifiedDate FROM ContentVersion WHERE ContentDocumentId = '...' ORDER BY VersionNumber DESC
 GET /services/data/v66.0/query/?q=SELECT Id, LinkedEntityId, LinkedEntity.Name, ShareType, Visibility FROM ContentDocumentLink WHERE ContentDocumentId = '...'
 GET /services/data/v66.0/connect/files/{contentDocumentId}                              (Chatter Connect detail)

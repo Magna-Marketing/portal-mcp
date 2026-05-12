@@ -8,7 +8,7 @@ Salesforce API
 REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, TalkingAbout, NetworkId, CreatedDate, SystemModstamp FROM Topic
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, TalkingAbout, NetworkId, CreatedDate, SystemModstamp, ManagedTopicType FROM Topic
 
 Headers
 Authorization: Bearer <access_token>

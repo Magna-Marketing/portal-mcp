@@ -9,7 +9,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL on `Attachment`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, ParentId, Parent.Type, Name, ContentType, BodyLength, OwnerId, Owner.Name, IsPrivate, Description, CreatedDate FROM Attachment
+GET /services/data/v66.0/query/?q=SELECT OwnerId,ParentId, Name, ContentType, BodyLength,Body,Description,IsPrivate FROM Attachment
 
 Headers
 Authorization: Bearer <access_token>

@@ -12,7 +12,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL aggregate via `GET /query`.
 
 Endpoint
-GET https://{instance}.my.salesforce.com/services/data/v66.0/query/?q={SOQL}
+GET https://{instance}.my.salesforce.com/services/data/v66.0/query/?q={{soql}}&groupBy=&having=&limit=
 
 Headers
 Authorization: Bearer <access_token>

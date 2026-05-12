@@ -10,7 +10,7 @@ Tooling API, v66.0. SOQL on `ApexClass` body parsed for the
 `@RestResource` annotation.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, Body, ApiVersion, Status FROM ApexClass WHERE Body LIKE '%@RestResource%'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, Body, ApiVersion, Status,BodyCrc,IsValid,LengthWithoutComments,NamespacePrefix FROM ApexClass
 
 Headers
 Authorization: Bearer <access_token>

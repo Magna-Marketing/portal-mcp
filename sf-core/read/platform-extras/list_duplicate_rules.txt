@@ -9,7 +9,7 @@ Salesforce API
 Tooling API + Metadata API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, IsActive, SobjectType, OperationsOnInsert, OperationsOnUpdate FROM DuplicateRule
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, IsActive, Language, LastViewedDate, NamespacePrefix, SobjectSubtype, sObjectType FROM DuplicateRule
 GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, SobjectType, RuleStatus, MatchEngine FROM MatchingRule
 
 Headers

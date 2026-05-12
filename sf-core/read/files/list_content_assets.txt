@@ -9,7 +9,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL on `ContentAsset`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, IsVisibleByExternalUsers, NamespacePrefix, FileExtension, ContentDocumentId FROM ContentAsset
+GET /services/data/v66.0/query/?q=SELECT ContentDocumentId, DeveloperName, IsVisibleByExternalUsers, Language, MasterLabel, NamespacePrefix FROM ContentAsset
 
 Headers
 Authorization: Bearer <access_token>

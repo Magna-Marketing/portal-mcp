@@ -8,7 +8,7 @@ Salesforce API
 Analytics REST API, v66.0. `/analytics/notifications?source=dashboard`.
 
 Endpoint
-GET /services/data/v66.0/analytics/notifications?source=dashboard
+GET /services/data/v66.0/analytics/notifications?source=lightningDashboardSubscribe
 
 Headers
 Authorization: Bearer <access_token>

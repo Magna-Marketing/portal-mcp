@@ -10,7 +10,7 @@ Salesforce API
 REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, LinkedEntityId, LinkedEntity.Name, LinkedEntity.Type, ShareType, Visibility, IsDeleted, ContentDocument.Title FROM ContentDocumentLink WHERE ContentDocumentId = '...' OR LinkedEntityId = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, LinkedEntityId, ShareType,Visibility FROM ContentDocumentLink WHERE ContentDocumentId='{{contentDocumentId}}'
 
 Headers
 Authorization: Bearer <access_token>

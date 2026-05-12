@@ -9,7 +9,7 @@ Salesforce API
 Tooling API + REST API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel FROM EntityDefinition WHERE IsCustomBigObject = true
+GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, Description FROM EntityDefinition WHERE QualifiedApiName LIKE '%25__b' LIMIT 100
 GET /services/data/v66.0/sobjects/{name}/describe
 
 Headers

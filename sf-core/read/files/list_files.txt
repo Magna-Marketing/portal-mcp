@@ -11,7 +11,7 @@ REST API (Data) + Connect API, v66.0. SOQL on `ContentDocument`,
 `ContentDocumentLink`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Title, FileType, FileExtension, ContentSize, ContentModifiedDate, OwnerId, Owner.Name, ParentId, LatestPublishedVersionId, IsArchived FROM ContentDocument
+GET /services/data/v66.0/query/?q=SELECT Id, Title, FileType, FileExtension, ContentSize, ContentSizeLong, Description, IsInternalOnly,LastReferencedDate, LastViewedDate, LatestPublishedVersionId, SharingPrivacy, SharingOption, PublishStatus, ContentAssetId,  ContentModifiedDate, OwnerId, Owner.Name, ParentId, IsArchived,ArchivedById  FROM ContentDocument
 GET /services/data/v66.0/query/?q=SELECT ContentDocumentId, LinkedEntityId, ShareType, Visibility FROM ContentDocumentLink WHERE LinkedEntityId = '...'
 
 Headers

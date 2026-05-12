@@ -9,7 +9,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL on `ContentDistribution`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, ContentVersionId, Name, DistributionPublicUrl, ExpiryDate, RelatedRecordId, PasswordRequired, ViewCount, CreatedDate, LastViewDate FROM ContentDistribution
+GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, ContentVersionId, Name, DistributionPublicUrl, ExpiryDate, FirstViewDate , LastViewDate,  OwnerId, PdfDownloadUrl, Password, PreferencesAllowOriginalDownload ,PreferencesAllowPDFDownload, PreferencesAllowViewInBrowser, PreferencesExpires, PreferencesLinkLatestVersion,PreferencesNotifyOnVisit,PreferencesNotifyRndtnComplete, PreferencesPasswordRequired,RelatedRecordId, ViewCount,ContentDownloadUrl FROM ContentDistribution
 
 Headers
 Authorization: Bearer <access_token>

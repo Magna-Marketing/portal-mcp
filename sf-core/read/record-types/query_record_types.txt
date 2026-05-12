@@ -19,7 +19,7 @@ REST API (Data) + Tooling API, v66.0.
   `Tooling SOQL` against `RecordType` joined with describe layouts.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, SobjectType, IsActive, BusinessProcessId, Description FROM RecordType WHERE ...
+GET //services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, IsActive,Description,NamespacePrefix,SobjectType FROM RecordType WHERE SObjectType='{{sObject}}'
 GET /services/data/v66.0/sobjects/{sObject}/describe                  (recordTypeInfos)
 GET /services/data/v66.0/tooling/query/?q=SELECT Profile.Name, RecordType.SobjectType, RecordType.DeveloperName, Visible, Default FROM ProfileRecordTypeVisibility   (or composite)
 

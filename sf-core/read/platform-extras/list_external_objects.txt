@@ -9,7 +9,7 @@ Salesforce API
 REST API + Tooling, v66.0. SOQL/EntityDefinition.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, ExternalDataSourceId, ExternalDataSource.DeveloperName, ExternalName FROM EntityDefinition WHERE IsExternallyVisible = true AND ExternalDataSourceId != null
+GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, Description FROM EntityDefinition WHERE QualifiedApiName LIKE '%25__e' LIMIT 100
 
 Headers
 Authorization: Bearer <access_token>

@@ -1,4 +1,4 @@
-Tool: list_reporting_snapshots //low priority
+Tool: list_reporting_snapshots //low priority and needs to be revisited later
 
 Description
 List Reporting Snapshots (`AnalyticSnapshot`): scheduled report runs

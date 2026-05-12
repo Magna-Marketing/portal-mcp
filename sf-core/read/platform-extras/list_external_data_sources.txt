@@ -10,7 +10,7 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Endpoint, Type, Protocol, Repository, ManageableState, NamespacePrefix FROM ExternalDataSource
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Endpoint, Type, Protocol, Repository, ManageableState, NamespacePrefix,AuthProviderId,CustomConfiguration, isWritable, Language, NamedCredentialId, PrincipalType FROM ExternalDataSource
 
 Headers
 Authorization: Bearer <access_token>
