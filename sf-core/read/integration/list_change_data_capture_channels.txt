@@ -5,12 +5,10 @@ List Change Data Capture channels and the sObjects enabled on each.
 Default org channel `ChangeEvents` is shown plus any custom CDC channels.
 
 Salesforce API
-Tooling API + Metadata API, v66.0.
+Tooling API, v66.0.
 
 Endpoint
 GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ChannelType FROM PlatformEventChannel WHERE ChannelType = 'data'
-GET /services/data/v66.0/tooling/query/?q=SELECT EventChannelId, SelectedEntity, EnrichedFields FROM PlatformEventChannelMember WHERE EventChannel.ChannelType = 'data'
-POST /services/Soap/m/66.0    (readMetadata PlatformEventSubscriberConfig for default channel)
 
 Headers
 Authorization: Bearer <access_token>

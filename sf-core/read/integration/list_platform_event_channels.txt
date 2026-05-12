@@ -5,11 +5,10 @@ List Platform Event channels (custom channels that bundle Platform
 Events for streaming) and their members.
 
 Salesforce API
-Tooling API, v66.0. `PlatformEventChannel`, `PlatformEventChannelMember`.
+Tooling API, v66.0. `PlatformEventChannelMember`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ChannelType FROM PlatformEventChannel WHERE ChannelType = 'event'
-GET /services/data/v66.0/tooling/query/?q=SELECT EventChannelId, EventChannel.DeveloperName, SelectedEntity, FilterExpression FROM PlatformEventChannelMember
+GET /services/data/v66.0/tooling/query/?q=SELECT EventChannel, SelectedEntity, FilterExpression FROM PlatformEventChannelMember
 
 Headers
 Authorization: Bearer <access_token>
@@ -24,7 +23,7 @@ includeMembers (boolean, optional, default true).
 
 Result
 totalSize (number).
-platformEventChannels (array) - { id, developerName, masterLabel, channelType "event", members: [{ selectedEntity, filterExpression }] }.
+records (array) - { id, developerName, masterLabel, channelType "event", members: [{ selectedEntity, filterExpression }] }.
 
 Required permissions
 - "Customize Application".

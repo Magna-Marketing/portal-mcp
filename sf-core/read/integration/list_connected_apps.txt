@@ -9,7 +9,7 @@ Salesforce API
 Tooling API + Metadata API, v66.0. `ConnectedApplication`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, CreatedDate, OptionsAllowAdminApprovedUsersOnly FROM ConnectedApplication
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, CreatedDate, OptionsAllowAdminApprovedUsersOnly FROM ConnectedApplication
 POST /services/Soap/m/66.0   (readMetadata ConnectedApp for full XML)
 
 Headers

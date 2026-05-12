@@ -6,11 +6,10 @@ AWS EventBridge) with their state, target ARN, and feedback (success
 counts, last error).
 
 Salesforce API
-Tooling API, v66.0. `EventRelayConfig`, `EventRelayFeedback`.
+Tooling API, v66.0. `EventRelayConfig`.
 
 Endpoint
 GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, EventChannel, DestinationResourceName, State FROM EventRelayConfig
-GET /services/data/v66.0/tooling/query/?q=SELECT EventRelayConfigId, RelayedEventCount, FailedEventCount, LastError, LastEventReplayId, LastEventTimestamp FROM EventRelayFeedback
 
 Headers
 Authorization: Bearer <access_token>

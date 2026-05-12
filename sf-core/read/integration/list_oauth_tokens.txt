@@ -1,15 +1,15 @@
 Tool: list_oauth_tokens
 
 Description
-List active OAuth tokens (`OauthToken`): which user, which app, when
-issued, last used, and what scopes they hold. Use to audit / revoke
-stale tokens (`revoke_oauth_token`).
+List active OAuth tokens (`OauthToken`): which user, which app, last
+used time, and use count. Use to audit / revoke stale tokens
+(`revoke_oauth_token`). Fields returned follow the SOQL SELECT.
 
 Salesforce API
 REST API (Data), v66.0. SOQL on `OauthToken`.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, AppName, AppMenuItemId, UserId, User.Username, CreatedDate, LastUsedDate, Scopes, UseCount, DeleteToken FROM OauthToken
+GET /services/data/v66.0/query/?q=SELECT Id, UserId, AppName, LastUsedDate, UseCount FROM OauthToken ORDER BY LastUsedDate DESC
 
 Headers
 Authorization: Bearer <access_token>
@@ -26,8 +26,10 @@ sinceLastUsedHours (number, optional) - Only tokens used in the last N hours.
 limit (number, optional, default 500).
 
 Result
-totalSize (number).
-tokens (array) - { id, appName, userId, username, createdDate, lastUsedDate, scopes (string[]), useCount }.
+Standard REST query response body for this call:
+- totalSize (number) - total matching rows for the query.
+- done (boolean) - whether the query is complete (no further pages).
+- records (array) - each record: attributes { type ("OauthToken"), url (string) }, Id, UserId, AppName, LastUsedDate, UseCount (additional fields appear if included in the SELECT).
 
 Required permissions
 - "Manage Connected Apps" + "Manage Users".

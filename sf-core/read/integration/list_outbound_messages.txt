@@ -1,16 +1,16 @@
 Tool: list_outbound_messages
 
 Description
-List Outbound Messages (`OutboundMessage` Metadata, the SOAP-style
-webhook mechanism wired to workflow rules). Each entry shows the target
-endpoint URL, fields included, and integration user used to sign the
-message.
+List Outbound Message definitions from Tooling API (`WorkflowOutboundMessage`):
+each row is Id, human-readable Name, and EntityDefinitionId (the sObject
+the message is tied to). For endpoint URL, fields payload, and integration
+user, use Metadata API read on `Workflow` / outbound message metadata.
 
 Salesforce API
-Metadata API (`Workflow.outboundMessages`), v66.0.
+Tooling API, v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0   (readMetadata Workflow per sObject; outbound messages are inside)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, EntityDefinitionId FROM WorkflowOutboundMessage
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,14 +20,17 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional).
 namePattern (string, optional).
-includeFailures (boolean, optional, default false) - Include `OutboundMessageDelivery` failure rows when available.
+limit (number, optional, default 500).
 
 Result
-totalSize (number).
-outboundMessages (array) - { sObject, fullName, name, endpointUrl, integrationUserId, integrationUserName, fields (string[]), apiVersion, includeSessionId, useDeadLetterQueue, protected }.
-failures (array, optional).
+Standard Tooling query response body:
+- size (number) - count of records in this response.
+- totalSize (number) - total matching rows for the query.
+- done (boolean) - whether the query is complete (no further pages).
+- queryLocator (string|null) - cursor for next batch when paginated; null when done.
+- entityTypeName (string) - "WorkflowOutboundMessage".
+- records (array) - each record: attributes { type ("WorkflowOutboundMessage"), url (string) }, Id, Name, EntityDefinitionId (additional fields appear if included in the SELECT).
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -40,4 +43,4 @@ Errors
 
 Example request
 
-list_outbound_messages({ "sObjects": ["Opportunity"] })
+list_outbound_messages({})

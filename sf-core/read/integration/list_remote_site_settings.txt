@@ -24,7 +24,7 @@ namePattern (string, optional).
 
 Result
 totalSize (number).
-remoteSites (array) - { id, name, endpointUrl, isActive, disableProtocolSecurity, namespacePrefix, description }.
+records (array) - { id, name, endpointUrl, isActive, disableProtocolSecurity, namespacePrefix, description }.
 
 Required permissions
 - "Customize Application".
