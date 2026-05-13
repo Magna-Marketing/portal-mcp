@@ -12,7 +12,6 @@ Tooling API, v66.0. `LightningComponentBundle` +
 `LightningComponentResource` (Source field).
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed FROM LightningComponentBundle WHERE DeveloperName LIKE '...'
 GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId IN (...)
 
 Headers

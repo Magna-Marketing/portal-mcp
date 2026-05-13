@@ -1,19 +1,19 @@
 Tool: analyze_object_ui_usage
 
 Description
-For a given sObject, enumerate every Lightning Page that targets it, and
-across those pages list every UI component (LWC, Aura, VF, standard
-Lightning) with how many times it appears. Use to inventory the entire
-UI surface area of an object before a refactor or rebrand.
+For a given sObject, query `FlexiPage` record pages that target that object.
+Use `Type = 'RecordPage'` and `EntityDefinition.QualifiedApiName = '{sObject}'`
+in the `WHERE` condition. The first API call returns matching FlexiPage
+records; use each record Id to read FlexiPage metadata and inspect the UI
+components on that object page.
 
 Salesforce API
 Tooling API, v66.0.
-- `FlexiPage WHERE EntityDefinitionId.QualifiedApiName = '{sObject}'`.
+- `FlexiPage WHERE Type = 'RecordPage' AND EntityDefinition.QualifiedApiName = '{sObject}'`.
 - For each FlexiPage, parse `Metadata.flexiPageRegions[].itemInstances`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type FROM FlexiPage WHERE EntityDefinition.QualifiedApiName = '{sObject}'
-GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}     (per page)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId FROM FlexiPage WHERE Type = 'RecordPage' AND EntityDefinition.QualifiedApiName = '{sObject}'
 
 Headers
 Authorization: Bearer <access_token>
@@ -28,21 +28,18 @@ includeStandardComponents (boolean, optional, default true).
 includeRelatedListsAsRefs (boolean, optional, default true).
 
 Result
-sObject (string).
-pages (array) - Each:
-  id, name, label, type, isOrgDefault.
-  componentCount (number).
-componentsAcrossPages (array) - Each:
-  componentName (string) - "c:projectCard", "lightning:relatedList", etc.
-  type (string) - "lwc" | "aura" | "standardLightning" | "standardForce" | "facet".
-  isCustom (boolean).
-  totalUsages (number) - Across all pages targeting this sObject.
-  pages (array) - { pageName, region, identifier }.
-summary (object):
-  totalPages (number).
-  totalUniqueComponents (number).
-  totalCustomComponents (number).
-  totalUsages (number).
+size (number).
+totalSize (number).
+done (boolean).
+queryLocator (string|null).
+entityTypeName (string) - "FlexiPage".
+records (array) - Each FlexiPage record:
+  attributes (object) - { type, url }.
+  Id (string).
+  DeveloperName (string).
+  MasterLabel (string).
+  Type (string) - "RecordPage".
+  EntityDefinitionId (string|null).
 
 Required permissions
 - "Customize Application".

@@ -2,7 +2,7 @@ Tool: search_ui_components
 
 Description
 Search UI components by name pattern across all component types
-(`LightningComponentBundle`, `AuraDefinitionBundle`, `ApexPage`,
+(`LightningComponentResource`, `AuraDefinitionBundle`, `ApexPage`,
 `FlexiPage`). Supports `*` and `?` wildcards. Use to discover candidates
 when you don't know whether something is an LWC vs Aura vs VF page.
 
@@ -11,10 +11,16 @@ specifically (record/app/home pages) use `list_lightning_pages`.
 
 Salesforce API
 Tooling API, v66.0. Multiple SOQL queries unioned by the MCP layer.
+The SOQL in the `q` parameter must be URL-encoded when testing directly.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT ... FROM LightningComponentBundle WHERE DeveloperName LIKE '...'
-... (one query per sObject)
+GET /services/data/v66.0/tooling/query/?q=SELECT%20Id%2C%20FilePath%2C%20Format%2C%20LightningComponentBundleId%20FROM%20LightningComponentResource%20WHERE%20FilePath%20LIKE%20%27%25Card%25%27%20LIMIT%20200
+GET /services/data/v66.0/tooling/query/?q=SELECT%20Id%2C%20DeveloperName%2C%20MasterLabel%2C%20ApiVersion%2C%20NamespacePrefix%2C%20Description%2C%20LastModifiedDate%20FROM%20AuraDefinitionBundle%20WHERE%20DeveloperName%20LIKE%20%27%25Card%25%27%20LIMIT%20200
+GET /services/data/v66.0/tooling/query/?q=SELECT%20Id%2C%20Name%2C%20MasterLabel%2C%20ApiVersion%2C%20NamespacePrefix%2C%20Description%2C%20LastModifiedDate%20FROM%20ApexPage%20WHERE%20Name%20LIKE%20%27%25Card%25%27%20LIMIT%20200
+GET /services/data/v66.0/tooling/query/?q=SELECT%20Id%2C%20DeveloperName%2C%20MasterLabel%2C%20Type%2C%20NamespacePrefix%2C%20Description%2C%20LastModifiedDate%20FROM%20FlexiPage%20WHERE%20DeveloperName%20LIKE%20%27%25Card%25%27%20LIMIT%20200
+
+Replace `Card` with the search term. For no filter, remove the encoded
+`WHERE ...` portion and keep `LIMIT 200`.
 
 Headers
 Authorization: Bearer <access_token>

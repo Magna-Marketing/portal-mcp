@@ -14,8 +14,7 @@ Tooling API, v66.0. `FlexiPage` sObject + Metadata API for the structured
 XML when needed.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, NamespacePrefix, ManageableState, Description FROM FlexiPage WHERE DeveloperName = '{name}'
-GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}/Metadata    (returns parsed metadata)
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}
 
 Headers
 Authorization: Bearer <access_token>

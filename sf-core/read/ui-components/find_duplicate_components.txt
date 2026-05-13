@@ -17,8 +17,7 @@ Salesforce API
 Tooling API, v66.0. Reads metadata + content per candidate.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed FROM LightningComponentBundle [WHERE ManageableState = 'unmanaged']
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId IN (...)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed, ManageableState FROM LightningComponentBundle WHERE ManageableState = 'unmanaged' OR ManageableState = null
 
 Headers
 Authorization: Bearer <access_token>

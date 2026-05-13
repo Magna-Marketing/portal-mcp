@@ -9,7 +9,7 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, EndpointUrl, IsActive, DisableProtocolSecurity, NamespacePrefix, Description FROM RemoteProxy
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, EndpointUrl, IsActive, NamespacePrefix, Description FROM RemoteProxy
 
 Headers
 Authorization: Bearer <access_token>
@@ -24,7 +24,7 @@ namePattern (string, optional).
 
 Result
 totalSize (number).
-records (array) - { id, name, endpointUrl, isActive, disableProtocolSecurity, namespacePrefix, description }.
+records (array) - { id, name, endpointUrl, isActive, namespacePrefix, description }.
 
 Required permissions
 - "Customize Application".

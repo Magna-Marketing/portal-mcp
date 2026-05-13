@@ -2,25 +2,23 @@ Tool: get_ui_usage_statistics
 
 Description
 Org-wide UI inventory and usage statistics:
-- Counts of LWC, Aura, VF, FlexiPage, CustomTab, CustomApplication.
+- Counts of Aura, Visualforce, and FlexiPage metadata.
 - Custom vs managed breakdown.
 - Average / median components per Lightning Page.
-- Most-used custom components (rank).
-- Unused-component count (cross-checked with `find_unused_components`).
 - API version distribution.
 
 Use as a once-a-quarter dashboard input or before a UI cleanup project.
 
 Salesforce API
 Tooling API + Lightning Usage REST endpoints, v66.0.
-- `LightningComponentBundle`, `AuraDefinitionBundle`, `ApexPage`,
-  `FlexiPage` for inventory.
+- `AuraDefinitionBundle`, `ApexPage`, `FlexiPage` for inventory.
 - `LightningUsageByPageMetrics`, `LightningUsageByFlexiPageMetrics`
   (`/services/data/v66.0/lightning/...`) for actual user-traffic stats.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=...   (inventory queries)
-GET /services/data/v66.0/lightning/usagebyflexipagemetrics?startDate=...&endDate=...
+GET /services/data/v66.0/tooling/query/?q=SELECT COUNT() FROM AuraDefinitionBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT COUNT() FROM ApexPage
+GET /services/data/v66.0/tooling/query/?q=SELECT COUNT() FROM FlexiPage
 
 Headers
 Authorization: Bearer <access_token>
@@ -39,21 +37,16 @@ includeBreakdownByApi (boolean, optional, default true).
 Result
 generatedAt (string).
 inventory (object):
-  lwc (object) - { total, custom, managed, exposed, byApiVersion: { "62.0": 30 } }.
-  aura (object) - same shape minus exposed.
+  aura (object) - { total, custom, managed, byApiVersion: { "62.0": 30 } }.
   visualforce (object) - { total, custom, managed }.
   flexiPage (object) - { total, byType: { "RecordPage": ..., "AppPage": ... } }.
-  customTab (object) - { total, custom }.
-  customApplication (object) - { total, custom }.
 flexiPageStats (object):
   averageComponentsPerPage (number).
   medianComponentsPerPage (number).
   maxComponentsOnAnyPage (number).
   pageWithMost (object) - { name, label, count }.
-mostUsedCustomComponents (array) - { name, type, usageCount, pages[] }.
-unusedComponents (object) - { lwc: number, aura: number, visualforce: number }.
 trafficStats (object|null, when includeUsageMetrics=true) - { topPages: [{ pageName, views, uniqueUsers }], topAppPages, dailyAverage }.
-apiVersionDistribution (object) - Across all UI components.
+apiVersionDistribution (object) - Across Aura components.
 
 Required permissions
 - "Customize Application", "View All Setup".
@@ -62,7 +55,7 @@ Required permissions
 
 Idempotency & limits
 - Read-only; safe to retry.
-- Heavy: O(LWC count) due to file enumeration; ~5–10 s in big orgs.
+- Lightweight inventory queries; usage metrics depend on the date window.
 
 Errors
 - INSUFFICIENT_ACCESS_OR_READONLY for traffic stats; tool falls back

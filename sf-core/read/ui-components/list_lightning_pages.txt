@@ -10,7 +10,7 @@ Salesforce API
 Tooling API, v66.0. `FlexiPage` sObject.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, NamespacePrefix, ManageableState FROM FlexiPage [WHERE EntityDefinitionId = '{sObject}'] ORDER BY MasterLabel
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, NamespacePrefix, ManageableState FROM FlexiPage WHERE EntityDefinitionId = '{sObject}' ORDER BY MasterLabel
 
 Headers
 Authorization: Bearer <access_token>

@@ -10,6 +10,8 @@ Get the dependency graph for a UI component:
 
 Backed by the Tooling API's `MetadataComponentDependency` view (the same
 view powering "Where is this used?" in Setup -> Lightning Components).
+Resolve the component's Tooling Id first, then query dependencies by Id;
+`MetadataComponentName` can be selected but should not be used in `WHERE`.
 Use this before refactoring or deleting components.
 
 Salesforce API
@@ -17,7 +19,9 @@ Tooling API, v66.0. `MetadataComponentDependency` (read-only Tooling
 sObject; introduced for dependency tracing).
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT MetadataComponentName, MetadataComponentType, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency WHERE (MetadataComponentName = '{name}' AND MetadataComponentType = '{type}') OR (RefMetadataComponentName = '{name}' AND RefMetadataComponentType = '{type}')
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel FROM {type} WHERE DeveloperName = '{name}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency WHERE MetadataComponentId = '{componentId}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency WHERE RefMetadataComponentId = '{componentId}'
 
 Headers
 Authorization: Bearer <access_token>
@@ -38,15 +42,21 @@ includeFlexiPages (boolean, optional, default true) - When this is an
   LWC/Aura, also enumerate `FlexiPage` placements (region info).
 
 Result
-component (object) - { id, name, type, label, namespacePrefix }.
-outgoing (array, when direction != "incoming") - What this component depends on:
-  refName (string), refType (string), refNamespace (string|null).
-incoming (array, when direction != "outgoing") - What depends on this:
-  Same shape.
-flexiPages (array, when includeFlexiPages=true) - Lightning Pages where the
-  component appears: { flexiPageName, flexiPageLabel, type ("RecordPage"|
-  "AppPage"|"HomePage"), region, sObject (when RecordPage) }.
-summary (object) - { outgoingCount, incomingCount, flexiPageCount }.
+size (number).
+totalSize (number).
+done (boolean).
+queryLocator (string|null).
+entityTypeName (string) - "MetadataComponentDependency".
+records (array) - Each MetadataComponentDependency record:
+  attributes (object) - { type, url }.
+  Id (string).
+  MetadataComponentId (string).
+  MetadataComponentName (string).
+  MetadataComponentType (string).
+  RefMetadataComponentId (string).
+  RefMetadataComponentName (string).
+  RefMetadataComponentType (string).
+  RefMetadataComponentNamespace (string|null).
 
 Required permissions
 - "View All Setup", "Modify All Data", or "Customize Application".

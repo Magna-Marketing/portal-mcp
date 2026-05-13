@@ -1,18 +1,21 @@
 Tool: analyze_component_usage
 
 Description
-For a single UI component, list every Lightning Page that uses it, with
-the region, identifier, and any property overrides. Reverse of
-`get_component_dependencies` (incoming side, narrowed to FlexiPage).
-Use to safely change or remove a component.
+For a single UI component, query `MetadataComponentDependency`; the first
+API call returns all dependency results in `records`. For each record, use
+`RefMetadataComponentType` ("FlexiPage"|"LightningComponentBundle"|"ApexPage")
+and `RefMetadataComponentId` to read the referenced metadata and determine
+where the component is used. Use to safely change or remove a component.
 
 Salesforce API
 Tooling API, v66.0. `MetadataComponentDependency` filtered to FlexiPage
 parents, plus FlexiPage metadata reads for identifier/region.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT MetadataComponentName, MetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentName = '{name}' AND RefMetadataComponentType = '{type}' AND MetadataComponentType = 'FlexiPage'
-GET /services/data/v66.0/tooling/sobjects/FlexiPage/{id}     (per match)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency
+GET /services/data/v66.0/tooling/sobjects/FlexiPage/{RefMetadataComponentId}     (per match)
+GET /services/data/v66.0/tooling/sobjects/ApexPage/{RefMetadataComponentId}    
+GET /services/data/v66.0/tooling/sobjects/LightningComponentBundle/{RefMetadataComponentId}    
 
 Headers
 Authorization: Bearer <access_token>
@@ -29,18 +32,20 @@ type (string, required) - "LightningComponentBundle" | "AuraDefinitionBundle"
 includePropertyValues (boolean, optional, default true).
 
 Result
-component (object) - { name, type }.
-totalPages (number).
-pages (array) - Each:
-  pageId, pageName, pageLabel, pageType ("RecordPage"|"AppPage"|"HomePage"),
-  sObject (string|null).
-  occurrences (array) - Each occurrence within the page:
-    region (string).
-    identifier (string).
-    propertyValues (object|null) - { propName: value } when
-      includePropertyValues=true.
-    visibilityRule (object|null).
-summary (object) - { byPageType: {...}, bySObject: {...} }.
+size (number).
+totalSize (number).
+done (boolean).
+queryLocator (string|null).
+entityTypeName (string) - "MetadataComponentDependency".
+records (array) - Each MetadataComponentDependency record:
+  attributes (object) - { type, url }.
+  Id (string).
+  MetadataComponentId (string).
+  MetadataComponentName (string).
+  MetadataComponentType (string).
+  RefMetadataComponentId (string).
+  RefMetadataComponentName (string).
+  RefMetadataComponentType (string).
 
 Required permissions
 - "Customize Application".
