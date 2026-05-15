@@ -1,84 +1,114 @@
 Tool: create_flow
 
 Description
-Create a new Flow in Salesforce. Two modes:
-1. **Template**: pass `template` to instantiate from a built-in template
-   (e.g. `record_triggered_before_save`, `screen_form`,
-   `autolaunched`). The MCP server fills in the boilerplate XML.
+Create a new Salesforce Flow. Two mutually exclusive modes:
+1. **Template**: pass `template` to generate a well-formed Flow XML skeleton. The
+   following templates are supported:
+   - `record_triggered_before_save` – AutoLaunchedFlow + Before-Save trigger
+   - `record_triggered_after_save`  – AutoLaunchedFlow + After-Save trigger
+   - `autolaunched`                 – AutoLaunchedFlow, no trigger (invocable)
+   - `screen_form`                  – Screen Flow (processType=Flow) with one blank screen
+   - `screen_lookup`                – Screen Flow with a Get Records node
+   - `scheduled`                    – AutoLaunchedFlow with Scheduled trigger
 2. **Custom XML**: pass `xml` for full control over the Flow body.
 
-Either way, the new Flow is saved as **draft** (status `Draft`). Use
-`deploy_flow` with `action: "activate"` to turn on a version.
+The flow XML is packaged into a deployment zip and sent to Salesforce using
+the Metadata REST API deployRequest endpoint (multipart/form-data). It is
+saved as **Draft** by default. To activate, either:
+  - Pass `activateAfterDeploy: true` (tool activates via Tooling API after deploy), or
+  - Include `<status>Active</status>` in the XML body (modern approach, API v44+).
+
+API Corrections (vs. earlier documentation):
+- The endpoint requires multipart/form-data with a zip file, NOT a plain JSON body.
+- `processType: "ScreenFlow"` is INVALID. Use `processType: "Flow"` for screen flows.
+- Record-triggered flows use `processType: "AutoLaunchedFlow"` with the `start`
+  element's `triggerType` (RecordBeforeSave / RecordAfterSave).
+- Activation after deploy uses the Tooling API FlowDefinition PATCH, not metadata deploy.
 
 Salesforce API
-Metadata API (`Flow` type), v66.0. Deploy via `metadata/deployRequest`.
+Metadata REST API v66.0 — deployRequest (multipart/form-data with zip).
+Tooling API v66.0 — FlowDefinition PATCH (for activateAfterDeploy only).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Endpoints
+POST /services/data/v66.0/metadata/deployRequest       (multipart/form-data)
+PATCH /services/data/v66.0/tooling/sobjects/FlowDefinition/{id}  (activate only)
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=<boundary>
 
-Body (template example)
-{
-  "fullName": "Account_Trigger_Flow",
-  "label": "Account Trigger Flow",
-  "description": "Sets default region on Account create",
-  "processType": "AutoLaunchedFlow",
-  "apiVersion": 62.0,
-  "template": "record_triggered_before_save",
-  "templateOptions": {
-    "objectType": "Account",
-    "recordTriggerType": "Create"
-  }
-}
+Multipart body parts
+1. json part: { "deployOptions": { "checkOnly": false, "singlePackage": true, ... } }
+2. file part: zip archive containing:
+   - package.xml  (declares Flow type + version)
+   - flows/<FlowApiName>.flow  (the Flow XML)
 
 Input (parameters)
-fullName (string, required) - Flow API name (DeveloperName).
-label (string, required) - Master label.
+fullName (string, required) – Flow API name (DeveloperName).
+label (string, required in template mode) – Display label.
 description (string, optional).
-processType (string, required) - "Flow" | "AutoLaunchedFlow" |
-  "RecordTrigger" | "ScreenFlow" | "Workflow" | "InvocableProcess" |
-  "PlatformEvent" | "ApprovalProcess".
-apiVersion (number, optional, default 62.0).
-template (string, optional) - One of "record_triggered_before_save",
-  "record_triggered_after_save", "autolaunched", "screen_form",
-  "screen_lookup", "scheduled". Mutually exclusive with `xml`.
-templateOptions (object, optional) - Per-template variables
-  (objectType, recordTriggerType, scheduleStart, etc.).
-xml (string, optional) - Full <Flow> XML body. Mutually exclusive with
-  `template`.
-runInMode (string, optional, default "DefaultMode") - "DefaultMode" |
+processType (string, optional in xml mode) – Valid values for Metadata API v66.0:
+  "AutoLaunchedFlow" | "Flow" | "Workflow" | "InvocableProcess" | "PlatformEvent" |
+  "ApprovalProcess" | "ContactRequestFlow" | "CustomEvent" | "FieldServiceMobile" |
+  "FieldServiceWeb" | "Journey" | "OrchestrationFlow" | "TransactionSecurityFlow" |
+  "UserProvisioningFlow".
+  NOTE: "ScreenFlow" is NOT a valid value — use "Flow" for screen flows.
+apiVersion (number, optional, default 66.0).
+template (string, optional) – One of the template names listed above.
+  Mutually exclusive with `xml`.
+templateOptions (object, optional) – Per-template variables:
+  objectType (string) – sObject API name. Required for record_triggered_*,
+    screen_lookup, and scheduled templates.
+  recordTriggerType (string) – "Create" | "Update" | "CreateAndUpdate" | "Delete".
+    Required for record_triggered_* templates.
+  startDate (string) – YYYY-MM-DD. Used by scheduled template.
+  startTime (string) – HH:MM:SS.000Z. Used by scheduled template.
+  frequency (string) – "Once" | "Daily" | "Weekly". Used by scheduled template.
+xml (string, optional) – Full <Flow> XML document. Mutually exclusive with `template`.
+runInMode (string, optional, default "DefaultMode") – "DefaultMode" |
   "SystemModeWithoutSharing".
-checkOnly (boolean, optional, default false).
-activateAfterDeploy (boolean, optional, default false) - When true, the
-  tool runs `deploy_flow` with `activate` after successful create.
+checkOnly (boolean, optional, default false) – Validate without saving.
+activateAfterDeploy (boolean, optional, default false) – Activate via Tooling API
+  after a successful deploy.
+testLevel (string, optional, default "NoTestRun") – "NoTestRun" | "RunLocalTests" |
+  "RunAllTestsInOrg".
 
 Result
-Same shape as `manage_object`'s deploy result: deployId, status, done,
-componentSuccesses, componentFailures.
-flow (object, on success) - { id, definitionId, fullName, label,
-  processType, status, latestVersionNumber }.
+deployResult (object) – Raw Salesforce deploy status from the REST API, including:
+  deployResult.id, deployResult.done, deployResult.status,
+  deployResult.details.componentSuccesses[], deployResult.details.componentFailures[].
+flowDefinition (object|null, on success) – FlowDefinition info from the Tooling API:
+  { definitionId, masterLabel, latestVersionNumber, latestVersionId,
+    activeVersionNumber, activeVersionId }.
+activationResult (object|null) – Present when activateAfterDeploy=true.
 
 Required permissions
-- "Manage Flow" + "Customize Application".
+- "Manage Flow" + "Customize Application"
 
 Idempotency & limits
-- `create_flow` will fail if `fullName` already exists; use `update_flow`.
-- Each save bumps the version number; max 50 versions per Flow.
+- create_flow will fail if `fullName` already exists; use update_flow.
+- Each successful deploy creates a new version. Max 50 versions per Flow.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME on existing flow.
-- INVALID_FLOW_DEFINITION on bad XML.
+- DUPLICATE_DEVELOPER_NAME – flow with fullName already exists.
+- INVALID_FLOW_DEFINITION – invalid or missing XML elements.
+- Deploy failures appear in deployResult.details.componentFailures.
 
-Example request (autolaunched, before-save trigger on Account)
+Example request (record-triggered before-save on Account)
 
 create_flow({
   "fullName": "Account_Trigger_Flow",
   "label": "Account Trigger Flow",
-  "processType": "AutoLaunchedFlow",
-  "apiVersion": 62.0,
   "template": "record_triggered_before_save",
-  "templateOptions": { "objectType": "Account", "recordTriggerType": "Create" }
+  "templateOptions": { "objectType": "Account", "recordTriggerType": "Create" },
+  "activateAfterDeploy": false
+})
+
+Example request (custom XML, activate immediately)
+
+create_flow({
+  "fullName": "My_Autolaunched_Flow",
+  "fullName": "My_Autolaunched_Flow",
+  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Flow xmlns=\"http://soap.sforce.com/2006/04/metadata\">\n  <apiVersion>66.0</apiVersion>\n  <label>My Autolaunched Flow</label>\n  <processType>AutoLaunchedFlow</processType>\n  <start><locationX>50</locationX><locationY>0</locationY></start>\n  <status>Draft</status>\n</Flow>",
+  "activateAfterDeploy": true
 })

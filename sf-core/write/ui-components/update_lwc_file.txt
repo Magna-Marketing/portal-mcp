@@ -1,39 +1,40 @@
 Tool: update_lwc_file
 
 Description
-Update a single file in an existing LWC bundle. The platform validates
-the change as part of the save; compile errors are returned with file +
-line + column. If the file doesn't exist, the call **fails** (use
-`add_lwc_file` instead).
+Update a single file in an existing LWC bundle. PATCHes the Source of the
+matching LightningComponentResource. If the file does not exist, the call
+fails — use `add_lwc_file` instead.
 
 Salesforce API
-Tooling API, v66.0.
+Tooling API, v66.0. Direct CRUD.
 
-Endpoint
-GET   /services/data/v66.0/tooling/query/?q=SELECT Id FROM LightningComponentResource WHERE LightningComponentBundleId = '...' AND FilePath LIKE '%{fileName}'
-POST  /services/data/v66.0/tooling/sobjects/MetadataContainer
+Endpoints
+GET   /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
 PATCH /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}
-POST  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body (member update)
-{ "MetadataContainerId": "<id>", "Source": "..." }
+Body (PATCH)
+{ "Source": "..." }
+
+Note: Salesforce returns HTTP 204 No Content for a successful PATCH. The tool
+returns { resourceId, filePath, format, updateResult: { success: true } }.
 
 Input (parameters)
-bundleName (string, required) - LWC bundle name.
-fileName (string, required) - File name including extension.
-source (string, required) - New contents.
-checkOnly (boolean, optional, default false).
-expectedFormat (string, optional) - Validate the format inferred from
-  fileName matches: "js" | "html" | "css" | "xml" | "svg".
+bundleName (string, required) - DeveloperName of the bundle.
+fileName (string, required) - File name including extension, e.g.
+  projectCard.js or projectCard.js-meta.xml.
+source (string, required) - New file contents.
+expectedFormat (string, optional) - Format assertion: "js" | "html" | "css"
+  | "xml" | "svg" | "json". Returns an error if the inferred format differs.
 
 Result
-deploy (object) - state, componentSuccesses, componentFailures.
-file (object, on success) - { id, fileName, format, sizeBytes,
-  lastModifiedDate }.
+resourceId (string) - LightningComponentResource Id.
+filePath (string) - Full FilePath value.
+format (string) - Inferred format.
+updateResult (object) - Raw PATCH response (or { success: true } for 204).
 
 Required permissions
 - "Customize Application".
@@ -43,7 +44,6 @@ Idempotency & limits
 
 Errors
 - NOT_FOUND if bundle or file doesn't exist.
-- DEPLOY_FAILED with line/column on syntax errors.
 
 Example request
 

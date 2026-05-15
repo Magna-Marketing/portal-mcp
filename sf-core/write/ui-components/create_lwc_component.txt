@@ -1,64 +1,69 @@
 Tool: create_lwc_component
 
 Description
-Create a new Lightning Web Component with full file contents in one
-call. Convenience wrapper around `create_lwc_bundle` for the case where
-you already have the JS / HTML / CSS / XML drafted (no template-based
-generation). Validates the name format (lowercase first char,
-alphanumeric only, max 40 chars).
+Create a new LWC component with explicit file contents. Unlike
+`create_lwc_bundle` (template-based), this tool requires you to supply the
+full JavaScript and XML configuration; HTML, CSS, and SVG are optional.
 
 Salesforce API
-Tooling API, v66.0. Same container/save pattern as `create_lwc_bundle`.
+Tooling API, v66.0. Direct CRUD.
 
-Endpoint
-See `create_lwc_bundle`.
+Endpoints
+POST /services/data/v66.0/tooling/sobjects/LightningComponentBundle
+POST /services/data/v66.0/tooling/sobjects/LightningComponentResource  (per file)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-N/A.
+Body (bundle)
+{
+  "DeveloperName": "myCard",
+  "MasterLabel": "My Card",
+  "Description": "...",
+  "ApiVersion": 66.0,
+  "IsExposed": false
+}
+
+Body (resource)
+{
+  "LightningComponentBundleId": "<bundleId>",
+  "FilePath": "lwc/myCard/myCard.js",
+  "Format": "js",
+  "Source": "..."
+}
 
 Input (parameters)
-name (string, required) - Component name. Must match `^[a-z][a-zA-Z0-9]{0,39}$`.
-label (string, required) - Master label.
+componentName (string, required) - DeveloperName. Lowercase start,
+  alphanumeric + underscores, max 40 chars.
+masterLabel (string, required).
 description (string, optional).
-apiVersion (number, optional, default = org default).
+apiVersion (number, optional, default 66.0).
 isExposed (boolean, optional, default false).
-js (string, required) - `<name>.js` source.
-html (string, required) - `<name>.html` source.
-css (string, optional) - `<name>.css` source.
-xml (string, required) - `<name>.js-meta.xml` source. Must be valid
-  Lightning meta XML; the tool validates it before creating the bundle.
-svg (string, optional) - `<name>.svg` source.
-checkOnly (boolean, optional, default false).
+files (object, required):
+  js (string, required) - JavaScript controller.
+  xml (string, required) - Meta XML (*.js-meta.xml content).
+  html (string, optional) - HTML template.
+  css (string, optional).
+  svg (string, optional).
 
-Result
-deploy (object).
-bundle (object, on success) - { id, name, label, apiVersion, isExposed,
-  files }.
+Result (raw Tooling API responses)
+bundle (object) - { id, success, errors }.
+resources (object) - Map of fileName → { id, success, errors }.
 
 Required permissions
 - "Customize Application".
 
-Idempotency & limits
-- Not idempotent — fails on duplicate name.
-
 Errors
-- INVALID_FIELD: name doesn't match the regex.
-- DUPLICATE_DEVELOPER_NAME.
-- DEPLOY_FAILED with line/column on compile errors.
+- DUPLICATE_VALUE: componentName already exists.
 
 Example request
 
 create_lwc_component({
-  "name": "projectStatusBadge",
-  "label": "Project Status Badge",
-  "apiVersion": 62.0,
-  "isExposed": true,
-  "html": "<template><span class={cssClass}>{status}</span></template>",
-  "js": "import { LightningElement, api } from 'lwc';\nexport default class ProjectStatusBadge extends LightningElement { @api status; get cssClass() { return `slds-badge slds-theme_${this.status}`; } }",
-  "css": ".slds-badge { padding: 0.25rem 0.5rem; }",
-  "xml": "<?xml version=\"1.0\"?><LightningComponentBundle xmlns=\"http://soap.sforce.com/2006/04/metadata\"><apiVersion>62.0</apiVersion><isExposed>true</isExposed><targets><target>lightning__RecordPage</target></targets></LightningComponentBundle>"
+  "componentName": "myCard",
+  "masterLabel": "My Card",
+  "files": {
+    "js": "import { LightningElement, api } from 'lwc';\nexport default class MyCard extends LightningElement { @api recordId; }",
+    "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<LightningComponentBundle xmlns=\"http://soap.sforce.com/2006/04/metadata\">\n  <apiVersion>66.0</apiVersion>\n  <isExposed>true</isExposed>\n</LightningComponentBundle>"
+  }
 })

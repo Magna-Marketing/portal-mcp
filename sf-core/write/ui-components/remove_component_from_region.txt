@@ -1,42 +1,33 @@
 Tool: remove_component_from_region
 
 Description
-Remove a component instance from a FlexiPage region by its identifier.
-The component is excised from the metadata in a single deploy. Other
-components in the region are untouched.
+Remove a component or field instance from a FlexiPage region by identifier.
+Reads the current page, filters out the matching instance, and deploys.
 
 Salesforce API
-Metadata API (`FlexiPage`), v66.0.
+Metadata API (FlexiPage), v66.0.
+Reads via metadata.read(), updates via metadata.update() (SOAP).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+Correction vs. original doc: Uses metadata.read() + metadata.update(), not deployRequest.
 
 Input (parameters)
-flexiPageName (string, required).
-region (string, required) - Region API name.
-identifier (string, required) - Component identifier to remove.
-checkOnly (boolean, optional, default false).
+flexiPageName (string, required) - DeveloperName of the FlexiPage.
+region (string, required) - Region API name containing the component.
+identifier (string, required) - Unique identifier of the component instance
+  to remove.
 
 Result
-deploy (object).
-flexiPage (object) - { id, name, region: { name, componentCount } }.
-removed (object) - { identifier, componentName }.
+updateResult (object) - Raw Metadata API update response.
+removed (object) - { flexiPageName, region, identifier }.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Idempotent: a second call returns "already_removed".
+- Not idempotent (errors if identifier not found).
 
 Errors
-- NOT_FOUND on flexiPageName, region, or identifier.
+- NOT_FOUND: flexiPageName, region, or identifier not found.
 
 Example request
 

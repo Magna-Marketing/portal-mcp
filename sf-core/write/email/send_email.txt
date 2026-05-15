@@ -1,16 +1,15 @@
 Tool: send_email
 
 Description
-Send a single email message via Salesforce. Three modes: free-form
-(subject + body), template-based (rendered against a target record),
-or composite invocable action. Supports To / Cc / Bcc, attachments,
-HTML body, save-as-activity (logs an EmailMessage on the record).
+Send a single email via the Salesforce emailSimple standard invocable action.
+Supports plain-text and rich-text bodies, template-based rendering with merge
+fields, activity logging, threading tokens, and file attachments.
 
 Salesforce API
-REST API (Connect API + Standard Invocable Actions), v66.0.
+REST API (Standard Invocable Action), v66.0.
 
 Endpoint
-POST /services/data/v66.0/actions/standard/emailSimple        (synchronous send)
+POST /services/data/v66.0/actions/standard/emailSimple
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,64 +18,97 @@ Content-Type: application/json
 Body
 {
   "inputs": [{
-    "emailAddresses": "to1@example.com,to2@example.com",
-    "emailAddressesArray": ["to1@example.com"],
+    "recipientAddresses": "to@example.com,to2@example.com",
+    "ccAddresses": "cc@example.com",
+    "bccAddresses": "bcc@example.com",
+    "recipientId": "003Qg0000020aBcDE",
+    "relatedRecordId": "a01Qg0000020aBcDE",
     "emailSubject": "Quarterly Update",
-    "emailBody": "Hello, ...",
+    "emailBody": "<p>Hello</p>",
     "emailTemplateId": "00X4Q00000abcDE",
+    "sendRichBody": true,
+    "useLineBreaks": false,
+    "logEmailOnSend": true,
     "senderType": "CurrentUser",
     "senderAddress": null,
-    "logEmailOnSend": true,
-    "relatedRecordId": "0014Q00000abcDE",
-    "recipientId": "003Qg0000020aBcDE"
+    "attachmentId": "068Qg00000abcDE",
+    "addThreadingTokenToBody": false,
+    "addThreadingTokenToSubject": false
   }]
 }
 
+Corrections vs. original documentation
+- emailAddresses / emailAddressesArray → replaced by recipientAddresses,
+  ccAddresses, bccAddresses (all string, comma-delimited, available API v65.0+).
+- subject → emailSubject.
+- htmlBody / textBody → emailBody (plain or HTML depending on sendRichBody).
+- saveAsActivity → logEmailOnSend.
+- senderType valid values: "CurrentUser" | "DefaultWorkflowUser" |
+  "OrgWideEmailAddress" ("DefaultWorkflowUser" was missing in original docs).
+- attachments array not supported; use attachmentId (string, comma-delimited,
+  API v63.0+) or attachmentIdCollection (API v64.0+) instead.
+- whatId is NOT a valid field; use relatedRecordId.
+- The action returns NO structured outputs (Salesforce docs say "None").
+  The raw response array contains { actionName, errors, isSuccess, outputValues }.
+
 Input (parameters)
-to (string|string[], required) - One or more email addresses or User Ids.
-cc (string|string[], optional).
-bcc (string|string[], optional).
-subject (string, optional) - Required when no template.
-htmlBody (string, optional).
-textBody (string, optional).
-templateId (string, optional) - Or templateName. Renders against `targetRecordId`.
-templateName (string, optional).
-targetRecordId (string, optional) - Record context for merge fields.
-whatId (string, optional) - Related record (Opportunity, Case, etc.) for activity logging.
-senderType (string, optional, default "CurrentUser") - "CurrentUser" | "OrgWideEmailAddress".
-orgWideEmailAddressId (string, optional).
-saveAsActivity (boolean, optional, default true).
-attachments (object[], optional) - [{ contentVersionId | contentDocumentId | base64 + fileName + contentType }].
+recipientAddresses (string, optional) - Comma-delimited To addresses (API v65.0+).
+ccAddresses (string, optional) - Comma-delimited CC addresses (API v65.0+).
+bccAddresses (string, optional) - Comma-delimited BCC addresses (API v65.0+).
+recipientId (string, optional) - Contact/Lead ID. Required when emailTemplateId is set.
+relatedRecordId (string, optional) - Non-person record for merge fields or secondary log target.
+emailSubject (string, optional) - Subject line. Required when no template.
+emailBody (string, optional) - Body content (plain or HTML). Required when no template.
+emailTemplateId (string, optional) - EmailTemplate ID. Requires recipientId.
+sendRichBody (boolean, optional, default false) - Render emailBody as HTML rich text.
+useLineBreaks (boolean, optional, default false) - Render line breaks as <br>.
+logEmailOnSend (boolean, optional, default false) - Log email on activity timelines.
+  Requires recipientId or relatedRecordId. Changes the daily email limit bucket.
+senderType (string, optional, default "CurrentUser") -
+  "CurrentUser" | "DefaultWorkflowUser" | "OrgWideEmailAddress".
+senderAddress (string, optional) - Org-wide email address. Required when senderType
+  is OrgWideEmailAddress.
+attachmentId (string, optional) - Comma-delimited Document/ContentVersion/Attachment
+  IDs (API v63.0+).
+attachmentIdCollection (string, optional) - Collection of attachment IDs (API v64.0+).
+addThreadingTokenToBody (boolean, optional) - Append Email-to-Case threading token to body.
+addThreadingTokenToSubject (boolean, optional) - Append threading token to subject.
 
 Result
-result (object) - { success, errors (array), messageId, sentDate, savedAsActivity }.
+Array: [{ "actionName": "emailSimple", "errors": null, "isSuccess": true, "outputValues": {} }]
+The emailSimple action has no defined output values; check isSuccess and errors.
+
+Limits
+- Combined recipientAddresses + ccAddresses + bccAddresses + recipientId ≤ 150.
+- Using logEmailOnSend or emailTemplateId counts against the single-email daily limit.
+- Otherwise counts against the daily workflow email limit.
+- Not idempotent.
 
 Required permissions
-- "Send Email" + (for templateId) read on the template's folder.
-
-Idempotency & limits
-- Not idempotent.
-- Daily SingleEmail limit: 5,000 external recipients/day (`SingleEmail` in `get_org_limits`).
+- "Send Email" (+ read on template folder when using emailTemplateId).
 
 Errors
-- INSUFFICIENT_ACCESS_OR_READONLY, EMAIL_TEMPLATE_NOT_FOUND, INVALID_EMAIL_ADDRESS.
-- EMAIL_LIMIT_EXCEEDED.
+- INSUFFICIENT_ACCESS_OR_READONLY
+- EMAIL_TEMPLATE_NOT_FOUND
+- INVALID_EMAIL_ADDRESS
+- EMAIL_LIMIT_EXCEEDED
 
-Example request
+Example request (free-form)
 
 send_email({
-  "to": ["jane.doe@magnatech.com"],
-  "subject": "Project Update",
-  "htmlBody": "<p>Status: <b>Green</b></p>",
-  "whatId": "a01Qg0000020aBcDE",
-  "saveAsActivity": true
+  "recipientAddresses": "jane.doe@magnatech.com",
+  "emailSubject": "Project Update",
+  "emailBody": "<p>Status: <b>Green</b></p>",
+  "sendRichBody": true,
+  "relatedRecordId": "a01Qg0000020aBcDE",
+  "logEmailOnSend": true
 })
 
 Example request (template)
 
 send_email({
-  "to": ["003Qg0000020aBcDE"],
-  "templateName": "MTG_Project_Status_Email",
-  "targetRecordId": "a01Qg0000020aBcDE",
-  "saveAsActivity": true
+  "emailTemplateId": "00X4Q00000abcDE",
+  "recipientId": "003Qg0000020aBcDE",
+  "relatedRecordId": "a01Qg0000020aBcDE",
+  "logEmailOnSend": true
 })

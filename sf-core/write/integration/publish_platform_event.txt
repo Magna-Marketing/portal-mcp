@@ -1,48 +1,68 @@
 Tool: publish_platform_event
 
 Description
-Publish one or many Platform Events. Synchronous publish, returns
-EventReplayId per event. Subscribers (Apex triggers, Flows, CDC
-listeners, external Pub/Sub clients) receive within seconds.
+Publish one or many Platform Events synchronously. Subscribers (Apex triggers, Flows,
+CDC listeners, external Pub/Sub API clients, Event Relay) receive events within seconds.
+Returns the API response including EventUuid per event.
 
 Salesforce API
-REST API (Data), v66.0. POST a record on the Platform Event sObject
-(`<EventName>__e`).
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/sobjects/{eventName}__e
-POST /services/data/v66.0/composite/sobjects                        (bulk)
+Single event:   POST /services/data/v66.0/sobjects/{EventName}__e
+Multiple events: POST /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-{ "Field__c": "...", "Anther_Field__c": "..." }
+Body (single)
+{ "Project_Id__c": "a01Qg00000abcDE", "New_Status__c": "Active" }
+
+Body (composite/bulk)
+{
+  "allOrNone": false,
+  "records": [
+    { "attributes": { "type": "Order_Notification__e" }, "Order_Id__c": "001...", "Status__c": "Shipped" },
+    { "attributes": { "type": "Order_Notification__e" }, "Order_Id__c": "002...", "Status__c": "Delivered" }
+  ]
+}
 
 Input (parameters)
-eventName (string, required) - Platform Event API name (without `__e`).
-events (object[], required) - Each is the field map.
-allOrNone (boolean, optional, default false).
+eventName (string, required) - Platform Event API name WITHOUT the __e suffix,
+  e.g. Project_Status_Update (not Project_Status_Update__e). The tool appends __e automatically.
+events (object[], required) - Array of field maps. One object per event. Field keys use the
+  full API name including __c suffix for custom fields.
+allOrNone (boolean, optional, default false) - For multiple events: roll back all on any failure.
 
 Result
-results (array) - { id (EventReplayId placeholder), success, errors }.
-publishedCount (number).
-failedCount (number).
+Single event:    { id, success, errors[] } — sObject insert result. id is the EventUuid.
+Multiple events: [{ id, success, errors[] }] — array of results in publish order.
 
 Required permissions
-- "Customize Application" + "Send Outbound Messages" / "API Enabled".
+- "API Enabled" (+ specific Platform Event access if restricted).
 
 Idempotency & limits
-- Not idempotent.
-- Hourly publish caps in `get_org_limits.HourlyPublishedPlatformEvents`.
+- NOT idempotent — each call produces new events.
+- Org hourly publish cap: HourlyPublishedPlatformEvents in org limits (use get_org_limits).
+- Max 200 records per composite/sobjects call.
 
 Errors
-- INVALID_TYPE, REQUEST_LIMIT_EXCEEDED.
+- INVALID_TYPE - Event API name not found or __e suffix issue.
+- REQUEST_LIMIT_EXCEEDED - hourly publish cap hit.
 
 Example request
 
 publish_platform_event({
-  "eventName": "Project_Status_Update__e",
+  "eventName": "Project_Status_Update",
   "events": [{ "Project_Id__c": "a01Qg00000abcDE", "New_Status__c": "Active" }]
+})
+
+publish_platform_event({
+  "eventName": "Order_Notification",
+  "events": [
+    { "Order_Id__c": "001...", "Status__c": "Shipped" },
+    { "Order_Id__c": "002...", "Status__c": "Delivered" }
+  ],
+  "allOrNone": true
 })

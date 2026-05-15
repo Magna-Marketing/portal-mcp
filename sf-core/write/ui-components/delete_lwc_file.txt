@@ -1,42 +1,43 @@
 Tool: delete_lwc_file
 
 Description
-Delete a single file from an LWC bundle. Refuses to delete required
-files (`js` and `js-meta.xml`). Allowed types: `css`, `html`, `svg`.
-Note: deleting `html` is allowed by the platform but the resulting
-bundle has no template and the component will throw at runtime.
+Delete a single file from an LWC bundle. Refuses to delete required files
+(.js and .js-meta.xml). Allowed file types: css, html, svg, json.
+Note: deleting html removes the template; the component will throw at runtime.
+
+Returns { alreadyDeleted: true } if the file does not exist (idempotent).
 
 Salesforce API
-Tooling API, v66.0.
+Tooling API, v66.0. Direct CRUD.
 
-Endpoint
-GET    /services/data/v66.0/tooling/query/?q=SELECT Id FROM LightningComponentResource WHERE LightningComponentBundleId = '...' AND FilePath LIKE '%{fileName}'
+Endpoints
+GET    /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
 DELETE /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}
 
 Headers
 Authorization: Bearer <access_token>
 
-Body
-None.
-
 Input (parameters)
-bundleName (string, required).
-fileName (string, required).
+bundleName (string, required) - DeveloperName of the bundle.
+fileName (string, required) - File name including extension, e.g. projectCard.svg.
 
 Result
-deleted (boolean).
-file (object) - { id, fileName, format, sizeBytes }.
+deleted (boolean) - true if deleted; absent when alreadyDeleted=true.
+alreadyDeleted (boolean, optional) - true when file did not exist.
+resourceId (string, when deleted) - Id of the deleted resource.
+filePath (string).
+format (string).
+deleteResult (object, when deleted) - Raw DELETE response.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Idempotent: a second call returns deleted=false with status
-  "already_deleted".
+- Idempotent: returns alreadyDeleted=true if file not found.
 
 Errors
-- NOT_DELETABLE: cannot delete `.js` or `.js-meta.xml`.
-- NOT_FOUND if file or bundle doesn't exist.
+- NOT_DELETABLE: cannot delete .js or .js-meta.xml files.
+- NOT_FOUND: bundle not found.
 
 Example request
 

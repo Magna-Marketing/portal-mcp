@@ -1,70 +1,74 @@
 Tool: update_flow
 
 Description
-Update an existing Flow. Each save creates a new draft version (the
-current active version is unaffected unless you also activate the new
-version with `deploy_flow`). To replace the active version, follow up
-with `deploy_flow` action `activate` on the new version number returned
-here.
+Update an existing Salesforce Flow by deploying a new version. Each successful deploy
+creates a new draft version under the same FlowDefinition. The currently active version
+is NOT affected unless you also pass `activateAfterDeploy: true` or include
+`<status>Active</status>` in the XML.
+
+API Corrections (vs. earlier documentation):
+- The endpoint requires multipart/form-data with a zip file, NOT a plain JSON body.
+- There is no separate concept of "deactivateOldVersions" — Salesforce enforces that
+  only one version is active at a time; activating a new version automatically deactivates
+  the old active one.
+- The modern approach (API v44+) to activate a new version is to set
+  `<status>Active</status>` inside the Flow XML. Alternatively use activateAfterDeploy.
 
 Salesforce API
-Metadata API (`Flow` type), v66.0. Deploy via `metadata/deployRequest`.
-The Metadata API saves the new XML as a new version under the same
-FlowDefinition.
+Metadata REST API v66.0 — deployRequest (multipart/form-data with zip).
+Tooling API v66.0 — FlowDefinition PATCH (for activateAfterDeploy only).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Endpoints
+POST /services/data/v66.0/metadata/deployRequest       (multipart/form-data)
+PATCH /services/data/v66.0/tooling/sobjects/FlowDefinition/{id}  (activate only)
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=<boundary>
 
-Body
-{
-  "fullName": "Account_Trigger_Flow",
-  "label": "Account Trigger Flow",
-  "description": "Sets default region on Account create (v5: NA region)",
-  "processType": "AutoLaunchedFlow",
-  "apiVersion": 62.0,
-  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Flow xmlns=\"http://soap.sforce.com/2006/04/metadata\">...</Flow>"
-}
+Multipart body parts
+1. json part: { "deployOptions": { "checkOnly": false, "singlePackage": true, ... } }
+2. file part: zip archive containing:
+   - package.xml  (declares Flow type + version)
+   - flows/<FlowApiName>.flow  (the updated Flow XML)
 
 Input (parameters)
-fullName (string, required) - Existing Flow API name.
-xml (string, required) - Full <Flow> XML for the new version.
-label (string, optional) - When you also want to update the FlowDefinition's master label.
-description (string, optional).
-processType (string, optional) - Cannot change once set; supplied only for validation.
-apiVersion (number, optional).
-runInMode (string, optional).
-deactivateOldVersions (boolean, optional, default false) - Mark prior
-  active versions Obsolete after this version is activated.
-activateAfterDeploy (boolean, optional, default false) - When true, also
-  run `deploy_flow` with `activate` on the new version.
-checkOnly (boolean, optional, default false).
+fullName (string, required) – Existing Flow API name (DeveloperName).
+xml (string, required) – Full <Flow> XML document for the new version. Must include
+  the root <Flow xmlns="http://soap.sforce.com/2006/04/metadata"> element.
+  To activate as part of the deploy, include <status>Active</status> in the XML.
+apiVersion (number, optional, default 66.0) – Version declared in package.xml.
+checkOnly (boolean, optional, default false) – Validate without saving.
+activateAfterDeploy (boolean, optional, default false) – After a successful deploy,
+  activate the new version using the Tooling API FlowDefinition PATCH.
+testLevel (string, optional, default "NoTestRun") – "NoTestRun" | "RunLocalTests" |
+  "RunAllTestsInOrg".
 
 Result
-deploy result fields plus:
-flow (object) - { id, definitionId, fullName, latestVersionNumber,
-  latestVersionStatus ("Draft"|"Active") }.
+deployResult (object) – Raw Salesforce deploy status, including:
+  deployResult.id, deployResult.done, deployResult.status,
+  deployResult.details.componentSuccesses[], deployResult.details.componentFailures[].
+flowDefinition (object|null, on success) – Tooling API FlowDefinition info:
+  { definitionId, masterLabel, latestVersionNumber, latestVersionId,
+    activeVersionNumber, activeVersionId }.
+activationResult (object|null) – Present when activateAfterDeploy=true.
 
 Required permissions
-- "Manage Flow" + "Customize Application".
+- "Manage Flow" + "Customize Application"
 
 Idempotency & limits
-- Each successful update bumps `latestVersionNumber` by one. Re-running
-  with the same XML still creates a new version.
-- Max 50 versions per Flow; use Salesforce's UI to purge old versions.
+- Re-running with the same XML still creates a new version. NOT idempotent.
+- Max 50 versions per Flow; use Salesforce Flow Builder to purge old versions.
 
 Errors
-- NOT_FOUND: fullName doesn't exist.
-- INVALID_FLOW_DEFINITION on bad XML.
+- NOT_FOUND / INVALID_CROSS_REFERENCE_KEY – fullName doesn't exist (use create_flow).
+- INVALID_FLOW_DEFINITION – invalid or missing XML elements.
+- Deploy failures appear in deployResult.details.componentFailures.
 
 Example request
 
 update_flow({
   "fullName": "Account_Trigger_Flow",
-  "xml": "<?xml version=\"1.0\" ... ?><Flow ...>...</Flow>",
-  "activateAfterDeploy": true,
-  "deactivateOldVersions": true
+  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Flow xmlns=\"http://soap.sforce.com/2006/04/metadata\">\n  <apiVersion>66.0</apiVersion>\n  <label>Account Trigger Flow</label>\n  <processType>AutoLaunchedFlow</processType>\n  <start>\n    <locationX>50</locationX><locationY>0</locationY>\n    <object>Account</object>\n    <recordTriggerType>Create</recordTriggerType>\n    <triggerType>RecordBeforeSave</triggerType>\n  </start>\n  <status>Draft</status>\n</Flow>",
+  "activateAfterDeploy": true
 })

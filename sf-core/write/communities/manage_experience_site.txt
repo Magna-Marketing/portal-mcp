@@ -1,58 +1,111 @@
 Tool: manage_experience_site
 
 Description
-Create / update / delete an Experience Cloud site (`Network`). For
-LWR/Aura Experience sites, content/page editing is via the
-`ExperienceBundle` Metadata API; this tool covers the site-level
-identity, status, login policy, and accepted profiles.
+Create or update an Experience Cloud site (Network sObject). For LWR/Aura
+Experience sites, content/page editing is via the `ExperienceBundle` Metadata
+API; this tool covers the site-level identity, status, login policy, and
+member preferences.
+
+NOTE: Delete is NOT supported by the Salesforce REST or Connect API. The
+Network sObject only supports describeSObjects(), query(), retrieve(), update().
+To deactivate a site, use operation "update" with status "DownForMaintenance".
 
 Salesforce API
-Connect API + Metadata API (`CommunityTemplateDefinition`,
-`Network`), v66.0.
+- Create: Connect REST API, v66.0. POST /connect/communities.
+- Update: REST API sObject, v66.0. PATCH /sobjects/Network/{id}.
 
-Endpoint
-POST /services/data/v66.0/connect/communities                         (create from template)
-PATCH /services/data/v66.0/connect/communities/{communityId}          (update)
-DELETE /services/data/v66.0/connect/communities/{communityId}         (delete)
+Endpoints
+POST  /services/data/v66.0/connect/communities                    (create)
+PATCH /services/data/v66.0/sobjects/Network/{id}                  (update)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-{ "name": "Customer Hub", "urlPathPrefix": "customer", "templateName": "Customer Service", "templateOptions": { } }
+Create Body
+{
+  "name": "Customer Hub",
+  "urlPathPrefix": "customerhub",
+  "templateName": "Customer Service",
+  "description": "Self-service portal",
+  "templateParams": {}
+}
+
+Update Body (Network sObject PATCH — fields that are updatable)
+{
+  "Status": "Live",
+  "Description": "Updated description",
+  "OptionsAllowMembersToFlag": true
+}
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-siteId (string, optional) - Required for non-create.
-siteName (string, optional) - Or use as create input.
-urlPathPrefix (string, required for create).
-templateName (string, optional, default "Customer Service") - Salesforce-provided template.
-description (string, optional).
-status (string, optional) - "Live" | "DownForMaintenance" | "UnderConstruction".
-allowMembersToFlag (boolean, optional).
-contentVisibility (string, optional).
-checkOnly (boolean, optional, default false).
+operation (string, required) - "create" | "update". Delete is not supported.
+siteId (string, optional) - Network record ID. Required for update when siteName is not provided.
+siteName (string, optional) - Display name used to resolve siteId for update, or as the name for create.
+urlPathPrefix (string, required for create; optional for update) - URL suffix, e.g. "customers" in MyDomain.my.site.com/customers.
+templateName (string, required for create) - Experience Builder template name.
+  Known values: "Customer Service", "Build Your Own", "Partner Central",
+  "Help Center", "B2B Commerce Template".
+  Use GET /connect/communities/templates to list all templates in the org.
+description (string, optional) - Site description.
+templateParams (object, optional, create only) - Template-specific parameters:
+  - "AuthenticationType": "UNAUTHENTICATED"|"AUTHENTICATED"|"AUTHENTICATED_WITH_PUBLIC_ACCESS"
+    (Build Your Own LWR template, API v52.0-55.0 only)
+  - "CreateStoreDefaults": "ALL"|"NONE" (B2B/D2C store templates)
+  - "WebstoreId": "<id>" (B2B Aura, B2B LWR, D2C templates)
+status (string, optional, update only) - "Live" | "DownForMaintenance" | "UnderConstruction".
+  Note: "UnderConstruction" is only valid before first publish. Once published,
+  a site cannot return to "UnderConstruction".
+allowMembersToFlag (boolean, optional, update only) - OptionsAllowMembersToFlag.
+directMessagesEnabled (boolean, optional, update only) - OptionsDirectMessagesEnabled.
+memberVisibility (boolean, optional, update only) - OptionsMemberVisibility.
+invitationsEnabled (boolean, optional, update only) - OptionsInvitationsEnabled.
+selfRegistrationEnabled (boolean, optional, update only) - OptionsSelfRegistrationEnabled.
+sendWelcomeEmail (boolean, optional, update only) - OptionsSendWelcomeEmail.
+guestChatterEnabled (boolean, optional, update only) - OptionsGuestChatterEnabled.
+nicknameDisplayEnabled (boolean, optional, update only) - OptionsNicknameDisplayEnabled.
+privateMessagesEnabled (boolean, optional, update only) - OptionsPrivateMessagesEnabled.
+reputationEnabled (boolean, optional, update only) - OptionsReputationEnabled.
 
-Result
-site (object) - { id, name, urlPathPrefix, status, siteUrl, template }.
+Result (create)
+Raw Community Create response: { id, name, url, loginUrl, siteUrl, status, ... }
+
+Result (update)
+Updated Network record: { Id, Name, Description, Status, UrlPathPrefix }
+(queried via SOQL after PATCH — PATCH itself returns HTTP 204 No Content)
 
 Required permissions
 - "Create and Set Up Experiences".
 
 Idempotency & limits
-- Not idempotent on create.
+- Create is not idempotent (duplicate urlPathPrefix raises DUPLICATE_VALUE).
+- Update is idempotent.
 
 Errors
 - DUPLICATE_VALUE on urlPathPrefix.
-- TEMPLATE_NOT_FOUND.
+- NOT_FOUND if siteId or siteName does not match any Network record.
 
-Example request
+Corrections from original documentation
+- The original doc listed PATCH and DELETE on /connect/communities/{communityId}.
+  The Connect REST API's /connect/communities/{communityId} endpoint only supports GET.
+- Update is correctly done via PATCH /sobjects/Network/{id} (sObject REST API).
+- Delete is not supported at all via any REST or Connect API endpoint for Network.
+- "templateOptions" body key does not exist; the correct key is "templateParams".
+- Status "DownForMaintenance" is the correct spelling (not camelCase).
+
+Example requests
 
 manage_experience_site({
   "operation": "create",
   "siteName": "Customer Hub",
-  "urlPathPrefix": "customer",
+  "urlPathPrefix": "customerhub",
   "templateName": "Customer Service",
   "description": "Self-service portal"
+})
+
+manage_experience_site({
+  "operation": "update",
+  "siteName": "Customer Hub",
+  "status": "DownForMaintenance",
+  "allowMembersToFlag": true
 })

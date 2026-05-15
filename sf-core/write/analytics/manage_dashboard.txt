@@ -1,22 +1,32 @@
 Tool: manage_dashboard
 
 Description
-Manage Salesforce dashboards. Operations: `list`, `describe`, `create`,
-`update`, `delete`, `refresh`. Returns raw Analytics REST responses.
-Components within a dashboard are managed by `manage_dashboard_component`.
+Manage Salesforce dashboards. Operations: `list`, `describe`, `read`, `create`,
+`update`, `delete`, `refresh`, `refreshStatus`. Returns raw Analytics REST
+responses. Components within a dashboard are managed by `manage_dashboard_component`.
 
 Salesforce API
 Analytics REST API, v66.0. `/analytics/dashboards/...`.
 
-Endpoint
-GET    /services/data/v66.0/analytics/dashboards                                   (list)
-GET    /services/data/v66.0/analytics/dashboards/{dashboardId}/describe            (describe)
-GET    /services/data/v66.0/analytics/dashboards/{dashboardId}                     (read)
-POST   /services/data/v66.0/analytics/dashboards                                   (create)
-PATCH  /services/data/v66.0/analytics/dashboards/{dashboardId}                     (update)
-DELETE /services/data/v66.0/analytics/dashboards/{dashboardId}                     (delete)
-PUT    /services/data/v66.0/analytics/dashboards/{dashboardId}                     (refresh)
-GET    /services/data/v66.0/analytics/dashboards/{dashboardId}/status              (refresh status)
+Corrections vs. original documentation:
+- `refresh` uses PUT on the Dashboard Results resource, NOT POST to a /refresh
+  sub-resource. Response contains a `statusUrl` pointing to the status endpoint.
+- `describe` uses GET /analytics/dashboards/{id}/describe and returns metadata
+  ONLY (no run). The `read` operation (GET /analytics/dashboards/{id}) runs the
+  dashboard and returns live data + metadata.
+- Dashboard create/update bodies must wrap metadata in a `dashboardMetadata` key.
+- `list` returns recently-used dashboards (recentItems) — there is no built-in
+  server-side filter by folderId; filtering is applied client-side.
+
+Endpoints
+GET    /services/data/v66.0/analytics/dashboards                            (list — recently used)
+POST   /services/data/v66.0/analytics/dashboards                            (create)
+GET    /services/data/v66.0/analytics/dashboards/{dashboardId}              (read — runs the dashboard)
+GET    /services/data/v66.0/analytics/dashboards/{dashboardId}/describe     (describe — metadata only)
+GET    /services/data/v66.0/analytics/dashboards/{dashboardId}/status       (refreshStatus)
+PUT    /services/data/v66.0/analytics/dashboards/{dashboardId}              (refresh — triggers background refresh)
+PATCH  /services/data/v66.0/analytics/dashboards/{dashboardId}              (update — save changes)
+DELETE /services/data/v66.0/analytics/dashboards/{dashboardId}              (delete)
 
 Headers
 Authorization: Bearer <access_token>
@@ -29,16 +39,7 @@ Body (create example)
     "name": "MTG Pipeline Dashboard",
     "developerName": "MTG_Pipeline_Dashboard",
     "folderId": "00lQg0000008abcAB",
-    "components": [
-      {
-        "componentType": "Bar",
-        "displayUnits": "Auto",
-        "header": "Top Stages",
-        "report": "00OQg0000004aBcDE",
-        "groupingColumn": "STAGE_NAME"
-      }
-    ],
-    "layout": { "columns": [ { "components": [ /* layout refs */ ] } ] }
+    "description": "Sales pipeline overview"
   }
 }
 
@@ -47,28 +48,28 @@ operation (string, required) - "list" | "describe" | "read" | "create"
   | "update" | "delete" | "refresh" | "refreshStatus".
 dashboardId (string, optional) - Required for describe / read / update /
   delete / refresh / refreshStatus.
-folderId (string, optional) - Filter for list.
-runningUser (string, optional) - User Id under which a dashboard is
-  evaluated (dynamic dashboards).
-dashboardMetadata (object, required for create / update) - See body example.
-limit, pageToken (optional, for list).
+dashboardMetadata (object, required for create / update) - Dashboard metadata:
+  name (string, required for create), developerName, folderId (required for create),
+  description, runningUser, components (array), layout (object).
+folderId (string, optional) - Client-side filter applied to list results.
+runningUser (string, optional) - User ID to run the dashboard as (read operation).
+confirm (boolean, required for delete) - Must be true.
 
 Result
-Operation-specific verbatim Analytics REST payload. For list:
-{
-  "dashboards": [{ "id", "name", "folderId", "ownerId", "describeUrl", ... }],
-  "nextPageToken": "..."
-}
-For refresh: { "id", "status" } with status going Running -> Complete.
+Operation-specific verbatim Analytics REST payload.
+- list: { recentItems: [{ id, name, folderId, url, describeUrl, ... }] }
+- describe: dashboard metadata without data (components, filters, layout, runningUser)
+- read: dashboard metadata + live component data
+- refresh: { id, statusUrl } — status URL to poll with refreshStatus
+- refreshStatus: { id, status, lastRefreshDate, ... }
 
 Required permissions
 - "API Enabled" + "Run Reports".
-- "Manage Dashboards" for create/update/delete and refresh of dashboards
-  in shared folders.
+- "Manage Dashboards" for create/update/delete.
 
 Idempotency & limits
-- Refresh is throttled (~1 per minute per dashboard).
-- Composite ops are not supported here; loop via this tool for bulk.
+- Refresh is rate-limited (~1 per minute per dashboard).
+- Dashboard limit: 25 components maximum.
 
 Errors
 - INVALID_DASHBOARD_ID, INSUFFICIENT_FOLDER_ACCESS, DASHBOARD_REFRESH_LIMIT.
@@ -76,3 +77,13 @@ Errors
 Example request (refresh)
 
 manage_dashboard({ "operation": "refresh", "dashboardId": "01ZQg0000004ZyAA" })
+
+Example request (create)
+
+manage_dashboard({
+  "operation": "create",
+  "dashboardMetadata": {
+    "name": "Sales Pipeline",
+    "folderId": "00lQg0000008abcAB"
+  }
+})

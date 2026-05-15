@@ -1,65 +1,90 @@
 Tool: deploy_flow
 
 Description
-Activate, deactivate, or validate an existing Flow version. Activation
-makes the chosen version the live one; deactivation transitions the
-active version to `Obsolete`. Validation runs the Metadata API in
-checkOnly mode.
+Activate, deactivate, or inspect an existing Salesforce Flow version via the Tooling API v66.0.
+
+Actions:
+- activate   – Makes the specified (or latest) version the live active version.
+- deactivate – Transitions the currently active version to Obsolete.
+- status     – Returns FlowDefinition info and recent version list. No changes made.
+
+API Corrections (vs. earlier documentation):
+- There is no "validate" action for this tool. Flow XML validation occurs as part of
+  create_flow or update_flow by setting checkOnly=true.
+- Activation sets `activeVersionNumber` on the FlowDefinition, NOT the Flow object.
+  Attempting to PATCH a Flow object's status directly throws INVALID_STATUS when the
+  version is already active.
+- FlowDefinition PATCH is technically deprecated for new-style flows (API v44+) in favor
+  of setting `<status>Active</status>` in the XML during deploy, but it remains the only
+  supported REST method for standalone activation/deactivation without re-deploying.
+- Activating a new version automatically deactivates the previously active version;
+  Salesforce enforces single active version per flow.
+- Deactivate sets `activeVersionNumber = 0` on the FlowDefinition via Tooling API.
 
 Salesforce API
-Metadata API + Tooling API, v66.0.
-- Activation/deactivation: update `FlowDefinition.ActiveVersionId` via
-  `PATCH /tooling/sobjects/FlowDefinition/{id}`.
-- Validation-only: `metadata/deployRequest` with `checkOnly=true`.
+Tooling API v66.0 — FlowDefinition PATCH (activate/deactivate).
+Tooling API v66.0 — FlowDefinition + Flow queries (status).
 
-Endpoint
+Endpoints
 PATCH /services/data/v66.0/tooling/sobjects/FlowDefinition/{flowDefinitionId}
-POST  /services/data/v66.0/metadata/deployRequest    (checkOnly=true)
+GET   /services/data/v66.0/tooling/query/?q=SELECT+...+FROM+FlowDefinition+WHERE+...
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body (activate)
-{
-  "Metadata": { "activeVersionNumber": 5 }
-}
+{ "Metadata": { "activeVersionNumber": 5 } }
+
+Body (deactivate)
+{ "Metadata": { "activeVersionNumber": 0 } }
+
+Finding the FlowDefinition ID
+The tool queries automatically:
+  SELECT Id, MasterLabel, LatestVersionId, ActiveVersionId
+  FROM FlowDefinition
+  WHERE DeveloperName = '<fullName>'
 
 Input (parameters)
-fullName (string, required) - Flow API name (DeveloperName).
-action (string, required) - "activate" | "deactivate" | "validate".
-versionNumber (number, optional) - Required for activate; defaults to
-  latest. Ignored for deactivate (the current active version is targeted).
-checkOnly (boolean, optional, default true for action="validate", else false).
-testLevel (string, optional, default "NoTestRun") - For validate in
-  production-like environments.
+fullName (string, required) – Flow API name (DeveloperName).
+action (string, required) – "activate" | "deactivate" | "status".
+versionNumber (number, optional) – Specific version to activate. Defaults to the latest
+  version when omitted. Ignored for deactivate and status actions.
 
 Result
-flow (object):
-  definitionId (string).
-  fullName (string).
-  activeVersionId (string|null).
-  activeVersionNumber (number|null).
-  status (string).
-deployResult (object|null) - When validating: deployId + componentFailures.
+flowDefinition (object) – FlowDefinition info:
+  { definitionId, masterLabel, latestVersionNumber, latestVersionId,
+    activeVersionNumber, activeVersionId }.
+patchResult (object|null) – Raw Tooling API PATCH response (activate/deactivate only).
+recentVersions (array|null) – Up to 10 recent Flow versions with Id, VersionNumber,
+  Status, ApiVersion, LastModifiedDate (status action only).
+message (string|null) – Informational message for no-op cases.
 
 Required permissions
-- "Manage Flow" + "Customize Application".
+- "Manage Flow" + "Customize Application"
 
 Idempotency & limits
-- Activate of an already-active version is a no-op.
-- Deactivate of a flow with no active version is a no-op.
-- A flow cannot have two active versions; activating v5 deactivates v4.
+- Activating an already-active version is a no-op (tool returns message, no PATCH made).
+- Deactivating a flow with no active version is a no-op.
+- A flow cannot have two active versions simultaneously.
 
 Errors
-- NOT_FOUND: fullName doesn't exist.
-- INVALID_FLOW_VERSION: versionNumber doesn't exist or has Status="Obsolete".
-- VALIDATION_FAILED with deployResult.componentFailures.
+- Flow NOT_FOUND – fullName doesn't exist in the org.
+- Version NOT_FOUND – the specified versionNumber doesn't exist.
+- INVALID_STATUS – attempting to PATCH a Flow object directly (tool uses FlowDefinition).
 
-Example request (activate v5)
+Example request (activate latest version)
 
-deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "activate", "versionNumber": 5 })
+deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "activate" })
 
-Example request (validate latest)
+Example request (activate specific version)
 
-deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "validate" })
+deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "activate", "versionNumber": 3 })
+
+Example request (deactivate)
+
+deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "deactivate" })
+
+Example request (get status)
+
+deploy_flow({ "fullName": "Account_Trigger_Flow", "action": "status" })

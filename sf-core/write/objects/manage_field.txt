@@ -1,97 +1,155 @@
 Tool: manage_field
 
 Description
-Create or update a custom field on a Salesforce object via the Metadata
-API. Use to add fields, change labels/help text, expand picklists,
-modify formula bodies, or change required/unique flags. Standard fields
-support a narrower set of properties; the tool surfaces the platform's
-errors for unsupported edits.
+Create, update, upsert, or delete a custom field on a Salesforce object using
+the Metadata API (CustomField type) v66.0.
 
-After a field is created, callers usually also want to grant FLS — see
-`manage_field_permissions`.
+The fullName used internally is the qualified format: ObjectAPIName.FieldAPIName
+(e.g. "Project__c.Status__c"). The tool constructs this from the 'object' and
+'fullName' parameters.
+
+IMPORTANT: A field's type cannot be changed after creation. Changing type
+requires delete + recreate (causes data loss). The 'upsert' operation creates
+or updates but cannot change the field type.
+
+After creating a custom field, call 'manage_field_permissions' to grant FLS
+to the appropriate permission sets or profiles.
 
 Salesforce API
-Metadata API (`CustomField` inside `CustomObject`), v66.0.
+Metadata API (CustomField type), v66.0.
+Underlying SOAP endpoint: /services/Soap/m/66.0
+jsforce abstraction: conn.metadata.create/update/delete('CustomField', ...)
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Corrections vs original documentation:
+- Original doc listed "POST /services/data/v66.0/metadata/deployRequest" as
+  the endpoint. The correct programmatic approach uses jsforce's Metadata SOAP
+  API (createMetadata / updateMetadata / deleteMetadata) — no ZIP assembly.
+- Added many missing field type-specific parameters: formulaReturnType,
+  caseSensitive, displayFormat (AutoNumber), startingNumber, maskType, maskChar,
+  summaryOperation, summarizedField, summaryForeignKey, summaryFilterItems,
+  relationshipOrder, writeRequiresMasterRead, reparentableMasterDetail.
+- valueSet structure corrected to match Metadata API spec: uses
+  valueSetDefinition.value[] for inline values and valueSetName for global sets.
+- 'checkOnly' removed — not applicable to individual SOAP metadata calls.
+- Picklist value schema corrected: fullName is the stored API value; label is
+  the display text. isActive and color are additional supported properties.
+- Added ExternalLookup, IndirectLookup, Hierarchy field types.
 
-Headers
+Headers (managed by jsforce internally)
 Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body (create example)
-{
-  "operation": "create",
-  "object": "Project__c",
-  "fullName": "Project_Status__c",
-  "label": "Project Status",
-  "type": "Picklist",
-  "valueSet": {
-    "valueSetDefinition": {
-      "sorted": false,
-      "value": [
-        { "fullName": "Not Started", "default": true, "label": "Not Started" },
-        { "fullName": "In Progress", "default": false, "label": "In Progress" },
-        { "fullName": "Complete",    "default": false, "label": "Complete" }
-      ]
-    }
-  },
-  "required": false,
-  "trackHistory": true
-}
+Content-Type: text/xml; charset=utf-8
+SOAPAction: createMetadata | updateMetadata | deleteMetadata
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "upsert" | "delete".
-object (string, required) - sObject API name (e.g. "Project__c").
-fullName (string, required) - Field API name (e.g. "Project_Status__c"
-  or "Status__c"; namespace prefix added by platform).
-label (string, required for create).
-type (string, required for create) - Salesforce field type:
+object (string, required) - Parent object API name (e.g. "Project__c",
+  "Account"). Used to build the qualified fullName.
+fullName (string, required) - Field API name without object prefix
+  (e.g. "Status__c"). Tool builds qualified name as Object.Field.
+label (string, required for create) - Display label.
+type (string, required for create) - Field type. Cannot change after creation:
   "Text" | "TextArea" | "LongTextArea" | "Html" | "Number" | "Currency"
-  | "Percent" | "Date" | "DateTime" | "Time" | "Email" | "Phone"
-  | "Url" | "Checkbox" | "Picklist" | "MultiselectPicklist"
-  | "Lookup" | "MasterDetail" | "Hierarchy" | "Formula" | "Summary"
-  | "AutoNumber" | "EncryptedText" | "Location" | "ExternalLookup"
-  | "IndirectLookup".
-length, precision, scale, byteLength (number, optional) - Field-type-specific.
-required (boolean, optional, default false).
-unique (boolean, optional, default false).
-externalId (boolean, optional, default false).
-description, inlineHelpText (string, optional).
-defaultValue (string, optional) - Formula expression for default.
-formula (string, optional) - For Formula type. Use Salesforce formula syntax.
+  | "Percent" | "Date" | "DateTime" | "Time" | "Email" | "Phone" | "Url"
+  | "Checkbox" | "Picklist" | "MultiselectPicklist" | "Lookup" | "MasterDetail"
+  | "Hierarchy" | "Formula" | "Summary" | "AutoNumber" | "EncryptedText"
+  | "Location" | "ExternalLookup" | "IndirectLookup".
+length (number, optional) - Max chars: required for Text (1–255) and
+  EncryptedText. Required for LongTextArea/Html (256–131072).
+precision (number, optional) - Total digits for Number/Currency/Percent (1–18).
+  Must be > scale.
+scale (number, optional) - Decimal places for Number/Currency/Percent (0–17).
+byteLength (number, optional) - Byte length for EncryptedText (32–1333).
+required (boolean, optional, default false) - Field required on record create.
+unique (boolean, optional, default false) - Enforce uniqueness.
+caseSensitive (boolean, optional) - Case-sensitive uniqueness for Text.
+externalId (boolean, optional, default false) - Mark as External ID.
+description (string, optional) - Internal description. Not shown to users.
+inlineHelpText (string, optional) - Help text shown to users. Max 510 chars.
+defaultValue (string, optional) - Default value expression.
+formula (string, optional) - Formula body. Required for type="Formula".
+formulaReturnType (string, optional) - Required for Formula:
+  "Text" | "Number" | "Currency" | "Percent" | "Date" | "DateTime" | "Checkbox".
 formulaTreatBlanksAs (string, optional) - "BlankAsZero" | "BlankAsBlank".
-referenceTo (string, optional) - For Lookup/MasterDetail target sObject.
-relationshipName (string, optional) - For Lookup/MasterDetail.
-relationshipLabel (string, optional).
-deleteConstraint (string, optional, default "SetNull") - "Restrict" |
-  "SetNull" | "Cascade" (Lookup deletes only).
-valueSet (object, optional) - For Picklist/MultiselectPicklist.
-trackHistory (boolean, optional, default false).
-trackFeedHistory (boolean, optional, default false).
-visibleLines (number, optional) - For Multiselect picklists.
-checkOnly (boolean, optional, default false).
+referenceTo (string, optional) - Target object for Lookup/MasterDetail/
+  ExternalLookup/IndirectLookup, or child object for Summary roll-up.
+relationshipName (string, optional) - Relationship API name (no __r suffix).
+relationshipLabel (string, optional) - Plural label for related list.
+relationshipOrder (number, optional) - 0 or 1 for multiple MasterDetail rels.
+deleteConstraint (string, optional, default "SetNull") - Lookup only:
+  "Restrict" | "SetNull" | "Cascade".
+writeRequiresMasterRead (boolean, optional) - MasterDetail: allow child edit
+  without parent edit.
+reparentableMasterDetail (boolean, optional) - Allow re-parenting child records.
+valueSet (object, optional) - For Picklist/MultiselectPicklist:
+  { restricted: boolean, sorted: boolean,
+    valueSetName: string (global value set name),
+    values: [{ fullName, label, default, isActive, color }, ...] }
+  Use valueSetName OR values, not both.
+visibleLines (number, optional) - Visible rows for LongTextArea, Html,
+  and MultiselectPicklist. Required for these types.
+maskType (string, optional) - EncryptedText masking:
+  "all" | "lastFour" | "creditCard" | "nino" | "ssn" | "sin".
+maskChar (string, optional) - EncryptedText mask char: "asterisk" | "X".
+displayFormat (string, optional) - AutoNumber format e.g. "AN-{0000}".
+  Required for AutoNumber type.
+startingNumber (number, optional) - AutoNumber starting counter. Default 0.
+trackHistory (boolean, optional, default false) - Track field history.
+trackFeedHistory (boolean, optional, default false) - Show changes in Chatter.
+summarizedField (string, optional) - Qualified field to aggregate for Summary
+  (e.g. "Opportunity.Amount"). Required for Summary type.
+summaryOperation (string, optional) - "COUNT" | "SUM" | "MIN" | "MAX".
+  Required for Summary type.
+summaryForeignKey (string, optional) - Lookup on child back to this object
+  (e.g. "Opportunity.AccountId"). Required for Summary type.
+summaryFilterItems (array, optional) - Filter conditions for Summary roll-up.
+  Each: { field, operation, value }.
 
 Result
-Same shape as `manage_object`'s deploy result: deployId, status, done,
-numberComponents*, componentSuccesses, componentFailures.
+{ operation, fullName: "Object.Field", result: SaveResult }
+SaveResult: { fullName, success (boolean), errors (array) }
 
 Required permissions
-- "Customize Application", "Modify All Data".
+- Customize Application
+- Modify All Data
 
 Idempotency & limits
-- `upsert` idempotent on `(object, fullName)`. `create` is not.
-- A field cannot change type after create; type-changes require
-  delete + recreate (data loss).
-- Required-flag flips on existing fields require all rows to have a value.
-- Adding picklist values is non-blocking; renaming values is.
+- "upsert" idempotent on (object, fullName). "create" is not.
+- Field type cannot change after create.
+- Adding picklist values is non-blocking; renaming values may block users.
+- Required flag on existing field: all records must already have a value.
+- Custom field limit per object: 800 custom fields.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD, FIELD_FILTER_VALIDATION_EXCEPTION
-  (on bad valueSet), CIRCULAR_DEPENDENCY (formula).
+- DUPLICATE_DEVELOPER_NAME: field with this name already exists.
+- FIELD_FILTER_VALIDATION_EXCEPTION: bad valueSet definition.
+- CIRCULAR_DEPENDENCY: self-referencing formula.
+- INVALID_FIELD: unsupported property combination for the field type.
 
-Example request (add lookup field)
+Example request (create picklist field)
+
+manage_field({
+  "operation": "create",
+  "object": "Project__c",
+  "fullName": "Status__c",
+  "label": "Status",
+  "type": "Picklist",
+  "valueSet": {
+    "restricted": true,
+    "values": [
+      { "fullName": "Not_Started", "label": "Not Started", "default": true },
+      { "fullName": "In_Progress", "label": "In Progress" },
+      { "fullName": "Complete",    "label": "Complete" }
+    ]
+  },
+  "required": false,
+  "trackHistory": true
+})
+
+Response:
+{ "operation": "create", "fullName": "Project__c.Status__c",
+  "result": { "fullName": "Project__c.Status__c", "success": true, "errors": [] } }
+
+Example request (create lookup field)
 
 manage_field({
   "operation": "create",
@@ -105,3 +163,20 @@ manage_field({
   "deleteConstraint": "SetNull",
   "required": false
 })
+
+Example request (create formula field)
+
+manage_field({
+  "operation": "create",
+  "object": "Opportunity",
+  "fullName": "Days_Open__c",
+  "label": "Days Open",
+  "type": "Formula",
+  "formulaReturnType": "Number",
+  "formula": "TODAY() - CreatedDate",
+  "scale": 0
+})
+
+Example request (delete field)
+
+manage_field({ "operation": "delete", "object": "Project__c", "fullName": "Old_Field__c" })

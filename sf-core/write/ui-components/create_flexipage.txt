@@ -1,69 +1,57 @@
 Tool: create_flexipage
 
 Description
-Create a new Lightning Page (FlexiPage). Three common types:
-- `RecordPage` (requires `objectType`).
-- `AppPage`.
-- `HomePage`.
+Create a new Lightning Page (FlexiPage). Three supported types:
+- RecordPage (requires objectType — the sObject API name).
+- AppPage.
+- HomePage.
 
-The page is created from a starter template by default with one empty
-region (`main`). After creation, add components with
-`add_component_to_region` and assign to apps/profiles via Setup or
-`get_page_assignments`-driven Metadata edits.
+A default template is selected based on the page type unless overridden.
+One empty 'main' region (type Region, appendable) is created by default
+unless `regions` is specified.
 
 Salesforce API
-Metadata API (`FlexiPage`), v66.0.
+Metadata API (FlexiPage), v66.0.
+Uses the jsforce conn.metadata.create() SOAP-based helper (not REST deployRequest).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Correction vs. original doc: The original doc referenced the REST
+`POST /services/data/v66.0/metadata/deployRequest` (zip-based deploy). The
+MCP server uses the Metadata SOAP API via jsforce's metadata.create() which
+is simpler and produces the same result.
 
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-{
-  "fullName": "Project__c_Record_Page",
-  "label": "Project Record Page",
-  "description": "Default record page for Project",
-  "type": "RecordPage",
-  "objectType": "Project__c",
-  "template": "flexipage:recordHomeWithHeader",
-  "regions": [
-    { "name": "main", "type": "Region", "appendable": true }
-  ]
-}
+Endpoint (SOAP, via jsforce)
+SOAP: MetadataService.createMetadata('FlexiPage', metadata)
 
 Input (parameters)
-fullName (string, required) - DeveloperName.
-label (string, required).
-description (string, optional).
+fullName (string, required) - DeveloperName, e.g. "Project__c_Record_Page".
+label (string, required) - Display label shown in Setup.
 type (string, required) - "RecordPage" | "AppPage" | "HomePage".
 objectType (string, required for RecordPage) - sObject API name.
-template (string, optional, default chosen by `type`):
-  RecordPage default: "flexipage:recordHomeWithHeader".
-  HomePage default:   "flexipage:defaultHome".
-  AppPage default:    "flexipage:defaultAppHome".
+description (string, optional).
+template (string, optional) - Template name. Defaults:
+  RecordPage → "flexipage:recordHomeWithHeader"
+  HomePage   → "flexipage:defaultHome"
+  AppPage    → "flexipage:defaultAppHome"
+masterLabel (string, optional) - Internal master label. Defaults to label.
 regions (array, optional) - Initial regions:
   name (string), type (string, default "Region"), appendable (boolean).
-  Default: one region named "main" of type "Region", appendable=true.
-masterLabel (string, optional) - Internal label override.
-checkOnly (boolean, optional, default false).
+  Default: [{ name: "main", type: "Region", appendable: true }].
 
-Result
-deploy (object).
-flexiPage (object, on success) - { id, name, label, type, sObject, regions: [{ name, type, componentCount: 0 }] }.
+Result (raw Metadata API create response)
+fullName (string).
+success (boolean).
+id (string).
+errors (array).
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Not idempotent.
+- Not idempotent (fails on duplicate fullName).
 
 Errors
 - DUPLICATE_DEVELOPER_NAME.
-- INVALID_TYPE: bad type or bad objectType.
-- INVALID_OBJECT_TYPE_FOR_RECORD_PAGE.
+- INVALID_TYPE: bad type or objectType combination.
 
 Example request
 

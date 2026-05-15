@@ -1,46 +1,88 @@
 Tool: manage_letterhead
 
 Description
-Create / update / delete Letterheads (`BrandTemplate`) — the header/footer
-container for HTML email templates.
+Create, update, delete, activate, or deactivate Salesforce Letterheads
+(BrandTemplate) via the Metadata API v66.0. Letterheads define the logo,
+header, footer, colors, and separator lines used in HTML email templates.
 
 Salesforce API
-Metadata API (`Letterhead`), v66.0.
+Metadata API (Letterhead type), v66.0. Managed via jsforce conn.metadata
+CRUD methods (not a REST deployRequest zip upload).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Endpoints (internal, via jsforce)
+conn.metadata.create("Letterhead", metadata)
+conn.metadata.read("Letterhead", fullName)
+conn.metadata.update("Letterhead", metadata)
+conn.metadata.delete("Letterhead", fullName)
 
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
+Corrections vs. original documentation
+- The original doc listed POST /services/data/v66.0/metadata/deployRequest,
+  which requires building a multipart zip payload. The tool instead uses jsforce
+  Metadata API CRUD methods, which are simpler and correct.
+- "logoStaticResource" does NOT exist as a header field in the Letterhead
+  Metadata API. The correct field is "logo", which is a document reference
+  string in the format "FolderName/DocumentName.ext".
+- Required Letterhead fields on create: available, backgroundColor, bodyColor,
+  header.backgroundColor, header.height, footer.backgroundColor, footer.height.
+- topLine / middleLine / bottomLine are LetterheadLine objects with "color" and
+  "height" fields (NOT "style" — the style is a separate LINE_STYLES enum
+  applied via the Metadata API file, not exposed directly via API CRUD).
+- activate/deactivate set the "available" boolean field.
 
-Body
-N/A.
+Metadata type fields
+fullName      string   Required. DeveloperName/API name of the letterhead.
+name          string   Required for create. Display label.
+available     boolean  Required. Whether the letterhead is available for use.
+backgroundColor string Required. Overall background color in hex, e.g. #FFFFFF.
+bodyColor       string Required. Body section color in hex.
+description     string Optional.
+header          LetterheadHeaderFooter  Required.
+footer          LetterheadHeaderFooter  Required.
+topLine         LetterheadLine          Optional.
+middleLine      LetterheadLine          Optional.
+bottomLine      LetterheadLine          Optional.
+
+LetterheadHeaderFooter fields
+backgroundColor string  Required. Section background color in hex.
+height          int     Required. Height in pixels.
+logo            string  Optional. Document reference, e.g. "MyFolder/Logo.png".
+horizontalAlignment  "None"|"Left"|"Center"|"Right"   Optional.
+verticalAlignment    "None"|"Top"|"Middle"|"Bottom"   Optional.
+
+LetterheadLine fields
+color   string  Required. Line color in hex.
+height  int     Required. Line height in pixels.
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
-fullName (string, required) - DeveloperName.
-name (string, required for create).
+fullName (string, required) - Letterhead DeveloperName. Required for all operations.
+name (string, required for create) - Display label.
 description (string, optional).
-isActive (boolean, optional, default true).
-header (object, optional) - { logoStaticResource, color, height }.
-footer (object, optional) - { color, content }.
-backgroundColor (string, optional).
-topColor, middleColor, bottomColor (string, optional).
-checkOnly (boolean, optional, default false).
+available (boolean, optional, default true on create).
+backgroundColor (string, required for create) - Overall background hex color.
+bodyColor (string, required for create) - Body background hex color.
+header (object, required for create) - { backgroundColor, height, logo?,
+  horizontalAlignment?, verticalAlignment? }.
+footer (object, required for create) - { backgroundColor, height, logo?,
+  horizontalAlignment?, verticalAlignment? }.
+topLine (object, optional) - { color, height }.
+middleLine (object, optional) - { color, height }.
+bottomLine (object, optional) - { color, height }.
 
 Result
-deploy (object).
-letterhead (object).
+create:  { "create": { "fullName": "...", "success": true } }
+update:  { "update": { "fullName": "...", "success": true } }
+delete:  { "delete": { "fullName": "...", "success": true } }
 
 Required permissions
 - "Manage Public Templates".
 
-Idempotency & limits
-- update idempotent.
+Idempotency
+- update, activate, deactivate are idempotent.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME.
+- DUPLICATE_DEVELOPER_NAME
+- REQUIRED_FIELD_MISSING
 
 Example request
 
@@ -48,6 +90,17 @@ manage_letterhead({
   "operation": "create",
   "fullName": "MTG_Brand",
   "name": "MTG Brand",
-  "header": { "logoStaticResource": "MTG_BrandLogo", "color": "#0A2540" },
-  "backgroundColor": "#FFFFFF"
+  "backgroundColor": "#FFFFFF",
+  "bodyColor": "#F5F5F5",
+  "header": {
+    "backgroundColor": "#0A2540",
+    "height": 80,
+    "logo": "BrandAssets/MTGLogo.png",
+    "horizontalAlignment": "Center"
+  },
+  "footer": {
+    "backgroundColor": "#0A2540",
+    "height": 40
+  },
+  "topLine": { "color": "#0A2540", "height": 2 }
 })

@@ -1,70 +1,103 @@
 Tool: manage_bulk_ingest_job
 
 Description
-Full Bulk API 2.0 ingest job lifecycle in one tool: create, upload
-data (CSV or JSON), close (start processing), abort, get status, fetch
-successful/failed/unprocessed results, delete. Use Bulk API 2.0 for
-loads above ~10,000 records or any time you want resumable batches.
+Full Bulk API 2.0 ingest job lifecycle: create, upload data (CSV),
+close (trigger processing), abort, poll status, fetch results, delete, list all jobs.
+Use for large-scale DML operations (>~10,000 records) or any time you need
+resumable, asynchronous batch processing.
+
+KEY DIFFERENCES/CORRECTIONS from original documentation:
+- contentType is ONLY "CSV" — JSON is NOT supported for ingest jobs.
+  The original documentation incorrectly suggested JSON as an option.
+- uploadData uses PUT (not POST) to /jobs/ingest/{jobId}/batches with Content-Type: text/csv.
+- close operation sends PATCH with body { "state": "UploadComplete" } (not "close").
+- abort operation sends PATCH with body { "state": "Aborted" } (not "abort").
+- The 'listAll' operation (GET /jobs/ingest) supports a 'queryLocator' parameter for pagination,
+  not a generic 'nextPage' — the response includes 'nextRecordsUrl' with the locator value.
+- 'parseResultsAs' is a client-side convenience option that parses the CSV response into
+  an array of row objects when set to "rows".
+- Job states from the API: Open → UploadComplete → InProgress → JobComplete | Failed | Aborted.
+  Note: 'InProgress' is an actual state returned by the status endpoint (not in original docs).
 
 Salesforce API
 Bulk API 2.0, v66.0.
 
-Endpoint
-POST   /services/data/v66.0/jobs/ingest                                                  (create)
-PUT    /services/data/v66.0/jobs/ingest/{jobId}/batches                                  (upload data)
-PATCH  /services/data/v66.0/jobs/ingest/{jobId}                                          (close or abort: state)
-GET    /services/data/v66.0/jobs/ingest/{jobId}                                          (get status)
-GET    /services/data/v66.0/jobs/ingest/{jobId}/successfulResults                        (CSV)
-GET    /services/data/v66.0/jobs/ingest/{jobId}/failedResults                            (CSV)
-GET    /services/data/v66.0/jobs/ingest/{jobId}/unprocessedrecords                       (CSV)
-DELETE /services/data/v66.0/jobs/ingest/{jobId}                                          (delete)
+Endpoints
+POST   /services/data/v66.0/jobs/ingest                                 (create)
+PUT    /services/data/v66.0/jobs/ingest/{jobId}/batches                 (uploadData — Content-Type: text/csv)
+PATCH  /services/data/v66.0/jobs/ingest/{jobId}                        (close: { state: "UploadComplete" })
+PATCH  /services/data/v66.0/jobs/ingest/{jobId}                        (abort: { state: "Aborted" })
+GET    /services/data/v66.0/jobs/ingest/{jobId}                        (status)
+GET    /services/data/v66.0/jobs/ingest/{jobId}/successfulResults      (CSV)
+GET    /services/data/v66.0/jobs/ingest/{jobId}/failedResults          (CSV)
+GET    /services/data/v66.0/jobs/ingest/{jobId}/unprocessedrecords     (CSV — note lowercase 'r')
+DELETE /services/data/v66.0/jobs/ingest/{jobId}                        (delete)
+GET    /services/data/v66.0/jobs/ingest                                (listAll)
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json (create/state) or text/csv (data upload)
+Content-Type: application/json (create/close/abort)
+Content-Type: text/csv (uploadData)
 
-Body
-Create:
-{ "object": "Account", "operation": "insert", "lineEnding": "LF", "columnDelimiter": "COMMA", "contentType": "CSV", "externalIdFieldName": null, "assignmentRuleId": null }
+Body (create)
+{
+  "object": "Account",
+  "operation": "insert",
+  "contentType": "CSV",
+  "lineEnding": "LF",
+  "columnDelimiter": "COMMA",
+  "externalIdFieldName": null,
+  "assignmentRuleId": null
+}
 
 Input (parameters)
-operation (string, required) - "create" | "uploadData" | "close" | "abort" | "status" | "successfulResults" | "failedResults" | "unprocessedResults" | "delete".
-jobId (string, required for non-create).
-sObject (string, required for create).
+operation (string, required) - "create" | "uploadData" | "close" | "abort" | "status" |
+  "successfulResults" | "failedResults" | "unprocessedRecords" | "delete" | "listAll".
+jobId (string, required for all except create and listAll).
+sObject (string, required for create) - Object API name, e.g. "Account", "Contact".
 ingestOperation (string, required for create) - "insert" | "update" | "upsert" | "delete" | "hardDelete".
-externalIdFieldName (string, required for create when ingestOperation="upsert").
-contentType (string, optional, default "CSV") - "CSV" | "JSON".
+externalIdFieldName (string, required when ingestOperation="upsert") - External ID field API name.
 columnDelimiter (string, optional, default "COMMA") - "BACKQUOTE"|"CARET"|"COMMA"|"PIPE"|"SEMICOLON"|"TAB".
-lineEnding (string, optional, default "LF") - "LF" | "CRLF".
-assignmentRuleId (string, optional).
-data (string, optional, for uploadData) - CSV body or JSON array string.
-parseResultsAs (string, optional, default "csv") - "csv" | "rows".
+lineEnding (string, optional, default "LF") - "LF" | "CRLF". Must match the actual CSV data.
+assignmentRuleId (string, optional) - Assignment rule ID for Case/Lead.
+isPkChunkingEnabled (boolean, optional) - Adds Sforce-Enable-PKChunking header for better performance.
+data (string, required for uploadData) - Raw CSV text. First row must be field API names.
+parseResultsAs (string, optional, default "csv") - "csv" | "rows" (for result operations).
+queryLocator (string, optional, for listAll) - Pagination locator from previous listAll response.
 
 Result (per operation)
-For create: { jobId, state, contentUrl, lineEnding, columnDelimiter, contentType, object, operation, createdById, createdDate }.
-For uploadData: { jobId, status: "uploaded", contentSize }.
-For close/abort: { jobId, state }.
-For status: { jobId, state, recordsProcessed, retries, totalProcessingTime, errorMessage, numberRecordsFailed, ... }.
-For successfulResults / failedResults / unprocessedResults: { jobId, csv (string) | rows (array) }.
-For delete: { jobId, deleted: true }.
+create:   Full job info including { id, state: "Open", contentUrl, object, operation, contentType, lineEnding, columnDelimiter, createdById, createdDate, systemModstamp, apiVersion, jobType, concurrencyMode, ... }
+uploadData: { jobId, status: "uploaded", result: null }
+close:    Full job info with state updated to "UploadComplete".
+abort:    Full job info with state updated to "Aborted".
+status:   { id, state, numberRecordsProcessed, numberRecordsFailed, retries, totalProcessingTime, errorMessage, apiActiveProcessingTime, apexProcessingTime, ... }
+successfulResults: { jobId, csv: "..." } or { jobId, rows: [...] } — columns include sf__Id, sf__Created.
+failedResults:     { jobId, csv: "..." } or { jobId, rows: [...] } — columns include sf__Id, sf__Error.
+unprocessedRecords: { jobId, csv: "..." } or { jobId, rows: [...] }.
+delete:   { jobId, deleted: true }
+listAll:  { records: [...], done: boolean, nextRecordsUrl?: string }
 
 Required permissions
 - "API Enabled" + DML permissions on the sObject.
+- "Bulk API Hard Delete" for hardDelete operation.
 
 Idempotency & limits
 - Job creation is not idempotent.
-- 150 million records / 24 hours per org (`get_org_limits.DailyBulkApi*`).
-- Once `state="UploadComplete"` (after close), you cannot change the data.
+- Must call close (UploadComplete) after all uploads — processing does not start without it.
+- Results files available for 7 days after job completion.
+- Job must be in UploadComplete, JobComplete, Aborted, or Failed state to be deleted.
 
 Errors
-- INVALID_JOB_STATE on calling close before uploadData.
-- DAILY_LIMIT_EXCEEDED.
+- INVALID_JOB_STATE if attempting operations in wrong state.
+- DAILY_LIMIT_EXCEEDED for org-level Bulk API limits.
 
 Example request (full lifecycle)
 
 manage_bulk_ingest_job({ "operation": "create", "sObject": "Account", "ingestOperation": "upsert", "externalIdFieldName": "External_Id__c" })
-  -> jobId
+  -> { "id": "<jobId>", "state": "Open", ... }
 manage_bulk_ingest_job({ "operation": "uploadData", "jobId": "<jobId>", "data": "External_Id__c,Name,Industry\nA1,ACME,Tech\n..." })
 manage_bulk_ingest_job({ "operation": "close", "jobId": "<jobId>" })
-manage_bulk_ingest_job({ "operation": "status", "jobId": "<jobId>" })           // poll
-manage_bulk_ingest_job({ "operation": "successfulResults", "jobId": "<jobId>" })
+  -> { "state": "UploadComplete", ... }
+manage_bulk_ingest_job({ "operation": "status", "jobId": "<jobId>" })   // poll until state = JobComplete or Failed
+manage_bulk_ingest_job({ "operation": "successfulResults", "jobId": "<jobId>", "parseResultsAs": "rows" })
+manage_bulk_ingest_job({ "operation": "delete", "jobId": "<jobId>" })

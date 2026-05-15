@@ -1,70 +1,90 @@
 Tool: manage_report_folder
 
 Description
-Manage report and dashboard folders. Operations: `list`, `describe`,
-`create`, `update`, `delete`, `contents`. Folder type is one of `Report`
-or `Dashboard`. Use to organize reports/dashboards or grant access via
-sharing settings.
+Manage report and dashboard folders using the Analytics Folders REST API v66.0.
+Operations: `list`, `describe`, `create`, `update`, `delete`, `children`,
+`shares`, `addShares`, `replaceShares`. Use to organize reports/dashboards and
+manage access via sharing entries.
 
 Salesforce API
-Analytics REST API + REST API (Folder is an sObject), v66.0.
-- `GET /folders` (Analytics).
-- `Folder` SOQL for sharing details.
-- Metadata API for `Folder.share` updates.
+Analytics Folders REST API, v66.0.
+Base path: /services/data/v66.0/folders  (NOT /analytics/folders — that was incorrect).
 
-Endpoint
-GET    /services/data/v66.0/folders                                                  (list)
-GET    /services/data/v66.0/folders/{folderId}                                       (describe)
-POST   /services/data/v66.0/folders                                                  (create)
-PATCH  /services/data/v66.0/folders/{folderId}                                       (update)
-DELETE /services/data/v66.0/folders/{folderId}                                       (delete)
-GET    /services/data/v66.0/folders/{folderId}/folderItems                           (contents)
+Corrections vs. original documentation:
+- The base path is /folders, not /analytics/folders.
+- The contents endpoint was incorrectly listed as /folders/{id}/folderItems.
+  The correct endpoint for subfolders is /folders/{id}/children.
+- Folder shares have dedicated endpoints: /folders/{id}/shares (GET/POST/PUT).
+- type values in the API are lowercase: "report" and "dashboard" (not "Report"/"Dashboard").
+
+Endpoints
+GET    /services/data/v66.0/folders                               (list — optional ?type=report|dashboard)
+POST   /services/data/v66.0/folders                               (create)
+GET    /services/data/v66.0/folders/{folderId}                    (describe)
+PATCH  /services/data/v66.0/folders/{folderId}                    (update)
+DELETE /services/data/v66.0/folders/{folderId}                    (delete)
+GET    /services/data/v66.0/folders/{folderId}/children           (list first-level subfolders)
+GET    /services/data/v66.0/folders/{folderId}/shares             (list shares)
+POST   /services/data/v66.0/folders/{folderId}/shares             (add shares)
+PUT    /services/data/v66.0/folders/{folderId}/shares             (replace all shares)
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
-Content-Type: application/json    (POST/PATCH)
+Content-Type: application/json    (POST/PATCH/PUT)
 
 Body (create example)
 {
   "name": "MTG Sales",
   "developerName": "MTG_Sales",
-  "type": "Report",
-  "accessType": "Hidden",
-  "shares": [
-    { "sharedTo": "Role:CEO",          "accessLevel": "View" },
-    { "sharedTo": "Group:SalesManagers","accessLevel": "Edit" }
-  ]
+  "type": "report",
+  "accessType": "Hidden"
 }
 
 Input (parameters)
-operation (string, required) - "list" | "describe" | "create" | "update" | "delete" | "contents".
-folderId (string, optional) - Required for describe / update / delete / contents.
-type (string, optional) - "Report" | "Dashboard". Required for create and to filter list.
-name (string, required for create / update).
-developerName (string, optional, default = derived from name).
+operation (string, required) - "list" | "describe" | "create" | "update" | "delete"
+  | "children" | "shares" | "addShares" | "replaceShares".
+folderId (string, optional) - Required for describe / update / delete / children /
+  shares / addShares / replaceShares.
+type (string, optional) - "report" | "dashboard" (lowercase). Required for create;
+  used as query filter for list.
+name (string, required for create; optional for update).
+developerName (string, optional) - Auto-derived from name when omitted.
 accessType (string, optional, default "Public") - "Public" | "Hidden" | "PublicInternal".
-shares (array, optional) - { sharedTo (Role:..., Group:..., User:...), accessLevel ("View"|"Edit"|"Manage") }.
-limit, pageToken (optional, list).
+shares (array, required for addShares / replaceShares) - Each entry:
+  { sharedTo (string, user/role/group ID), shareType ("User"|"Role"|"RoleAndSubordinates"|"Group"|"AllInternalUsers"),
+    accessLevel ("View"|"Edit"|"Manage") }.
+confirm (boolean, required for delete) - Must be true.
 
 Result
-For list: { folders: [{ id, name, type, accessType }], nextPageToken }.
-For describe / read: full folder object including shares.
-For contents: { folderId, items: [{ id, type ("Report"|"Dashboard"|"FolderShare"), name, lastModifiedDate }], hasMore }.
-For create / update: the resulting folder object.
-For delete: { id, deleted: true }.
+For list: array of folder objects { id, name, type, accessType, developerName, ... }.
+For describe: full folder object.
+For create / update: resulting folder object.
+For delete: null / empty response (204) on success.
+For children: array of child folder objects.
+For shares / addShares / replaceShares: array of share objects.
 
 Required permissions
-- "Manage All Reports and Dashboards" (or "Manage Reports/Dashboards in Public Folders" for public ones).
+- "Manage All Reports and Dashboards" (or "Manage Reports/Dashboards in Public Folders").
 - "Modify All Data" for some folder operations.
 
 Idempotency & limits
 - Idempotent for update on equal input.
-- A folder cannot be deleted while it contains items.
+- A folder cannot be deleted while it contains items (reports, dashboards, subfolders).
 
 Errors
 - INVALID_FOLDER_ID, FOLDER_NOT_EMPTY, INSUFFICIENT_ACCESS_OR_READONLY.
 
 Example request (list report folders)
 
-manage_report_folder({ "operation": "list", "type": "Report" })
+manage_report_folder({ "operation": "list", "type": "report" })
+
+Example request (create folder with shares)
+
+manage_report_folder({
+  "operation": "create",
+  "name": "MTG Sales",
+  "type": "report",
+  "accessType": "Hidden",
+  "shares": [{ "sharedTo": "005...", "shareType": "User", "accessLevel": "Edit" }]
+})

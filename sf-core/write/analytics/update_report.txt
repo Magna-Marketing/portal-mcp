@@ -1,10 +1,10 @@
 Tool: update_report
 
 Description
-Update an existing report's metadata. Only the fields you provide are
-updated; existing fields not in the request are left as-is. Filters,
-columns, groupings, name, description, folder are all editable. Use
-`describe_report` to see the current shape.
+Update an existing report's metadata. The request body must wrap the fields
+to change in a `reportMetadata` key. The Analytics REST API applies partial
+update semantics — only fields present in the request body are updated;
+fields omitted are preserved as-is.
 
 Salesforce API
 Analytics REST API, v66.0. `PATCH /analytics/reports/{reportId}`.
@@ -16,7 +16,7 @@ Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body (any subset of these)
+Body (any subset of reportMetadata fields)
 {
   "reportMetadata": {
     "name": "Pipeline This Quarter (v2)",
@@ -27,14 +27,18 @@ Body (any subset of these)
 }
 
 Input (parameters)
-reportId (string, required) - 18-char Report Id.
-reportMetadata (object, required) - Partial reportMetadata object with
-  the fields to change. Same shape as `create_report` (all optional inside).
-moveToFolderId (string, optional) - Convenience: PATCH `folderId`.
+reportId (string, required) - 18-char Report ID (starts with "00O").
+reportMetadata (object, required) - Partial reportMetadata with the fields to change.
+  All keys match the create_report schema (all optional inside). Common updates:
+  - name, description, folderId (to move the report)
+  - detailColumns, aggregates
+  - groupingsDown, groupingsAcross
+  - reportFilters, reportBooleanFilter
+  - standardDateFilter
+  - showGrandTotal, showSubtotals, hasDetailRows, hasRecordCount
 
 Result
-report (object) - Same shape as `create_report` result.
-modifiedFields (string[]) - Names of metadata fields that were updated.
+Raw Analytics REST API response — the complete updated reportMetadata.
 
 Required permissions
 - "API Enabled" + "Edit My Reports" (or "Manage All Reports" for others').
@@ -44,12 +48,16 @@ Idempotency & limits
 - Idempotent on equal input.
 
 Errors
-- INVALID_REPORT_ID.
-- INSUFFICIENT_FOLDER_ACCESS on moveToFolderId.
+- INVALID_REPORT_ID
+- INSUFFICIENT_FOLDER_ACCESS (when moving to a different folder)
 
 Example request
 
 update_report({
   "reportId": "00OQg0000004aBcDE",
-  "reportMetadata": { "name": "Pipeline This Quarter (v2)", "showGrandTotal": true }
+  "reportMetadata": {
+    "name": "Pipeline This Quarter (v2)",
+    "showGrandTotal": true,
+    "reportFilters": [{ "column": "AMOUNT", "operator": "greaterOrEqual", "value": "100000" }]
+  }
 })

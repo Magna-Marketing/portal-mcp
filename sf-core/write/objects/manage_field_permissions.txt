@@ -1,74 +1,152 @@
 Tool: manage_field_permissions
 
 Description
-Grant or revoke field-level security (FLS) on one or more fields, on
-one or more permission sets / profiles. Without this, newly created
-custom fields are **not visible to anyone but the System Administrator
-profile**. The tool batches updates into Metadata API deploys.
+Grant, revoke, or explicitly set field-level security (FLS) on one or more
+fields for one or more permission sets and/or profiles using the Metadata API
+(PermissionSet / Profile type) v66.0.
 
-Use after `manage_field` (create) to make the field actually usable.
-Use `view_permission_set` to see current FLS for a permset.
+CRITICAL — Read-modify-write required: Since Metadata API v40+, sending a
+partial PermissionSet/Profile update REPLACES the entire fieldPermissions array
+rather than merging. This tool reads the existing metadata first, applies your
+targeted changes, then writes back the complete record — preserving all existing
+permissions on other fields.
 
-Salesforce API
-Metadata API (`PermissionSet.fieldPermissions`,
-`Profile.fieldPermissions`), v66.0.
+Salesforce APIs Used (v66.0)
+Metadata API PermissionSet and Profile types.
+Underlying SOAP endpoint: /services/Soap/m/66.0
+jsforce: conn.metadata.read / conn.metadata.update (or readMetadata / updateMetadata)
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Corrections vs original documentation:
+- Original doc listed "POST /services/data/v66.0/metadata/deployRequest" as the
+  endpoint. The correct approach uses the Metadata SOAP API read/update pattern
+  (no ZIP assembly required).
+- The 'permissionSetGroups' parameter was listed in the original doc, but PSG
+  metadata cannot be updated directly — you update the underlying member
+  PermissionSets. Removed from this tool.
+- Field format must be "ObjectName.FieldName" (e.g. "Account.Tax_Id__c"), not
+  just the field API name. The tool handles this construction from the {object, field}
+  input.
+- 'grant' never downgrades: if a field already has edit access and you grant read,
+  the edit access is preserved.
+- Added 'checkOnly' parameter for previewing changes without API calls.
+- Profiles are read/written one at a time due to large metadata size.
+- PermissionSets are read in batches of up to 10 (Metadata API limit).
 
-Headers
+Headers (managed by jsforce internally)
 Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-{
-  "operation": "grant",
-  "fields": [
-    { "object": "Project__c", "field": "Project_Status__c" }
-  ],
-  "permissionSets": ["MTG_Project_Manager", "MTG_Delivery_Bundle_Member"],
-  "profiles": ["System Administrator"],
-  "access": "edit"
-}
+Content-Type: text/xml; charset=utf-8
+SOAPAction: readMetadata | updateMetadata
 
 Input (parameters)
 operation (string, required) - "grant" | "revoke" | "set".
-  - grant: add read or edit (does not downgrade existing edit -> read).
-  - revoke: remove read+edit (caller cannot see/edit the field).
-  - set: explicit; cleared first then applied (use to flip edit -> read).
-fields (object[], required) - Each: { object (sObject API name), field
-  (field API name) }.
-permissionSets (string[], optional) - PermissionSet names.
-permissionSetGroups (string[], optional) - PSG developer names. The
-  tool resolves to the underlying member permsets.
-profiles (string[], optional) - Profile names. (Use sparingly — Salesforce
-  recommends permsets.)
-access (string, optional, default "edit" for grant; ignored for revoke)
-  - "read" | "edit". `edit` implies `read`.
-checkOnly (boolean, optional, default false).
-allOrNone (boolean, optional, default true).
+  - grant: Add read or edit access. Does NOT downgrade edit → read.
+  - revoke: Remove all access (read + edit) by deleting the field entry.
+  - set: Explicit overwrite. Replaces the entry regardless of current access.
+    Use this to downgrade edit → read.
+fields (object[], required, min 1) - Fields to target. Each entry:
+  { object: sObject API name, field: field API name }.
+  Internally combined as "Object.Field". System fields (Id, CreatedDate,
+  LastModifiedDate, etc.) are not FLS-eligible and will be rejected by SF.
+permissionSets (string[], optional) - PermissionSet API names (fullNames).
+  At least one of permissionSets or profiles is required.
+profiles (string[], optional) - Profile names (e.g. "System Administrator",
+  "Standard User"). Avoid modifying profiles via API — prefer permission sets.
+  Profile metadata is large; reading/updating one at a time.
+access (string, optional, default "edit") - "read" | "edit".
+  - "read": readable=true, editable=false.
+  - "edit": readable=true, editable=true (edit always implies read).
+  Ignored for revoke.
+allOrNone (boolean, optional, default false) - Stop on first failure when true.
+checkOnly (boolean, optional, default false) - Return planned changes without
+  making any API calls.
 
 Result
-Same shape as `manage_object`'s deploy result.
+{
+  operation: string,
+  access: string,
+  fields: string[],           // Qualified field names e.g. "Account.Tax_Id__c"
+  permissionSets: [{
+    target: string,           // PermissionSet API name
+    readResponse: any,        // Raw Metadata API read response
+    updateResponse: any       // Raw Metadata API update response
+  }, ...],
+  profiles: [{
+    target: string,
+    readResponse: any,
+    updateResponse: any
+  }, ...]
+}
+
+updateResponse shape (success): SaveResult — { fullName, success: true, errors: [] }
+updateResponse shape (failure): SaveResult — { fullName, success: false, errors: [...] }
+  or { error: "error message" } if allOrNone=false and the call threw.
 
 Required permissions
-- "Customize Application", "Manage Profiles and Permission Sets".
-- Editing profile FLS additionally requires "Modify All Data".
+- Customize Application
+- Manage Profiles and Permission Sets
+- Modify All Data (for Profile FLS updates)
 
 Idempotency & limits
-- Idempotent: granting an already-granted permission is a no-op.
-- Cap: ~200 PermissionSet/Profile components per deploy; tool batches
-  larger requests across multiple deploys.
+- Idempotent: granting already-granted access is a no-op (no state change).
+- Revoking a non-existent entry is also a no-op.
+- Metadata API limit: read up to 10 PermissionSets per call; tool batches
+  automatically.
+- Profile metadata is very large; reading may be slow for complex profiles.
 
 Errors
-- INVALID_FIELD: field doesn't exist or isn't FLS-applicable (system
-  fields like Id, CreatedDate are not).
-- INSUFFICIENT_ACCESS_OR_READONLY.
+- INVALID_FIELD: field doesn't exist, isn't FLS-applicable (system fields), or
+  the object/field name is wrong.
+- INSUFFICIENT_ACCESS_OR_READONLY: caller lacks required permissions.
+- NOT_FOUND: PermissionSet or Profile name doesn't exist.
 
-Example request (revoke FLS on a sensitive field for a permset)
+Example request (grant edit access for new field)
+
+manage_field_permissions({
+  "operation": "grant",
+  "fields": [
+    { "object": "Project__c", "field": "Status__c" }
+  ],
+  "permissionSets": ["MTG_Project_Manager", "MTG_Delivery_Bundle_Member"],
+  "access": "edit"
+})
+
+Response:
+{
+  "operation": "grant",
+  "access": "edit",
+  "fields": ["Project__c.Status__c"],
+  "permissionSets": [
+    { "target": "MTG_Project_Manager",
+      "readResponse": { ... current PermissionSet metadata ... },
+      "updateResponse": { "fullName": "MTG_Project_Manager", "success": true, "errors": [] } },
+    { "target": "MTG_Delivery_Bundle_Member", ... }
+  ],
+  "profiles": []
+}
+
+Example request (revoke sensitive field)
 
 manage_field_permissions({
   "operation": "revoke",
   "fields": [{ "object": "Account", "field": "Tax_Id__c" }],
   "permissionSets": ["MTG_Sales_Rep"]
+})
+
+Example request (downgrade edit → read via set)
+
+manage_field_permissions({
+  "operation": "set",
+  "fields": [{ "object": "Contact", "field": "SSN__c" }],
+  "profiles": ["Standard User"],
+  "access": "read"
+})
+
+Example request (preview without applying)
+
+manage_field_permissions({
+  "operation": "grant",
+  "fields": [{ "object": "Project__c", "field": "Budget__c" }],
+  "permissionSets": ["Sales_Manager"],
+  "access": "edit",
+  "checkOnly": true
 })

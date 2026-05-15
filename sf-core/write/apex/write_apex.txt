@@ -1,28 +1,26 @@
 Tool: write_apex
 
 Description
-Create or update an Apex class. Uses the Tooling API
-container/member/save pattern (a `MetadataContainer`, an
-`ApexClassMember` with the new Body, then a synchronous
-`ContainerAsyncRequest` that compiles and saves). On success the class
-is `IsValid=true` and ready to be invoked.
+Create, update, or upsert an Apex class using the Tooling API v66.0
+container/member/save pattern.
 
-To read existing classes, use `read_apex`. To run anonymous Apex without
-saving, use `execute_anonymous`. For triggers, use `write_apex_trigger`.
+The old approach of directly calling tooling.sobject('ApexClass').create()
+bypasses compilation and is NOT recommended. Use the container pattern:
+1. Create a MetadataContainer (workspace scratch-pad).
+2. Create an ApexClassMember with the new Body (and ContentEntityId for update).
+3. Create a ContainerAsyncRequest to compile + save.
+4. Poll until State is terminal: Completed / Failed / Aborted / Invalidated.
 
 Salesforce API
 Tooling API, v66.0.
-- `POST /tooling/sobjects/MetadataContainer` (create container).
-- `POST /tooling/sobjects/ApexClassMember` (create member with new Body).
-- `POST /tooling/sobjects/ContainerAsyncRequest` with `IsCheckOnly=false`.
-- `GET /tooling/sobjects/ContainerAsyncRequest/{id}` polled until `State`
-  is "Completed", "Failed", "Aborted", or "Invalidated".
 
-Endpoint
+Endpoints
 POST /services/data/v66.0/tooling/sobjects/MetadataContainer
 POST /services/data/v66.0/tooling/sobjects/ApexClassMember
 POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
-GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}
+GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}   (poll)
+DELETE /services/data/v66.0/tooling/sobjects/MetadataContainer/{id}     (cleanup on failure)
+GET  /services/data/v66.0/tooling/query/?q=...                          (lookup existing class)
 
 Headers
 Authorization: Bearer <access_token>
@@ -30,57 +28,52 @@ Content-Type: application/json
 
 Body (per call)
 MetadataContainer:           { "Name": "mcpDeploy_<timestamp>" }
-ApexClassMember (create):    { "MetadataContainerId": "<id>", "ContentEntityId": null, "FullName": "ProjectService", "Body": "public ..." }
-ApexClassMember (update):    { "MetadataContainerId": "<id>", "ContentEntityId": "<existing apexClassId>", "Body": "..." }
+ApexClassMember (create):    { "MetadataContainerId": "<id>", "FullName": "MyClass", "Body": "public class MyClass { ... }" }
+ApexClassMember (update):    { "MetadataContainerId": "<id>", "ContentEntityId": "<classId>", "Body": "..." }
 ContainerAsyncRequest:       { "MetadataContainerId": "<id>", "IsCheckOnly": false }
+
+ContainerAsyncRequest.State terminal values: Completed | Failed | Aborted | Invalidated
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "upsert".
-name (string, required) - Class name (must equal the class's API name in
-  the source).
+  - create: fails if class already exists.
+  - update: fails if class does not exist (looks up by name).
+  - upsert: creates if not found, updates if found. Idempotent on name.
+name (string, required) - Apex class API name. Must match the class declaration in body.
 body (string, required) - Full Apex source. Must compile.
-apiVersion (number, optional, default = current org default) - Class
-  ApiVersion (>= 27.0).
+apiVersion (number, optional) - Class ApiVersion (e.g. 62.0). Defaults to org default.
 status (string, optional, default "Active") - "Active" | "Inactive".
-checkOnly (boolean, optional, default false) - Compile-only; do not
-  save. Useful for syntax verification.
-runTests (boolean, optional, default false) - Force-run org tests after
-  save. Ignored in production where tests are mandatory.
-testLevel (string, optional, default "NoTestRun" in sandbox,
-  "RunLocalTests" in production) - "NoTestRun" | "RunSpecifiedTests" |
-  "RunLocalTests" | "RunAllTestsInOrg".
-specifiedTests (string[], optional) - When testLevel="RunSpecifiedTests".
+checkOnly (boolean, optional, default false) - Compile without saving.
+  Useful for syntax validation; does NOT create/update the class.
 
 Result
-deploy (object):
-  containerId (string).
-  state (string) - "Completed" | "Failed" | "Aborted" | "Invalidated".
-  done (boolean).
-  errorMessage (string|null) - Top-level deploy error.
-  componentSuccesses (array) - Per-class success rows.
-  componentFailures (array) - { problemType, problem, lineNumber,
-    columnNumber, fileName }.
-  symbolTable (object|null) - When successful and SymbolTable computed.
-apexClass (object, when successful) - { id, name, apiVersion, status,
-  isValid, length, lastModifiedDate }.
+{
+  "deploy": {
+    "containerId": "<id>",
+    "state": "Completed | Failed | Aborted | Invalidated",
+    "done": true,
+    "errorMessage": null,
+    "componentSuccesses": [],
+    "componentFailures": [{ "problemType", "problem", "lineNumber", "columnNumber", "fileName" }]
+  },
+  "apexClass": { "Id", "Name", "ApiVersion", "Status", "IsValid", "LengthWithoutComments", "LastModifiedDate" }
+}
+apexClass is null on checkOnly or failure.
 
 Required permissions
-- "Author Apex" (also requires the user license to allow Apex authoring;
-  not all licenses do).
-- In production orgs: deploys must include or pass tests achieving 75%+
-  org-wide coverage on the changed classes.
+- "Author Apex".
+- Production deploys must achieve ≥75% org-wide coverage on changed classes.
 
 Idempotency & limits
-- `upsert` idempotent on `name`. `create` fails on conflict. `update`
-  fails if class doesn't exist.
-- Class Body up to ~1 MB.
-- Compile errors return `componentFailures` with line/column.
+- upsert: idempotent on name.
+- create: fails (DUPLICATE_VALUE) if class exists.
+- Class body up to ~1 MB.
+- Compile errors in componentFailures with line/column.
 
 Errors
-- INVALID_FIELD: bad ApiVersion.
-- DEPLOY_FAILED with componentFailures list.
-- INSUFFICIENT_ACCESS_OR_READONLY: caller lacks Author Apex.
-- DEPENDENT_CLASS_INVALID: dependency referenced from this class is broken.
+- DEPLOY_FAILED with componentFailures.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- DEPENDENT_CLASS_INVALID: a dependency is broken.
 
 Example request
 

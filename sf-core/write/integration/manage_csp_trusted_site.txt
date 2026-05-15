@@ -1,44 +1,37 @@
 Tool: manage_csp_trusted_site
 
 Description
-Create / update / delete CSP Trusted Sites — endpoints whitelisted in
-the org's Content Security Policy for LWC, Aura, and Lightning Out
-to call.
+Create / update / delete / activate / deactivate CSP Trusted Sites — endpoints
+whitelisted in the org's Content Security Policy so that LWC, Aura, and Lightning
+Out components can make callouts to them from the browser.
 
 Salesforce API
-Metadata API (`CspTrustedSite`), v66.0.
+SOAP Metadata API, v66.0. Metadata type: CspTrustedSite.
+Use conn.metadata.create / update / delete (jsforce).
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+SOAP /services/Soap/m/{version}   (via jsforce metadata client)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
-fullName (string, required).
-endpointUrl (string, required for create/update).
+fullName (string, required) - DeveloperName of the CSP Trusted Site, e.g. Partner_CDN.
+endpointUrl (string, optional) - Endpoint URL to allow. Required for create.
 description (string, optional).
-isActive (boolean, optional, default true).
+isActive (boolean, optional, default true) - Whether the entry is active. activate/deactivate set this automatically.
 context (string, optional, default "All") - "All" | "LEX" | "Communities".
-checkOnly (boolean, optional, default false).
 
 Result
-deploy (object).
-cspTrustedSite (object).
+{ create | update | delete: <Metadata API SaveResult / DeleteResult> }
 
 Required permissions
-- "Modify All Data" / "Customize Application".
+- "Customize Application".
 
 Idempotency & limits
 - update idempotent.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME.
+- DUPLICATE_DEVELOPER_NAME — fullName already exists (on create).
+- sf:INVALID_CROSS_REFERENCE_KEY — fullName not found (on update/delete).
 
 Example request
 

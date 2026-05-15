@@ -1,100 +1,115 @@
 Tool: dml_records
 
 Description
-Perform DML (insert / update / delete / upsert) on Salesforce records.
-Supports single-record and collection (multi-record) calls. For >200
-rows the tool transparently switches to the **Composite SObject
-Collections** endpoint (max 200 per call) or **Bulk API 2.0** (for
->10,000 rows). For idempotent inserts, use `upsert` with an
-`externalIdField`.
+Perform DML (insert / update / delete / upsert) on Salesforce records using
+the REST API v66.0. Intelligently routes requests to the most appropriate
+endpoint based on record count:
 
-Salesforce API
-REST API (Data) + Composite + Bulk API 2.0, v66.0.
-- Single record: `POST/PATCH/DELETE /sobjects/{sObject}[/id]`.
-- Collections (≤200): `POST/PATCH/DELETE /composite/sobjects`.
-- Upsert by external id: `PATCH /sobjects/{sObject}/{externalIdField}/{value}`
-  or `PATCH /composite/sobjects/{sObject}/{externalIdField}`.
-- Bulk: `POST /jobs/ingest` then upload CSV/JSON, then close.
+- 1 record      → single sObject endpoint for precise single-record response.
+- 2–200 records → sObject Collections endpoint, chunked at batchSize (≤200
+                  per request, multiple chunks if needed).
+- useBulk=true OR records > 10,000 → Bulk API 2.0: creates job, uploads CSV,
+  polls to completion, returns job metadata + result URLs.
 
-Endpoint
-POST   /services/data/v66.0/sobjects/{sObject}                                  (single insert)
-PATCH  /services/data/v66.0/sobjects/{sObject}/{recordId}                       (single update)
-DELETE /services/data/v66.0/sobjects/{sObject}/{recordId}                       (single delete)
-PATCH  /services/data/v66.0/sobjects/{sObject}/{externalIdField}/{value}        (single upsert)
-POST   /services/data/v66.0/composite/sobjects                                  (collection insert ≤200)
-PATCH  /services/data/v66.0/composite/sobjects                                  (collection update ≤200)
-DELETE /services/data/v66.0/composite/sobjects?ids=...                          (collection delete ≤200)
-PATCH  /services/data/v66.0/composite/sobjects/{sObject}/{externalIdField}      (collection upsert ≤200)
-POST   /services/data/v66.0/jobs/ingest                                         (bulk job)
+Salesforce APIs Used (v66.0)
+REST Data API + sObject Collections + Bulk API 2.0.
+
+Single-record endpoints:
+- POST   /services/data/v66.0/sobjects/{sObject}                             (insert)
+- PATCH  /services/data/v66.0/sobjects/{sObject}/{recordId}                  (update)
+- DELETE /services/data/v66.0/sobjects/{sObject}/{recordId}                  (delete)
+- PATCH  /services/data/v66.0/sobjects/{sObject}/{externalIdField}/{value}   (upsert)
+
+Collection endpoints (≤200 records per chunk):
+- POST   /services/data/v66.0/composite/sobjects                             (collection insert)
+- PATCH  /services/data/v66.0/composite/sobjects                             (collection update)
+- DELETE /services/data/v66.0/composite/sobjects?ids=...&allOrNone=false     (collection delete)
+- PATCH  /services/data/v66.0/composite/sobjects/{sObject}/{externalIdField} (collection upsert)
+
+Bulk API 2.0 (>10,000 records or useBulk=true):
+1. POST  /services/data/v66.0/jobs/ingest                  (create job)
+2. PUT   {contentUrl from job response}                    (upload CSV data)
+3. PATCH /services/data/v66.0/jobs/ingest/{jobId}          (state=UploadComplete)
+4. GET   /services/data/v66.0/jobs/ingest/{jobId}          (poll until terminal)
+5. GET   /services/data/v66.0/jobs/ingest/{jobId}/successfulResults/
+6. GET   /services/data/v66.0/jobs/ingest/{jobId}/failedResults/
+
+Corrections vs original documentation:
+- The original doc mentioned "disableValidationRules" as a REST header parameter.
+  This is NOT a real Salesforce REST API parameter and has been removed.
+  Validation rule bypassing is only possible via Apex with allOrNone or a
+  custom permission, not via a REST header.
+- "Sforce-Auto-Assign: false" header IS real and is surfaced via
+  disableAssignmentRules parameter.
+- Collection upsert uses PATCH /composite/sobjects/{sObject}/{externalIdField}
+  (all records must be the same sObject type for upsert).
+- Bulk API 2.0 only supports CSV (not JSON) as contentType.
+- Single-record delete for collections uses query param: ?ids=id1,id2&allOrNone=false
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
-Sforce-Auto-Assign: false           (optional; disables Lead/Case assignment rules)
-
-Body (collection insert example)
-{
-  "allOrNone": false,
-  "records": [
-    { "attributes": { "type": "Account" }, "Name": "ACME", "Industry": "Tech" }
-  ]
-}
+Content-Type: application/json          (REST and Collections calls)
+Content-Type: text/csv                  (Bulk data upload)
+Sforce-Auto-Assign: false               (optional; disableAssignmentRules=true)
 
 Input (parameters)
 operation (string, required) - "insert" | "update" | "delete" | "upsert".
-sObject (string, required for insert/upsert; inferred from records for
-  update/delete) - sObject API name.
-records (object[], required) - For insert/update/upsert: full record
-  objects. For update/upsert each record needs Id (or the externalIdField
-  for upsert). For delete: array of Ids or objects with `Id`.
-externalIdField (string, required when operation="upsert") - External Id
-  field name used as the upsert key.
-allOrNone (boolean, optional, default false) - When true, any single-row
-  failure rolls back the whole call.
-useBulk (boolean, optional, default auto) - Force Bulk API 2.0; default
-  is auto when records > 10,000.
-disableAssignmentRules (boolean, optional, default false).
-disableValidationRules (boolean, optional, default false) - Requires
-  "Bypass Validation Rules" or admin perm.
-batchSize (number, optional, default 200) - Composite batch size; ≤200.
+sObject (string, required) - Salesforce object API name (e.g. "Account").
+records (object[], required) - Records to process.
+  - insert: plain field objects, no Id field.
+  - update: each must include "Id".
+  - delete: each must include "Id" (or plain id strings).
+  - upsert: each must include the externalIdField value.
+externalIdField (string, required when operation="upsert") - External ID field name.
+allOrNone (boolean, optional, default false) - Roll back on any failure.
+useBulk (boolean, optional) - Force Bulk API 2.0. Auto when records > 10,000.
+batchSize (number, optional, default 200) - Collections chunk size; ≤200.
+disableAssignmentRules (boolean, optional, default false) - Suppress Lead/Case
+  assignment rules via Sforce-Auto-Assign: false header.
 
-Result (single)
-For insert/upsert: { id (string), success (boolean), errors (array), created (boolean, upsert only) }.
-For update/delete: { id, success, errors }.
+Result (single record)
+{ results: [{ id, success, errors[], created? }] }
+- insert: created=true always.
+- update/delete: no 'created' field.
+- upsert single: created=true if new record, false if existing.
 
-Result (collection)
-results (array of single shape, one per input record), in the same order
-as input.
+Result (collections)
+{ chunks: [ [SaveResult | DeleteResult, ...], ... ] }
+- One sub-array per chunk. Each entry: { id, success, errors[], created? }.
+- Errors array is empty on success.
 
 Result (bulk)
-job (object) - { id, state, contentType, operation, object, ... }.
-status (string) - Initial state ("Open"|"UploadComplete"|"InProgress"|
-  "JobComplete"|"Failed"|"Aborted"). The MCP server polls until
-  terminal and surfaces success/failed counts.
-recordsProcessed (number).
-numberRecordsFailed (number).
-failedRecordsUrl (string|null) - Where to download row-by-row errors.
+{
+  job: {
+    id, state, object, operation, contentType, apiVersion,
+    numberRecordsProcessed, numberRecordsFailed, ...
+  },
+  successfulResults: "/services/data/v66.0/jobs/ingest/{jobId}/successfulResults/",
+  failedResults:     "/services/data/v66.0/jobs/ingest/{jobId}/failedResults/"
+}
+- Bulk results URLs return CSV; fetch them with a separate GET request.
+- state will be "JobComplete" or "Failed".
 
 Required permissions
 - API Enabled.
-- Object create/edit/delete and FLS for every field touched.
-- For Bulk: same DML perms; no extra license required for Bulk API 2.0.
+- Object-level create/edit/delete permissions.
+- Field-level security (FLS) on every field being written.
 
 Idempotency & limits
-- Insert is **not** idempotent; a retried insert duplicates. Use upsert
+- insert is NOT idempotent; retried inserts create duplicates. Use upsert
   with an externalIdField for idempotency.
-- Composite collections cap: 200 records per call; 25 sub-requests for
-  /composite/.
-- Bulk v2 ingest: 150 million records / 24 hours.
-- Governor limits in synchronous DML: 100 SOQL, 150 DML, 10 s CPU, 6 MB heap.
-- `allOrNone=false` returns partial success.
+- Collections: ≤200 records per request; up to 10 chunks of different object
+  types per request.
+- Bulk API 2.0: 150 million records / 24 h org limit.
+- Bulk data upload: ≤150 MB per job (after base64).
+- allOrNone=false returns partial success results.
 
 Errors
 - INVALID_FIELD / FIELD_CUSTOM_VALIDATION_EXCEPTION.
 - DUPLICATE_VALUE on unique fields.
-- ENTITY_IS_DELETED on update of a recycled record.
-- INSUFFICIENT_ACCESS_OR_READONLY.
-- UNABLE_TO_LOCK_ROW (transient; retry once).
+- ENTITY_IS_DELETED on update of recycled record.
+- INSUFFICIENT_ACCESS_OR_READONLY (FLS or CRUD violation).
+- UNABLE_TO_LOCK_ROW (transient; safe to retry once).
 
 Example request (single insert)
 
@@ -104,9 +119,21 @@ dml_records({
   "records": [{ "Name": "ACME", "Industry": "Technology" }]
 })
 
-Example response
+Response: { "results": [{ "id": "0014Q00000abcDE", "success": true, "errors": [] }] }
 
-{ "results": [{ "id": "0014Q00000abcDE", "success": true, "errors": [] }] }
+Example request (collection update)
+
+dml_records({
+  "operation": "update",
+  "sObject": "Contact",
+  "allOrNone": false,
+  "records": [
+    { "Id": "003xx000001aaa", "Title": "Engineer" },
+    { "Id": "003xx000001bbb", "Title": "Manager" }
+  ]
+})
+
+Response: { "chunks": [[{ "id": "003xx...", "success": true, "errors": [] }, ...]] }
 
 Example request (upsert by external id)
 
@@ -114,17 +141,16 @@ dml_records({
   "operation": "upsert",
   "sObject": "Account",
   "externalIdField": "External_Account_Id__c",
-  "records": [
-    { "External_Account_Id__c": "EXT-001", "Name": "ACME", "Industry": "Tech" }
-  ]
+  "records": [{ "External_Account_Id__c": "EXT-001", "Name": "ACME" }]
 })
 
-Response: { "results": [{ "id": "0014Q00000abcDE", "success": true, "created": true, "errors": [] }] }
+Response: { "results": [{ "id": "0014Q00000abcDE", "success": true, "errors": [] }] }
 
 Example request (bulk update)
 
 dml_records({
   "operation": "update",
+  "sObject": "Contact",
   "useBulk": true,
-  "records": [ /* >10,000 rows with Id */ ]
+  "records": [ ... many records with Id ... ]
 })

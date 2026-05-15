@@ -1,48 +1,43 @@
 Tool: add_region_to_page
 
 Description
-Add a new region to a FlexiPage. Creates an empty region with no
-components; then use `add_component_to_region` to populate it. The
-region's allowed types depend on the page's template (e.g.
-`flexipage:recordHomeWithHeader` allows `header`, `main`, `right`).
+Add a new empty region to an existing Lightning Page (FlexiPage). After
+creation, populate the region with `add_component_to_region`.
+
+The region's allowed API names depend on the page's template — adding an
+unsupported name will be rejected by the platform.
 
 Salesforce API
-Metadata API (`FlexiPage`), v66.0.
+Metadata API (FlexiPage), v66.0.
+Reads via metadata.read(), updates via metadata.update() (SOAP).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+Correction vs. original doc: Uses metadata.read() + metadata.update(), not deployRequest.
+The appendable field uses the string enum "Appendable" / "NotAppendable" in
+the Metadata API (not a boolean).
 
 Input (parameters)
-flexiPageName (string, required).
-regionName (string, required) - New region API name. Must match the
+flexiPageName (string, required) - DeveloperName of the FlexiPage.
+regionName (string, required) - API name for the new region. Must match the
   template's allowed regions.
-type (string, optional, default "Region") - "Region" | "Facet" | "Container".
-appendable (boolean, optional, default true).
-position (number|"end"|"start", optional, default "end") - Insertion
-  position into the page's region array.
-checkOnly (boolean, optional, default false).
+type (string, optional, default "Region") - "Region" | "Facet" | "Background".
+appendable (boolean, optional, default true) - Serialized as "Appendable" or
+  "NotAppendable" in the Metadata API.
+position (number|"start"|"end", optional, default "end") - Insertion position
+  in the page's region list.
 
 Result
-deploy (object).
-flexiPage (object) - { id, name, regionCount }.
-region (object) - { name, type, position, appendable }.
+updateResult (object) - Raw Metadata API update response.
+region (object) - { name, type, appendable, position }.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Not idempotent (fails on duplicate region name within the page).
+- Not idempotent (errors if region name already exists).
 
 Errors
-- DUPLICATE_VALUE on existing region name.
-- INVALID_REGION_FOR_TEMPLATE: name not allowed by the page's template.
+- DUPLICATE_VALUE: region name already exists.
+- INVALID_REGION_FOR_TEMPLATE: name not supported by the page template.
 
 Example request
 

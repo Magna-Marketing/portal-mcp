@@ -1,12 +1,16 @@
 Tool: publish_custom_notification
 
 Description
-Publish a Custom Notification to specified users / groups / queues. The
-notification appears in the bell icon (in-app) and on mobile (when
-enabled).
+Publish a Custom Notification to specified users, groups, or queues. The
+notification appears in the Salesforce bell icon (desktop) and as a mobile push
+notification when the CustomNotificationType has those channels enabled.
+
+A CustomNotificationType must already exist in the org. Provide its ID directly
+(notificationTypeId) or its DeveloperName (notificationTypeName), which the tool
+resolves to an ID via SOQL internally.
 
 Salesforce API
-REST API (Standard Invocable), v66.0. `actions/standard/customNotificationAction`.
+REST API (Standard Invocable Action), v66.0.
 
 Endpoint
 POST /services/data/v66.0/actions/standard/customNotificationAction
@@ -18,37 +22,63 @@ Content-Type: application/json
 Body
 {
   "inputs": [{
-    "customNotifTypeId": "0ML4Q00000abcDE",
-    "recipientIds": ["005Qg0000020aBcDE"],
+    "customNotifTypeId": "0MLR0000000008eOAA",
+    "recipientIds": ["005Qg0000020aBcDE", "0F9Qg0000008abcAB"],
     "title": "Project status change",
     "body": "MTG project flipped to Red",
     "targetId": "a01Qg0000020aBcDE",
-    "targetPageRef": null
+    "targetPageRef": null,
+    "senderId": null,
+    "actionGroup": null
   }]
 }
 
+Corrections vs. original documentation
+- "notificationTypeName" is NOT an official API field. The API only accepts
+  customNotifTypeId. The tool resolves notificationTypeName to an ID via SOQL.
+- "sendOnlyToInternalUsers" does NOT exist in the customNotificationAction API.
+  Removed.
+- Added "senderId" (optional User ID of the notification sender).
+- Added "actionGroup" (optional, enables actionable mobile push notifications).
+- recipientIds maximum is 500 values (not unlimited). Valid ID types:
+  UserId, GroupId, QueueId, OpportunityId (Opportunity Team, if team selling enabled).
+- Either targetId OR targetPageRef must be provided (one is required).
+- Response is an array: [{ actionName, errors, isSuccess, outputValues }].
+
 Input (parameters)
-notificationTypeName (string, optional) - DeveloperName. Or notificationTypeId.
-notificationTypeId (string, optional).
-  One required.
-title (string, required).
-body (string, required).
-recipientIds (string[], optional) - Users, public groups, queues, role+sub IDs.
-targetId (string, optional) - Record Id the notification opens to when clicked.
-targetPageRef (object, optional) - Lightning navigation pageReference.
-sendOnlyToInternalUsers (boolean, optional, default false).
+notificationTypeId (string, optional) - ID of the CustomNotificationType record.
+notificationTypeName (string, optional) - DeveloperName of CustomNotificationType.
+  Resolved to ID via SOQL. One of notificationTypeId or notificationTypeName required.
+title (string, required) - Notification title. Maximum 250 characters.
+body (string, required) - Notification body. Maximum 750 characters.
+recipientIds (string[], required) - User/Group/Queue/Opportunity Team IDs (max 500).
+targetId (string, optional) - Record ID the notification opens when clicked.
+  One of targetId or targetPageRef must be provided.
+targetPageRef (string, optional) - Lightning pageReference JSON string.
+  One of targetId or targetPageRef must be provided.
+senderId (string, optional) - User ID of the notification sender.
+actionGroup (string, optional) - Action group for actionable mobile push notifications.
 
 Result
-result (object) - { success, errors, notificationsSent (number) }.
+[{
+  "actionName": "customNotificationAction",
+  "errors": null,
+  "isSuccess": true,
+  "outputValues": {
+    "SuccessMessage": "Your custom notification is processed successfully."
+  }
+}]
 
 Required permissions
 - "Send Custom Notifications".
 
 Idempotency & limits
 - Not idempotent.
+- Maximum 500 recipient IDs per call.
 
 Errors
-- CUSTOM_NOTIFICATION_TYPE_NOT_FOUND.
+- CUSTOM_NOTIFICATION_TYPE_NOT_FOUND (if notificationTypeName not found via SOQL)
+- REQUIRED_FIELD_MISSING (if customNotifTypeId, title, body, or recipientIds missing)
 
 Example request
 

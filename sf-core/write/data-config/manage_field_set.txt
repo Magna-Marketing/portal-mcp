@@ -1,50 +1,93 @@
 Tool: manage_field_set
 
 Description
-Create / update / delete a Field Set on an sObject.
+Create / update / upsert / delete a Field Set on a custom or standard sObject.
+Uses the Metadata API CRUD calls — NOT a deployRequest endpoint (which was incorrect
+in the original documentation).
 
 Salesforce API
-Metadata API (`FieldSet`), v66.0.
+Metadata API, v66.0. Type: FieldSet.
+CRUD-based calls via conn.metadata.create / update / upsert / delete.
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Endpoints (internal — called by jsforce Metadata client)
+POST   /services/data/v66.0/metadata/    (create/update/upsert/delete)
+
+NOTE: The original doc listed "POST /services/data/v66.0/metadata/deployRequest".
+That is the deploy-based endpoint and is NOT used. The Metadata API CRUD
+operations are the correct approach for FieldSet.
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: text/xml (handled by jsforce internally)
 
-Body
-N/A.
+FieldSet Metadata fields (v66.0)
+fullName         – string, required. Format: "ObjectApiName.FieldSetDeveloperName".
+                   The tool prepends the sObject name automatically if only the developer
+                   name is given (i.e. no dot present).
+label            – string, required. Display label.
+description      – string, required. Developer description of the field set's purpose.
+displayedFields  – FieldSetItem[], optional. Fields shown on the page in listed order.
+availableFields  – FieldSetItem[], optional. Additional fields available but not displayed.
+
+FieldSetItem fields
+field            – string, required. Field API name in the sObject (e.g. "Status__c", "Name").
+isFieldManaged   – boolean, read-only. Whether the field came from a managed package.
+isRequired       – boolean, read-only. Whether the field is universally required.
+
+NOTE: FieldSetItem uses a "field" property object — NOT a plain string array.
+      Original doc incorrectly documented displayedFields and availableFields as
+      string arrays. The correct type is FieldSetItem[]: [{ "field": "Status__c" }].
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-sObject (string, required).
-fullName (string, required) - "<sObject>.<DeveloperName>".
-label (string, required for create).
-description (string, optional).
-displayedFields (string[], optional) - Field API names in display order.
-availableFields (string[], optional) - Available fields not currently displayed.
-checkOnly (boolean, optional, default false).
+operation        (string, required) – "create" | "update" | "upsert" | "delete".
+sObject          (string, required) – API name of the owning sObject, e.g. "Project__c".
+fullName         (string, required) – Developer name or qualified name. Tool auto-prefixes
+                 with sObject if missing the dot.
+label            (string, required for create/upsert).
+description      (string, required for create/upsert – required by Metadata API).
+displayedFields  (object[], optional) – [{ "field": "Name" }, { "field": "Status__c" }]
+availableFields  (object[], optional) – [{ "field": "OtherField__c" }]
 
 Result
-deploy (object).
-fieldSet (object).
+Returns a JSON object with:
+  operation  – echo of the requested operation.
+  fullName   – the normalized fullName used in the Metadata API call.
+  create     – Metadata API SaveResult.
+  update     – Metadata API SaveResult.
+  upsert     – Metadata API UpsertResult.
+  delete     – Metadata API DeleteResult.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- update idempotent.
+- update/upsert are idempotent on fullName.
 
 Errors
-- INVALID_FIELD.
+- INVALID_FIELD if a field API name does not exist on the sObject.
+- MISSING_REQUIRED_FIELD if description or label is omitted on create.
+
+Corrections vs original doc
+- Endpoint corrected from "POST /services/data/v66.0/metadata/deployRequest" to
+  Metadata API CRUD calls (conn.metadata.create/update/upsert/delete).
+- displayedFields and availableFields corrected from string[] to FieldSetItem[]:
+  [{ "field": "FieldApiName" }] — not plain strings.
+- description is documented as required (Metadata API enforces this).
+- Operation "upsert" added.
+- fullName auto-qualification logic documented.
 
 Example request
 
 manage_field_set({
   "operation": "create",
   "sObject": "Project__c",
-  "fullName": "Project__c.Editable_Fields",
+  "fullName": "Editable_Fields",
   "label": "Editable Fields",
-  "displayedFields": ["Name", "Status__c", "Project_Manager__c", "Due_Date__c"]
+  "description": "Fields displayed on the project edit form",
+  "displayedFields": [
+    { "field": "Name" },
+    { "field": "Status__c" },
+    { "field": "Project_Manager__c" },
+    { "field": "Due_Date__c" }
+  ]
 })

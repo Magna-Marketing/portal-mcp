@@ -1,61 +1,104 @@
 Tool: composite_request
 
 Description
-Bundle up to 25 sub-requests into a single round trip. Each sub-request
-can reference the response of an earlier one via `@{refId.fieldPath}`.
-Useful for transactional create-record-then-create-related-record
-flows without N round trips.
+Bundle multiple REST API sub-requests into a single round trip. Supports
+two distinct modes with different capabilities, endpoints, and request shapes.
+
+Mode 1 — composite (default):
+  POST /services/data/v66.0/composite
+  - Up to 25 sub-requests. Up to 5 may be sObject Collections or Query/QueryAll operations.
+  - Each sub-request can reference a prior sub-request's response via @{referenceId.fieldPath}.
+  - Controlled rollback via allOrNone (default: false).
+  - Optional collation via collateSubrequests to bulk similar DML operations (default: true since API v49.0).
+  - Request uses 'compositeRequest' array; each item has method, url, referenceId, body?, httpHeaders?.
+  - Response: { "compositeResponse": [{ "referenceId", "httpStatusCode", "body", "httpHeaders" }] }
+
+Mode 2 — batch:
+  POST /services/data/v66.0/composite/batch
+  - Up to 25 independent sub-requests. No cross-request references allowed.
+  - Controlled halt on error via haltOnError (default: false).
+  - Request uses 'batchRequests' array; each item has method, url, richInput? (NOT body, NOT referenceId).
+  - Response: { "hasErrors": boolean, "results": [{ "statusCode", "result" }] }
+
+KEY DIFFERENCES from original documentation:
+- Batch mode uses 'batchRequests' (not 'subrequests') in the request body.
+- Batch mode uses 'richInput' (not 'body') for the request payload of each sub-request.
+- Batch sub-requests do NOT support referenceId or cross-request references.
+- Batch mode uses 'haltOnError' (not 'allOrNone') to control failure behavior.
+- The 'collateSubrequests' parameter is composite-mode only and defaults to TRUE since API v49.0.
+  When true, unrelated sub-requests of the same method/type may be reordered for bulkification.
+  Set to false if execution order matters for unrelated sub-requests.
 
 Salesforce API
 Composite REST API, v66.0.
 
-Endpoint
-POST /services/data/v66.0/composite/                       (composite, supports response references)
-POST /services/data/v66.0/composite/batch                  (composite batch — independent sub-requests)
+Endpoints
+POST /services/data/v66.0/composite           (composite mode — supports cross-reference)
+POST /services/data/v66.0/composite/batch     (batch mode — independent sub-requests)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
+Body (composite mode)
 {
   "allOrNone": true,
+  "collateSubrequests": false,
   "compositeRequest": [
     { "method": "POST", "url": "/services/data/v66.0/sobjects/Account", "referenceId": "newAccount", "body": { "Name": "ACME" } },
     { "method": "POST", "url": "/services/data/v66.0/sobjects/Contact", "referenceId": "newContact", "body": { "LastName": "Doe", "AccountId": "@{newAccount.id}" } }
   ]
 }
 
+Body (batch mode)
+{
+  "haltOnError": false,
+  "batchRequests": [
+    { "method": "PATCH", "url": "/services/data/v66.0/sobjects/Account/001xx", "richInput": { "Name": "Updated" } },
+    { "method": "GET", "url": "/services/data/v66.0/sobjects/Contact/003xx" }
+  ]
+}
+
 Input (parameters)
 mode (string, optional, default "composite") - "composite" | "batch".
-allOrNone (boolean, optional, default false) - composite only.
-collateSubrequests (boolean, optional, default false) - composite only.
-subrequests (object[], required) - Each:
-  method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
-  url (string, required) - Path under /services/data/v{version}/...
-  referenceId (string, required for composite).
-  body (object, optional) - JSON body for POST/PATCH/PUT.
-  httpHeaders (object, optional).
 
-Result
-results (array) - Each: { referenceId, statusCode, body, httpHeaders, success }.
-overallSuccess (boolean) - true iff all sub-requests succeeded (or allOrNone=true with rollback).
+[composite mode]
+allOrNone (boolean, optional, default false) - If true, rolls back all sub-requests on any failure.
+collateSubrequests (boolean, optional, default true in API v49.0+) - If true, allows the API to
+  reorder and bulkify unrelated sub-requests of the same method/type. Set false for strict order.
+subrequests (object[], required for composite mode) - Each:
+  method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
+  url (string, required) - Must start with /services/data/vXX.X/.
+  referenceId (string, required) - Unique ID; used in @{referenceId.fieldPath} cross-references.
+  body (object, optional) - JSON body for POST/PATCH/PUT.
+  httpHeaders (object, optional) - Sub-request-specific headers (disables collation for that sub-request).
+
+[batch mode]
+haltOnError (boolean, optional, default false) - If true, halts remaining sub-requests on first
+  4xx/5xx error, returning HTTP 412 BATCH_PROCESSING_HALTED for them.
+batchSubrequests (object[], required for batch mode) - Each:
+  method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
+  url (string, required) - Resource path.
+  richInput (object, optional) - Request body for POST/PATCH/PUT (NOT called 'body').
+
+Result (composite mode)
+{ "compositeResponse": [{ "referenceId": "...", "httpStatusCode": 201, "body": {...}, "httpHeaders": {...} }] }
+
+Result (batch mode)
+{ "hasErrors": false, "results": [{ "statusCode": 200, "result": {...} }] }
 
 Required permissions
 - "API Enabled".
 
 Idempotency & limits
-- Up to 25 sub-requests; up to 5 cross-tool calls in `batch` mode.
-- Each sub-request counts as a separate API request unless
-  `collateSubrequests=true`.
+- Up to 25 sub-requests per call.
+- Composite mode: up to 5 sub-requests may be sObject Collections or query operations.
+- Entire request counts as a single API call toward limits.
 
-Errors
-- COMPOSITE_GRAPH_VALIDATION_FAILED on bad references.
-- Sub-request errors returned in `results[].body`.
-
-Example request
+Example request (composite)
 
 composite_request({
+  "mode": "composite",
   "allOrNone": true,
   "subrequests": [
     { "method": "POST", "referenceId": "acc",
@@ -63,9 +106,17 @@ composite_request({
       "body": { "Name": "ACME", "Industry": "Tech" } },
     { "method": "POST", "referenceId": "con",
       "url": "/services/data/v66.0/sobjects/Contact",
-      "body": { "LastName": "Doe", "AccountId": "@{acc.id}", "Email": "doe@acme.com" } },
-    { "method": "POST", "referenceId": "opp",
-      "url": "/services/data/v66.0/sobjects/Opportunity",
-      "body": { "Name": "ACME Phase 1", "AccountId": "@{acc.id}", "StageName": "Prospecting", "CloseDate": "2026-12-31" } }
+      "body": { "LastName": "Doe", "AccountId": "@{acc.id}", "Email": "doe@acme.com" } }
+  ]
+})
+
+Example request (batch)
+
+composite_request({
+  "mode": "batch",
+  "haltOnError": false,
+  "batchSubrequests": [
+    { "method": "PATCH", "url": "/services/data/v66.0/sobjects/Account/001xx", "richInput": { "Name": "Updated" } },
+    { "method": "GET", "url": "/services/data/v66.0/sobjects/Contact/003xx" }
   ]
 })

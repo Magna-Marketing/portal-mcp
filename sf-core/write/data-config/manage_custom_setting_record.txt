@@ -1,47 +1,64 @@
 Tool: manage_custom_setting_record
 
 Description
-Create / update / delete records in a Custom Setting (List or
-Hierarchy). Custom Settings are sObjects so direct DML works; this tool
-adds hierarchy-aware semantics (per-user / per-profile / org-default
-selection).
+Create / update / upsert / delete records in a Custom Setting (List or Hierarchy type).
+Custom Settings are sObjects so standard REST Data API DML is used. This tool adds
+hierarchy-aware semantics: per-user / per-profile / org-default selection via SetupOwnerId,
+and read-before-write upsert logic.
 
 Salesforce API
-REST API (Data), v66.0. POST/PATCH/DELETE on the custom setting sObject.
+REST API (Data), v66.0. POST / PATCH / DELETE on the custom setting sObject.
+GET /query is used for upsert/update/delete lookup by Name or SetupOwnerId.
 
-Endpoint
-POST   /services/data/v66.0/sobjects/{customSetting}
-PATCH  /services/data/v66.0/sobjects/{customSetting}/{id}
-DELETE /services/data/v66.0/sobjects/{customSetting}/{id}
+Endpoints
+POST   /services/data/v66.0/sobjects/{customSetting}           (create)
+PATCH  /services/data/v66.0/sobjects/{customSetting}/{id}      (update, upsert-as-update)
+DELETE /services/data/v66.0/sobjects/{customSetting}/{id}      (delete)
+GET    /services/data/v66.0/query?q=<SOQL>                     (lookup for upsert/update/delete)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-N/A.
+Body (create)
+{ "Name": "MyRecord", "SetupOwnerId": "005...", "MyField__c": true }
+
+Custom Setting record fields
+Name          – string. Required for List-type create. Used as lookup key for list-type upsert.
+SetupOwnerId  – string. For Hierarchy-type settings only. Accepts:
+                  • A User Id (005...)
+                  • A Profile Id (00e...)
+                  • The literal string "Organization" for the org-level default.
+                Used as the lookup key for hierarchy-type upsert.
+<field>__c    – any custom fields on the Custom Setting sObject.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-customSetting (string, required) - Custom Setting API name.
-records (object[], required) - Each:
-  id (string, optional).
-  name (string, optional, required for List type create).
-  setupOwnerId (string, optional, for hierarchy) - User or Profile Id, or "Organization" string for org-default.
-  fields (object, required for create/update) - Map of field API name -> value.
-allOrNone (boolean, optional, default false).
+operation      (string, required) – "create" | "update" | "upsert" | "delete".
+customSetting  (string, required) – Custom Setting API name including __c, e.g. "MyConfig__c".
+records        (object[], required, min 1) – Each record:
+  id           (string, optional) – Salesforce record Id. Highest-priority lookup key.
+  name         (string, optional) – Name field. Required for list-type create.
+                Used as upsert/update/delete key when id is absent.
+  setupOwnerId (string, optional) – Hierarchy level owner. Used when id and name absent.
+  fields       (object, required for create/update/upsert) – { fieldApiName: value }.
 
 Result
-results (array) - { id, name, status, errors }.
+Returns a JSON object with:
+  operation      – echo of the requested operation.
+  customSetting  – echo of the customSetting name.
+  results        – array of per-record result objects with: operation, action (upsert),
+                   id, result (raw API response), or error.
 
 Required permissions
 - Object create/update/delete on the Custom Setting sObject.
 
 Idempotency & limits
-- upsert idempotent on Name (list) or SetupOwnerId (hierarchy).
+- upsert is idempotent on Name (list type) or SetupOwnerId (hierarchy type).
+- Records are processed sequentially; failures are captured per-record (not transactional).
 
 Errors
-- DUPLICATE_VALUE, INVALID_FIELD.
+- DUPLICATE_VALUE if creating a record with a Name/SetupOwnerId that already exists.
+- INVALID_FIELD if a field API name is incorrect.
 
 Example request (hierarchy)
 

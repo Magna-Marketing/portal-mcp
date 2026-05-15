@@ -1,39 +1,54 @@
 Tool: abort_scheduled_job
 
 Description
-Abort a scheduled Apex job by `CronTrigger` Id (or job name). Equivalent
-to `System.abortJob(jobId)`.
+Abort a scheduled Apex job by CronTrigger ID or job name.
+
+How it works:
+1. Resolves the CronTrigger ID — uses cronTriggerId directly, or queries
+   CronTrigger WHERE CronJobDetail.Name = jobName if only jobName is provided.
+2. Executes System.abortJob('cronTriggerId') via anonymous Apex.
+3. Re-queries CronTrigger to confirm State = "DELETED".
 
 Salesforce API
-Tooling API + Anonymous Apex, v66.0.
+Tooling API + SOQL, v66.0.
 
-Endpoint
-GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody=System.abortJob('07cQg00000abcDE');
+Endpoints
+GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody=System.abortJob('08e...');
+GET /services/data/v66.0/tooling/query/?q=SELECT Id FROM CronTrigger WHERE CronJobDetail.Name='...'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, State FROM CronTrigger WHERE Id='...'
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
-Body
-None.
-
 Input (parameters)
-cronTriggerId (string, optional).
-jobName (string, optional).
-  One required.
+cronTriggerId (string, optional) - CronTrigger ID (starts with "08e").
+jobName (string, optional) - CronJobDetail.Name to look up the ID.
+  At least one of cronTriggerId or jobName is required.
 
 Result
-result (object) - { cronTriggerId, jobName, state ("Deleted"), aborted: true }.
+{
+  "aborted": true,
+  "cronTriggerId": "08e...",
+  "jobName": "MTG Daily Recalc",
+  "state": "DELETED"
+}
+On not-found: aborted=true with a note that the job was already deleted.
+On error: compile/exception details from the anonymous Apex response.
 
 Required permissions
-- "Author Apex" / "Modify All Data".
+- "Author Apex" (to abort own jobs).
+- "Modify All Data" to abort jobs owned by other users.
 
 Idempotency & limits
-- Idempotent (already-aborted: no-op).
+- Idempotent: aborting an already-deleted job returns success with a note.
 
 Errors
-- NOT_FOUND.
+- NOT_FOUND: jobName doesn't match any active scheduled job.
+- System.AsyncException: if the job cannot be aborted (e.g. currently running).
 
 Example request
 
 abort_scheduled_job({ "jobName": "MTG Daily Project Recalc" })
+
+abort_scheduled_job({ "cronTriggerId": "08eQg0000001AbcAA" })

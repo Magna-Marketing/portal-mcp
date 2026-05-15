@@ -1,17 +1,19 @@
 Tool: create_report
 
 Description
-Create a new Salesforce report via the Analytics REST API. Supply the
+Create a new Salesforce report via the Analytics REST API v66.0. Supply the
 report type (use `list_report_types` to discover), the report format
-(tabular / summary / matrix), columns, filters, groupings, and folder
-assignment. The new report is saved and ready to run with
-`run_report`.
+(TABULAR / SUMMARY / MATRIX / JOINED), columns, filters, groupings, and folder
+assignment. The new report is saved and ready to run asynchronously with
+`manage_report_instance`.
 
 Salesforce API
 Analytics REST API, v66.0. `POST /analytics/reports`.
+The request body must wrap all metadata in a `reportMetadata` key.
 
 Endpoint
 POST /services/data/v66.0/analytics/reports
+POST /services/data/v66.0/analytics/reports?checkOnly=true   (validate without saving)
 
 Headers
 Authorization: Bearer <access_token>
@@ -38,38 +40,41 @@ Body
 
 Input (parameters)
 name (string, required) - Display name.
-developerName (string, optional) - DeveloperName; auto-generated when omitted.
+reportType (object, required) - { type: "Opportunity" | "AccountList" | <custom_dev_name> }.
+reportFormat (string, optional, default "TABULAR") - "TABULAR" | "SUMMARY" | "MATRIX" | "JOINED".
+folderId (string, optional) - Defaults to the running user's Private Reports folder.
+developerName (string, optional) - Auto-generated from name when omitted.
 description (string, optional).
-reportType (object, required) - { type (string, e.g. "Opportunity",
-  "AccountList", or a custom report type developer name) }.
-reportFormat (string, required) - "TABULAR" | "SUMMARY" | "MATRIX" | "JOINED".
-folderId (string, optional, default = the running user's "Private" folder).
-detailColumns (string[], required for non-empty TABULAR/SUMMARY/MATRIX).
-aggregates (string[], optional) - "RowCount", "s!Amount" (sum), "a!Amount" (avg), etc.
-groupingsAcross (array, optional) - For MATRIX: { name, sortOrder, dateGranularity }.
-groupingsDown (array, optional) - { name, sortOrder, dateGranularity }.
+detailColumns (string[], optional) - Unique API column names.
+aggregates (string[], optional) - "RowCount", "s!Amount" (sum), "a!Amount" (avg), "m!Amount" (max), etc.
+groupingsDown (array, optional) - { name, sortOrder ("Asc"|"Desc"), dateGranularity }. For SUMMARY/MATRIX.
+groupingsAcross (array, optional) - { name, sortOrder, dateGranularity }. For MATRIX only.
 reportFilters (array, optional) - { column, operator, value }.
-standardDateFilter (object, optional) - { column, durationValue, startDate, endDate }.
+  Valid operators: equals, notEqual, greaterThan, lessThan, greaterOrEqual, lessOrEqual,
+  contains, notContain, startsWith, includes, excludes.
 reportBooleanFilter (string, optional) - e.g. "(1 OR 2) AND 3".
-showSubtotals, showGrandTotal, hasDetailRows, hasRecordCount (boolean, optional).
-checkOnly (boolean, optional, default false).
+standardDateFilter (object, optional) - { column, durationValue, startDate, endDate }.
+showGrandTotal, showSubtotals, hasDetailRows, hasRecordCount (boolean, optional).
+scope (string, optional) - "user" | "organization" | "territory".
+checkOnly (boolean, optional, default false) - Validates without saving.
 
 Result
-report (object) - { id, name, developerName, format, folderId, ownerId,
-  createdDate, modifiedDate, describeUrl, instancesUrl }.
+Raw Analytics REST API response — the saved reportMetadata including:
+id, name, developerName, reportFormat, folderId, reportType, url,
+describeUrl, instancesUrl, and all supplied metadata fields.
 
 Required permissions
 - "API Enabled" + "Create and Customize Reports".
 - Write access on the destination folder.
 
 Idempotency & limits
-- Not idempotent: a second call creates a second report.
+- Not idempotent: a second call with the same input creates a second report.
 - Folder must allow the running user to write.
 
 Errors
-- INVALID_REPORT_TYPE.
-- INSUFFICIENT_FOLDER_ACCESS.
-- INVALID_FILTER_VALUE.
+- INVALID_REPORT_TYPE
+- INSUFFICIENT_FOLDER_ACCESS
+- INVALID_FILTER_VALUE
 
 Example request
 
@@ -81,6 +86,7 @@ create_report({
   "detailColumns": ["NAME","ACCOUNT.NAME","AMOUNT","STAGE_NAME"],
   "aggregates": ["RowCount","s!AMOUNT"],
   "groupingsDown": [{ "name": "OWNER.NAME", "sortOrder": "Asc" }],
+  "groupingsAcross": [{ "name": "STAGE_NAME", "sortOrder": "Asc" }],
   "reportFilters": [{ "column": "STAGE_NAME", "operator": "notEqual", "value": "Closed Lost" }],
   "standardDateFilter": { "column": "CLOSE_DATE", "durationValue": "THIS_QUARTER" }
 })

@@ -1,56 +1,52 @@
 Tool: replace_lwc_bundle_files
 
 Description
-Replace files in an existing LWC bundle in a single deploy. Provide an
-array of files; each is created (if missing) or updated (if present).
-Files not listed are left untouched. Useful when deploying multiple
-file changes at once (HTML + JS + CSS) so users see a consistent state.
-
-For a single file, use `update_lwc_file`. For brand-new bundles use
-`create_lwc_bundle`.
+Replace, create, or delete files in an existing LWC bundle in a single
+operation. Each entry in `files` is POSTed (created) if missing or PATCHed
+(updated) if present. Files not listed are left untouched unless
+`deleteMissing=true`. Required files (js, xml) are never deleted.
 
 Salesforce API
-Tooling API, v66.0. Container/save pattern.
+Tooling API, v66.0. Direct CRUD.
 
-Endpoint
-POST /services/data/v66.0/tooling/sobjects/MetadataContainer
-POST /services/data/v66.0/tooling/sobjects/LightningComponentResource     (per new file)
-PATCH /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}     (per existing)
-POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+Endpoints
+GET   /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
+POST  /services/data/v66.0/tooling/sobjects/LightningComponentResource       (per new file)
+PATCH /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id}  (per existing file)
+DELETE /services/data/v66.0/tooling/sobjects/LightningComponentResource/{id} (when deleteMissing=true)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-N/A.
+Body (PATCH existing resource)
+{ "Source": "..." }
+
+Body (POST new resource)
+{ "LightningComponentBundleId": "<id>", "FilePath": "lwc/name/name.css", "Format": "css", "Source": "..." }
 
 Input (parameters)
-bundleName (string, required) - LWC bundle name.
-files (object[], required) - Each:
-  fileName (string, required).
-  source (string, required) - New file contents.
-  format (string, optional) - Inferred from extension when omitted.
-deleteMissing (boolean, optional, default false) - When true, files in
-  the bundle that are not in the input list are deleted (except `js`
-  and `js-meta.xml` which are required).
-checkOnly (boolean, optional, default false).
+bundleName (string, required) - DeveloperName of the bundle.
+files (object[], required, min 1) - Each entry:
+  fileName (string, required) - File name with extension, e.g. projectCard.css.
+  source (string, required) - Full file contents.
+  format (string, optional) - Format override. Auto-inferred from fileName.
+deleteMissing (boolean, optional, default false) - Delete bundle files not
+  listed in the files array. Required files (js, xml) are protected.
 
-Result
-deploy (object).
-bundle (object) - { id, name, label, apiVersion }.
-fileChanges (array) - [{ fileName, action ("created"|"updated"|"deleted"|"unchanged"), sizeBytes }].
+Result (raw Tooling API responses)
+bundleId (string).
+files (object) - Map of fileName → { id, success, errors } or delete result.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Idempotent on equal input.
+- Idempotent when source is identical.
 - Each file ≤ 1 MB; bundle total ≤ 5 MB.
 
 Errors
 - NOT_FOUND on bundleName.
-- DEPLOY_FAILED with file/line/column on compile errors.
 
 Example request
 

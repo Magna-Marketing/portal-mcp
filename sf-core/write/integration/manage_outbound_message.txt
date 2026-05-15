@@ -1,40 +1,39 @@
 Tool: manage_outbound_message
 
 Description
-Create / update / delete a Workflow Outbound Message (SOAP webhook
-fired by a Workflow Rule). Configures endpoint URL, fields included,
-and integration user used to authenticate the message.
+Create / update / delete a Workflow Outbound Message (SOAP webhook fired by a Workflow
+Rule). Configures endpoint URL, fields included, and integration user used to
+authenticate the message.
 
 Salesforce API
-Metadata API (`Workflow.outboundMessages`), v66.0.
+SOAP Metadata API, v66.0. Outbound messages are child records within the Workflow
+metadata container for the sObject.
+API: Read Workflow container → mutate outboundMessages array → create/update container.
+Use conn.metadata.read / create / update (jsforce).
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+SOAP /services/Soap/m/{version}   (via jsforce metadata client)
 
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+Metadata structure
+The outbound message fullName stored in Salesforce is "SObjectName.MessageDeveloperName",
+e.g. "Opportunity.Notify_Partner_On_Won". The tool constructs this automatically from
+the sObject and fullName parameters.
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
-sObject (string, required).
-fullName (string, required) - Outbound message DeveloperName (within the sObject's Workflow).
-name (string, required for create).
-endpointUrl (string, required for create/update).
-integrationUserId (string, optional).
-integrationUsername (string, optional).
-fields (string[], optional) - Field API names to include in the SOAP message.
-apiVersion (number, optional, default = org default).
+sObject (string, required) - sObject API name owning this message, e.g. Opportunity.
+fullName (string, required) - DeveloperName of the outbound message only (no sObject prefix),
+  e.g. Notify_Partner_On_Won.
+name (string, required for create/update) - Human-readable label.
+endpointUrl (string, required for create) - HTTPS webhook URL.
+fields (string[], optional) - Field API names to include in the SOAP payload.
+integrationUser (string, optional) - Username of the Salesforce user sending the message.
+apiVersion (number, optional, default 66.0).
 includeSessionId (boolean, optional, default false).
 useDeadLetterQueue (boolean, optional, default false).
-checkOnly (boolean, optional, default false).
 
 Result
-deploy (object).
-outboundMessage (object) - { fullName, name, endpointUrl, fields }.
+{ create | update | delete: <Metadata API SaveResult> }
 
 Required permissions
 - "Customize Application".
@@ -43,7 +42,8 @@ Idempotency & limits
 - update idempotent.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad fields list.
+- DUPLICATE_DEVELOPER_NAME.
+- INVALID_FIELD - bad field API name in fields array.
 
 Example request
 
@@ -53,6 +53,5 @@ manage_outbound_message({
   "fullName": "Notify_Partner_On_Won",
   "name": "Notify Partner on Won",
   "endpointUrl": "https://webhook.partner.com/sf/opportunity",
-  "fields": ["Id", "Name", "Amount", "CloseDate"],
-  "integrationUsername": "integration@magnatech.com"
+  "fields": ["Id", "Name", "Amount", "CloseDate"]
 })

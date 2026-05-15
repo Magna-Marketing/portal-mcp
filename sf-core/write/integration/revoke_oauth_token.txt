@@ -1,41 +1,55 @@
 Tool: revoke_oauth_token
 
 Description
-Revoke OAuth tokens for a user, an app, or a specific token Id.
+Revoke OAuth tokens for a user, a Connected App, or a specific token.
 Forces re-authentication on next call.
 
 Salesforce API
-REST API + Connect API, v66.0.
+Two-step process using REST API v66.0 + OAuth2 revoke endpoint:
+1. Query OauthToken sObject to find matching tokens and their DeleteToken values.
+2. POST each DeleteToken to /services/oauth2/revoke.
 
-Endpoint
-DELETE /services/data/v66.0/sobjects/OauthToken/{id}                 (single token)
-DELETE /services/data/v66.0/apps/oauth/usage/{appId}/users/{userId}/tokens     (all tokens for user/app)
+NOTE: There is no direct REST DELETE endpoint for OauthToken records in v66.0.
+The correct revocation method is via the /services/oauth2/revoke endpoint with
+the DeleteToken value (an opaque string from the OauthToken record).
 
-Headers
-Authorization: Bearer <access_token>
+Endpoint (step 1 - query)
+GET /services/data/v66.0/query?q=SELECT+Id,DeleteToken,UserId,AppName+FROM+OauthToken+WHERE+...
 
-Body
-None.
+Endpoint (step 2 - revoke)
+POST /services/oauth2/revoke
+Body: token=<DeleteToken> (application/x-www-form-urlencoded)
+Response: 200 OK on success, 400 on error.
 
 Input (parameters)
-mode (string, required) - "byTokenId" | "byUserAndApp" | "byUser" | "byApp".
-tokenId (string, optional, required for "byTokenId").
-userId (string, optional) / username (string, optional).
-appId (string, optional) / appName (string, optional).
+mode (string, required) - "byTokenId" | "byUser" | "byApp" | "byUserAndApp".
+tokenId (string, optional) - OauthToken record Id. Required for byTokenId.
+userId (string, optional) - Salesforce User Id. Used in byUser and byUserAndApp.
+username (string, optional) - Salesforce username. Alternative to userId for byUser/byUserAndApp.
+appName (string, optional) - Connected App name (AppName field). Required for byApp. Used in byUserAndApp.
 
 Result
-revoked (number).
-results (array) - { tokenId, status ("revoked"|"failed"), error }.
+{
+  "revoked": <number>,
+  "total": <number>,
+  "results": [
+    { "tokenId": "...", "userId": "...", "appName": "...", "status": "revoked" | "failed", "error": "..." }
+  ]
+}
 
 Required permissions
 - "Manage Connected Apps" + "Manage Users".
 
 Idempotency & limits
-- Idempotent.
+- Idempotent — revoking an already-revoked token returns 200/400 without side effects.
 
 Errors
-- INSUFFICIENT_ACCESS_OR_READONLY, NOT_FOUND.
+- INSUFFICIENT_ACCESS_OR_READONLY — insufficient permissions.
+- NOT_FOUND — OauthToken record not found or token already revoked.
+- 400 Bad Request from /services/oauth2/revoke — invalid_token or unsupported_token_type.
 
-Example request (revoke all tokens for a user across all apps)
+Example request (revoke all tokens for a compromised user)
 
 revoke_oauth_token({ "mode": "byUser", "username": "compromised@magnatech.com" })
+
+revoke_oauth_token({ "mode": "byTokenId", "tokenId": "17tXXXXXXXXXXXXXXX" })

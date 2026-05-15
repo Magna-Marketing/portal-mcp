@@ -1,9 +1,24 @@
 Tool: sobject_tree_insert
 
 Description
-Insert a parent record plus its child records in a single call (200
-records max, including parent + children). The platform creates the
-parent first then children with the parent's Id auto-wired.
+Create a tree of parent and child records in a single API call. An sObject
+tree is a nested, parent-child record hierarchy with a single root sObject
+type. Child records are nested under their parent using the child relationship
+API name (e.g., Contacts, Opportunities). All records in the same request are
+created together; if any record fails, the entire request is rolled back.
+
+KEY DIFFERENCES/CORRECTIONS from original documentation:
+- The resource supports up to 5 different sObject types per request (not unlimited).
+- Trees can be up to 5 levels deep (not unlimited nesting).
+- The root sObject type in the URL must match all root-level records' attributes.type.
+- referenceId must start with a letter or digit (alphanumeric + underscores only).
+- The response structure uses 'hasErrors' and 'results' (not 'results[].success').
+  Results include { referenceId, id, errors } for each record. The 'id' field is
+  absent when errors occur.
+- Triggers, processes, and workflow rules fire per level (all root records together,
+  then all second-level records of the same type, etc.) — not per individual record.
+- Because the tree can contain a single record, you can use this to bulk-insert up to
+  200 unrelated records of the same type in one call.
 
 Salesforce API
 REST API (Composite), v66.0.
@@ -29,24 +44,48 @@ Body
 }
 
 Input (parameters)
-sObject (string, required) - Root sObject API name.
-records (object[], required) - Tree-shaped records (children nested under
-  the parent's child relationship name, e.g. `Contacts`).
+sObject (string, required) - Root sObject API name. Must match all root records' attributes.type.
+  Example: "Account", "Case", "MyObject__c".
+records (object[], required) - Array of root-level records. Each record:
+  attributes (object, required) - { type (string), referenceId (string) }. referenceId must
+    be alphanumeric + underscores, starting with a letter or digit.
+  <field> (any, optional) - Any sObject field values.
+  <ChildRelationshipName> (object, optional) - Nested children via the child relationship API name
+    (e.g. Contacts, Opportunities, Cases). Value is { records: [...] } with the same structure.
 
 Result
-hasErrors (boolean).
-results (array) - Per row (root + children): { referenceId, id, errors: [] | [{ statusCode, message, fields }] }.
+{
+  "hasErrors": false,
+  "results": [
+    { "referenceId": "acc1", "id": "001xx...", "errors": [] },
+    { "referenceId": "con1", "id": "003xx...", "errors": [] }
+  ]
+}
+
+On error (entire request rolled back):
+{
+  "hasErrors": true,
+  "results": [
+    { "referenceId": "con1", "errors": [{ "statusCode": "REQUIRED_FIELD_MISSING", "message": "Required fields are missing: [LastName]", "fields": ["LastName"] }] }
+  ]
+}
 
 Required permissions
-- "API Enabled" + create on parent and child sObjects.
+- "API Enabled" + Create permission on all sObject types in the tree.
 
 Idempotency & limits
-- Not idempotent.
-- 200 records total per call (root + children).
-- All records must be of compatible sObjects (the URL declares the root).
+- Not idempotent (creates new records on each call).
+- Up to 200 total records across all trees per call.
+- Up to 5 different sObject types per request.
+- Up to 5 levels of nesting depth.
+- All root records must be of the same type (matching the URL sObject parameter).
+- Entire request rolls back if any single record fails.
+- Counts as a single API call toward limits.
 
 Errors
 - INVALID_FIELD on bad child relationship name.
+- REQUIRED_FIELD_MISSING if required fields are omitted.
+- The error includes the referenceId of the failed record.
 
 Example request
 
@@ -55,11 +94,11 @@ sobject_tree_insert({
   "records": [{
     "attributes": { "type": "Account", "referenceId": "acc1" },
     "Name": "ACME",
-    "Industry": "Tech",
+    "Industry": "Technology",
     "Contacts": {
       "records": [
-        { "attributes": { "type": "Contact", "referenceId": "c1" }, "LastName": "Doe" },
-        { "attributes": { "type": "Contact", "referenceId": "c2" }, "LastName": "Smith" }
+        { "attributes": { "type": "Contact", "referenceId": "c1" }, "LastName": "Doe", "Email": "doe@acme.com" },
+        { "attributes": { "type": "Contact", "referenceId": "c2" }, "LastName": "Smith", "Email": "smith@acme.com" }
       ]
     },
     "Opportunities": {

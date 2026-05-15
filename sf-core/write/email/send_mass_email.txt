@@ -1,56 +1,80 @@
 Tool: send_mass_email
 
 Description
-Send a templated email to many recipients in one batch (up to 1,000
-recipients per call). Each recipient resolves merge fields against
-their own context record. Logs as activity per recipient (optional).
+Send a templated email to many recipients in one batch using the Apex
+Messaging.MassEmailMessage class. Each recipient resolves merge fields against
+their own context record (targetRecordId). Logs as activity per recipient
+(optional).
 
 Salesforce API
-REST API (Standard Invocable), v66.0. `actions/standard/emailMassSimple`
-or apex `Messaging.MassEmailMessage` via `execute_anonymous` (the tool
-prefers REST).
+Tooling API (executeAnonymous), v66.0.
+Apex: Messaging.MassEmailMessage + Messaging.sendEmail()
 
-Endpoint
-POST /services/data/v66.0/actions/standard/emailMassSimple
+Corrections vs. original documentation
+- emailMassSimple does NOT exist as a standard Salesforce invocable action. There
+  is no REST endpoint /actions/standard/emailMassSimple in the Salesforce platform.
+- The correct approach is Apex Messaging.MassEmailMessage executed via:
+  GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody=<url-encoded>
+- The tool builds the Apex code internally, executes it anonymously, and returns
+  the Apex execution result.
+- The "priority" parameter does not exist on Messaging.MassEmailMessage.
+- cc / bcc per-recipient is not supported by Messaging.MassEmailMessage.
+- Mass email uses templateId (Salesforce EmailTemplate ID) + targetObjectIds
+  (list of Contact/Lead/User IDs) + optional whatIds (context records).
+
+Endpoint (composite)
+GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody=...
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
 
-Body
-{
-  "inputs": [{
-    "templateId": "00X4Q00000abcDE",
-    "recipientIds": ["003Qg00...", "003Qg00..."],
-    "targetRecordIds": ["a01Qg00...", "a01Qg00..."],
-    "senderType": "OrgWideEmailAddress",
-    "orgWideEmailAddressId": "0D2Qg00000abcDE",
-    "logEmailOnSend": true
-  }]
-}
+Generated Apex (example)
+Messaging.MassEmailMessage mail = new Messaging.MassEmailMessage();
+mail.setTemplateId('00X...');
+mail.setTargetObjectIds(new List<Id> { '003...', '003...' });
+mail.setWhatIds(new List<Id> { 'a01...', 'a01...' });
+mail.setSaveAsActivity(true);
+Messaging.sendEmail(new Messaging.MassEmailMessage[] { mail }, false);
 
 Input (parameters)
-templateId (string, optional).
-templateName (string, optional).
-  One required.
-recipients (object[], required) - Each: { recipientId (Contact/Lead/User), targetRecordId (record context), cc?, bcc? }.
-senderType (string, optional, default "CurrentUser").
-orgWideEmailAddressId (string, optional).
-saveAsActivity (boolean, optional, default true).
-priority (string, optional, default "Normal") - "Normal" | "High" | "Low".
+templateId (string, optional) - Salesforce EmailTemplate ID.
+templateName (string, optional) - DeveloperName resolved to ID via SOQL.
+  One of templateId or templateName is required.
+recipients (object[], required) - Each: { recipientId (Contact/Lead/User ID),
+  targetRecordId? (context record for merge fields) }.
+senderType (string, optional, default "CurrentUser") -
+  "CurrentUser" | "OrgWideEmailAddress".
+orgWideEmailAddressId (string, optional) - Required when senderType is
+  OrgWideEmailAddress.
+saveAsActivity (boolean, optional, default true) - Log email on recipient
+  activity timeline.
 
 Result
-result (object) - { sent, failed, errors, messageIds (string[]), logIds (string[]) }.
+{
+  "apex": "<generated apex code>",
+  "result": {
+    "compiled": true,
+    "compileProblem": null,
+    "success": true,
+    "exceptionMessage": null,
+    "exceptionStackTrace": null,
+    "line": null,
+    "column": null
+  }
+}
+
+Limits
+- Up to 1,000 recipients per mass email call (Apex Messaging.MassEmailMessage limit).
+- Daily mass email limit applies (check get_org_limits for MassEmail).
+- Apex governor limits apply (100 SOQL, 10s CPU).
+- Not idempotent.
 
 Required permissions
 - "Mass Email" + "Send Email".
 
-Idempotency & limits
-- Not idempotent.
-- 1,000 mass recipients per call. Daily MassEmail cap (5,000–unlimited depending on edition; check `get_org_limits.MassEmail`).
-
 Errors
-- MASS_MAIL_LIMIT_EXCEEDED, EMAIL_TEMPLATE_NOT_FOUND.
+- MASS_MAIL_LIMIT_EXCEEDED (Apex exception).
+- EMAIL_TEMPLATE_NOT_FOUND (custom error when templateName not found).
 
 Example request
 

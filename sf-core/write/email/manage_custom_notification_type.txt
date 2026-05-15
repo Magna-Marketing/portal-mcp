@@ -1,51 +1,85 @@
 Tool: manage_custom_notification_type
 
 Description
-Create / update / delete Custom Notification Types — the channels you
-publish to via `publish_custom_notification`.
+Create, update, or delete Custom Notification Types via the Salesforce Metadata
+API v66.0. Custom Notification Types are the channel definitions used by
+publish_custom_notification to route notifications to desktop (bell icon) and/or
+mobile push.
 
 Salesforce API
-REST API (Data), v66.0. SOQL/CRUD on `CustomNotificationType`.
+Metadata API (CustomNotificationType), v66.0. Managed via jsforce
+conn.metadata CRUD methods.
 
-Endpoint
-POST /services/data/v66.0/sobjects/CustomNotificationType
-PATCH /services/data/v66.0/sobjects/CustomNotificationType/{id}
-DELETE /services/data/v66.0/sobjects/CustomNotificationType/{id}
+Endpoints (internal, via jsforce)
+conn.metadata.create("CustomNotificationType", metadata)
+conn.metadata.read("CustomNotificationType", fullName)
+conn.metadata.update("CustomNotificationType", metadata)
+conn.metadata.delete("CustomNotificationType", fullName)
 
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
+Corrections vs. original documentation
+- The original doc listed "NotificationChannel": "Desktop;Mobile" and used the
+  REST sObjects endpoint POST /sobjects/CustomNotificationType. Both are incorrect:
+  * The Metadata API (and Tooling API) expose separate boolean fields:
+    "desktop" and "mobile" — NOT a single "NotificationChannel" string.
+  * CustomNotificationType is not creatable/updatable via the standard sObjects
+    REST API; it must go through the Metadata API.
+- "iconName" is NOT a valid Metadata API field for CustomNotificationType. Removed.
+- "defaultTitle" and "defaultBody" are NOT valid Metadata API fields. Removed.
+- "channels" string[] parameter replaced by "desktop" (boolean) and "mobile"
+  (boolean) to match the actual Metadata API schema.
+- The Metadata API field "customNotifTypeName" is the notification type name
+  (max 80 chars), separate from "masterLabel" (display label).
 
-Body
-{ "DeveloperName": "MTG_Project_Update", "MasterLabel": "MTG Project Update", "CustomNotifTypeName": "MTG Project Update", "Description": "...", "Title": null, "Body": null, "NotificationChannel": "Desktop;Mobile" }
+Metadata type fields
+fullName            string   Required. Maps to developerName parameter.
+masterLabel         string   Required. Display label.
+customNotifTypeName string   Required. Notification type name (max 80 chars).
+  Defaults to masterLabel when omitted.
+description         string   Optional. Max 255 chars.
+desktop             boolean  Required. Enable desktop (bell icon) channel.
+mobile              boolean  Required. Enable mobile push channel.
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
-developerName (string, required) - DeveloperName.
-masterLabel (string, required for create).
-description (string, optional).
-defaultTitle (string, optional).
-defaultBody (string, optional).
-channels (string[], optional, default ["Desktop","Mobile"]) - Subset of "Desktop","Mobile".
-iconName (string, optional).
+developerName (string, required) - API/developer name (fullName in Metadata API).
+masterLabel (string, required for create) - Display label.
+customNotifTypeName (string, optional) - Notification type name. Defaults to
+  masterLabel on create.
+description (string, optional) - Description (max 255 chars).
+desktop (boolean, required for create) - Enable desktop channel.
+mobile (boolean, required for create) - Enable mobile push channel.
 
 Result
-notificationType (object) - { id, developerName, masterLabel, channels }.
+create:  { "create": { "fullName": "...", "success": true } }
+update:  { "update": { "fullName": "...", "success": true } }
+delete:  { "delete": { "fullName": "...", "success": true } }
 
 Required permissions
 - "Customize Application".
 
-Idempotency & limits
-- update idempotent.
+Idempotency
+- update is idempotent.
+- create and delete are not.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME.
+- DUPLICATE_DEVELOPER_NAME
+- REQUIRED_FIELD_MISSING
 
-Example request
+Example request (create)
 
 manage_custom_notification_type({
   "operation": "create",
   "developerName": "MTG_Project_Update",
   "masterLabel": "MTG Project Update",
-  "channels": ["Desktop", "Mobile"]
+  "description": "Notifies users of MTG project status changes.",
+  "desktop": true,
+  "mobile": true
+})
+
+Example request (disable mobile)
+
+manage_custom_notification_type({
+  "operation": "update",
+  "developerName": "MTG_Project_Update",
+  "mobile": false
 })

@@ -1,34 +1,105 @@
 Tool: manage_object
 
 Description
-Create or update a custom Salesforce object via the Metadata API. Use
-this for `__c` objects only — standard objects can have fields/layouts
-modified but cannot be created or renamed. Operations: `create`, `update`,
-`upsert` (create-or-update), `delete`. Returns the deploy result with
-synchronous status; the Metadata API is asynchronous so the MCP server
-polls until the deploy reaches a terminal state.
+Create, update, upsert, or delete a custom Salesforce object using the
+Metadata API (CustomObject type) v66.0.
+
+Only custom objects (__c suffix) can be created or deleted. Standard objects
+support a limited 'update' to change labels and some settings.
+
+The Metadata API call is synchronous from the tool's perspective — jsforce
+handles the underlying SOAP createMetadata / updateMetadata / deleteMetadata
+call and returns the result directly.
 
 Salesforce API
-Metadata API (`CustomObject` type), v66.0. Composite metadata deploy via
-`POST /services/data/v66.0/metadata/deploy`.
+Metadata API (CustomObject type), v66.0.
+Underlying SOAP endpoint: /services/Soap/m/66.0
+jsforce abstraction: conn.metadata.create/update/delete('CustomObject', ...)
 
-Endpoint
-POST  /services/data/v66.0/metadata/deployRequest                 (preferred; JSON wrapper)
-or SOAP `metadata/v66.0` with createMetadata / updateMetadata / deleteMetadata.
+Corrections vs original documentation:
+- Original doc listed "POST /services/data/v66.0/metadata/deployRequest" as the
+  endpoint. While that REST endpoint exists, it requires a ZIP file upload
+  (multipart/form-data) with package.xml and XML component definitions. The
+  implementation uses jsforce's Metadata SOAP API instead (createMetadata /
+  updateMetadata / deleteMetadata), which is the correct programmatic approach
+  and does not require ZIP file assembly.
+- "checkOnly" and "testLevel" are deploy-level options for the deployRequest
+  REST endpoint only, not for individual createMetadata/updateMetadata SOAP
+  calls. They have been removed from this tool.
+- 'upsert' operation: Tries createMetadata first; on DUPLICATE_DEVELOPER_NAME
+  falls back to updateMetadata — making it idempotent on fullName.
+- Added 'recordTypeTrackHistory', 'visibility', 'enableLicensing',
+  'startingNumber' for nameField AutoNumber, and full description/label
+  fields per official CustomObject metadata type spec.
 
-Headers
+Headers (managed by jsforce internally)
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: text/xml; charset=utf-8
+SOAPAction: createMetadata | updateMetadata | deleteMetadata
 
-Body (create example)
-{
+Input (parameters)
+operation (string, required) - "create" | "update" | "upsert" | "delete".
+fullName (string, required) - sObject API name including __c suffix
+  (e.g. "Project__c"). For standard objects only "update" is supported.
+label (string, required for create) - Singular display label.
+pluralLabel (string, required for create) - Plural label. Defaults to
+  label + 's' if omitted.
+description (string, optional) - Object description. Max 1000 characters.
+nameField (object, required for create) - Name field config:
+  { type: "Text" | "AutoNumber", label: string,
+    displayFormat: string (AutoNumber only, e.g. "PRJ-{0000}"),
+    startingNumber: number (AutoNumber only, default 1) }.
+  Defaults to { type: "Text", label: "Name" } if omitted.
+deploymentStatus (string, optional, default "Deployed") - "Deployed" |
+  "InDevelopment".
+sharingModel (string, optional, default "ReadWrite") - "Private" | "Read" |
+  "ReadWrite" | "ReadWriteTransfer" | "FullAccess" |
+  "ControlledByParent" (required for junction objects on master-detail).
+enableActivities (boolean, optional) - Enable Activity (Task/Event) tracking.
+enableHistory (boolean, optional) - Enable field history tracking.
+enableReports (boolean, optional) - Allow in reports.
+enableSearch (boolean, optional) - Enable global search.
+enableBulkApi (boolean, optional) - Allow Bulk API access.
+enableSharing (boolean, optional) - Enable sharing rules.
+enableStreamingApi (boolean, optional) - Enable Streaming API.
+enableLicensing (boolean, optional) - Enable ISV subscriber licensing.
+visibility (string, optional, default "Public") - "Public" | "Protected".
+recordTypeTrackHistory (boolean, optional) - Track record type changes.
+
+Result
+{ operation, fullName, result: SaveResult }
+SaveResult: { fullName, success (boolean), errors (array) }
+or array of the same for batch operations.
+
+Required permissions
+- Customize Application
+- Modify All Data
+
+Idempotency & limits
+- "upsert" is idempotent on fullName (create-or-update).
+- "create" fails with DUPLICATE_DEVELOPER_NAME if the object already exists.
+- Custom objects count against the org's object limit.
+- Production changes may require test coverage via separate deploy.
+
+Errors
+- DUPLICATE_DEVELOPER_NAME: object with this fullName already exists (create).
+- INVALID_FIELD: unsupported combination of nameField type or sharingModel.
+- DEPLOY_FAILED: validation error in the metadata definition.
+
+Example request (create with AutoNumber name)
+
+manage_object({
   "operation": "create",
   "fullName": "Project__c",
   "label": "Project",
   "pluralLabel": "Projects",
-  "nameField": { "type": "AutoNumber", "displayFormat": "PRJ-{0000}", "label": "Project Number" },
-  "deploymentStatus": "Deployed",
+  "nameField": {
+    "type": "AutoNumber",
+    "label": "Project Number",
+    "displayFormat": "PRJ-{0000}"
+  },
   "sharingModel": "ReadWrite",
+  "deploymentStatus": "Deployed",
   "enableActivities": true,
   "enableHistory": true,
   "enableReports": true,
@@ -36,60 +107,11 @@ Body (create example)
   "enableBulkApi": true,
   "enableSharing": true,
   "enableStreamingApi": true
-}
+})
 
-Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-fullName (string, required) - sObject API name (e.g. "Project__c").
-  For standard sObjects, only "update" is allowed.
-label (string, required for create) - Singular label.
-pluralLabel (string, required for create).
-description (string, optional).
-nameField (object, required for create) - { type ("Text"|"AutoNumber"),
-  label (string), displayFormat (string for AutoNumber, with {0000}
-  template) }.
-deploymentStatus (string, optional, default "Deployed") - "Deployed" or "InDevelopment".
-sharingModel (string, optional, default "ReadWrite") - "Private",
-  "Read", "ReadWrite", "ReadWriteTransfer", "FullAccess",
-  "ControlledByParent" (junction).
-enableActivities, enableHistory, enableReports, enableSearch,
-  enableBulkApi, enableSharing, enableStreamingApi (boolean, optional).
-enableLicensing (boolean, optional).
-recordTypeTrackHistory (boolean, optional).
-visibility (string, optional, default "Public") - "Public" | "Protected".
-checkOnly (boolean, optional, default false) - Validate without saving.
-testLevel (string, optional, default "NoTestRun" in sandboxes;
-  required "RunLocalTests" in production for changes that touch Apex).
-
-Result
-deployId (string) - Metadata API deploy Id.
-status (string) - "Pending" | "InProgress" | "Succeeded" | "Failed" |
-  "Canceled" | "SucceededPartial".
-done (boolean).
-numberComponentsTotal (number).
-numberComponentsDeployed (number).
-numberComponentErrors (number).
-componentSuccesses (array) - Per-component success entries.
-componentFailures (array) - { componentType, fileName, problemType,
-  problem, lineNumber, columnNumber }.
-runTestsResult (object|null) - For production deploys; pass/fail per test.
-elapsedMs (number).
-
-Required permissions
-- "Customize Application", "Modify All Data", and (for production)
-  "Manage Deployments".
-
-Idempotency & limits
-- `upsert` is idempotent on `fullName`; `create` is not (will fail on
-  conflict). The MCP layer maps `create` -> `upsert` when an existing
-  object is detected and `update` semantics fit.
-- Metadata deploys count against the org's "Daily Metadata Calls" budget.
-- Production deploys require Apex test runs (≥75% coverage org-wide).
-
-Errors
-- DUPLICATE_DEVELOPER_NAME on create when fullName exists.
-- INVALID_FIELD on bad nameField.type.
-- DEPLOY_FAILED with componentFailures.
+Response:
+{ "operation": "create", "fullName": "Project__c",
+  "result": { "fullName": "Project__c", "success": true, "errors": [] } }
 
 Example request (update sharing model)
 
@@ -99,3 +121,7 @@ manage_object({
   "sharingModel": "Private",
   "enableActivities": true
 })
+
+Example request (delete)
+
+manage_object({ "operation": "delete", "fullName": "Project__c" })

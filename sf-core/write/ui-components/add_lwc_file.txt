@@ -1,47 +1,50 @@
 Tool: add_lwc_file
 
 Description
-Add a new file to an existing LWC bundle. Cannot be used to overwrite
-existing files (use `update_lwc_file`). Cannot add `js` or `js-meta.xml`
-to a bundle that already has them.
+Add a new file to an existing LWC bundle. Fails if the file already exists
+(use `update_lwc_file` instead). Cannot add a second .js or .js-meta.xml
+since the platform allows only one per bundle.
 
 Salesforce API
-Tooling API, v66.0.
+Tooling API, v66.0. Direct CRUD.
 
-Endpoint
-POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+Endpoints
+GET  /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
 POST /services/data/v66.0/tooling/sobjects/LightningComponentResource
-POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body (resource create)
-{ "MetadataContainerId": "<id>", "LightningComponentBundleId": "<bundleId>", "FilePath": "lwc/{name}/{fileName}", "Format": "css", "Source": "..." }
+Body
+{
+  "LightningComponentBundleId": "<bundleId>",
+  "FilePath": "lwc/projectCard/projectCard.css",
+  "Format": "css",
+  "Source": ":host { display: block; padding: 0.5rem; }"
+}
 
 Input (parameters)
-bundleName (string, required).
-fileName (string, required) - Must include extension.
+bundleName (string, required) - DeveloperName of the bundle.
+fileName (string, required) - File name including extension.
 source (string, required) - File contents.
-checkOnly (boolean, optional, default false).
 
-Result
-deploy (object).
-file (object, on success) - { id, fileName, format, sizeBytes }.
+Result (raw Tooling API response)
+filePath (string).
+format (string) - Inferred from fileName.
+createResult (object) - { id, success, errors }.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Not idempotent — fails if the file already exists.
+- Not idempotent (fails if file already exists).
 
 Errors
-- DUPLICATE_VALUE on existing file.
-- INVALID_FIELD on unsupported file extension.
-- DEPLOY_FAILED with compile errors.
+- DUPLICATE_VALUE: file already exists in the bundle.
+- NOT_FOUND: bundle not found.
 
-Example request (add CSS)
+Example request
 
 add_lwc_file({
   "bundleName": "projectCard",

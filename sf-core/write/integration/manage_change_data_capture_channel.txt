@@ -1,35 +1,47 @@
 Tool: manage_change_data_capture_channel
 
 Description
-Add / remove sObjects to/from a Change Data Capture (CDC) channel
-(default `ChangeEvents` or a custom CDC channel). Supports adding
-enriched fields (those propagated even when unchanged).
+Add / remove sObjects to/from a Change Data Capture (CDC) channel (default
+ChangeEvents or a custom CDC channel), manage enriched fields, or create / delete
+a custom CDC channel.
+
+Enriched fields are propagated in change events even when the fields were not changed,
+providing denormalized context for event consumers.
 
 Salesforce API
-Metadata API + Tooling, v66.0. `PlatformEventChannel` (channelType=data) +
-`PlatformEventChannelMember`.
+SOAP Metadata API, v66.0.
+Metadata types: PlatformEventChannel (channelType=data) + PlatformEventChannelMember.
+Use conn.metadata.create / update / delete / read (jsforce).
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+SOAP /services/Soap/m/{version}   (via jsforce metadata client)
 
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
+Channel naming
+- Default standard channel: ChangeEvents (no __chn suffix needed in channelName).
+- Custom CDC channels: fullName ends with __chn, e.g. MTG_Ops_CDC__chn.
 
-Body
-N/A.
+PlatformEventChannelMember fullName pattern: "{channelFullName}.{sObjectApiName}"
+e.g. "ChangeEvents.Account", "MTG_Ops_CDC__chn.Case"
+
+Enriched fields are stored as { name: "FieldApiName" } array on the member.
 
 Input (parameters)
-operation (string, required) - "addEntity" | "removeEntity" | "updateEnrichedFields" | "createCustomChannel" | "deleteCustomChannel".
-channelName (string, optional, default "ChangeEvents") - Custom channel DeveloperName when not the default.
-sObjects (string[], optional) - For addEntity/removeEntity.
-enrichedFields (object[], optional) - For updateEnrichedFields: [{ sObject, fields: [field API names] }].
-masterLabel (string, optional, for createCustomChannel).
-checkOnly (boolean, optional, default false).
+operation (string, required) - "addEntity" | "removeEntity" | "updateEnrichedFields" |
+  "createCustomChannel" | "deleteCustomChannel".
+channelName (string, optional, default "ChangeEvents") - DeveloperName of the channel.
+  For the default CDC channel, omit or supply "ChangeEvents".
+  For custom channels, supply the full name including __chn suffix.
+masterLabel (string, required for createCustomChannel).
+sObjects (string[], optional) - Required for addEntity, removeEntity, createCustomChannel.
+enrichedFields (object[], optional) - Required for updateEnrichedFields:
+  [{ sObject (string), fields (string[]) }]
 
 Result
-deploy (object).
-channel (object) - { fullName, members: [{ selectedEntity, enrichedFields }] }.
+addEntity: { addEntity: [<SaveResult>] }
+removeEntity: { removeEntity: [{ fullName, delete | error }] }
+updateEnrichedFields: { updateEnrichedFields: [<SaveResult>] }
+createCustomChannel: { createCustomChannel: <SaveResult>, members: [<SaveResult>] }
+deleteCustomChannel: { deleteCustomChannel: <DeleteResult> }
 
 Required permissions
 - "Customize Application".
@@ -38,11 +50,17 @@ Idempotency & limits
 - addEntity / removeEntity idempotent.
 
 Errors
-- INVALID_TYPE, CDC_NOT_ENABLED on the org.
+- INVALID_TYPE - CDC not enabled for this object.
+- CDC_NOT_ENABLED - CDC not enabled on the org.
 
 Example request
 
 manage_change_data_capture_channel({
   "operation": "addEntity",
   "sObjects": ["Account", "Opportunity", "Project__c"]
+})
+
+manage_change_data_capture_channel({
+  "operation": "updateEnrichedFields",
+  "enrichedFields": [{ "sObject": "Account", "fields": ["Name", "BillingCity"] }]
 })

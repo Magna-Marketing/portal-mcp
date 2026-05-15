@@ -1,10 +1,21 @@
 Tool: graphql_query
 
 Description
-Run a GraphQL query (or mutation) against Salesforce's GraphQL endpoint.
-Supports nested reads with relationships, cursor-based pagination,
-filters, and sort. Mutations are limited to UI-API-supported sObjects
-(create/update/delete records and a few specialized actions).
+Execute a GraphQL query or mutation against the Salesforce GraphQL API.
+Supports nested reads with relationships, cursor-based pagination, filters,
+sort, and write mutations for UI-API-supported sObjects.
+
+KEY DIFFERENCES from original documentation:
+- The response ALWAYS returns HTTP 200, even when errors occur. Check the
+  'errors' array in the response for query/execution errors.
+- All Salesforce scalar fields are wrapped in value objects. Access them via
+  FieldName { value }, e.g. Name { value }, not Name directly.
+- The response includes a third 'extensions' field alongside 'data' and 'errors'.
+- The request body supports an optional 'extensions' field for server extensions
+  (e.g. persisted queries).
+- GraphQL error extensions use 'ErrorType' (capital T), not 'errorType'.
+- The updateMRU argument (available in API v66.0+) can be set on queries to update
+  the LastViewedDate field on returned records.
 
 Salesforce API
 GraphQL API, v66.0.
@@ -18,39 +29,72 @@ Content-Type: application/json
 
 Body
 {
-  "query": "query Accounts($first: Int) { uiapi { query { Account(first: $first, where: { Industry: { eq: \"Tech\" } }) { edges { node { Id Name Industry { value } } } pageInfo { endCursor hasNextPage } } } } }",
-  "variables": { "first": 50 }
+  "query": "query Accounts($first: Int) { uiapi { query { Account(first: $first) { edges { node { Id Name { value } } } pageInfo { endCursor hasNextPage } totalCount } } } }",
+  "variables": { "first": 25 },
+  "operationName": "Accounts"
 }
 
 Input (parameters)
-query (string, required) - GraphQL document (query or mutation).
-variables (object, optional).
-operationName (string, optional).
+query (string, required) - GraphQL document (query or mutation). All scalar fields must
+  be accessed via their value wrapper: FieldName { value }. Read queries wrap in
+  uiapi { query { ... } }. Mutations wrap in uiapi { <Object>Create/Update/Delete(...) }.
+variables (object, optional) - Variables map for parameterized queries/mutations.
+operationName (string, optional) - Required when the document contains multiple named
+  operations; identifies which one to execute.
+extensions (object, optional) - Optional GraphQL extensions map (e.g. persisted queries).
 
 Result
-data (object) - GraphQL data response (shape mirrors query structure).
-errors (array, optional) - GraphQL errors.
+{
+  "data": { ... },         // GraphQL response data (mirrors query shape)
+  "errors": [              // Present when errors occur (even if HTTP 200)
+    {
+      "message": "...",
+      "locations": [{ "line": 4, "column": 7 }],
+      "paths": ["uiapi", "query", "Account"],
+      "extensions": { "ErrorType": "ValidationError" }
+    }
+  ],
+  "extensions": { ... }    // Optional server extensions
+}
+
+Error types (extensions.ErrorType):
+- InvalidSyntax — request has a syntax error.
+- ValidationError — field or object doesn't exist in the schema.
+- DataFetchingException — exception during data fetch (e.g. invalid credentials).
+- OperationNotSupported — server cannot resolve which operation to run.
+- ExecutionAborted — request did not complete successfully.
 
 Required permissions
 - "API Enabled".
 
 Idempotency & limits
-- Idempotent for read queries; not for mutations.
-- Cursor pagination via `pageInfo.endCursor` + `after` arg.
+- Idempotent for read queries; mutations are NOT idempotent.
+- Cursor pagination via pageInfo.endCursor + the 'after' argument on the object type.
+- upperBound argument: limits pagination up to 200–2000 records total.
 - Counts toward DailyApiRequests.
+- Only objects supported by UI API are available (not all sObjects).
 
 Errors
-- GraphQL errors with `path`, `extensions.errorType`.
+- HTTP 200 is returned even for errors. Always check the 'errors' array.
+- HTTP 401 when session is invalid.
+- HTTP 404 when the endpoint path is wrong.
 
-Example request (read)
+Example request (read with pagination)
 
 graphql_query({
-  "query": "query { uiapi { query { Account(where: { Industry: { eq: \"Tech\" } }, first: 25) { edges { node { Id Name Industry { value } } } pageInfo { endCursor hasNextPage } } } } }"
+  "query": "query Accounts($first: Int, $after: String) { uiapi { query { Account(first: $first, after: $after, where: { Industry: { eq: \"Tech\" } }) { edges { node { Id Name { value } Industry { value } } } pageInfo { endCursor hasNextPage } totalCount } } } }",
+  "variables": { "first": 25 }
 })
 
-Example request (mutation)
+Example request (mutation — create record)
 
 graphql_query({
-  "query": "mutation CreateAccount($input: AccountInput!) { uiapi { AccountCreate(input: { Account: $input }) { Record { Id Name } } } }",
-  "variables": { "input": { "Name": "ACME" } }
+  "query": "mutation CreateAccount($input: AccountInput!) { uiapi { AccountCreate(input: { Account: $input }) { Record { Id Name { value } } errors { message statusCode } } } }",
+  "variables": { "input": { "Name": "ACME Corp" } }
+})
+
+Example request (introspect schema)
+
+graphql_query({
+  "query": "{ __schema { queryType { fields { name } } } }"
 })

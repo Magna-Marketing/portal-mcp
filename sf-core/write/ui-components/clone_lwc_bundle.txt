@@ -1,60 +1,57 @@
 Tool: clone_lwc_bundle
 
 Description
-Clone an existing LWC bundle to a new name. The tool reads every file
-in the source bundle, rewrites references that include the original
-class name (the JS class name and `<c-...>` tag references in HTML
-templates), and creates a new bundle.
+Clone an existing LWC bundle to a new name. Reads all resources from the
+source bundle, optionally rewrites class names and HTML tag references,
+then creates the new bundle and its files.
 
 Salesforce API
-Tooling API, v66.0.
-- `GET /tooling/query/?q=...` to read source bundle and files.
-- Same container/save pattern as `create_lwc_bundle`.
+Tooling API, v66.0. Direct CRUD.
+- GET to query source bundle and resources via SOQL.
+- POST LightningComponentBundle to create new bundle.
+- POST LightningComponentResource per file.
 
-Endpoint
-GET  /services/data/v66.0/tooling/sobjects/LightningComponentBundle/{id}
-GET  /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{id}'
-POST /services/data/v66.0/tooling/sobjects/MetadataContainer
+Correction vs. original doc: The original doc referenced MetadataContainer +
+ContainerAsyncRequest which is not needed for direct CRUD since v45.0.
+
+Endpoints
+GET  /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Description, ApiVersion, IsExposed FROM LightningComponentBundle WHERE DeveloperName = '{sourceName}'
+GET  /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
 POST /services/data/v66.0/tooling/sobjects/LightningComponentBundle
-POST /services/data/v66.0/tooling/sobjects/LightningComponentResource
-POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+POST /services/data/v66.0/tooling/sobjects/LightningComponentResource    (per file)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-N/A.
-
 Input (parameters)
-sourceName (string, required) - Existing bundle name.
-newName (string, required) - New bundle name (lowercase first char,
-  alphanumeric, max 40).
-newLabel (string, required).
-newDescription (string, optional).
-copyApiVersion (boolean, optional, default true) - When false, use the
-  org's current default API version.
-includeFileTypes (string[], optional, default ["js","html","css","xml","svg"]) -
-  Subset of file types to copy.
-checkOnly (boolean, optional, default false).
-rewriteReferences (boolean, optional, default true) - Replace the JS
-  class name and `<c-original-name>` tag references with the new name.
+sourceName (string, required) - DeveloperName of the source bundle.
+newName (string, required) - DeveloperName for the clone. Must follow LWC
+  naming rules (lowercase start, alphanumeric + underscores, max 40 chars).
+newLabel (string, required) - MasterLabel for the clone.
+newDescription (string, optional) - Defaults to the source description.
+copyApiVersion (boolean, optional, default true) - Use source ApiVersion.
+  When false, defaults to 66.0.
+includeFileTypes (string[], optional, default all) - Subset of formats to
+  copy: "js" | "html" | "css" | "xml" | "svg" | "json".
+rewriteReferences (boolean, optional, default true) - Replaces the JS class
+  name and <c-source-name> HTML tag references with the new name.
 
-Result
-deploy (object).
-bundle (object, on success) - { id, name, label, apiVersion, isExposed }.
-filesCopied (array) - [{ fileName, sizeBytes, hadReferenceRewrite }].
+Result (raw Tooling API responses)
+bundle (object) - { id, success, errors } from POST LightningComponentBundle.
+resources (object) - Map of fileName → { id, success, errors }.
+filesCopied (number) - Count of files copied.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- Not idempotent.
-- Source bundle must be unmanaged (managed bundles cannot be cloned).
+- Not idempotent (fails if newName already exists).
+- Source must be unmanaged.
 
 Errors
 - NOT_FOUND on sourceName.
-- DUPLICATE_DEVELOPER_NAME on newName.
+- DUPLICATE_VALUE on newName conflict.
 
 Example request
 

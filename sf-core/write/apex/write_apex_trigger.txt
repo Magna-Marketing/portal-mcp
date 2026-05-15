@@ -1,57 +1,61 @@
 Tool: write_apex_trigger
 
 Description
-Create or update an Apex trigger. Same Tooling API container pattern as
-`write_apex` but for `ApexTrigger` / `ApexTriggerMember`. The trigger's
-declared sObject (e.g. `trigger Foo on Account (before insert)`) must
-match the running org's metadata.
+Create, update, or upsert an Apex trigger using the Tooling API v66.0
+container/member/save pattern — identical flow to write_apex but using
+ApexTriggerMember instead of ApexClassMember.
 
 Salesforce API
 Tooling API, v66.0.
-- `MetadataContainer`.
-- `ApexTriggerMember` for the source.
-- `ContainerAsyncRequest` to compile/save.
 
-Endpoint
+Endpoints
 POST /services/data/v66.0/tooling/sobjects/MetadataContainer
 POST /services/data/v66.0/tooling/sobjects/ApexTriggerMember
 POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
-GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}
+GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}   (poll)
+DELETE /services/data/v66.0/tooling/sobjects/MetadataContainer/{id}     (cleanup)
+GET  /services/data/v66.0/tooling/query/?q=...                          (lookup existing trigger)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-ApexTriggerMember (create):   { "MetadataContainerId": "<id>", "ContentEntityId": null, "FullName": "ProjectTrigger", "Body": "trigger ..." }
-ApexTriggerMember (update):   { "MetadataContainerId": "<id>", "ContentEntityId": "<existing apexTriggerId>", "Body": "..." }
+ApexTriggerMember (create):  { "MetadataContainerId": "<id>", "FullName": "TriggerName",
+                                "TableEnumOrId": "Account", "Body": "trigger ..." }
+ApexTriggerMember (update):  { "MetadataContainerId": "<id>", "ContentEntityId": "<triggerId>",
+                                "Body": "trigger ..." }
+ContainerAsyncRequest:       { "MetadataContainerId": "<id>", "IsCheckOnly": false }
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "upsert".
-name (string, required) - Trigger name (must equal the API name in the
-  source).
-sObject (string, required for create) - Target sObject API name; must
-  match `trigger X on <sObject>` in the body.
-body (string, required) - Full trigger source.
+name (string, required) - Trigger API name. Must match the declaration in body.
+body (string, required) - Full Apex trigger source.
+sObject (string, required for create) - sObject API name the trigger fires on (e.g. "Account",
+  "Project__c"). Must match the `trigger X on <sObject>` declaration in body.
+  Not required for update/upsert (inferred from existing trigger).
 apiVersion (number, optional).
 status (string, optional, default "Active") - "Active" | "Inactive".
 checkOnly (boolean, optional, default false).
-testLevel, specifiedTests (string/string[], optional) - Same as write_apex.
 
 Result
-Same shape as write_apex.deploy + apexTrigger object on success.
+Same shape as write_apex:
+{
+  "deploy": { "containerId", "state", "done", "errorMessage", "componentSuccesses", "componentFailures" },
+  "apexTrigger": { "Id", "Name", "ApiVersion", "Status", "IsValid", "TableEnumOrId", "LastModifiedDate" }
+}
+apexTrigger is null on checkOnly or failure.
 
 Required permissions
 - "Author Apex".
 - Production deploys require tests with ≥75% org coverage.
 
 Idempotency & limits
-- `upsert` idempotent on `name`.
-- A trigger can only be defined once per (sObject, name) tuple.
+- upsert: idempotent on name.
+- A trigger name must be unique per org (not per sObject).
 
 Errors
 - DEPLOY_FAILED with line/column on compile error.
-- INVALID_TRIGGER_TYPE: target sObject is not triggerable.
 - INSUFFICIENT_ACCESS_OR_READONLY.
 
 Example request

@@ -1,41 +1,55 @@
 Tool: publish_experience_site
 
 Description
-Publish (deploy) the staged content of an Experience site to its live
-URL. Required after editing pages / branding / navigation in
-`ExperienceBundle`.
+Publish (deploy) the staged content of an Experience site to its live URL.
+Required after editing pages, branding, or navigation in ExperienceBundle.
 
 Salesforce API
-Connect API, v66.0. `/connect/communities/{communityId}/publish`.
+Connect REST API, v66.0. POST /connect/communities/{communityId}/publish.
+Available since API version 46.0.
 
 Endpoint
 POST /services/data/v66.0/connect/communities/{communityId}/publish
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
 
 Body
-None.
+None. The API does not accept any request body or query parameters.
 
 Input (parameters)
-siteId (string, optional).
-siteName (string, optional).
-  One required.
-notify (string, optional, default "publisher") - "publisher" | "all" - whether to email when complete.
+siteId (string, optional) - Network record ID of the site to publish.
+siteName (string, optional) - Display name of the site. Resolved to Network ID via SOQL.
+  One of siteId or siteName is required.
 
 Result
-publication (object) - { siteId, status ("Queued"|"InProgress"|"Succeeded"|"Failed"), submittedAt, completedAt }.
+Raw Community Publish response (varies by org configuration):
+  { id, message, url, ... }
+
+Note: The response structure is not a structured status object like
+"Queued/InProgress/Succeeded/Failed" — the publish is initiated synchronously
+and the API returns a simple confirmation response.
 
 Required permissions
 - "Create and Set Up Experiences" + "Publish Experience Cloud Sites".
 
 Idempotency & limits
-- Not idempotent (each call creates a new publication record).
+- Not idempotent — each call triggers a new publish event.
 
 Errors
-- INSUFFICIENT_ACCESS_OR_READONLY, NOT_FOUND.
+- INSUFFICIENT_ACCESS_OR_READONLY.
+- NOT_FOUND if siteId does not match any Network record.
+
+Corrections from original documentation
+- The original doc listed a "notify" parameter ("publisher" | "all"). This parameter
+  does NOT exist in the Salesforce Connect API. The POST endpoint takes no parameters
+  or body whatsoever.
+- The original result structure described { siteId, status, submittedAt, completedAt }
+  with status values like "Queued"|"InProgress"|"Succeeded"|"Failed". The actual API
+  returns a simpler response; there is no asynchronous polling endpoint for publish.
 
 Example request
 
-publish_experience_site({ "siteName": "Customer_Hub" })
+publish_experience_site({ "siteName": "Customer Hub" })
+
+publish_experience_site({ "siteId": "0DBxx000000abcD" })

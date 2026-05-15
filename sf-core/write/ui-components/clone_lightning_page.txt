@@ -2,39 +2,28 @@ Tool: clone_lightning_page
 
 Description
 Clone an existing Lightning Page (FlexiPage) to a new name and label.
-The new page is a faithful copy: same regions, components, properties,
-and visibility rules. The clone has no app/profile assignments — those
-must be added later (`get_page_assignments` to inspect, then
-`add_region_to_page` / Setup UI to assign).
+The clone is a faithful copy: same regions, components, properties, and
+visibility rules. The clone has no app or profile assignments.
 
 Salesforce API
-Tooling API + Metadata API, v66.0.
-- Read source FlexiPage metadata.
-- Submit a Metadata API `create` for FlexiPage with the new fullName
-  and label.
+Metadata API (FlexiPage), v66.0.
+Reads via metadata.read(), creates via metadata.create() (SOAP).
 
-Endpoint
-GET  /services/data/v66.0/tooling/sobjects/FlexiPage/{id}
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+Correction vs. original doc: The original doc mentioned Tooling API + deployRequest.
+The correct approach is metadata.read() to fetch the source, then metadata.create()
+with the modified fullName and masterLabel.
 
 Input (parameters)
-sourceName (string, required) - Source FlexiPage DeveloperName.
-newName (string, required) - New FlexiPage DeveloperName.
-newLabel (string, required) - Master label.
-newDescription (string, optional).
-checkOnly (boolean, optional, default false).
+sourceName (string, required) - DeveloperName of the source FlexiPage.
+newName (string, required) - DeveloperName for the clone. Must be unique.
+newLabel (string, required) - Display label for the clone.
+newDescription (string, optional) - Description. Defaults to source description.
 
-Result
-deploy (object).
-flexiPage (object, on success) - { id, name, label, type, sObject (when
-  RecordPage), region count, component count }.
+Result (raw Metadata API create response)
+fullName (string).
+success (boolean).
+id (string).
+errors (array).
 
 Required permissions
 - "Customize Application".

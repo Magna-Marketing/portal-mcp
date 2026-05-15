@@ -1,37 +1,45 @@
 Tool: manage_connected_app
 
 Description
-Create / update / delete Connected Apps. Configure OAuth scopes,
-callback URL, IP relaxation, refresh token policy, and admin-pre-
-approval. For modern apps, prefer External Client Apps
-(`manage_external_client_app`).
+Create / update / delete Connected Apps. Configure OAuth scopes, callback URL,
+IP relaxation, and refresh token policy. For modern apps, strongly prefer External
+Client Apps (manage_external_client_app).
+
+NOTE: Connected App creation has been restricted since Spring '26. Salesforce
+recommends using External Client Apps for all new integrations. Contact Salesforce
+Support if you must still create Connected Apps.
 
 Salesforce API
-Metadata API (`ConnectedApp`), v66.0.
+SOAP Metadata API, v66.0. Metadata type: ConnectedApp.
+Use conn.metadata.create / update / delete (jsforce).
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+SOAP /services/Soap/m/{version}   (via jsforce metadata client)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
-fullName (string, required) - DeveloperName.
+fullName (string, required) - DeveloperName of the Connected App.
 label (string, required for create).
 contactEmail (string, required for create).
 description (string, optional).
-oauth (object, optional) - { scopes (string[]), callbackUrl (string), consumerKey (auto-generated if omitted), isPkceRequired, isSecretRequiredForRefreshToken, idTokenConfig }.
-policies (object, optional) - { ipRelaxation, ipAllowlist, refreshTokenPolicy ("specific_lifetime"|"infinite"|"expire_immediate"|"expire_on_logout"), sessionTimeout, requireUsersToInstallApp, isAdminApprovedUsersOnly }.
-checkOnly (boolean, optional, default false).
+oauth (object, optional) - {
+  scopes (string[])  - Api, Basic, Chatter, CustomPermissions, Email, FullAccess, Id,
+                       OpenId, Profile, RefreshToken, Wave, Web.
+  callbackUrl (string) - OAuth redirect_uri. Multiple URLs are newline-separated.
+  consumerKey (string, auto-generated if omitted).
+  isPkceRequired (boolean, default false).
+  isSecretRequiredForRefreshToken (boolean, default false).
+  isTokenExchangeEnabled (boolean, default false).
+}.
+policies (object, optional) - {
+  ipRelaxation ("enforceIpRestrictions" | "relaxIpRestrictions" | "relaxIpRestrictionsWithSecondFactor").
+  refreshTokenPolicy ("specific_lifetime" | "infinite" | "expire_immediate" | "expire_on_logout").
+  isAdminApprovedUsersOnly (boolean, default false).
+  singleLogoutUrl (string).
+}.
 
 Result
-deploy (object).
-connectedApp (object) - { id, fullName, label, consumerKey }.
+{ create | update | delete: <Metadata API SaveResult / DeleteResult> }
 
 Required permissions
 - "Manage Connected Apps".

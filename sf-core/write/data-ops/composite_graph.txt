@@ -1,10 +1,17 @@
 Tool: composite_graph
 
 Description
-Submit a directed acyclic graph (DAG) of sub-requests in a single call.
-Each graph is a transactional unit: rollback on any error within the
-graph. Up to 75 sub-requests across multiple graphs per call (vs the
-25-cap of `composite_request`).
+Submit one or more composite graphs in a single API call. Each graph
+is a directed acyclic graph (DAG) of sub-requests (nodes). Each graph
+is an atomic transaction: if any node fails, the entire graph rolls back
+automatically (implicit all-or-none per graph). Multiple graphs in a
+single payload are independent of each other — a failure in one graph
+does not affect others.
+
+Cross-reference syntax: Use @{referenceId.fieldPath} in the url or body
+of a node to reference the response of an earlier node in the same graph.
+Example: "@{acc1.id}" references the 'id' field from the node with
+referenceId "acc1".
 
 Salesforce API
 Composite Graph REST API, v66.0.
@@ -21,28 +28,77 @@ Body
   "graphs": [{
     "graphId": "g1",
     "compositeRequest": [
-      { "method": "POST", "url": "/services/data/v66.0/sobjects/Account", "referenceId": "acc1", "body": { "Name": "ACME" } },
-      { "method": "POST", "url": "/services/data/v66.0/sobjects/Contact", "referenceId": "con1", "body": { "LastName": "Doe", "AccountId": "@{acc1.id}" } }
+      {
+        "method": "POST",
+        "url": "/services/data/v66.0/sobjects/Account",
+        "referenceId": "acc1",
+        "body": { "Name": "ACME" }
+      },
+      {
+        "method": "POST",
+        "url": "/services/data/v66.0/sobjects/Contact",
+        "referenceId": "con1",
+        "body": { "LastName": "Doe", "AccountId": "@{acc1.id}" }
+      }
     ]
   }]
 }
 
 Input (parameters)
-graphs (object[], required) - Each: { graphId, compositeRequest: [{ method, url, referenceId, body, httpHeaders? }] }.
-allOrNonePerGraph (boolean, optional, default true).
+graphs (object[], required) - Array of graph objects. Each:
+  graphId (string, required) - Unique identifier for this graph. Must be alphanumeric.
+  compositeRequest (object[], required) - Ordered list of sub-request nodes. Each:
+    method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
+    url (string, required) - Must start with /services/data/vXX.X/. Supports @{ref.field} cross-reference.
+    referenceId (string, required) - Unique ID for this node. Alphanumeric + underscores only.
+    body (object, optional) - Request body for POST/PATCH/PUT.
+    httpHeaders (object, optional) - Per-node HTTP headers, e.g. { "If-Match": "etag" }.
 
-Result
-graphs (array) - Each: { graphId, isSuccessful (boolean), graphResponse: [{ referenceId, statusCode, body, success }] }.
+NOTE: The 'allOrNonePerGraph' parameter documented in earlier versions does NOT exist in the API.
+Each graph is always implicitly all-or-none. This is a fundamental property of composite graphs
+and cannot be configured.
+
+Result (response body)
+{
+  "graphs": [{
+    "graphId": "g1",
+    "graphResponse": {
+      "compositeResponse": [
+        {
+          "referenceId": "acc1",
+          "httpStatusCode": 201,
+          "body": { "id": "001...", "success": true, "errors": [] },
+          "httpHeaders": { "Location": "/services/data/v66.0/sobjects/Account/001..." }
+        },
+        {
+          "referenceId": "con1",
+          "httpStatusCode": 201,
+          "body": { "id": "003...", "success": true, "errors": [] },
+          "httpHeaders": { "Location": "/services/data/v66.0/sobjects/Contact/003..." }
+        }
+      ]
+    },
+    "isSuccessful": true
+  }]
+}
 
 Required permissions
 - "API Enabled".
 
 Idempotency & limits
-- Up to 75 sub-requests total per call across all graphs.
-- Each graph is its own transaction.
+- Not idempotent (creates new records on each call).
+- Up to 75 graphs per payload.
+- Up to 500 total nodes across all graphs per payload.
+- Maximum graph depth: 15 levels.
+- Maximum graph failures before processing halts: 14. If exceeded, remaining graphs
+  get status PROCESSING_HALTED.
+- Supported URL patterns: /sobjects/sObject, /sobjects/sObject/id,
+  /sobjects/sObject/fieldName/externalId.
 
 Errors
-- COMPOSITE_GRAPH_VALIDATION_FAILED.
+- Graphs exceeding node/depth limits are rejected.
+- Failed graphs are rolled back; other graphs in the same payload continue processing.
+- If >14 graphs fail, PROCESSING_HALTED is returned for remaining graphs.
 
 Example request
 

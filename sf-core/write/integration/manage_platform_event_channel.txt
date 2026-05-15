@@ -1,52 +1,60 @@
 Tool: manage_platform_event_channel
 
 Description
-Create / update / delete custom Platform Event channels and add /
-remove members. Custom channels let you bundle multiple Platform
-Events for a single subscription.
+Create / update / delete custom Platform Event channels and add / remove members.
+Custom channels (channelType=event) let you bundle multiple Platform Events for a
+single subscription. For Change Data Capture channels (channelType=data) use
+manage_change_data_capture_channel instead.
 
 Salesforce API
-Tooling API + Metadata API, v66.0.
+SOAP Metadata API, v66.0.
+Metadata types: PlatformEventChannel + PlatformEventChannelMember.
+Use conn.metadata.create / update / delete (jsforce).
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+SOAP /services/Soap/m/{version}   (via jsforce metadata client)
 
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
+Channel naming
+fullName must end with __chn, e.g. MTG_Project_Stream__chn.
 
-Body
-N/A.
+Member selectedEntity
+For channelType=event: Platform Event API name ending with __e, e.g. Project_Status_Update__e.
+For channelType=data: sObject API name.
+
+PlatformEventChannelMember fullName pattern: "{channelFullName}.{selectedEntity}"
+e.g. "MTG_Project_Stream__chn.Project_Status_Update__e"
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete" | "addMember" | "removeMember".
-fullName (string, required).
+fullName (string, required) - Channel API name ending with __chn.
 masterLabel (string, required for create).
 channelType (string, optional, default "event") - "event" | "data".
 description (string, optional).
-members (object[], optional) - For addMember/removeMember:
-  selectedEntity (string, required) - Platform Event API name (with `__e`) or sObject for CDC.
+members (object[], optional) - For addMember/removeMember/create:
+  selectedEntity (string, required).
   filterExpression (string, optional).
-checkOnly (boolean, optional, default false).
 
 Result
-deploy (object).
-channel (object) - { id, fullName, masterLabel, channelType, members }.
+create: { create: <SaveResult>, members: [<SaveResult>] }
+update: { update: <SaveResult> }
+delete: { delete: <DeleteResult> }
+addMember: { addMember: [<SaveResult>] }
+removeMember: { removeMember: [{ fullName, delete | error }] }
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- update / addMember / removeMember idempotent.
+- addMember/removeMember idempotent.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME.
+- DUPLICATE_DEVELOPER_NAME (channel already exists).
 
 Example request
 
 manage_platform_event_channel({
   "operation": "create",
-  "fullName": "MTG_Project_Stream",
+  "fullName": "MTG_Project_Stream__chn",
   "masterLabel": "MTG Project Stream",
   "channelType": "event",
   "members": [{ "selectedEntity": "Project_Status_Update__e" }]

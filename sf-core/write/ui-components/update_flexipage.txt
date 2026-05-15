@@ -1,51 +1,41 @@
 Tool: update_flexipage
 
 Description
-Update FlexiPage metadata: label, description, regions structural
-changes (add/remove a region with `add_region_to_page` /
-`remove_component_from_region`). For component-level edits use
-`add_component_to_region`, `remove_component_from_region`,
-`update_component_properties`, `reorder_region_components`.
+Update metadata on an existing Lightning Page (FlexiPage): label, description,
+or template. Reads the current page, applies the changes, and deploys.
+
+For component-level edits use `add_component_to_region`,
+`remove_component_from_region`, `update_component_properties`, and
+`reorder_region_components`. For adding a single region use `add_region_to_page`.
+
+When `regions` is provided it replaces the entire region list.
 
 Salesforce API
-Metadata API (`FlexiPage`), v66.0.
+Metadata API (FlexiPage), v66.0.
+Reads via metadata.read(), updates via metadata.update() (SOAP).
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-{
-  "fullName": "Project__c_Record_Page",
-  "label": "Project Record Page (v2)",
-  "description": "Updated for Q3 2026 redesign"
-}
+Correction vs. original doc: Uses SOAP Metadata API (jsforce), not REST deployRequest.
 
 Input (parameters)
-fullName (string, required).
-label (string, optional).
-description (string, optional).
-template (string, optional) - Change template; structural impact.
-regions (array, optional) - Replace/extend region list:
+fullName (string, required) - DeveloperName of the FlexiPage.
+label (string, optional) - New display label.
+description (string, optional) - New description.
+template (string, optional) - New template name.
+regions (array, optional) - Replacement region list:
   name (string), type (string), appendable (boolean).
-  Note: when present, this overwrites the page's region list. To add a
-  single region see `add_region_to_page`.
-checkOnly (boolean, optional, default false).
+  Overwrites all existing regions. Omit to keep current regions.
 
-Result
-deploy (object).
-flexiPage (object) - Updated identity + region count.
+Result (raw Metadata API update response)
+fullName (string).
+success (boolean).
+id (string).
+errors (array).
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
 - Idempotent on equal input.
-- Reducing regions or removing components requires a re-validation by
-  the platform; expect 5–15 s.
 
 Errors
 - NOT_FOUND on fullName.

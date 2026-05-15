@@ -1,48 +1,89 @@
 Tool: manage_global_value_set
 
 Description
-Create / update / delete a Global Value Set or modify its values.
+Create / update / delete a Global Value Set (shared picklist value set), or selectively
+add / remove / deactivate its values. Uses the Metadata API CRUD calls — NOT a
+deployRequest endpoint (which was incorrect in the original documentation).
 
 Salesforce API
-Metadata API (`GlobalValueSet`), v66.0.
+Metadata API, v66.0. Type: GlobalValueSet.
+CRUD-based calls via conn.metadata.create / update / upsert / delete.
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Endpoints (internal — called by jsforce Metadata client)
+POST   /services/data/v66.0/metadata/                        (create/update/upsert/delete)
+
+NOTE: The original doc listed "POST /services/data/v66.0/metadata/deployRequest".
+That is the deploy-based endpoint and is NOT used here. The Metadata API CRUD
+operations are the correct approach for GlobalValueSet.
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: text/xml (handled by jsforce internally)
 
-Body
-N/A.
+GlobalValueSet Metadata fields (v66.0)
+fullName       – string, required. Developer name. For GVS created in API v57+, Salesforce
+                 automatically appends the __gvs suffix to the developer name. This tool
+                 appends __gvs to the provided fullName automatically.
+masterLabel    – string, required for create/update. Display label.
+description    – string, optional (max 255 characters).
+sorted         – boolean, required for create (default false). Alphabetically sorted values.
+customValue[]  – array of CustomValue objects. Each:
+  fullName     – string, required. API name (no spaces). Unique identifier for the value.
+  label        – string. Display label. Defaults to fullName if omitted.
+  default      – boolean. Whether this is the default selection. At most one can be true.
+  isActive     – boolean. Whether the value is active (selectable). Default true.
+  color        – string, optional. Hex color code, e.g. "#FF0000".
+  description  – string, optional.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addValues" | "removeValues" | "deactivateValues".
-fullName (string, required) - GVS DeveloperName.
-masterLabel (string, required for create).
-description (string, optional).
-sorted (boolean, optional, default false).
-values (object[], optional) - For create / addValues / removeValues / deactivateValues:
-  fullName (string), label (string), default (boolean), isActive (boolean).
-checkOnly (boolean, optional, default false).
+operation      (string, required) – "create" | "update" | "delete" | "addValues" |
+                                    "removeValues" | "deactivateValues".
+fullName       (string, required) – GVS developer name WITHOUT the __gvs suffix.
+                                    The tool appends __gvs automatically.
+masterLabel    (string, required for create/update).
+description    (string, optional).
+sorted         (boolean, optional, default false).
+customValues   (object[], optional) –
+  For create/update: the complete list of values (replaces all existing).
+  For addValues: new values to merge in (existing values are preserved).
+  For removeValues: only fullName is used to identify which values to remove.
+  For deactivateValues: only fullName is used; matching values have isActive set to false.
 
 Result
-deploy (object).
-globalValueSet (object) - Updated identity + values count.
+Returns a JSON object with:
+  operation  – echo of the requested operation.
+  fullName   – the normalized GVS fullName (with __gvs suffix).
+  read       – (addValues/removeValues/deactivateValues) the GVS metadata before modification.
+  create     – Metadata API SaveResult.
+  update     – Metadata API SaveResult.
+  delete     – Metadata API DeleteResult.
+  upsert     – Metadata API UpsertResult.
+  error      – present when the GVS was not found for mutation operations.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- addValues / removeValues idempotent.
+- addValues: idempotent (upserts by fullName into the value list).
+- removeValues: idempotent (no-op if values not present).
+- A Global Value Set can have up to 1,000 total values including inactive.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD.
+- DUPLICATE_DEVELOPER_NAME if creating a GVS that already exists.
+- INVALID_FIELD if a customValue fullName contains invalid characters.
+
+Corrections vs original doc
+- Endpoint corrected from "POST /services/data/v66.0/metadata/deployRequest" to
+  Metadata API CRUD calls (conn.metadata.create/update/upsert/delete).
+- Field name corrected from "values" to "customValue" (the Metadata API field name).
+- The __gvs suffix requirement (API v57+) documented and handled automatically.
+- CustomValue fields documented: fullName, label, default, isActive, color, description.
+- "addValues" now implemented as read-modify-update (not a separate API endpoint).
 
 Example request
 
 manage_global_value_set({
   "operation": "addValues",
   "fullName": "MTG_Project_Status",
-  "values": [{ "fullName": "On Hold", "label": "On Hold", "default": false }]
+  "customValues": [{ "fullName": "On_Hold", "label": "On Hold", "default": false }]
 })

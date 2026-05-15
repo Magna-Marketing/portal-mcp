@@ -1,47 +1,90 @@
 Tool: manage_custom_metadata_record
 
 Description
-Create / update / upsert / delete records of a Custom Metadata Type.
-Custom Metadata Type records are deployed via the Metadata API
-(`CustomMetadata` type), not direct sObject DML — this tool wraps that
-deploy flow.
+Create / update / upsert / delete records of a Custom Metadata Type using the Metadata
+API CRUD calls — NOT a deployRequest endpoint (which was incorrect in the original doc).
+
+DML on custom metadata records is NOT allowed in the REST or SOAP Data APIs.
+The Metadata API (conn.metadata.create / update / upsert / delete) is the correct approach.
 
 Salesforce API
-Metadata API (`CustomMetadata`), v66.0.
+Metadata API, v66.0. Type: CustomMetadata.
+CRUD-based calls via conn.metadata.create / update / upsert / delete.
 
-Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+Endpoints (internal — called by jsforce Metadata client)
+POST   /services/data/v66.0/metadata/    (create/update/upsert/delete)
+
+NOTE: The original doc listed "POST /services/data/v66.0/metadata/deployRequest".
+That is the deploy-based endpoint and is NOT used here. The Metadata API CRUD
+operations are the correct approach for CustomMetadata records.
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: text/xml (handled by jsforce internally)
 
-Body
-N/A.
+CustomMetadata Metadata fields (v66.0)
+fullName     – string, required. Format: "TypeName.DeveloperName".
+               TypeName does NOT include the __mdt suffix.
+               Example: "Feature_Flag.Enable_New_UI"
+label        – string, required for create/upsert.
+description  – string, optional (max 1,000 characters).
+protected    – boolean, optional. Default false. Protects the record from subscriber access.
+values       – CustomMetadataValue[], optional. Each:
+  field      – string, required. Custom field API name including __c suffix.
+               The field name is not qualified with the type name.
+               Example: "Enabled__c", "Threshold__c", "picklist1234__AlphaSort__c".
+  value      – any. The field value. Type must match the field definition:
+               boolean for Checkbox, string for Text/Email/Phone/URL/TextArea,
+               number for Number (int when scale=0, double otherwise),
+               date string "YYYY-MM-DD" for Date,
+               datetime string for DateTime.
+               Use null to explicitly clear a field value.
+
+NOTE: The original doc documented "fields" as a flat map { fieldApiName: value } on the
+record directly. The actual Metadata API structure uses a "values" array of
+{ field, value } objects. The tool accepts the flat map and converts it automatically.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-typeName (string, required) - Custom Metadata Type API name (with or without `__mdt`).
-records (object[], required) - Each:
-  developerName (string, required).
-  label (string, required for create).
-  protected (boolean, optional, default false).
-  fields (object, required for create/update) - Map of fieldApiName -> value.
-checkOnly (boolean, optional, default false).
+operation    (string, required) – "create" | "update" | "upsert" | "delete".
+typeName     (string, required) – Custom Metadata Type API name. The __mdt suffix is
+             optional — the tool appends it automatically if missing.
+records      (object[], required, min 1, max 10) – Metadata API supports up to 10 per call.
+  developerName  (string, required) – Developer name of the record. Unique within the type.
+                 Do not include the type prefix.
+  label          (string, required for create/upsert).
+  description    (string, optional).
+  protected      (boolean, optional, default false).
+  fields         (object, optional) – Flat map of fieldApiName (with __c) -> value.
+                 Converted internally to CustomMetadataValue[].
 
 Result
-deploy (object).
-records (array) - { developerName, status ("created"|"updated"|"deleted"|"failed"), error }.
+Returns a JSON object with:
+  operation  – echo of the requested operation.
+  typeName   – the normalized type name (with __mdt suffix).
+  create     – Metadata API SaveResult or SaveResult[].
+  update     – Metadata API SaveResult or SaveResult[].
+  upsert     – Metadata API UpsertResult or UpsertResult[].
+  delete     – Metadata API DeleteResult or DeleteResult[].
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- upsert idempotent on developerName.
-- Custom Metadata Type records are deployed metadata; they survive sandbox refresh and are deployed via change sets/Bridge.
+- upsert is idempotent on developerName.
+- Max 10 records per call (Metadata API limit).
+- Custom metadata records survive sandbox refresh and are packagable.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME, INVALID_FIELD on bad fieldApiName.
+- DUPLICATE_DEVELOPER_NAME if creating a record that already exists (use upsert).
+- INVALID_FIELD if a field API name does not exist on the custom metadata type.
+
+Corrections vs original doc
+- Endpoint corrected from "POST /services/data/v66.0/metadata/deployRequest" to
+  Metadata API CRUD calls (conn.metadata.create/update/upsert/delete).
+- fields input map is converted to CustomMetadataValue[] [{ field, value }] internally.
+- fullName format documented: "TypeName.DeveloperName" (TypeName without __mdt).
+- __mdt normalization of typeName is handled automatically.
+- Max records per call: 10 (Metadata API limit).
 
 Example request
 
@@ -49,6 +92,10 @@ manage_custom_metadata_record({
   "operation": "upsert",
   "typeName": "Feature_Flag__mdt",
   "records": [
-    { "developerName": "MTG_Use_New_Form", "label": "Use new form", "fields": { "Enabled__c": true, "Description__c": "Enable Lightning form on Project" } }
+    {
+      "developerName": "MTG_Use_New_Form",
+      "label": "Use new form",
+      "fields": { "Enabled__c": true, "Description__c": "Enable Lightning form on Project" }
+    }
   ]
 })

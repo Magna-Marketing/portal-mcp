@@ -2,33 +2,62 @@ Tool: manage_event_relay
 
 Description
 Create / update / delete / start / stop Event Relay configurations
-(forward Platform Events to AWS EventBridge).
+(forward Platform Events and CDC events to AWS EventBridge).
 
 Salesforce API
-Tooling API, v66.0. `EventRelayConfig`.
+Tooling API, v66.0. sObject: EventRelayConfig (available API 56.0+).
 
 Endpoint
-POST   /services/data/v66.0/tooling/sobjects/EventRelayConfig
-PATCH  /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}
-DELETE /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}
+POST   /services/data/v66.0/tooling/sobjects/EventRelayConfig           (create)
+PATCH  /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}      (update/start/stop)
+DELETE /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}      (delete)
+
+The Tooling API uses a { FullName, Metadata } wrapper for EventRelayConfig.
+For update/delete/start/stop, the record Id is resolved by querying FullName.
+
+IMPORTANT notes:
+- destinationResourceName must be a Named Credential reference: "callout:NamedCredentialName"
+  NOT a raw AWS ARN. The Named Credential stores the AWS account/region.
+- eventChannel is the full DeveloperName of the Platform Event channel including __chn suffix.
+- You CANNOT update eventChannel or destinationResourceName after creation. Delete and recreate.
+- state defaults to "STOP" on create. Use start/stop operations to change state.
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-{ "DeveloperName": "MTG_Project_To_AWS", "MasterLabel": "MTG Project To AWS", "EventChannel": "MTG_Project_Stream__chn", "DestinationResourceName": "arn:aws:events:us-east-1:..." }
+Body (create)
+{
+  "FullName": "MTG_Project_To_AWS",
+  "Metadata": {
+    "label": "MTG Project to AWS",
+    "eventChannel": "MTG_Project_Stream__chn",
+    "destinationResourceName": "callout:AWS_Account",
+    "state": "STOP",
+    "relayOption": "{\"ReplayRecovery\":\"LATEST\"}"
+  }
+}
+
+Body (PATCH for start)
+{
+  "FullName": "MTG_Project_To_AWS",
+  "Metadata": { "state": "RUN" }
+}
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete" | "start" | "stop".
-developerName (string, required).
+developerName (string, required) - FullName / DeveloperName of the EventRelayConfig.
 masterLabel (string, required for create).
-eventChannel (string, required for create) - Channel DeveloperName.
-destinationResourceName (string, required for create) - AWS EventBridge ARN.
-state (string, optional) - For start (set "Run") / stop (set "Stop"); ignored otherwise.
+eventChannel (string, required for create) - Channel FullName including __chn suffix.
+destinationResourceName (string, required for create) - "callout:{NamedCredentialDeveloperName}".
+state (string, optional) - "RUN" | "PAUSE" | "STOP". For start/stop use those operations.
+relayOption (string, optional) - JSON string: '{"ReplayRecovery":"LATEST"}' (default)
+  or '{"ReplayRecovery":"EARLIEST"}' to replay all stored events (up to 3 days).
 
 Result
-eventRelay (object) - { id, developerName, masterLabel, eventChannel, destinationResourceName, state }.
+create: { id, success } — Tooling API insert response.
+update/start/stop: null or { success: true, id, developerName, state } when PATCH returns 204.
+delete: null or { success: true, id, developerName }.
 
 Required permissions
 - "Customize Application" + "Modify All Data".
@@ -37,7 +66,8 @@ Idempotency & limits
 - start / stop idempotent.
 
 Errors
-- INVALID_AWS_ARN.
+- INVALID_FIELD - bad destinationResourceName format or unknown channel.
+- NOT_FOUND - developerName not found (on update/delete/start/stop).
 
 Example request
 
@@ -46,5 +76,7 @@ manage_event_relay({
   "developerName": "MTG_Project_To_AWS",
   "masterLabel": "MTG Project to AWS",
   "eventChannel": "MTG_Project_Stream__chn",
-  "destinationResourceName": "arn:aws:events:us-east-1:123456789012:event-bus/MTG"
+  "destinationResourceName": "callout:AWS_Account"
 })
+
+manage_event_relay({ "operation": "start", "developerName": "MTG_Project_To_AWS" })

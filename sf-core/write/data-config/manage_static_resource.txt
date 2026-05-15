@@ -1,45 +1,74 @@
 Tool: manage_static_resource
 
 Description
-Create / update / delete a Static Resource. Body is sent base64-encoded
-in the create/update.
+Create / update / upsert / delete a Static Resource using the Salesforce Tooling API.
+The file body is supplied as a base64-encoded string. For update/upsert/delete the
+tool first queries StaticResource by Name to obtain the Id, then performs PATCH/DELETE.
 
 Salesforce API
-Tooling API, v66.0. `StaticResource`.
+Tooling API, v66.0. StaticResource sObject.
 
-Endpoint
-POST  /services/data/v66.0/tooling/sobjects/StaticResource
-PATCH /services/data/v66.0/tooling/sobjects/StaticResource/{id}
-DELETE /services/data/v66.0/tooling/sobjects/StaticResource/{id}
+Endpoints
+POST   /services/data/v66.0/tooling/sobjects/StaticResource           (create)
+PATCH  /services/data/v66.0/tooling/sobjects/StaticResource/{id}      (update)
+DELETE /services/data/v66.0/tooling/sobjects/StaticResource/{id}      (delete)
+GET    /services/data/v66.0/tooling/query/?q=<SOQL>                   (lookup by Name)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-{ "Name": "MTG_BrandLogo", "ContentType": "image/png", "CacheControl": "Public", "Body": "<base64>" }
+Body (create / update)
+{
+  "Name": "MyStyles",
+  "ContentType": "text/css",
+  "CacheControl": "Public",
+  "Body": "<base64>",
+  "Description": "Optional description",
+  "NamespacePrefix": ""
+}
+
+Tooling API StaticResource fields
+Name             – string, required for create. Unique, alphanumeric + underscores, max 255.
+ContentType      – string (MIME type), required for create. E.g. "text/css", "image/png", "application/zip".
+CacheControl     – enum "Public" | "Private". Defaults to "Public".
+Body             – string (base64-encoded file content). Required for create/update/upsert. Max 5 MB.
+Description      – string, optional.
+NamespacePrefix  – string, optional. For managed package resources.
+BodyLength       – integer, read-only. Returned in lookup/GET responses.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-name (string, required for create) - Resource name (no extension).
-contentType (string, required for create/update) - MIME type.
-cacheControl (string, optional, default "Public") - "Public" | "Private".
-description (string, optional).
-base64 (string, required for create/update) - Base64-encoded body.
+operation       (string, required) – "create" | "update" | "upsert" | "delete".
+name            (string, required) – Resource Name. Used as lookup key for all operations.
+contentType     (string, required for create) – MIME type.
+cacheControl    (enum "Public"|"Private", optional, default "Public").
+description     (string, optional).
+base64          (string, required for create/update/upsert) – Base64-encoded body. Max 5 MB unencoded.
 namespacePrefix (string, optional).
 
 Result
-staticResource (object) - { id, name, contentType, bodyLength, cacheControl }.
+Returns a JSON object with:
+  operation  – echo of the requested operation.
+  object     – "StaticResource".
+  lookup     – (update/upsert/delete) the existing record metadata returned by the query.
+  create     – (create/upsert-as-create) Tooling API SaveResult: { id, success, errors }.
+  update     – (update/upsert-as-update) Tooling API SaveResult.
+  delete     – (delete) Tooling API DeleteResult or a not-found message.
 
 Required permissions
 - "Customize Application".
 
 Idempotency & limits
-- update idempotent.
-- Body cap 5 MB.
+- upsert is idempotent on Name.
+- Body cap: 5 MB unencoded.
 
 Errors
-- DUPLICATE_VALUE on name; FILE_TOO_LARGE.
+- DUPLICATE_VALUE if creating with a name that already exists (use upsert instead).
+- FILE_TOO_LARGE if body exceeds 5 MB.
+
+Corrections vs original doc
+- Operation "upsert" added (missing from original).
+- Result shape documents the actual per-operation response keys.
 
 Example request
 
@@ -47,5 +76,6 @@ manage_static_resource({
   "operation": "create",
   "name": "MTG_BrandLogo",
   "contentType": "image/png",
+  "cacheControl": "Public",
   "base64": "iVBORw0KG..."
 })

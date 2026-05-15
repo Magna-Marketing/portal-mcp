@@ -1,51 +1,73 @@
 Tool: manage_network_member
 
 Description
-Add or remove a user from an Experience site (`NetworkMember`). To
-control who *can* be added, profiles + permsets are managed in the
-site's membership configuration (`view_experience_site.membership`).
+Add or remove a user from an Experience Cloud site (NetworkMember sObject).
+Controls who is an active member of the site. To control which profiles/permsets
+are eligible, use the site's membership configuration in Experience Workspaces.
 
 Salesforce API
-REST API (Data), v66.0. `NetworkMember` sObject.
+REST API (Data), v66.0. NetworkMember sObject.
 
-Endpoint
-POST   /services/data/v66.0/sobjects/NetworkMember
-DELETE /services/data/v66.0/sobjects/NetworkMember/{id}
+Endpoints
+POST   /services/data/v66.0/sobjects/NetworkMember          (add member)
+DELETE /services/data/v66.0/sobjects/NetworkMember/{id}      (remove member)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-Body
-{ "NetworkId": "...", "MemberId": "..." }
+Add Body
+{ "NetworkId": "<siteId>", "MemberId": "<userId>" }
+
+Remove Flow
+1. Query: SELECT Id FROM NetworkMember WHERE NetworkId = '<siteId>' AND MemberId = '<userId>'
+2. DELETE /sobjects/NetworkMember/{id}
 
 Input (parameters)
 operation (string, required) - "add" | "remove".
-siteId (string, optional).
-siteName (string, optional).
-  One required.
-userIds (string[], optional).
-usernames (string[], optional).
-  One required.
-allOrNone (boolean, optional, default false).
+siteId (string, optional) - Network record ID. Use this or siteName.
+siteName (string, optional) - Display name of the site. Resolved to Network ID via SOQL.
+  One of siteId or siteName is required.
+userIds (string[], optional) - Array of User record IDs to add/remove.
+usernames (string[], optional) - Array of Salesforce usernames. Resolved to User IDs via SOQL.
+  One of userIds or usernames is required.
+allOrNone (boolean, optional, default false) - When true, fail the whole operation if
+  any single user fails. When false, process each user independently.
 
 Result
-results (array) - { userId, username, networkMemberId, status, error }.
-summary (object) - { added, removed, failed, skipped }.
+results (array) - Per-user outcome:
+  { userId, username, networkMemberId, status ("added"|"removed"|"skipped"|"error"), error? }
+summary (object) - { total, added, removed, failed, skipped }
 
 Required permissions
-- "Manage Profiles and Permission Sets" + "Create and Set Up Experiences".
+- "Manage Experiences" or "Create and Set Up Experiences".
 
 Idempotency & limits
-- Idempotent on equal input.
+- Adding an already-existing member raises a duplicate error (DUPLICATE_VALUE).
+- Removing a non-member is reported as "skipped" (not an error).
 
 Errors
-- INVALID_CROSS_REFERENCE_KEY.
+- INVALID_CROSS_REFERENCE_KEY if MemberId or NetworkId is invalid.
+- DUPLICATE_VALUE if user is already a member (on add).
 
-Example request
+Corrections from original documentation
+- The original doc described the result summary with field "added" or "removed" only.
+  The implementation adds "skipped" and "total" to improve observability.
+- The remove flow requires a SOQL query to get the NetworkMember Id before deleting
+  (DELETE by external key is not supported for this sObject) — this two-step process
+  is now documented explicitly.
+- Users are resolved from usernames to IDs via SOQL on the User sObject.
+
+Example requests
 
 manage_network_member({
   "operation": "add",
-  "siteName": "Customer_Hub",
-  "usernames": ["partner1@magnatech.com"]
+  "siteName": "Customer Hub",
+  "usernames": ["partner1@magnatech.com", "partner2@magnatech.com"]
+})
+
+manage_network_member({
+  "operation": "remove",
+  "siteId": "0DBxx000000abcD",
+  "userIds": ["005xx000001SxyzAAC"]
 })

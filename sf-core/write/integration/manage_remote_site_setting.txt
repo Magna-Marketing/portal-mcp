@@ -1,34 +1,28 @@
 Tool: manage_remote_site_setting
 
 Description
-Create / update / delete a Remote Site Setting. Use only if you can't
-move to Named Credentials.
+Create / update / delete a Remote Site Setting. Allows Apex and Visualforce code to
+make outbound HTTP callouts to external URLs. For new integrations prefer Named
+Credentials (manage_named_credential), which store credentials alongside the endpoint
+and support OAuth. Use Remote Site Settings only when Named Credentials are unsuitable.
 
 Salesforce API
-Metadata API (`RemoteSiteSetting`), v66.0.
+SOAP Metadata API, v66.0. Metadata type: RemoteSiteSetting.
+Use conn.metadata.create / update / delete (jsforce).
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
-
-Headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-Body
-N/A.
+SOAP /services/Soap/m/{version}   (via jsforce metadata client)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
-fullName (string, required).
-url (string, required for create/update).
+fullName (string, required) - DeveloperName of the Remote Site Setting.
+url (string, optional) - Endpoint URL. Required for create.
 description (string, optional).
 isActive (boolean, optional, default true).
-disableProtocolSecurity (boolean, optional, default false) - When true, allows http://.
-checkOnly (boolean, optional, default false).
+disableProtocolSecurity (boolean, optional, default false) - Allows http:// when true.
 
 Result
-deploy (object).
-remoteSiteSetting (object).
+{ create | update | delete: <Metadata API SaveResult / DeleteResult> }
 
 Required permissions
 - "Customize Application".
@@ -37,7 +31,7 @@ Idempotency & limits
 - update idempotent.
 
 Errors
-- DUPLICATE_DEVELOPER_NAME.
+- DUPLICATE_DEVELOPER_NAME - fullName already exists (on create).
 
 Example request
 
