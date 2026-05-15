@@ -19,11 +19,11 @@ Body
 JSON metadata: { ContentDocumentId, PathOnClient, Title, ReasonForChange (optional) } + binary VersionData.
 
 Input (parameters)
-contentDocumentId (string, required).
-fileName (string, required) - Updated file name + extension.
-title (string, optional, default = fileName).
-reasonForChange (string, optional).
-base64 (string, required).
+ContentDocumentId (string, required).
+PathOnClient (string, required) - Updated file name + extension.
+Title (string, optional, default = PathOnClient).
+ReasonForChange (string, optional).
+VersionData (string, required).
 
 Result
 file (object) - { contentDocumentId, contentVersionId, versionNumber, title, contentSize }.
@@ -40,8 +40,8 @@ Errors
 Example request
 
 update_file_version({
-  "contentDocumentId": "069Qg0000004ZyAA",
-  "fileName": "MTG_Project_Brief_v2.pdf",
-  "reasonForChange": "Updated scope section",
-  "base64": "JVBERi0xLjQK..."
+  "ContentDocumentId": "069Qg0000004ZyAA",
+  "PathOnClient": "MTG_Project_Brief_v2.pdf",
+  "ReasonForChange": "Updated scope section",
+  "VersionData": "JVBERi0xLjQK..."
 })

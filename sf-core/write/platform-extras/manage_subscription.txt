@@ -19,24 +19,100 @@ Content-Type: application/json
 Body
 {
   "name": "Weekly Pipeline",
-  "source": "report",
-  "recordId": "00OQg0000004aBcDE",
-  "schedule": { "type": "weekly", "frequency": 1, "daysOfWeek": ["Monday"], "startTime": "09:00:00" },
-  "recipients": [{ "id": "005Qg0000020aBcDE", "type": "user" }],
-  "conditions": [{ "aggregate": "RowCount", "operator": "greaterThan", "value": "0" }],
+  "source": "lightningReportSubscribe",
+  "recordId": "{{recordId}}",
+  "schedule": {
+    "frequency": "daily",
+    "details": {
+      "time": 4
+    }
+  },
+  "thresholds": [
+    {
+      "type": "condition",
+      "conditions": [
+        {
+          "colName": "RowCount",
+          "operation": "greaterThan",
+          "value": "0"
+        }
+      ],
+      "actions": [
+        {
+          "type": "sendEmail",
+          "configuration": {
+            "recipients": [
+              {
+                "id": "{{id}}",
+                "type": "user"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
   "active": true
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-notificationId (string, optional, required for non-create).
-name (string, required for create).
-source (string, required for create) - "report" | "dashboard".
-recordId (string, required for create) - Report Id or Dashboard Id.
-schedule (object, required for create) - { type ("hourly"|"daily"|"weekly"|"monthly"), frequency, daysOfWeek, daysOfMonth, startTime, endTime }.
-recipients (array, required for create) - [{ id, type ("user"|"group"|"role") }].
-conditions (array, optional) - [{ aggregate, operator, value }].
-active (boolean, optional, default true).
+
+name (string, required) - Subscription name.
+
+source (string, required)
+- Notification source type.
+- Common values:
+  - "lightningReportSubscribe"
+  - "lightningDashboardSubscribe"
+
+recordId (string, required)
+- Report Id or Dashboard Id.
+
+schedule (object, required)
+- Notification schedule configuration.
+
+Example:
+{
+  "frequency": "daily" | "weekly" | "monthly",
+  "details": {
+    "time": number,
+    "daysOfWeek": string[],
+    "daysOfMonth": number[]
+  }
+}
+
+thresholds (array, optional)
+- Threshold-based conditions and actions.
+
+Example:
+[
+  {
+    "type": "condition",
+    "conditions": [
+      {
+        "colName": string,
+        "operation": "greaterThan" | "lessThan" | "equals",
+        "value": string
+      }
+    ],
+    "actions": [
+      {
+        "type": "sendEmail",
+        "configuration": {
+          "recipients": [
+            {
+              "id": string,
+              "type": "user" | "group" | "role"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]
+
+active (boolean, optional, default true)
+- Whether the subscription is enabled.
 
 Result
 subscription (object) - { id, name, source, recordId, recipients, schedule, active }.

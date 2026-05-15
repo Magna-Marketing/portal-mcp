@@ -19,13 +19,13 @@ Body
 { "ContentDocumentId": "...", "LinkedEntityId": "...", "ShareType": "V", "Visibility": "AllUsers" }
 
 Input (parameters)
-contentDocumentId (string, required).
+ContentDocumentId (string, required).
 operation (string, required) - "share" | "unshare".
 links (object[], required) - Each:
-  linkedEntityId (string, optional) - Record/User/Group/Library Id.
+  LinkedEntityId (string, optional) - Record/User/Group/Library Id.
   username (string, optional) - For User links.
-  shareType (string, optional, default "V") - "V" | "C" | "I".
-  visibility (string, optional, default "AllUsers").
+  ShareType (string, optional, default "V") - "V" | "C" | "I".
+  Visibility (string, optional, default "AllUsers").
 
 Result
 results (array) - { linkId, linkedEntityId, status ("created"|"removed"|"already_exists"|"failed"), error }.
@@ -43,10 +43,10 @@ Errors
 Example request
 
 share_file({
-  "contentDocumentId": "069Qg0000004ZyAA",
+  "ContentDocumentId": "069Qg0000004ZyAA",
   "operation": "share",
   "links": [
-    { "username": "jane.doe@magnatech.com", "shareType": "C" },
-    { "linkedEntityId": "a01Qg0000020aBcDE", "shareType": "V" }
+    { "username": "jane.doe@magnatech.com", "ShareType": "C" },
+    { "LinkedEntityId": "a01Qg0000020aBcDE", "ShareType": "V" }
   ]
 })

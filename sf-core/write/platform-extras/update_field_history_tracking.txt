@@ -13,10 +13,24 @@ POST /services/data/v66.0/metadata/deployRequest
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=...
 
 Body
-N/A.
+multipart/form-data with:
+Part 1, name="json", Content-Type: application/json
+{
+  "deployOptions": {
+    "checkOnly": false,
+    "rollbackOnError": true,
+    "singlePackage": true
+  }
+}
+
+Part 2, name="file", filename="deploy.zip", Content-Type: application/zip
+
+Generated ZIP containing:
+- package.xml
+- objects/<Object>.object
 
 Input (parameters)
 sObject (string, required).

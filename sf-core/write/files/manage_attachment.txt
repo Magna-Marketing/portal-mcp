@@ -20,17 +20,17 @@ Body
 { "Name": "...", "ParentId": "...", "ContentType": "...", "Body": "<base64>", "Description": "...", "IsPrivate": false }
 
 Input (parameters)
-operation (string, required) - "create" | "delete".
+operation (string, required) - "create" | "delete". 
 attachmentId (string, optional, required for delete).
-parentId (string, required for create).
-name (string, required for create).
-contentType (string, optional).
-description (string, optional).
-isPrivate (boolean, optional, default false).
-base64 (string, required for create).
+ParentId (string, required for create).
+Name (string, required for create).
+ContentType (string, optional).
+Description (string, optional).
+IsPrivate (boolean, optional, default false).
+Body (string, required for create).
 
 Result
-attachment (object) - { id, name, parentId, contentType, bodyLength }.
+attachment (object) - { id, name, ParentId, contentType, bodyLength }.
 
 Required permissions
 - "Edit" on the parent sObject.
@@ -46,8 +46,8 @@ Example request
 
 manage_attachment({
   "operation": "create",
-  "parentId": "500Qg0000020aBcDE",
-  "name": "case_screenshot.png",
-  "contentType": "image/png",
-  "base64": "iVBORw0KG..."
+  "ParentId": "500Qg0000020aBcDE",
+  "Name": "case_screenshot.png",
+  "ContentType": "image/png",
+  "Body": "iVBORw0KG..."
 })

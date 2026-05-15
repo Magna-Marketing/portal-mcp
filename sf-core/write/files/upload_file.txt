@@ -22,13 +22,13 @@ Multipart with two parts: JSON metadata (`PathOnClient`, `Title`,
 `Description`, `FirstPublishLocationId`) and binary `VersionData`.
 
 Input (parameters)
-fileName (string, required) - Display name + extension.
-title (string, optional, default = fileName).
-description (string, optional).
-base64 (string, required) - Base64-encoded contents.
+PathOnClient (string, required) - Display name + extension.
+Title (string, optional, default = PathOnClient).
+Description (string, optional).
+VersionData (string, required) - Base64-encoded contents.
 linkedToRecordIds (string[], optional) - Record Ids to attach to.
-shareType (string, optional, default "V") - "V" (viewer) | "C" (collaborator) | "I" (inferred).
-visibility (string, optional, default "AllUsers") - "AllUsers" | "InternalUsers" | "SharedUsers".
+ShareType (string, optional, default "V") - "V" (viewer) | "C" (collaborator) | "I" (inferred).
+Visibility (string, optional, default "AllUsers") - "AllUsers" | "InternalUsers" | "SharedUsers".
 firstPublishLocationId (string, optional) - Where the file is "owned" (record Id, library Id, or own user Id).
 
 Result
@@ -48,7 +48,7 @@ Errors
 Example request
 
 upload_file({
-  "fileName": "MTG_Project_Brief.pdf",
-  "base64": "JVBERi0xLjQK...",
+  "PathOnClient": "MTG_Project_Brief.pdf",
+  "VersionData": "JVBERi0xLjQK...",
   "linkedToRecordIds": ["a01Qg0000020aBcDE"]
 })

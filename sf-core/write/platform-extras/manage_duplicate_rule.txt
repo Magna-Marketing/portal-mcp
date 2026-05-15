@@ -12,10 +12,24 @@ POST /services/data/v66.0/metadata/deployRequest
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=...
 
 Body
-N/A.
+multipart/form-data with:
+Part 1, name="json", Content-Type: application/json
+{
+  "deployOptions": {
+    "checkOnly": false,
+    "rollbackOnError": true,
+    "singlePackage": true
+  }
+}
+
+Part 2, name="file", filename="deploy.zip", Content-Type: application/zip
+Generated ZIP containing:
+- package.xml
+- duplicateRules/*.duplicateRule-meta.xml
+- matchingRules/*.matchingRule-meta.xml
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
@@ -27,7 +41,7 @@ description (string, optional).
 isActive (boolean, optional, default true).
 operationsOnInsert (string[], optional) - For DuplicateRule: ["Allow"|"Block"|"Alert"|"Report"].
 operationsOnUpdate (string[], optional).
-matchingRule (object, optional) - For DuplicateRule create: target matching rule fullName.
+matchingRule (string, optional) - For DuplicateRule create: target matching rule fullName.
 matchEngine (string, optional, only matchingRule) - "Standard" | "Fuzzy".
 ruleFields (array, optional, only matchingRule) - [{ fieldName, matchingMethod ("Exact"|"Fuzzy"|"None"), blankValueBehavior ("MatchBlanks"|"NullNotAllowed") }].
 checkOnly (boolean, optional, default false).

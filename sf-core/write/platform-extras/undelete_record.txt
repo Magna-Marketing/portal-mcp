@@ -15,6 +15,8 @@ or executes anonymous Apex `Database.undelete(...)`.
 
 Headers
 Authorization: Bearer <access_token>
+Content-Type: text/xml
+SOAPAction: ""
 
 Body
 SOAP envelope or Apex.
@@ -36,6 +38,31 @@ Idempotency & limits
 
 Errors
 - ENTITY_NOT_IN_RECYCLEBIN, INSUFFICIENT_ACCESS_OR_READONLY.
+
+
+Example SOAP request body
+
+<?xml version="1.0" encoding="utf-8" ?>
+<env:Envelope
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:urn="urn:partner.soap.sforce.com">
+
+    <env:Header>
+        <urn:SessionHeader>
+            <urn:sessionId>{sessionId}</urn:sessionId>
+        </urn:SessionHeader>
+    </env:Header>
+
+    <env:Body>
+        <urn:undelete>
+            <urn:ids>001...</urn:ids>
+            <urn:ids>006...</urn:ids>
+        </urn:undelete>
+    </env:Body>
+
+</env:Envelope>
 
 Example request
 

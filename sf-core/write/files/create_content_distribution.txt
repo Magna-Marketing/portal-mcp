@@ -16,19 +16,20 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{ "ContentVersionId": "...", "Name": "...", "PreferencesAllowOriginalDownload": true, "PreferencesPasswordRequired": false, "ExpiryDate": "2026-12-31T23:59:59Z" }
+{ "ContentVersionId": "...", "Name": "...", "PreferencesAllowOriginalDownload": true, "PreferencesPasswordRequired": false, "PreferencesExpires": true, "ExpiryDate": "2026-12-31T23:59:59Z" }
 
 Input (parameters)
 operation (string, required) - "create" | "delete".
 distributionId (string, optional, required for delete).
-contentVersionId (string, optional, required for create) - Or contentDocumentId (tool resolves to latest version).
-contentDocumentId (string, optional).
-name (string, required for create).
-preferencesAllowOriginalDownload (boolean, optional, default true).
-preferencesAllowPDFDownload (boolean, optional, default true).
-preferencesPasswordRequired (boolean, optional, default false).
-preferencesNotifyOnVisit (boolean, optional, default false).
-expiryDate (string, optional) - ISO 8601.
+ContentVersionId (string, optional, required for create) - Or ContentDocumentId (tool resolves to latest version).
+ContentDocumentId (string, optional).
+Name (string, required for create).
+PreferencesAllowOriginalDownload (boolean, optional, default true).
+PreferencesAllowPDFDownload (boolean, optional, default true).
+PreferencesPasswordRequired (boolean, optional, default false).
+PreferencesNotifyOnVisit (boolean, optional, default false).
+PreferencesExpires (boolean, optional, default false) - Enables expiration using ExpiryDate.
+ExpiryDate (string, optional) - ISO 8601.
 
 Result
 distribution (object) - { id, name, distributionPublicUrl, expiryDate, passwordRequired, viewCount }.
@@ -46,7 +47,7 @@ Example request
 
 create_content_distribution({
   "operation": "create",
-  "contentDocumentId": "069Qg0000004ZyAA",
-  "name": "Project Brief Public Link",
-  "expiryDate": "2026-08-31T23:59:59Z"
+  "ContentDocumentId": "069Qg0000004ZyAA",
+  "Name": "Project Brief Public Link",
+  "ExpiryDate": "2026-08-31T23:59:59Z"
 })
