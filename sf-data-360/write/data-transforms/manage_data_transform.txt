@@ -9,9 +9,12 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST   {instanceUrl}/services/data/v{ver}/ssot/data-transforms                                  (operation="create")
-PUT    {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId           (operation="update")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId           (operation="delete")
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms/{dataTransformNameOrId}
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms/{dataTransformNameOrId}/actions/run
+PUT {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms
+PUT {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms/{dataTransformNameOrId}
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms/{dataTransformNameOrId}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -29,18 +32,25 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-dataTransformNameOrId (string, required for update / delete).
-developerName (string, required for create).
-label (string, required for create).
-type (string, optional, default "Batch") - "Batch" | "Streaming".
-targetObject (string, required for create).
-sql (string, required for create) - ANSI SQL on DMOs / DLOs.
-schedule (object, optional) - Initial schedule (else Manual).
+operation ("create" | "update" | "delete" | "run", required) - The operation to perform: create (POST), update (PUT), delete, or run (trigger
+execution)
+dataTransformNameOrId (string, optional) - Developer name or 18-character Salesforce ID. Required for update, delete, and run.
+name (string, optional) - Developer/API name of the data transform (no spaces). Alias: developerName. Required for
+create; cannot be changed after creation.
+developerName (string, optional) - Alias for name — developer/API name of the data transform
+label (string, optional) - Human-readable display label for the data transform. Required for create.
+description (string, optional) - Human-readable description of what this data transform does
+type ("Batch" | "Streaming", optional) - Execution type: Batch (bulk STL node-graph processing) or Streaming (real-time SQL
+pipeline). Required for create.
+schedule (object, optional) - Schedule configuration for automatic transform execution
+operationType ("Full" | "Incremental", optional) - Execution mode for run operation: Full (re-process all data) or Incremental (process
+only changes). Used with operation='run'.
+primarySource (string, optional) - Primary input data source for the transform (used when the transformation contains table
+joins)
+dataSpaceName (string, optional) - Data Space this transform belongs to
 
 Result
-dataTransform (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -55,17 +65,9 @@ Errors
 Example request
 
 manage_data_transform({
-  "operation": "create",
-  "developerName": "build_unified_individual",
-  "label": "Build Unified Individual",
-  "targetObject": "UnifiedIndividual__dlm",
-  "sql": "SELECT Id__c, FirstName__c FROM Contact__dlm"
+  "operation": ""
 })
 
 Example result
-{
-  "dataTransform": {
-    "developerName": "build_unified_individual",
-    "type": "Batch", "status": "Draft"
-  }
-}
+
+{ }

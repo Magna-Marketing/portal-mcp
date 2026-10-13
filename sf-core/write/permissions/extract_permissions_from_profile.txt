@@ -13,47 +13,91 @@ Common subsets:
 - Custom object access (a single __c object).
 
 Salesforce API
-Metadata API (`Profile` readMetadata + `PermissionSet` create), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0    (readMetadata Profile)
-POST /services/data/v66.0/metadata/deployRequest
+GET /services/data/v66.0/query/
+POST /services/Soap/m/66.0  (createMetadata PermissionSet)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-The MCP server reads the source profile, copies the requested
-sub-permissions, and submits a `create` for the new permset.
+JSON fields: field, readable, editable.
+JSON fields: fullName, label, description, license, userPermissions, objectPermissions, fieldPermissions, classAccesses, pageAccesses, customMetadataTypeAccesses, customSettingAccesses, customPermissions, externalDataSourceAccesses, flowAccesses, agentAccesses, genComputingSummaryDefAccess, servicePresenceStatusAccesses, tabSettings.
 
 Input (parameters)
-sourceProfile (string, required) - Profile DeveloperName.
-newPermsetName (string, required) - DeveloperName of the new permset.
-newPermsetLabel (string, required).
-newPermsetDescription (string, optional).
-license (string, optional) - Permset license; default = source profile's
-  user license.
-extract (object, required) - What to extract:
-  systemPermissions (string[], optional) - User permission API names,
-    e.g. ["ApiEnabled", "RunReports"].
-  objectPermissions (object[], optional) - { object, accessTypes:
-    ["read","create","edit","delete","viewAll","modifyAll"] }.
-  fieldPermissions (object[], optional) - { object, fields: ["Name","Phone"] }.
-  apexClasses (string[], optional).
-  vfPages (string[], optional).
-  customMetadataTypes (string[], optional).
-  customSettings (string[], optional).
-  tabs (object[], optional) - { tab, visibility }.
-removeFromProfile (boolean, optional, default false) - When true, the
-  same permissions are removed from the source profile in a follow-up
-  Metadata deploy. Use with care.
-checkOnly (boolean, optional, default false).
+sourceProfile (string, required) - Source Profile metadata fullName; string profile
+name; no default; example 'Custom Sales User'; do not pass Profile Id.
+newPermsetName (string, required) - New PermissionSet metadata fullName; string API
+name; no default; example 'Sales_Extracted_Access'; do not reuse an existing name.
+newPermsetLabel (string, required) - New PermissionSet label; string up to 80
+characters; no default; example 'Sales Extracted Access'; do not pass an API name unless
+intended.
+newPermsetDescription (string, optional) - New PermissionSet description; string up to
+255 characters; omitted means no description; example 'Extracted profile grants'; do not
+pass private notes.
+license (string, optional) - PermissionSet license metadata value; string license name;
+defaults to source profile userLicense when available; example 'Salesforce'; do not pass
+LicenseId.
+extract (object, optional) - Selected profile grants to extract; object with optional
+category arrays; no default; include at least one category; example { systemPermissions:
+['ApiEnabled'] }; do not pass full Profile metadata.
+  systemPermissions (string[], optional) - Profile userPermissions names to copy when
+  enabled; string array; omitted copies none; example ['ApiEnabled']; do not pass
+  labels.
+  objectPermissions (object[], optional) - Object permissions to copy; array with object
+  API name and optional accessTypes; omitted copies none; example { object: 'Account',
+  accessTypes: ['read', 'edit'] }; do not pass unsupported access types.
+  fieldPermissions (object[], optional) - Field permissions to copy; object is API name
+  and fields are unqualified field API names; omitted copies none; example { object:
+  'Account', fields: ['Phone'] }; do not pass Object.Field here.
+  apexClasses (string[], optional) - Apex class names to copy when enabled; string
+  array; omitted copies none; example ['InvoiceController']; do not pass class Ids.
+  vfPages (string[], optional) - Visualforce page names to copy when enabled; string
+  array; omitted copies none; example ['InvoicePage']; do not pass URLs.
+  customMetadataTypes (string[], optional) - Custom metadata type names to copy when
+  enabled; string array; omitted copies none; example ['Feature_Flag__mdt']; do not pass
+  record names.
+  customSettings (string[], optional) - Custom setting names to copy when enabled;
+  string array; omitted copies none; example ['App_Config__c']; do not pass setting
+  rows.
+  customPermissions (string[], optional) - Custom permission names to copy when enabled;
+  string array; omitted copies none; example ['Can_Approve']; do not pass labels.
+  externalDataSources (string[], optional) - External data source names to copy when
+  enabled; string array; omitted copies none; example ['ERP']; do not pass Named
+  Credentials.
+  flows (string[], optional) - Flow API names to copy when enabled; string array;
+  omitted copies none; example ['Submit_Order']; do not pass flow labels.
+  agents (string[], optional) - Agentforce agent names to copy when enabled; string
+  array; omitted copies none; example ['Sales_Agent']; do not pass bot labels.
+  enhancedSummaryConfigs (string[], optional) - Enhanced summary config names to copy
+  when enabled; string array; omitted copies none; example ['Sales_Summary']; do not
+  pass labels.
+  servicePresenceStatuses (string[], optional) - Service Presence Status names to copy
+  when enabled; string array; omitted copies none; example ['Available']; do not pass
+  translated labels.
+  tabs (object[], optional) - Profile tab visibility entries to copy into PermissionSet
+  tabSettings; visibility may be Profile or PermissionSet visibility text; omitted
+  copies none; example { tab: 'Account', visibility: 'Visible' }; do not pass app names.
+removeFromProfile (boolean, optional) - Whether to update the source Profile to remove
+selected grants; boolean; defaults to false; example true; do not enable without
+reviewing Profile impact.
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Whether to build payloads without createMetadata or
+updateMetadata; boolean; defaults to false; example true; do not use when changes must
+be applied.
 
 Result
-permissionSet (object) - { id, fullName, label, license, copiedComponents }.
-profileUpdate (object|null) - When removeFromProfile=true: {
-  deployId, status, removedComponents, succeeded }.
+checkOnly (value) - included in the JSON returned by the tool.
+profileReadResponse (value) - included in the JSON returned by the tool.
+permissionSetMetadata (value) - included in the JSON returned by the tool.
+createResponse (value) - included in the JSON returned by the tool.
+createdPermissionSetLookup (value) - included in the JSON returned by the tool.
+profileUpdateMetadata (value) - included in the JSON returned by the tool.
+profileUpdateResponse (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -71,12 +115,8 @@ Errors
 Example request
 
 extract_permissions_from_profile({
-  "sourceProfile": "MTG_Project_Manager_Profile",
-  "newPermsetName": "MTG_Project_API_Access",
-  "newPermsetLabel": "MTG Project | API Access",
-  "extract": {
-    "systemPermissions": ["ApiEnabled", "ManageDataIntegrations"],
-    "objectPermissions": [{ "object": "Project__c", "accessTypes": ["read", "edit"] }]
-  },
-  "removeFromProfile": false
+  "sourceProfile": "example",
+  "newPermsetName": "example",
+  "newPermsetLabel": "example",
+  "metadataOverride": "example"
 })

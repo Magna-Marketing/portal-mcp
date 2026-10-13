@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/folder-contents?fields={fields}&filter[folderId]=eq,:folderId
+GET https://{pi-domain}/api/v5/objects/folder-contents
+Optional query: fields, folderId, limit, nextPageToken, objectName, objectType
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,22 +22,16 @@ Body
 None.
 
 Input (parameters)
-folderId (number, required).
-objectType (string, optional) - "Email" | "EmailTemplate" |
-  "ListEmail" | "Form" | "FormHandler" | "LandingPage" |
-  "LayoutTemplate" | "DynamicContent" | "File" | "Campaign" |
-  "EngagementStudioProgram" | "List" | "Tag" | "CustomField" |
-  "CustomRedirect".
-nameContains (string, optional).
-fields (string[], optional, default: id,objectType,objectId,
-  folderId,name,isDeleted,createdAt,updatedAt).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+folderId (number, required) - Folder id whose contents to list. Required.
+objectType ("Email" | "EmailTemplate" | "ListEmail" | "Form" | "FormHandler" | "LandingPage" | "LayoutTemplate" | "DynamicContent" | "File" | "Campaign" | "EngagementStudioProgram" | "List" | "Tag" | "CustomField" | "CustomRedirect", optional) - Filter to a specific object type within the folder.
+objectName (string, optional) - Filter by exact object name (case-sensitive equality match).
+fields (string[], optional) - Field projection. Defaults to id, objectType, objectId, folderId, name, isDeleted,
+createdAt, updatedAt.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-folderContents (array) - Each: { id, objectType, objectId, folderId,
-  name, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -49,13 +44,10 @@ Errors
 
 Example request
 
-list_folder_contents({ "folderId": 33 })
+list_folder_contents({
+  "folderId": 1
+})
 
 Example result
-{
-  "folderContents": [
-    { "id": 9001, "objectType": "Email",         "objectId": 99821, "name": "Welcome" },
-    { "id": 9002, "objectType": "LandingPage",   "objectId": 4421,  "name": "Spring LP" },
-    { "id": 9003, "objectType": "File",          "objectId": 901,   "name": "logo.png" }
-  ]
-}
+
+{ }

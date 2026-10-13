@@ -16,25 +16,15 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "paths": [
-    {
-      "path": "s3://magnatech-data/customers/",
-      "type": "Prefix",
-      "includeRecursive": true,
-      "fileFormat": "CSV"
-    }
-  ]
-}
+PUT: paths
 
 Input (parameters)
-connectionId (string, required).
-operation (string, required) - "upsert" only.
-paths (array, required) - [{ path, type ("Bucket" | "Prefix" |
-  "File" | "Folder"), label?, includeRecursive?, fileFormat? }].
+connectionId (string, required) - ID of the connection to update the sitemap for
+paths (object[], required) - Array of path objects, each with path, type ('Bucket'|'Prefix'|'File'|'Folder'), and
+optional label, includeRecursive, fileFormat
 
 Result
-sitemap (object) - Refreshed site map.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -48,18 +38,10 @@ Errors
 Example request
 
 manage_connection_sitemap({
-  "connectionId": "0Z65800000000ABCAA",
-  "operation": "upsert",
-  "paths": [
-    { "path": "s3://magnatech-data/customers/", "type": "Prefix",
-      "includeRecursive": true, "fileFormat": "CSV" }
-  ]
+  "connectionId": "",
+  "paths": []
 })
 
 Example result
-{
-  "sitemap": {
-    "connectionId": "0Z65800000000ABCAA", "version": 4,
-    "paths": [{ "path": "s3://magnatech-data/customers/", "type": "Prefix" }]
-  }
-}
+
+{ }

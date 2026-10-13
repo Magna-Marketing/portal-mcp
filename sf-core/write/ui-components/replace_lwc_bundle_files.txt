@@ -26,17 +26,29 @@ Body (POST new resource)
 { "LightningComponentBundleId": "<id>", "FilePath": "lwc/name/name.css", "Format": "css", "Source": "..." }
 
 Input (parameters)
-bundleName (string, required) - DeveloperName of the bundle.
-files (object[], required, min 1) - Each entry:
-  fileName (string, required) - File name with extension, e.g. projectCard.css.
-  source (string, required) - Full file contents.
-  format (string, optional) - Format override. Auto-inferred from fileName.
-deleteMissing (boolean, optional, default false) - Delete bundle files not
-  listed in the files array. Required files (js, xml) are protected.
+bundleName (string, required) - Represents the LWC bundle DeveloperName; string existing
+in LightningComponentBundle; no default; example: projectCard; do not pass a label,
+namespace prefix, file path, or record Id.
+files (object[], optional) - Represents files to create or update; non-empty array of
+fileName/source entries; no default; example:
+[{\"fileName\":\"projectCard.css\",\"source\":\":host{}\"}]; do not pass empty arrays.
+  fileName (string, required) - Represents a resource file name inside the bundle;
+  string including extension; no default; example: projectCard.html; do not pass a full
+  lwc path or duplicate file names.
+  source (string, required) - Represents the full resource Source; string content; no
+  default; example: <template><p>Hello</p></template>; do not pass base64, a path, or
+  partial diffs.
+  format ("css" | "html" | "js" | "json" | "svg" | "xml", optional) - Represents an
+  optional Salesforce LightningComponentResource Format override; enum css, html, js,
+  json, svg, or xml; defaults to inference from fileName; example: html; do not pass
+  MIME types or unsupported extensions.
+deleteMissing (boolean, optional) - Represents whether to delete existing bundle
+resources not listed in files; boolean; defaults to false; example: true; do not use
+unless the provided file list is authoritative because non-required files can be
+removed.
 
-Result (raw Tooling API responses)
-bundleId (string).
-files (object) - Map of fileName → { id, success, errors } or delete result.
+Result
+object keyed by fileName or deleted:fileName with raw Tooling API responses.
 
 Required permissions
 - "Customize Application".
@@ -51,9 +63,5 @@ Errors
 Example request
 
 replace_lwc_bundle_files({
-  "bundleName": "projectCard",
-  "files": [
-    { "fileName": "projectCard.html", "source": "<template><lightning-card title=\"Project\"></lightning-card></template>" },
-    { "fileName": "projectCard.css",  "source": ":host { display: block; }" }
-  ]
+  "bundleName": "projectCard"
 })

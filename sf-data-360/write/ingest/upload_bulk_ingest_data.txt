@@ -24,17 +24,12 @@ Body (JSON)
 { "data": [ { "Id__c": "ORDER-100023", "Amount__c": 199.99 } ] }
 
 Input (parameters)
-jobId (string, required).
-csv (string, optional) - Inline CSV.
-csvBase64 (string, optional).
-data (object[], optional) - JSON rows.
+jobId (string, required) - ID of the bulk ingest job to upload data to
+csv (string, optional) - Inline CSV data including the header row. Mutually exclusive with data.
+data (object[], optional) - Array of JSON row objects to upload. Mutually exclusive with csv.
 
 Result
-batchId (string).
-jobId (string).
-state (string) - "Queued".
-sizeBytes (number).
-rowCountEstimate (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -50,15 +45,9 @@ Errors
 Example request
 
 upload_bulk_ingest_data({
-  "jobId": "JOB_001",
-  "csv": "Id__c,Amount__c\nORDER-100023,199.99"
+  "jobId": ""
 })
 
 Example result
-{
-  "batchId": "BATCH_001",
-  "jobId": "JOB_001",
-  "state": "Queued",
-  "sizeBytes": 64,
-  "rowCountEstimate": 1
-}
+
+{ }

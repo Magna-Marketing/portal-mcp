@@ -16,11 +16,10 @@ Use this before a deploy or after edits to catch obvious metadata
 mistakes that the platform would otherwise reject.
 
 Salesforce API
-Tooling API, v66.0. Reads the component (no validation endpoint exists;
-checks are run client-side by the MCP server).
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/sobjects/{type}/{id}
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -30,24 +29,25 @@ Body
 None.
 
 Input (parameters)
-type (string, required) - "lwc" | "aura" | "visualforce" | "flexipage".
-name (string, required) - Component DeveloperName / Name.
-strict (boolean, optional, default false) - Treat warnings as errors in
-  the returned summary.
+type (string, optional) - Component family to validate; string accepted values lwc,
+aura, visualforce, or flexipage; default lwc; example: lwc; do not pass metadata labels
+or multiple values.
+componentType (string, optional) - Alias for type; string component family; ignored when
+type is present; example: visualforce; do not pass arrays.
+name (string, optional) - Component name to validate; string exact DeveloperName or Name
+for the selected type; required unless componentName is set; example: accountSummary; do
+not pass file paths or labels.
+componentName (string, optional) - Alias for name; string exact component name; ignored
+when name is present; example: Account_Record_Page; do not pass multiple names.
+strict (boolean, optional) - Whether warnings make the derived summary invalid; boolean;
+default false; example: true; do not use as a substitute for Salesforce deployment
+validation.
 
 Result
-component (object) - { id, name, type, label, apiVersion }.
-summary (object) - { errors, warnings, infos } counts; valid (bool, true
-  iff zero errors).
-issues (array) - Each:
-  severity ("error"|"warning"|"info").
-  code (string) - "missing_meta_xml", "missing_target_for_exposed",
-    "stale_api_version", "broken_static_resource_ref",
-    "duplicate_region_id", "missing_controller", etc.
-  fileName (string|null).
-  line (number|null).
-  message (string).
-  suggestion (string|null).
+raw Tooling API records plus derived validation summary and issues.
+component (value) - included in the JSON returned by the tool.
+summary (value) - included in the JSON returned by the tool.
+issues (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application" / "View Setup and Configuration".
@@ -60,15 +60,16 @@ Errors
 
 Example request
 
-validate_ui_component({ "type": "lwc", "name": "projectCard", "strict": false })
+validate_ui_component({
+  "type": "lwc",
+  "componentType": "visualforce",
+  "name": "accountSummary"
+})
 
 Example result
 
 {
-  "component": { "id": "0Rb4Q00000abcDE", "name": "projectCard", "type": "LightningComponentBundle", "label": "Project Card", "apiVersion": 62.0 },
-  "summary": { "errors": 0, "warnings": 1, "infos": 1, "valid": true },
-  "issues": [
-    { "severity": "warning", "code": "stale_api_version", "fileName": "projectCard.js-meta.xml", "message": "API version 56.0 is older than org minimum 58.0; consider upgrading." },
-    { "severity": "info", "code": "no_targets", "fileName": "projectCard.js-meta.xml", "message": "isExposed=false but lightning__RecordPage target listed; target ignored." }
-  ]
+  "component": null,
+  "summary": null,
+  "issues": null
 }

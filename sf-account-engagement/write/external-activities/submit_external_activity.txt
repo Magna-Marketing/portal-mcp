@@ -45,7 +45,7 @@ value (string, optional) - Free-form payload.
 activityDate (string, optional) - ISO-8601; defaults to now.
 
 Result
-externalActivity (object) - Ingested row with `id` populated.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -72,9 +72,5 @@ submit_external_activity({
 })
 
 Example result
-{
-  "externalActivity": {
-    "id": 4421, "typeName": "Webinar Attended",
-    "prospectId": 7745, "externalId": "WEB-2026-04-22-S1"
-  }
-}
+
+{ }

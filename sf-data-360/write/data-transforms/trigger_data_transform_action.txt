@@ -25,19 +25,15 @@ Body (run)
 { "operationType": "Full" }
 
 Input (parameters)
-dataTransformNameOrId (string, required).
-subOperation (string, required) - "run" | "cancel" | "retry" |
-  "refreshStatus".
-operationType (string, optional, run-only) - "Full" | "Incremental".
-runId (string, optional) - For "cancel" target a specific run; for
-  "refreshStatus" target a specific run.
-runIdempotencyKey (string, optional, run-only).
+subOperation ("run" | "cancel" | "retry" | "refreshStatus", required) - The action to trigger: run, cancel, retry, or refreshStatus
+dataTransformNameOrId (string, required) - Developer name or 18-character Salesforce ID of the data transform
+operationType ("Full" | "Incremental", optional) - Execution mode for the run action: Full (re-process all data) or Incremental (process
+only changes). Used with subOperation='run'.
+runId (string, optional) - Run ID of a specific execution. Used with cancel, retry, or refreshStatus to target a
+specific run.
 
 Result
-runId (string, when subOperation="run" / "retry").
-status (string).
-submittedAt (ISO-8601).
-success (boolean, for cancel / refreshStatus).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -52,14 +48,10 @@ Errors
 Example request
 
 trigger_data_transform_action({
-  "dataTransformNameOrId": "build_unified_individual",
-  "subOperation": "run",
-  "operationType": "Incremental"
+  "subOperation": "",
+  "dataTransformNameOrId": ""
 })
 
 Example result
-{
-  "runId": "RUN_DT_2026-04-29T13",
-  "status": "Queued",
-  "submittedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

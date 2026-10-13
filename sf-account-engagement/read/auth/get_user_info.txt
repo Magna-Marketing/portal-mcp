@@ -12,8 +12,8 @@ Salesforce OAuth (`/services/oauth2/userinfo`) +
 Account Engagement v5 (`GET /objects/users/:id` for the run-as user).
 
 Endpoint
-GET https://login.salesforce.com/services/oauth2/userinfo
-GET https://{pi-domain}/api/v5/objects/users/:id
+GET https://{pi-domain}/api/v5/objects/users
+Optional query: fields, filter[salesforceId], limit
 
 Headers
 Authorization: Bearer <salesforce-access-token>

@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/tags?fields={fields}&filter[name]=like,Welcome*
+GET https://{pi-domain}/api/v5/objects/tags
+Optional query: fields, limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,17 +22,15 @@ Body
 None.
 
 Input (parameters)
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,objectCount,
-  createdAt,updatedAt,createdById,updatedById,isDeleted).
-limit (number, optional, default 200).
-nextPageToken (string, optional).
+nameContains (string, optional) - Filter tags whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted tags. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, objectCount, createdAt, updatedAt, createdById,
+updatedById, isDeleted.
+limit (number, optional) - Page size. Default 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-tags (array) - Each: { id, name, objectCount (number), isDeleted,
-  createdAt, updatedAt }.
-nextPageToken (string|null).
+tags (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `pardot_api`.
@@ -44,11 +43,10 @@ Errors
 
 Example request
 
-list_tags({ "nameContains": "Welcome" })
+list_tags({})
 
 Example result
+
 {
-  "tags": [
-    { "id": 211, "name": "Welcome 2026", "objectCount": 14 }
-  ]
+  "tags": null
 }

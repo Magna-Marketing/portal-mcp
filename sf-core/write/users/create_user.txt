@@ -9,66 +9,113 @@ unless `isActive=false`. Optionally trigger a welcome email and assign
 permission set licenses + permission sets in the same call.
 
 Salesforce API
-REST API (Data), v66.0. `POST /sobjects/User`. License + permset
-assignments are extra calls the tool fans out.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/sobjects/User
-POST /services/data/v66.0/sobjects/PermissionSetLicenseAssign     (per license)
-POST /services/data/v66.0/sobjects/PermissionSetAssignment        (per permset)
+POST /services/data/v66.0/sobjects/PermissionSetLicenseAssign
+POST /services/data/v66.0/sobjects/PermissionSetAssignment
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "Username": "jane.doe@magnatech.com",
-  "Email": "jane.doe@magnatech.com",
-  "FirstName": "Jane",
-  "LastName": "Doe",
-  "Alias": "jdoe",
-  "TimeZoneSidKey": "America/New_York",
-  "LocaleSidKey": "en_US",
-  "EmailEncodingKey": "UTF-8",
-  "LanguageLocaleKey": "en_US",
-  "ProfileId": "00eQg0000008ZyXAB",
-  "UserRoleId": "00EQg0000008abcAB",
-  "ManagerId": "005Qg0000020aBcDE",
-  "Department": "Engineering",
-  "Title": "Senior Engineer"
-}
+JSON fields: AssigneeId, PermissionSetLicenseId.
+JSON fields: AssigneeId, PermissionSetId.
+JSON fields: AssigneeId, PermissionSetGroupId.
+JSON fields: Username, Email, FirstName, LastName, Alias, ProfileId, UserRoleId, ManagerId, Department, Title, TimeZoneSidKey, LocaleSidKey, EmailEncodingKey, LanguageLocaleKey, Phone, MobilePhone, FederationIdentifier, IsActive.
 
 Input (parameters)
-username (string, required) - Email-shaped, globally unique.
-email (string, required).
-firstName (string, optional).
-lastName (string, required).
-alias (string, required, max 8 chars).
-profileId (string, required) - Or `profileName` (resolved by tool).
-profileName (string, optional).
-roleId (string, optional) - Or `roleName`.
-roleName (string, optional).
-managerId (string, optional) - Or `managerUsername`.
-managerUsername (string, optional).
-department (string, optional), title (string, optional).
-timeZoneSidKey (string, optional, default org default).
-localeSidKey (string, optional, default org default).
-emailEncodingKey (string, optional, default "UTF-8").
-languageLocaleKey (string, optional, default org default).
-phone (string, optional), mobilePhone (string, optional).
-federationIdentifier (string, optional) - For SSO.
-isActive (boolean, optional, default true).
-sendWelcomeEmail (boolean, optional, default false) - Triggers the
-  EmailHeader on create. Disabled by default to allow custom flows.
-permissionSetLicenseNames (string[], optional) - Auto-assign these PSLs.
-permissionSetNames (string[], optional) - Auto-assign these permsets.
-permissionSetGroupNames (string[], optional).
+username (string, required) - Represents User.Username; globally unique string, usually
+email-shaped; no default; example 'new.user@example.com'; do not pass a display name.
+email (string, required) - Represents User.Email; email address string accepted by
+Salesforce; no default; example 'new.user@example.com'; do not pass multiple addresses.
+firstName (string, optional) - Represents User.FirstName; string; omitted by default;
+example 'New'; do not pass the full name.
+lastName (string, required) - Represents User.LastName; string; no default and required
+by Salesforce; example 'User'; do not pass blank values.
+alias (string, required) - Represents User.Alias; string up to 8 characters; no default;
+example 'nuser'; do not pass values longer than 8 characters.
+profileId (string, optional) - Represents User.ProfileId; Salesforce Profile Id;
+required when profileName is omitted; example '00exx0000001234'; do not pass profile
+names.
+profileName (string, optional) - Represents Profile.Name to resolve into ProfileId;
+exact string; used when profileId is omitted; example 'Standard User'; do not pass
+labels from permission sets.
+roleId (string, optional) - Represents User.UserRoleId; Salesforce UserRole Id; omitted
+by default; example '00Exx0000001234'; do not pass Group Ids.
+roleName (string, optional) - Represents UserRole DeveloperName or Name to resolve;
+exact string; used when roleId is omitted; example 'Sales_Manager'; do not pass profile
+names.
+managerId (string, optional) - Represents User.ManagerId; Salesforce User Id; omitted by
+default; example '005xx0000012345'; do not pass usernames.
+managerUsername (string, optional) - Represents manager User.Username to resolve; exact
+username string; used when managerId is omitted; example 'manager@example.com'; do not
+pass manager names.
+department (string, optional) - Represents User.Department; string; omitted by default;
+example 'Sales'; do not pass arrays.
+title (string, optional) - Represents User.Title; string; omitted by default; example
+'Account Executive'; do not pass role API names.
+timeZoneSidKey (string, required) - Represents User.TimeZoneSidKey; Salesforce time zone
+key string; no default; example 'America/New_York'; do not pass GMT offsets.
+localeSidKey (string, required) - Represents User.LocaleSidKey; Salesforce locale key
+string; no default; example 'en_US'; do not pass language names.
+emailEncodingKey (string, optional) - Represents User.EmailEncodingKey; Salesforce
+encoding key string; defaults to 'UTF-8'; example 'UTF-8'; do not pass MIME labels.
+languageLocaleKey (string, required) - Represents User.LanguageLocaleKey; Salesforce
+language locale key string; no default; example 'en_US'; do not pass LocaleSidKey if
+different field is intended.
+phone (string, optional) - Represents User.Phone; phone string; omitted by default;
+example '+1 415 555 0100'; do not pass multiple numbers.
+mobilePhone (string, optional) - Represents User.MobilePhone; phone string; omitted by
+default; example '+1 415 555 0101'; do not pass SMS consent text.
+federationIdentifier (string, optional) - Represents User.FederationIdentifier for SSO;
+unique string as configured by identity provider; omitted by default; example
+'okta-12345'; do not pass passwords.
+isActive (boolean, optional) - Represents User.IsActive; boolean; defaults to true;
+example false; do not use as a license assignment flag.
+sendWelcomeEmail (boolean, optional) - Represents whether to send Salesforce user email
+via Sforce-Email-Header; boolean; defaults to false; example true; do not enable if
+notifications are not intended.
+permissionSetLicenseNames (string[], optional) - Represents PermissionSetLicense names
+to assign after create; array of DeveloperName, MasterLabel, or PermissionSetLicenseKey
+strings; omitted by default; example ['SalesConsole']; do not pass permission set names.
+permissionSetLicenseIds (string[], optional) - Represents PermissionSetLicense Ids to
+assign after create; array of Salesforce Id strings; omitted by default; example
+['0PLxx0000001234']; do not pass PermissionSet Ids.
+permissionSetNames (string[], optional) - Represents PermissionSet API names to assign
+after create; array of PermissionSet.Name strings; omitted by default; example
+['MTG_Project_Manager']; do not pass labels.
+permissionSetIds (string[], optional) - Represents PermissionSet Ids to assign after
+create; array of Salesforce Id strings; omitted by default; example ['0PSxx0000001234'];
+do not pass PermissionSetGroup Ids.
+permissionSetGroupNames (string[], optional) - Represents PermissionSetGroup
+DeveloperName values to assign after create; array of strings; omitted by default;
+example ['Sales_User_Group']; do not pass permission set names.
+permissionSetGroupIds (string[], optional) - Represents PermissionSetGroup Ids to assign
+after create; array of Salesforce Id strings; omitted by default; example
+['0PGxx0000001234']; do not pass PermissionSet Ids.
+additionalFields (object, optional) - Represents extra User fields merged into the
+create payload; object keyed by User field API names; omitted by default; example
+{\"Division\":\"West\"}; do not include Id or attributes.
 
 Result
-user (object) - { id, username, email, alias, profileId, roleId, isActive, createdDate }.
-permissionSetLicenseAssignments (array) - { permissionSetLicenseId, name, status ("created"|"already_assigned") }.
-permissionSetAssignments (array) - { permissionSetId|permissionSetGroupId, name, assignmentId, status }.
+JSON object with lookup responses, userPayload, createUserResponse, createdUserLookup,
+and optional assignment response arrays.
+profileLookup (value) - included in the JSON returned by the tool.
+roleLookup (value) - included in the JSON returned by the tool.
+managerLookup (value) - included in the JSON returned by the tool.
+userPayload (value) - included in the JSON returned by the tool.
+createUserResponse (value) - included in the JSON returned by the tool.
+createdUserLookup (value) - included in the JSON returned by the tool.
+permissionSetLicenseLookup (value) - included in the JSON returned by the tool.
+permissionSetLookup (value) - included in the JSON returned by the tool.
+permissionSetGroupLookup (value) - included in the JSON returned by the tool.
+permissionSetLicenseAssignments (value) - included in the JSON returned by the tool.
+permissionSetAssignments (value) - included in the JSON returned by the tool.
+permissionSetGroupAssignments (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Internal Users" + "Manage Profiles and Permission Sets" (for permset assignment).
@@ -86,11 +133,10 @@ Errors
 Example request
 
 create_user({
-  "username": "jane.doe@magnatech.com",
-  "email": "jane.doe@magnatech.com",
-  "firstName": "Jane", "lastName": "Doe",
-  "alias": "jdoe",
-  "profileName": "Standard User",
-  "roleName": "MTG_Engineering",
-  "permissionSetGroupNames": ["MTG_Delivery_Bundle"]
+  "username": "example",
+  "email": "example",
+  "lastName": "example",
+  "alias": "example",
+  "timeZoneSidKey": "example",
+  "localeSidKey": "example"
 })

@@ -8,35 +8,50 @@ List all users assigned to a permission set group. Same shape as
 PermissionSetAssignment Id you'd remove).
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `PermissionSetAssignment` joined to `User`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, ExpirationDate, SystemModstamp FROM PermissionSetAssignment WHERE PermissionSetGroupId = '{psgId}' ORDER BY Assignee.Name
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, PermissionSetGroupId, PermissionSetGroup.DeveloperName, PermissionSetGroup.MasterLabel, PermissionSetGroup.Status, ExpirationDate, IsActive, SystemModstamp FROM PermissionSetAssignment
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-groupName (string, optional) - PSG DeveloperName.
-groupId (string, optional) - PSG Id.
-  One of groupName or groupId is required.
-includeInactiveUsers (boolean, optional, default false).
-includeExpired (boolean, optional, default false).
-limit (number, optional, default 2000, max 50000).
-sortBy (string, optional, default "Name").
+permissionSetGroupId (string, optional) - PermissionSetGroup Id to filter assignments;
+Salesforce Id string; no default; example: 0PG5g000000ABCd; do not pass permission set
+Ids, names, multiple Ids, or SOQL fragments.
+groupNamePattern (string, optional) - PermissionSetGroup DeveloperName pattern; string
+with * and ? wildcards converted to SOQL LIKE; no default; example: Revenue_*; do not
+pass labels, permission set names, regex, or raw LIKE syntax.
+assigneeNamePattern (string, optional) - Assigned user's Name pattern; string with * and
+? wildcards converted to SOQL LIKE; no default; example: Sam*; do not pass usernames,
+regex, raw LIKE syntax, or comma-separated names.
+includeInactiveUsers (boolean, optional) - Whether inactive assigned users are included;
+boolean; default false; example: true; do not pass when only active users should be
+listed.
+includeExpiredAssignments (boolean, optional) - Whether expired group assignments are
+included; boolean; default false filters ExpirationDate before today; example: true; do
+not pass for current assignments only.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+PermissionSetAssignment; string without WHERE; no default; example:
+PermissionSetGroup.Status = 'Updated'; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for PermissionSetAssignment; string without
+ORDER BY; default PermissionSetGroup.DeveloperName ASC, Assignee.Name ASC; example:
+SystemModstamp DESC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum group assignment rows to query; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-group (object) - { id, developerName, label, status }.
-totalSize (number).
-assignments (array) - Same row shape as
-  list_permission_set_assignments: { assignmentId, userId, name,
-  username, email, isActive, profileName, expirationDate, assignedDate }.
-hasMore (boolean).
-nextRecordsUrl (string, optional).
+Returns the raw Salesforce QueryResult for group assignment records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" or "Manage Users".
@@ -49,24 +64,22 @@ Errors
 
 Example request
 
-list_permission_set_group_assignments({ "groupName": "MTG_Delivery_Bundle" })
+list_permission_set_group_assignments({
+  "permissionSetGroupId": "0PG5g000000ABCd",
+  "groupNamePattern": "Revenue_*",
+  "assigneeNamePattern": "Sam*"
+})
 
-Example result (one row)
+Example result
 
 {
-  "group": { "id": "0PGQg00000004abAB", "developerName": "MTG_Delivery_Bundle", "label": "MTG Delivery Bundle", "status": "Updated" },
-  "totalSize": 18,
-  "assignments": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "assignmentId": "0Pa4Q00000xy12abc",
-      "userId": "005Qg0000020aBcDE",
-      "name": "Jane Doe",
-      "username": "jane.doe@magnatech.com",
-      "email": "jane.doe@magnatech.com",
-      "isActive": true,
-      "profileName": "Standard User",
-      "expirationDate": null,
-      "assignedDate": "2026-02-14T18:23:09.000+0000"
+      "attributes": {
+        "type": "PermissionSetAssignment"
+      }
     }
   ]
 }

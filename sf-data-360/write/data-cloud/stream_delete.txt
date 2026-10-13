@@ -10,7 +10,7 @@ Salesforce API
 Runtime plane.
 
 Endpoint
-DELETE {cdpTenantUrl}/api/v1/ingest/sources/:sourceApiName/:objectApiName
+DELETE {instanceUrl}/api/v1/ingest/sources/{sourceApiName}/{objectApiName}
 
 Headers
 Authorization: Bearer <data_cloud_token>
@@ -18,11 +18,7 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "data": [
-    { "Id__c": "ORDER-100023" }
-  ]
-}
+DELETE: data
 
 Input (parameters)
 sourceApiName (string, required).
@@ -31,10 +27,7 @@ data (object[], required) - Each record must contain the source
   object's primary-key field.
 
 Result
-acceptedCount (number).
-rejectedCount (number).
-errors (array).
-ingestId (string).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -55,8 +48,5 @@ stream_delete({
 })
 
 Example result
-{
-  "acceptedCount": 1,
-  "rejectedCount": 0,
-  "ingestId": "ING_del_abc123"
-}
+
+{ }

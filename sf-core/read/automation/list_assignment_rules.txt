@@ -4,7 +4,7 @@ Description
 List Lead and Case assignment rules: rule entries (criteria, target user/queue, email template, notify checkbox), and active rule per object. There can be many rules per object but only one is active at a time per Salesforce constraint.
 
 Salesforce API
-Metadata API (`AssignmentRules` per sObject), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
 POST /services/Soap/m/66.0   (readMetadata AssignmentRules)
@@ -17,24 +17,20 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional, default ["Lead", "Case"]).
-includeInactive (boolean, optional, default true).
+sObjects (("Lead" | "Case")[], optional) - AssignmentRules container object API names;
+array limited by Salesforce to Lead and Case; default [\"Lead\", \"Case\"]; example:
+[\"Case\"]; do not pass custom objects, labels, or SOQL fragments.
+namePattern (string, optional) - Rule fullName selection hint using * and ? wildcards;
+string; no default; example: Support_*; Metadata API reads whole object containers, so
+this does not trim returned container data; do not pass regex or SOQL LIKE syntax.
+limit (integer, optional) - Maximum object containers to read; positive integer clamped
+by the two valid containers; default reads all selected containers; example: 1; do not
+pass 0, negatives, decimals, or offsets.
 
 Result
-assignmentRules (array) - Each:
-  sObject (string).
-  fullName (string) - Rule name.
-  active (boolean).
-  ruleEntries (array) - Each:
-    sortOrder (number).
-    criteriaItems (array) - [{ field, operation, value }].
-    formula (string|null).
-    booleanFilter (string|null).
-    assignedTo (string).
-    assignedToType ("User"|"Queue"|"PartnerUser"|"Owner").
-    emailTemplate (string|null).
-    notifyCcRecipients (boolean).
-    overrideExistingTeams (boolean, only Case).
+Returns a JSON object with metadataFullNames and metadataResult.
+metadataFullNames (value) - included in the JSON returned by the tool.
+metadataResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -47,4 +43,8 @@ Errors
 
 Example request
 
-list_assignment_rules({ "sObjects": ["Case"] })
+list_assignment_rules({
+  "sObjects": "[\\\"Case\\\"]",
+  "namePattern": "Support_*",
+  "limit": 1
+})

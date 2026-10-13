@@ -5,46 +5,81 @@ Create / update / activate / deactivate / delete Duplicate Rules and
 their Matching Rules.
 
 Salesforce API
-Metadata API (`DuplicateRule`, `MatchingRule`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (readMetadata MatchingRules)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: multipart/form-data; boundary=...
 
 Body
-multipart/form-data with:
-Part 1, name="json", Content-Type: application/json
-{
-  "deployOptions": {
-    "checkOnly": false,
-    "rollbackOnError": true,
-    "singlePackage": true
-  }
-}
-
-Part 2, name="file", filename="deploy.zip", Content-Type: application/zip
-Generated ZIP containing:
-- package.xml
-- duplicateRules/*.duplicateRule-meta.xml
-- matchingRules/*.matchingRule-meta.xml
+JSON fields: fullName, masterLabel, description, isActive, actionOnInsert, actionOnUpdate, alertText, securityOption, sortOrder, duplicateRuleFilter, duplicateRuleMatchRules.
+JSON fields: matchingRule, objectMapping, sortOrder.
+JSON fields: fullName, label, description, ruleStatus, booleanFilter, matchingRuleItems.
+JSON fields: fieldName, matchingMethod, blankValueBehavior.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
-target (string, required) - "duplicateRule" | "matchingRule".
-sObject (string, required).
-fullName (string, required) - "Account.MTG_Duplicate_Account" or matching rule fullName.
-masterLabel (string, required for create).
-description (string, optional).
-isActive (boolean, optional, default true).
-operationsOnInsert (string[], optional) - For DuplicateRule: ["Allow"|"Block"|"Alert"|"Report"].
-operationsOnUpdate (string[], optional).
-matchingRule (string, optional) - For DuplicateRule create: target matching rule fullName.
-matchEngine (string, optional, only matchingRule) - "Standard" | "Fuzzy".
-ruleFields (array, optional, only matchingRule) - [{ fieldName, matchingMethod ("Exact"|"Fuzzy"|"None"), blankValueBehavior ("MatchBlanks"|"NullNotAllowed") }].
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "activate" | "deactivate" | "delete" | "read", required) -
+Operation to perform.
+target ("duplicateRule" | "matchingRule", required) -
+Whether to manage DuplicateRule metadata or a child rule in a MatchingRules container.
+sObject (string, required) -
+Object API name, for example Account or Custom_Object__c. Required for matchingRule and
+useful for fullName validation.
+fullName (string, required) -
+Metadata fullName. DuplicateRule usually uses Object.RuleName; MatchingRule accepts
+Object.RuleName or RuleName.
+masterLabel (string, optional) -
+Display label. Required for create/upsert unless supplied through metadataOverride.
+label (string, optional) -
+MatchingRule label alias for masterLabel.
+description (string, optional) -
+Optional description.
+isActive (boolean, optional) -
+DuplicateRule active flag. activate/deactivate override this value.
+ruleStatus ("Active" | "Inactive", optional) -
+MatchingRule activation status. Defaults to Active. Must be Active for a DuplicateRule
+to reference the matching rule. activate/deactivate operations override this value.
+actionOnInsert (string, optional) -
+DuplicateRule action when a duplicate is found on insert: Allow or Block.
+actionOnUpdate (string, optional) -
+DuplicateRule action when a duplicate is found on update: Allow or Block.
+alertText (string, optional) -
+Optional duplicate alert text for users.
+securityOption (string, optional) -
+DuplicateRule security option, for example EnforceSharingRules or BypassSharingRules.
+sortOrder (integer, optional) -
+DuplicateRule evaluation sort order.
+matchingRule (string, optional) -
+MatchingRule reference for DuplicateRule duplicateRuleMatchRules.
+objectMapping (object, optional) -
+Raw DuplicateRule objectMapping metadata for the matching rule reference.
+matchRuleSortOrder (integer, optional) -
+Sort order inside duplicateRuleMatchRules. Defaults to 1 when matchingRule is used.
+duplicateRuleFilter (object, optional) -
+Raw Metadata API duplicateRuleFilter object.
+duplicateRuleMatchRules (object[], optional) -
+Raw Metadata API duplicateRuleMatchRules array. Overrides matchingRule/objectMapping
+convenience fields.
+ruleFields (object[], optional) -
+MatchingRule field items. Required for matchingRule create unless supplied through
+metadataOverride.
+  fieldName (string, required) -
+  Field API name participating in matching.
+  matchingMethod (string, required) -
+  Matching method per Salesforce Metadata API: Exact, FirstName, LastName, CompanyName,
+  Phone, City, Street, Zip, or Title.
+  blankValueBehavior (string, optional) -
+  How blanks are handled.
+booleanFilter (string, optional) -
+Optional MatchingRule boolean filter for matchingRuleItems.
+metadataOverride (object, optional) -
+Advanced raw Metadata API fields merged into the generated metadata payload. For
+target=matchingRule this merges into the individual child rule object only — do NOT pass
+container-level fields like matchingRules here. For target=duplicateRule this merges
+into the DuplicateRule metadata object.
 
 Result
 deploy (object).
@@ -62,13 +97,8 @@ Errors
 Example request
 
 manage_duplicate_rule({
-  "operation": "create",
-  "target": "duplicateRule",
-  "sObject": "Account",
-  "fullName": "Account.MTG_Duplicate_Account",
-  "masterLabel": "MTG Duplicate Account Detection",
-  "isActive": true,
-  "operationsOnInsert": ["Alert", "Report"],
-  "operationsOnUpdate": ["Alert"],
-  "matchingRule": "Standard_Account_Match_Rule_v1_1"
+  "operation": "example",
+  "target": "example",
+  "sObject": "example",
+  "fullName": "example"
 })

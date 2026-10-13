@@ -18,16 +18,37 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required).
-shareIds (string[], optional) - Direct share row Ids.
-records (object[], optional) - Each: { recordId, userOrGroupId | username | groupName }.
-  Tool resolves to share row Id.
-allOrNone (boolean, optional, default false).
-skipIfNotShared (boolean, optional, default true).
+sObject (string, required) - Represents the parent sObject API name; standard or custom
+object name; no default; example 'Account' or 'Project__c'; do not pass the share object
+name.
+shareIds (string[], optional) - Represents direct share row Ids to delete; array of
+Salesforce share Id strings; required when records is omitted; example
+['00rxx0000001234']; do not pass parent record Ids.
+records (unknown[], optional) - Represents share row references to resolve before
+deletion; array of parent record and user/group references; required when shareIds is
+omitted; example [{\"recordId\":\"001...\",\"username\":\"admin@example.com\"}]; do not
+pass empty references.
+allOrNone (boolean, optional) - Represents the sObject Collections delete rollback flag;
+boolean; defaults to false; example true; do not set true unless one failed delete
+should roll back the batch.
+batchSize (integer, optional) - Represents Ids per sObject Collections delete request;
+integer 1-200; defaults to 200; example 100; do not exceed the REST collection limit.
+skipIfNotShared (boolean, optional) - Represents whether missing resolved share rows are
+returned instead of failing; boolean; defaults to true; example false; do not set false
+for broad cleanup operations.
+parentIdField (string, optional) - Represents the parent Id field on the share object;
+Salesforce field API name; defaults to ParentId for custom objects and <sObject>Id for
+standard objects; example 'AccountId'; do not override unless the default is wrong.
 
 Result
-results (array) - { shareId, status ("removed"|"not_shared"|"failed"|"row_cause_locked"), recordId, error }.
-summary (object) - { removed, notShared, failed, total }.
+JSON object with request, lookups, shareQueryResponses, notFound, shareIds, and
+responses arrays containing raw Salesforce results.
+request (value) - included in the JSON returned by the tool.
+lookups (value) - included in the JSON returned by the tool.
+shareQueryResponses (value) - included in the JSON returned by the tool.
+notFound (value) - included in the JSON returned by the tool.
+shareIds (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Modify All" on the sObject or be the owner.
@@ -42,6 +63,5 @@ Errors
 Example request
 
 delete_record_share({
-  "sObject": "Account",
-  "records": [{ "recordId": "0014Q00000abcDE", "username": "external.partner@magnatech.com" }]
+  "sObject": "example"
 })

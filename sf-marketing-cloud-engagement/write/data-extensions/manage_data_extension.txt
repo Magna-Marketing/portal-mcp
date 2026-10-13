@@ -20,28 +20,52 @@ Body
 SOAP CreateRequest / UpdateRequest / DeleteRequest envelopes.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addField" | "removeField" | "renameField".
-customerKey (string, optional, required for non-create) - DE External Key.
-deName (string, optional) - For create.
-description (string, optional).
-folderId (number, optional).
-isSendable (boolean, optional, default false).
-sendableDataExtensionField (string, optional) - Field name flagged as sendable.
-sendableSubscriberField (string, optional, default "Subscriber Key") - Maps to Subscriber.SubscriberKey.
-isTestable (boolean, optional, default false).
-fields (object[], optional) - For create / addField / renameField:
-  name (string, required), fieldType ("Text"|"Number"|"Date"|"Boolean"|"EmailAddress"|"Phone"|"Decimal"|"Locale"), maxLength, scale (for Decimal), isPrimaryKey, isRequired, defaultValue, ordinal, customerKey.
-removeFieldNames (string[], optional, for removeField).
-renameFields (object[], optional, for renameField) - [{ oldName, newName }].
-dataRetentionPeriodLength (number, optional).
-dataRetentionPeriod (string, optional) - "Days" | "Weeks" | "Months" | "Years".
-isDataRetentionEnabled (boolean, optional).
-rowDeletionType (string, optional) - "DeleteIndividualRecords" | "DeleteAllRecords" | "ResetData".
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "delete" | "addField" | "removeField" | "renameField", required) - create/update/delete DataExtension, addField via DataExtension.Fields, removeField via
+DataExtensionField delete, renameField via DataExtensionField update.
+customer_key (string, optional) - Data Extension external key. Required for all operations except raw create XML.
+name (string, optional) - DataExtension.Name. Required for create unless raw_data_extension_xml is supplied.
+description (string, optional) - DataExtension.Description.
+category_id (number, optional) - DataExtension.CategoryID folder id. Use list_folders for dataextension folders.
+is_sendable (boolean, optional) - DataExtension.IsSendable.
+sendable_data_extension_field (string, optional) - Field name in this DE used for sending. Required when creating a sendable DE unless raw
+XML is supplied.
+sendable_subscriber_field (string, optional) - Subscriber attribute to relate to. Common values: Subscriber Key or Email Address.
+is_testable (boolean, optional) - DataExtension.IsTestable. Salesforce requires sendable DEs for testable usage.
+fields (object[], optional) - Fields for create or addField.
+remove_field_names (string[], optional) - Field names to delete for removeField. When possible, prefer remove_fields with
+object_id/customer_key.
+remove_fields (object[], optional) - DataExtensionField identifiers to delete. object_id is the safest identifier; name plus
+DataExtension.CustomerKey is used as fallback.
+rename_fields (object[], optional) - Fields to rename. Salesforce requires the existing DataExtensionField.ObjectID for
+reliable updates.
+template_object_id (string, optional) - DataExtensionTemplate.ObjectID to create the Data Extension from an existing template
+(e.g. the TriggeredSendDataExtension template). Use list_data_extension_templates to
+look this up. When set, fields becomes optional since the template supplies its own
+column definitions.
+template_customer_key (string, optional) - DataExtensionTemplate.CustomerKey to create the Data Extension from an existing
+template. Alternative to template_object_id.
+data_retention_period_length (number, optional) - DataExtension.DataRetentionPeriodLength. Requires retention permissions.
+data_retention_period ("Days" | "Weeks" | "Months" | "Years", optional) - DataExtension.DataRetentionPeriod.
+data_retention_period_unit_of_measure (number, optional) - DataExtension.DataRetentionPeriodUnitOfMeasure, if your account uses numeric retention
+units.
+is_data_retention_enabled (boolean, optional) - DataExtension.RowBasedRetention. true retains the DE and deletes individual rows at
+retention expiry.
+reset_retention_period_on_import (boolean, optional) - DataExtension.ResetRetentionPeriodOnImport.
+delete_at_end_of_retention_period (boolean, optional) - DataExtension.DeleteAtEndOfRetentionPeriod. true deletes the DE at retention expiry.
+raw_data_extension_xml (string, optional) - Exact DataExtension or DataExtensionField Objects XML to send inside the SOAP request.
+Use for fields not covered by this schema.
+confirm_delete (boolean, optional) - Must be true when operation=delete.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus REST Account-Context or SOAP
+ClientID. Defaults to the session BU when available.
+client_business_unit_id (number, optional) - Optional SOAP object Client.ID owner/context MID. Defaults to business_unit_id/session
+MID when numeric. Use this when parent authentication writes into a child BU.
 
 Result
-dataExtension (object) - { id, customerKey, name, isSendable, isTestable, fieldCount, rowCount }.
-fields (array, when applicable) - The DE's resulting field list.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_write`.

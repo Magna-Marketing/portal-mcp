@@ -21,23 +21,18 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Pending" | "Running" | "Complete" | "Error".
-object (string, optional) - "Prospect" only at this time.
-bulkAction (string, optional) - "AddTag" | "RemoveTag" | "AddToList" |
-  "RemoveFromList" | "Delete" | "Undelete" | "ChangeAssignment".
-createdAfter (string, optional) - ISO-8601.
-createdBefore (string, optional) - ISO-8601.
-fields (string[], optional, default: id,object,bulkAction,status,
-  origin,count,createdAt,updatedAt,createdById,errorCount,fileName,
-  processedCount).
-limit (number, optional, default 50, max 1000).
-nextPageToken (string, optional).
+status ("Pending" | "Running" | "Complete" | "Error", optional) - Filter by job status.
+object (string, optional) - Filter by target object type. Currently only "Prospect" is supported.
+bulkAction ("AddTag" | "RemoveTag" | "AddToList" | "RemoveFromList" | "Delete" | "Undelete" | "ChangeAssignment", optional) - Filter by bulk action type.
+createdAfter (string, optional) - ISO-8601 datetime. Filter to jobs created after this time.
+createdBefore (string, optional) - ISO-8601 datetime. Filter to jobs created before this time.
+fields (string[], optional) - Field projection. Defaults to id, object, bulkAction, status, origin, count,
+processedCount, errorCount, fileName, createdAt, updatedAt, createdById.
+limit (number, optional) - Page size. Default 50, max 1000.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-bulkActions (array) - Each: { id, object, bulkAction, status, origin,
-  count, processedCount, errorCount, fileName, createdAt, updatedAt,
-  createdById }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -50,14 +45,8 @@ Errors
 
 Example request
 
-list_bulk_actions({ "status": "Running", "limit": 25 })
+list_bulk_actions({})
 
 Example result
-{
-  "bulkActions": [
-    { "id": 88421, "object": "Prospect", "bulkAction": "AddToList",
-      "status": "Running", "count": 12450, "processedCount": 8412,
-      "errorCount": 0, "createdAt": "2026-04-29T13:02:11Z" }
-  ],
-  "nextPageToken": null
-}
+
+{ }

@@ -20,13 +20,23 @@ Body
 SOAP retrieve on DataFolder.
 
 Input (parameters)
-contentType (string, required) - "email" | "dataextension" | "triggered_send" | "automation_run" | "asset" | "list" | "queryactivity" | "filter" | "import" | etc.
-parentFolderId (number, optional).
-namePattern (string, optional).
+content_type (string, required) - Marketing Cloud DataFolder ContentType to retrieve, such as dataextension,
+shared_dataextension for Shared Data Extensions, email, triggered_send, automations,
+asset, list, queryactivity, filterdefinition, import, or publication.
+parent_folder_id (number, optional) - Optional numeric parent DataFolder ID. Sent as a ParentFolder.ID SOAP filter.
+name_pattern (string, optional) - Optional SOAP like filter against DataFolder.Name. Use SQL-style wildcards when needed,
+for example "Campaign%".
+properties (string[], optional) - Optional SOAP DataFolder property projection. Defaults to useful folder metadata, parent
+folder fields, and Client.ID.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context.
+query_all_accounts (boolean, optional) - Set true to add QueryAllAccounts to the SOAP retrieve when the installed package can
+access child Business Units.
 
 Result
-totalSize (number).
-folders (array) - { id, customerKey, name, description, contentType, parentFolderId, isActive, isEditable, allowChildren, dateCreated, dateModified }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+contentType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - Varies by `contentType`. Most use `email_read` / `data_extensions_read` / `automations_read`.
@@ -39,4 +49,6 @@ Errors
 
 Example request
 
-list_folders({ "contentType": "dataextension" })
+list_folders({
+  "content_type": ""
+})

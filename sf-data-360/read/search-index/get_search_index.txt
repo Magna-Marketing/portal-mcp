@@ -20,10 +20,7 @@ Input (parameters)
 searchIndexApiNameOrId (string, required).
 
 Result
-searchIndex (object): id, apiName, label, status, sourceDmoApiName,
-  embeddingModel, vectorDimension, fields (array<{ apiName,
-  isIndexed, isFilterable }>), recordCount, lastIndexedDate,
-  createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,11 +36,5 @@ Example request
 get_search_index({ "searchIndexApiNameOrId": "ProductCatalog__si" })
 
 Example result
-{
-  "searchIndex": {
-    "apiName": "ProductCatalog__si",
-    "sourceDmoApiName": "Product__dlm",
-    "embeddingModel": "openai.text-embedding-3-small",
-    "vectorDimension": 1536
-  }
-}
+
+{ }

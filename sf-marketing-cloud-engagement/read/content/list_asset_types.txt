@@ -18,10 +18,11 @@ Body
 None.
 
 Input (parameters)
-None.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and Account-Context header for this Content
+Builder REST request.
 
 Result
-items (array) - { id, name, displayName, contentType, assetTypeGroupId, assetTypeGroupName }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_read` / `documents_and_images_read`.

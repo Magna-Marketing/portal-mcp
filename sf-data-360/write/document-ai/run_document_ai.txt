@@ -23,18 +23,13 @@ Body
 }
 
 Input (parameters)
-idOrApiName (string, required).
-documentRefs (string[], optional) - URIs to process. Omit to process
-  the configuration's default queue.
-runMode (string, optional, default "Batch") - "Batch" | "OnDemand".
-runIdempotencyKey (string, optional).
+idOrApiName (string, required) - Configuration ID or API name to run
+runMode ("Batch" | "OnDemand", required) - Execution mode: 'Batch' for scheduled processing, 'OnDemand' for immediate
+documentRefs (string[], optional) - Array of document references (e.g., ContentVersion IDs) to process.
+runIdempotencyKey (string, optional) - Idempotency key to prevent duplicate runs.
 
 Result
-runId (string).
-configurationApiName (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
-documentCount (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -49,14 +44,10 @@ Errors
 Example request
 
 run_document_ai({
-  "idOrApiName": "Invoice_Default",
-  "documentRefs": ["s3://magnatech-docs/invoices/2026-04/inv_001.pdf"]
+  "idOrApiName": "",
+  "runMode": ""
 })
 
 Example result
-{
-  "runId": "RUN_DOC_2026-04-29T13",
-  "configurationApiName": "Invoice_Default",
-  "status": "Queued",
-  "documentCount": 1
-}
+
+{ }

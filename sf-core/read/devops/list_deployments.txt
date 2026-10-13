@@ -7,11 +7,10 @@ component counts, test results, time taken, and the user who submitted.
 Use to audit who deployed what and confirm pipelines.
 
 Salesforce API
-Tooling API + Metadata API, v66.0. `DeployRequest` (Tooling) and the
-Metadata API status endpoint.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Status, NumberComponentsTotal, NumberComponentsDeployed, NumberComponentErrors, NumberTestsTotal, NumberTestsCompleted, NumberTestErrors, CheckOnly, IgnoreWarnings, RollbackOnError, StartDate, CompletedDate, CreatedById, CreatedBy.Name, ErrorStatusCode, ErrorMessage, TestLevel FROM DeployRequest ORDER BY StartDate DESC
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Status, NumberComponentsTotal, NumberComponentsDeployed, NumberComponentErrors FROM DeployRequest
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,15 +20,32 @@ Body
 None.
 
 Input (parameters)
-status (string|string[], optional).
-sinceHours (number, optional, default 168).
-checkOnlyOnly (boolean, optional) - Filter to validate-only deploys (true) or actual deploys (false).
-createdById (string, optional).
-limit (number, optional, default 100).
+status (string | string[], optional) - DeployRequest Status value or values; string or
+string array; no default; example: [\"Succeeded\", \"Failed\"]; do not pass labels,
+empty strings, or SOQL fragments.
+sinceHours (number, optional) - StartDate lookback window in hours; non-negative number;
+default 168; example: 24; pass 0 only when you want deployments since the current
+instant.
+checkOnlyOnly (boolean, optional) - Whether to filter by validation-only deployments;
+boolean; no default means both CheckOnly true and false; example: true; do not pass
+strings such as \"true\".
+createdById (string, optional) - Submitting user Id stored in CreatedById; Salesforce Id
+string; no default; example: 0055g00000ABCDe; do not pass usernames, names, or
+comma-separated Ids.
+whereClause (string, optional) - Additional Tooling SOQL WHERE condition for
+DeployRequest; string without WHERE; no default; example: ErrorStatusCode != null; do
+not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Tooling SOQL ORDER BY for DeployRequest; string without
+ORDER BY; default StartDate DESC; example: CompletedDate DESC NULLS LAST; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum DeployRequest rows to query; positive integer
+clamped to 2000; default 200; example: 50; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-totalSize (number).
-deployments (array) - { id, status, numberComponentsTotal, numberComponentsDeployed, numberComponentErrors, numberTestsTotal, numberTestsCompleted, numberTestErrors, checkOnly, ignoreWarnings, rollbackOnError, startDate, completedDate, createdById, createdByName, testLevel, errorStatusCode, errorMessage }.
+Returns a JSON object with query and raw Tooling API result.
+query (value) - included in the JSON returned by the tool.
+result (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Modify Metadata Through Metadata API Functions" / "Manage Deployments".
@@ -42,4 +58,8 @@ Errors
 
 Example request
 
-list_deployments({ "sinceHours": 72, "checkOnlyOnly": false })
+list_deployments({
+  "status": "[\\\"Succeeded\\\", \\\"Failed\\\"]",
+  "sinceHours": 24,
+  "checkOnlyOnly": true
+})

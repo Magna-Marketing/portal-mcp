@@ -4,10 +4,11 @@ Description
 List custom labels (used in Apex, LWC, Aura, VF, formulas, and translations). Each label has a categorized name, value, language, protected flag, and namespace.
 
 Salesforce API
-Tooling API, v66.0. `CustomLabel`.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, Value, Language, IsProtected, NamespacePrefix, Categories FROM CustomLabel
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Category, IsProtected, Language, ManageableState, MasterLabel, Name, NamespacePrefix, Value FROM ExternalString
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, ExternalStringId, ExternalString.Name, ExternalString.MasterLabel, Language, ManageableState, NamespacePrefix, Value FROM ExternalStringLocalization
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,16 +18,55 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-language (string, optional, default org's default).
-namespacePrefix (string, optional).
-category (string, optional).
-includeManaged (boolean, optional, default false).
-limit (number, optional, default 500).
+namePattern (string, optional) - Pattern for ExternalString Name or MasterLabel; string
+using * and ? wildcards converted to SOQL LIKE; no default; example: Error_*; do not
+pass regex, raw LIKE syntax, or comma-separated names.
+language (string, optional) - ExternalString Language filter; Salesforce language code
+string; no default; example: en_US; do not pass labels, locale display names, or
+multiple languages.
+translationLanguage (string, optional) - ExternalStringLocalization Language filter;
+Salesforce language code string used only when includeTranslations is true; no default;
+example: fr; do not pass labels, locale display names, or multiple languages.
+namespacePrefix (string, optional) - NamespacePrefix filter; namespace string for
+managed labels; no default; example: pkg; do not pass namespace-qualified label names or
+multiple prefixes.
+category (string, optional) - Category substring filter; string matched with SOQL LIKE
+contains; no default; example: Errors; do not pass regex or wildcard syntax.
+includeManaged (boolean, optional) - Managed package inclusion flag based on
+NamespacePrefix; boolean; default false excludes namespaced records unless
+namespacePrefix is supplied; example: true; do not pass a namespace value here.
+includeTranslations (boolean, optional) - Translation query flag; boolean; default false
+returns only ExternalString; example: true; do not pass true unless translation rows are
+needed.
+whereClause (string, optional) - Additional SOQL WHERE condition for ExternalString;
+string with or without WHERE; no default; example: IsProtected = false; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ExternalString; string with or
+without ORDER BY; default Name ASC; example: MasterLabel ASC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum ExternalString rows to return; integer from 1 to
+2000; default 200; example: 250; do not pass 0, negatives, decimals, or offsets.
+translationWhereClause (string, optional) - Additional SOQL WHERE condition for
+ExternalStringLocalization; string with or without WHERE and used only when
+includeTranslations is true; no default; example: Language = 'fr'; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+translationOrderBy (string, optional) - SOQL ORDER BY clause for
+ExternalStringLocalization; string with or without ORDER BY and used only when
+includeTranslations is true; default ExternalString.Name ASC, Language ASC; example:
+Language ASC; do not pass WHERE, LIMIT, SELECT, or FROM.
+translationLimit (integer, optional) - Maximum ExternalStringLocalization rows to
+return; integer from 1 to 2000 and used only when includeTranslations is true; default
+200; example: 500; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-customLabels (array) - Each: { id, name, masterLabel, value, language, isProtected, namespacePrefix, categories }.
+raw Salesforce Tooling QueryResult for customLabels, or an object containing raw
+customLabels and customLabelTranslations QueryResults.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+customLabels (value) - included in the JSON returned by the tool.
+customLabelTranslations (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration".
@@ -39,4 +79,8 @@ Errors
 
 Example request
 
-list_custom_labels({ "namePattern": "MTG_*" })
+list_custom_labels({
+  "namePattern": "Error_*",
+  "language": "en_US",
+  "translationLanguage": "fr"
+})

@@ -23,32 +23,46 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "matchEmail": "jane@example.com",
-  "prospect": {
-    "firstName": "Jane",
-    "lastName": "Doe",
-    "company": "Acme",
-    "campaignId": 1024,
-    "customFields": { "region__c": "EMEA" }
-  }
-}
+POST: address1, address2, annualRevenue, assignedToUserId, campaignId, city, company, country, department, email, employees, fax, firstName, grade, industry, isDoNotCall, isDoNotEmail, isOptedOut, isReviewed, isStarred, jobTitle, lastName, mobilePhone, notes, phone, prospectAccountId, salesforceId, salutation, score, state, website, zip
+Custom field values from customFields are copied onto the top level of this body.
 
 Input (parameters)
-matchEmail (string, required) - Email to match on. Case-insensitive.
-prospect (object, required) - Same shape as `manage_prospect` body
-  (without `email`; the email is taken from `matchEmail`). All
-  fields optional; only set fields are updated.
-secondaryDeletedSearch (boolean, optional, default false) - When
-  true, also matches against soft-deleted prospects (and restores
-  them).
-restoreDeleted (boolean, optional, default false) - With
-  secondaryDeletedSearch=true, restores a soft-deleted prospect.
+email (string, required) - Prospect email address (lookup key for upsert).
+firstName (string, optional) - Prospect first name.
+lastName (string, optional) - Prospect last name.
+salutation (string, optional) - Salutation (e.g. "Mr.", "Dr.").
+company (string, optional) - Company name.
+jobTitle (string, optional) - Job title.
+department (string, optional) - Department.
+industry (string, optional) - Industry.
+phone (string, optional) - Phone number.
+mobilePhone (string, optional) - Mobile phone number.
+fax (string, optional) - Fax number.
+website (string, optional) - Website URL.
+address1 (string, optional) - Address line 1.
+address2 (string, optional) - Address line 2.
+city (string, optional) - City.
+state (string, optional) - State or province.
+zip (string, optional) - Postal code.
+country (string, optional) - Country.
+annualRevenue (string|number, optional) - Annual revenue.
+employees (string|number, optional) - Number of employees.
+notes (string, optional) - Internal notes.
+campaignId (number, optional) - Campaign to attribute the prospect to.
+assignedToUserId (number, optional) - Pardot user id to assign the prospect to.
+prospectAccountId (number, optional) - Prospect account id to link the prospect to.
+isDoNotEmail (boolean, optional) - Do not send email to this prospect.
+isDoNotCall (boolean, optional) - Do not call this prospect.
+isOptedOut (boolean, optional) - Global email opt-out (different from per-list opt-out).
+isReviewed (boolean, optional) - Mark the prospect as reviewed.
+isStarred (boolean, optional) - Star the prospect for visibility.
+score (number, optional) - Prospect score (0–100 typical range, or custom).
+grade (string, optional) - Letter grade ("A+" through "F").
+salesforceId (string, optional) - Salesforce Lead/Contact id cross-reference.
+customFields (object, optional) - Custom field values keyed by apiFieldId (e.g. { "region__c": "EMEA" }).
 
 Result
-prospect (object) - Resolved row (created or updated).
-created (boolean) - true when a new prospect was created.
-restored (boolean) - true when a soft-deleted prospect was restored.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -65,17 +79,9 @@ Errors
 Example request
 
 upsert_prospect_by_email({
-  "matchEmail": "jane@example.com",
-  "prospect": {
-    "firstName": "Jane",
-    "company": "Acme",
-    "campaignId": 1024
-  }
+  "email": ""
 })
 
 Example result
-{
-  "prospect": { "id": 7745, "email": "jane@example.com", "firstName": "Jane" },
-  "created": false,
-  "restored": false
-}
+
+{ }

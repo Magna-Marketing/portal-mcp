@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-artifacts
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/model-artifacts
+Optional query: runtimeFramework, status, limit, offset
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,17 +19,13 @@ Body
 None.
 
 Input (parameters)
-runtimeFramework (string, optional) - "TensorFlow" | "PyTorch" |
-  "ONNX" | "ScikitLearn" | "AmazonSageMaker" | "VertexAI" |
-  "AzureML".
-status (string, optional) - "Active" | "Archived" | "Failed".
-limit (number, optional, default 100).
+limit (number, optional) - Maximum number of records to return. Salesforce applies the endpoint default when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
 
 Result
-modelArtifacts (array) - Each: { id, apiName, label, version,
-  runtimeFramework, status, sourceUrl, sizeBytes, createdDate,
-  lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -41,13 +38,8 @@ Errors
 
 Example request
 
-list_model_artifacts({ "runtimeFramework": "TensorFlow" })
+list_model_artifacts({})
 
 Example result
-{
-  "modelArtifacts": [
-    { "id": "MA_001", "apiName": "ChurnArtifact_v12",
-      "version": "1.2.0", "runtimeFramework": "TensorFlow",
-      "status": "Active", "sizeBytes": 412800 }
-  ]
-}
+
+{ }

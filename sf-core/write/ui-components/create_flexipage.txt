@@ -23,19 +23,42 @@ Endpoint (SOAP, via jsforce)
 SOAP: MetadataService.createMetadata('FlexiPage', metadata)
 
 Input (parameters)
-fullName (string, required) - DeveloperName, e.g. "Project__c_Record_Page".
-label (string, required) - Display label shown in Setup.
-type (string, required) - "RecordPage" | "AppPage" | "HomePage".
-objectType (string, required for RecordPage) - sObject API name.
-description (string, optional).
-template (string, optional) - Template name. Defaults:
-  RecordPage → "flexipage:recordHomeWithHeader"
-  HomePage   → "flexipage:defaultHome"
-  AppPage    → "flexipage:defaultAppHome"
-masterLabel (string, optional) - Internal master label. Defaults to label.
-regions (array, optional) - Initial regions:
-  name (string), type (string, default "Region"), appendable (boolean).
-  Default: [{ name: "main", type: "Region", appendable: true }].
+fullName (string, required) - Represents the FlexiPage metadata fullName and developer
+name; string usually using underscores; no default; example: Project__c_Record_Page; do
+not pass a label, record Id, or namespace-qualified value unless that is the real
+metadata name.
+label (string, required) - Represents the page label shown in Setup; string; no default;
+example: Project Record Page; do not pass the API name when a user-facing label is
+intended.
+type ("RecordPage" | "AppPage" | "HomePage", required) - Represents the FlexiPage type;
+enum RecordPage, AppPage, or HomePage; no default; example: RecordPage; do not pass
+unsupported Metadata API FlexiPageType values here.
+objectType (string, optional) - Represents the sObject API name for a RecordPage; string
+required when type is RecordPage; default is omitted; example: Project__c; do not pass
+labels or record Ids.
+description (string, optional) - Represents optional page description text; string;
+default is omitted; example: Sales record workspace; do not pass HTML or long
+documentation.
+template (string, optional) - Represents the FlexiPage template name; string; defaults
+by type to flexipage:recordHomeWithHeader, flexipage:defaultHome, or
+flexipage:defaultAppHome; example: flexipage:recordHomeWithHeader; do not pass
+unsupported template names.
+masterLabel (string, optional) - Represents the metadata masterLabel; string; defaults
+to label; example: Project Record Page; do not pass a different value unless
+intentionally separating labels.
+regions (object[], optional) - Represents initial FlexiPage regions; array of region
+objects; defaults to one main Region; example:
+[{\"name\":\"main\",\"type\":\"Region\"}]; do not pass regions that do not exist in the
+chosen template.
+  name (string, required) - Represents the FlexiPageRegion name; string unique within
+  the page and valid for the selected template; no default inside an entry; example:
+  main; do not pass duplicate or template-unsupported region names.
+  type ("Region" | "Facet" | "Background", optional) - Represents the FlexiPageRegion
+  type; enum Region, Facet, or Background; defaults to Region; example: Region; do not
+  pass arbitrary strings.
+  appendable (boolean, optional) - Represents whether components can be appended to the
+  region; boolean converted to RegionFlagStatus enabled or disabled; omit to leave
+  region unlocked by default; example: false; do not pass string flag values.
 
 Result (raw Metadata API create response)
 fullName (string).
@@ -58,6 +81,5 @@ Example request
 create_flexipage({
   "fullName": "Project__c_Record_Page",
   "label": "Project Record Page",
-  "type": "RecordPage",
-  "objectType": "Project__c"
+  "type": "RecordPage"
 })

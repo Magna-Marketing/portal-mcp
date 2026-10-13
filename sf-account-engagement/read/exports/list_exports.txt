@@ -21,26 +21,18 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Waiting" | "Processing" |
-  "Complete" | "Error" | "Cancelled".
-object (string, optional) - "Prospect" | "ListMembership" |
-  "VisitorActivity" | "Email" | "ListEmail" | "Form" | "Folder" |
-  "Tag" | "Visitor" | "Visit" | "VisitorPageView" | "User" |
-  "Opportunity" | etc.
-createdAfter (string, optional) - ISO-8601.
-createdBefore (string, optional) - ISO-8601.
-fields (string[], optional, default: id,object,status,fields,
-  resultRefs,createdAt,updatedAt,createdById,procedure,arguments,
-  errorRef,fileName,counter).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+status ("Waiting" | "Processing" | "Complete" | "Error" | "Cancelled", optional) - Filter by export status.
+object ("Prospect" | "ListMembership" | "VisitorActivity" | "Email" | "ListEmail" | "Form" | "Folder" | "Tag" | "Visitor" | "Visit" | "VisitorPageView" | "User" | "Opportunity", optional) - Filter by target object type.
+createdAfter (string, optional) - ISO-8601 datetime. Filter to exports created after this time.
+createdBefore (string, optional) - ISO-8601 datetime. Filter to exports created before this time.
+fields (string[], optional) - Field projection. Defaults to id, object, status, createdAt, updatedAt, createdById,
+procedure, arguments, errorRef, fileName, counter. Note: fields and resultRefs are only
+available via get_export (single-record endpoint).
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-exports (array) - Each: { id, object, status, fields (string[]),
-  procedure (string), arguments (object), counter (number) - rows so
-  far, resultRefs (array<{fileId,sizeBytes}>), errorRef (string|null),
-  fileName, createdAt, updatedAt, createdById }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -53,13 +45,8 @@ Errors
 
 Example request
 
-list_exports({ "status": "Complete", "object": "Prospect" })
+list_exports({})
 
 Example result
-{
-  "exports": [
-    { "id": 7782, "object": "Prospect", "status": "Complete",
-      "counter": 28412,
-      "resultRefs": [{ "fileId": 1, "sizeBytes": 38421100 }] }
-  ]
-}
+
+{ }

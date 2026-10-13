@@ -22,11 +22,16 @@ Body
 }
 
 Input (parameters)
-mobileNumbers (string[], required) - E.164.
-keywords (object[], required) - [{ keyword, shortCode, countryCode (default "US") }].
+mobile_numbers (string[], optional) - Mobile numbers to check. Salesforce sends this as the mobileNumber array and allows up
+to 500 values. Use the format expected for the subscriber country, for example
+13175551212 for US numbers.
+subscriber_keys (string[], optional) - Subscriber keys to check. Salesforce sends this as the subscriberKey array and allows up
+to 500 values.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile REST request.
 
 Result
-subscriptions (array) - [{ mobileNumber, keyword, shortCode, status ("Active"|"Pending"|"Unsubscribed"), subscribedDate, unsubscribedDate }].
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_read`.
@@ -39,7 +44,4 @@ Errors
 
 Example request
 
-list_sms_subscription_status({
-  "mobileNumbers": ["+15551234567"],
-  "keywords": [{ "keyword": "MTG", "shortCode": "12345", "countryCode": "US" }]
-})
+list_sms_subscription_status({})

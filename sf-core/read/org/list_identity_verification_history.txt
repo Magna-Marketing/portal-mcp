@@ -20,15 +20,35 @@ Body
 None.
 
 Input (parameters)
-userId (string, optional).
-status (string, optional) - "Success" | "Failure" | "Pending" | "Skipped".
-method (string, optional) - "Sms" | "Email" | "Totp" | "SecurityKey" | "U2F" | "Salesforce Authenticator" | etc.
-sinceHours (number, optional, default 168).
-limit (number, optional, default 500).
+userId (string, optional) - VerificationHistory UserId reference filter; Salesforce User
+Id string; no default; example: 0055g00000ABCDe; do not pass usernames, emails, multiple
+Ids, or SOQL fragments.
+status (string, optional) - VerificationHistory Status exact match; string value
+returned by Salesforce; no default; example: Success; do not pass lowercase guesses,
+multiple statuses, or SOQL operators.
+verificationTimeFrom (string, optional) - Minimum VerificationTime filter; ISO-8601
+dateTime or Salesforce date literal string; no default; example:
+2026-05-01T00:00:00.000Z; do not pass local-only dates or untrusted SOQL fragments.
+verificationTimeTo (string, optional) - Maximum VerificationTime filter; ISO-8601
+dateTime or Salesforce date literal string; no default; example:
+2026-05-16T00:00:00.000Z; do not pass local-only dates or an end value earlier than the
+start value.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+VerificationHistory; string without WHERE; no default; example: Status != 'Success'; do
+not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for VerificationHistory; string without ORDER
+BY; default VerificationTime DESC; example: VerificationTime DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum VerificationHistory rows to query; positive integer
+clamped to 2000; default 200; example: 100; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-totalSize (number).
-events (array) - { id, userId, username, eventDate, status, method, activity, sourceIp, city, country, browser, platform, verificationTime }.
+Returns the raw Salesforce QueryResult for VerificationHistory records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Users" / "View Setup and Configuration".
@@ -42,4 +62,8 @@ Errors
 
 Example request
 
-list_identity_verification_history({ "status": "Failure", "sinceHours": 168 })
+list_identity_verification_history({
+  "userId": "0055g00000ABCDe",
+  "status": "Success",
+  "verificationTimeFrom": "2026-05-01T00:00:00.000Z"
+})

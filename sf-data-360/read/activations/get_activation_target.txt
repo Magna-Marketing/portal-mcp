@@ -20,8 +20,7 @@ Input (parameters)
 activationTargetId (string, required).
 
 Result
-activationTarget (object): id, name, label, targetType, status,
-  targetConfig, externalPlatformName, createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -37,9 +36,5 @@ Example request
 get_activation_target({ "activationTargetId": "0YT580000000001" })
 
 Example result
-{
-  "activationTarget": {
-    "id": "0YT580000000001", "name": "MTG_MCE_DE_EMEA",
-    "targetType": "MarketingCloudEngagement"
-  }
-}
+
+{ }

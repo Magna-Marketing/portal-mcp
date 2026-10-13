@@ -7,11 +7,10 @@ Credentials (manage_named_credential), which store credentials alongside the end
 and support OAuth. Use Remote Site Settings only when Named Credentials are unsuitable.
 
 Salesforce API
-SOAP Metadata API, v66.0. Metadata type: RemoteSiteSetting.
-Use conn.metadata.create / update / delete (jsforce).
+Metadata API (SOAP), v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
+POST /services/Soap/m/66.0  (createMetadata RemoteSiteSetting)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".

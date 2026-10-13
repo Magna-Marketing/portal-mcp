@@ -4,11 +4,10 @@ Description
 Get the org-wide defaults (OWD) for sharing on every relevant sObject: internal default, external default, grant access using hierarchies, and access level for related person accounts. This is the foundation of the sharing model.
 
 Salesforce API
-Metadata API (`SharingSettings` type) + Tooling API (`EntityDefinition`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0    (readMetadata SharingSettings)
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, InternalSharingModel, ExternalSharingModel FROM EntityDefinition WHERE InternalSharingModel != null
+POST /services/Soap/m/66.0  (readMetadata SharingSettings)
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,20 +17,10 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional) - Restrict to listed sObject API names. Omit for all.
-includeStandardOnly (boolean, optional, default false).
-includeCustomOnly (boolean, optional, default false).
+None.
 
 Result
-generatedAt (string).
-settings (array) - Each:
-  sObject (string).
-  label (string).
-  internalSharingModel (string) - "Private"|"Read"|"ReadWrite"|"ReadWriteTransfer"|"FullAccess"|"ControlledByParent"|"ControlledByLeadOrContact"|"ControlledByCampaign".
-  externalSharingModel (string).
-  grantAccessUsingHierarchies (boolean).
-  isCustom (boolean).
-externalSharingEnabled (boolean) - Org-level flag.
+Returns the raw SharingSettings metadata object.
 
 Required permissions
 - "View Setup and Configuration".
@@ -44,4 +33,4 @@ Errors
 
 Example request
 
-get_sharing_settings({ "sObjects": ["Account", "Opportunity", "Project__c"] })
+get_sharing_settings({})

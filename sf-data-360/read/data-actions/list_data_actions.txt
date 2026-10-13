@@ -10,7 +10,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-actions
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-actions
+Optional query: batchSize, dataspace, offset, orderby
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -20,16 +21,14 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Active" | "Paused" | "Failed".
-targetApiName (string, optional).
-nameContains (string, optional).
-limit (number, optional, default 100).
+batchSize (number, optional) - Number of data actions to return. Salesforce controls the default when omitted.
+dataspace (string, optional) - Data 360 data space from which to return data actions, for example 'default'.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderby (string, optional) - Field sort expression for the result set, for example 'developerName ASC' or
+'dataActionStatus DESC'.
 
 Result
-dataActions (array) - Each: { id, apiName, label, status,
-  sourceDmo, eventType, condition (object), targetApiName,
-  payloadTemplate (string), createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,14 +41,8 @@ Errors
 
 Example request
 
-list_data_actions({ "status": "Active" })
+list_data_actions({})
 
 Example result
-{
-  "dataActions": [
-    { "id": "0YD580000000001", "apiName": "ltv_threshold_alert",
-      "status": "Active",
-      "targetApiName": "WebhookTarget__dat",
-      "eventType": "DmoUpdate" }
-  ]
-}
+
+{ }

@@ -44,8 +44,7 @@ fields (array, required for create) - [{ apiName, isIndexed,
   isFilterable }].
 
 Result
-searchIndex (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -68,4 +67,5 @@ manage_search_index({
 })
 
 Example result
-{ "searchIndex": { "apiName": "ProductCatalog__si", "status": "Indexing" } }
+
+{ }

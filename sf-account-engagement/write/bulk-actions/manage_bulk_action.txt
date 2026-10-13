@@ -1,53 +1,49 @@
 Tool: manage_bulk_action
 
 Description
-Create or update a Bulk Action — a one-shot operation that targets
-a filtered set of prospects (set field, add/remove from list, add/
-remove tag, change assignment, delete, undelete). Up to 50,000
-records per job. Async — poll `get_bulk_action` until `status` is
+Create or update a Bulk Action on a list of prospect ids. Create
+uploads a CSV of ids plus a JSON input part (`object` is Prospect,
+and `bulkAction` is delete or permanentdelete). Update changes the
+job status. Async — poll `get_bulk_action` until `status` is
 terminal.
 
 Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST  https://{pi-domain}/api/v5/bulk-actions          (operation="create")
-PATCH https://{pi-domain}/api/v5/bulk-actions/:id      (operation="update", e.g. cancel)
+POST https://{pi-domain}/api/v5/bulk-actions
+Optional query: fields
+PATCH https://{pi-domain}/api/v5/bulk-actions/{id}
 
 Headers
 Authorization: Bearer <salesforce-access-token>
 Pardot-Business-Unit-Id: <buId>
-Content-Type: application/json
+Content-Type: multipart/form-data (create) or application/json (update)
 Accept: application/json
 
-Body (create AddToList)
-{
-  "object": "Prospect",
-  "bulkAction": "AddToList",
-  "argument": { "listId": 301 },
-  "filter": [ { "field": "score", "operator": "gte", "value": 50 } ]
-}
-
-Body (update - cancel)
-{ "status": "Cancelled" }
+Body
+POST multipart parts: file, input
+The input part is JSON: object (Prospect), bulkAction, status, and sendSystemEmail when provided.
+The file part is a CSV of prospect ids.
+PATCH: status
 
 Input (parameters)
-operation (string, required) - "create" | "update".
-id (number, required when operation="update").
-object (string, required when create) - "Prospect".
-bulkAction (string, required when create) - "AddTag" | "RemoveTag" |
-  "AddToList" | "RemoveFromList" | "Delete" | "Undelete" |
-  "ChangeAssignment" | "SetField".
-argument (object, required when create) - Action-specific:
-  AddToList / RemoveFromList → { listId }.
-  AddTag / RemoveTag → { tag }.
-  ChangeAssignment → { userId? | groupId? | roleId? }.
-  SetField → { apiFieldId, value }.
-filter (array, required when create) - [{ field, operator, value }].
-status (string, optional, update-only) - "Cancelled".
+operation ("create" | "update", required) - "create" starts a new bulk action job; "update" pauses, resumes, or cancels an existing
+job.
+id (number, optional) - Bulk action job id. Required when operation is "update".
+prospectIds (number[], optional) - Array of prospect IDs to process. Required when operation is "create". Maximum 100,000
+IDs per request.
+bulkAction ("delete" | "permanentdelete", optional) - "delete" moves prospects to the recycle bin; "permanentdelete" permanently removes them
+from the recycle bin. Required when operation is "create".
+status ("Ready" | "Paused" | "Cancelled", optional) - Initial status when creating ("Ready" or "Paused"), or target status when updating
+("Paused" to pause, "Ready" to resume, "Cancelled" to cancel).
+sendSystemEmail (boolean, optional) - When true, sends a notification email to the API user when the job reaches a final
+status (Complete, Cancelled, or Failed).
+fields (string, optional) - Comma-separated list of fields to return in the response. Defaults to
+id,status,bulkAction,object,count,errorCount,createdAt,updatedAt.
 
 Result
-bulkAction (object) - Same shape as `read/bulk-actions/get_bulk_action`.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -64,12 +60,9 @@ Errors
 Example request
 
 manage_bulk_action({
-  "operation": "create",
-  "object": "Prospect",
-  "bulkAction": "AddToList",
-  "argument": { "listId": 301 },
-  "filter": [{ "field": "score", "operator": "gte", "value": 50 }]
+  "operation": ""
 })
 
 Example result
-{ "bulkAction": { "id": 88421, "status": "Pending", "count": 12450 } }
+
+{ }

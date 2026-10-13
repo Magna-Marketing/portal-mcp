@@ -9,8 +9,9 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST   {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName/relationships     (operation="create")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/relationships/:name                    (operation="delete")
+POST {salesforceInstanceUrl}/services/data/v65.0/{basePath}
+Optional query: dataspace
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-objects/relationships/{name}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -28,20 +29,17 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "delete".
-dataModelObjectName (string, required for create) - The "from" DMO.
-name (string, required) - Relationship name.
-label (string, required for create).
-fromField (string, required for create).
-toDmo (string, required for create).
-toField (string, required for create).
-cardinality (string, optional, default "OneToMany") - "OneToOne" |
-  "OneToMany" | "ManyToMany".
-isRequired (boolean, optional, default false).
+operation ("create" | "delete", required) - The operation to perform: create or delete
+dataModelObjectName (string, optional) - Name of the data model object (DMO), either the source DMO or the target DMO. Required
+for create and delete.
+dataspace (string, optional) - Name of the data space. If unspecified, the default data space is used. Applies to
+create only.
+relationships (object[], optional) - List of field source target relationships to be created. Required for create. Each entry
+must specify sourceObjectName, targetObjectName, sourceFieldName, and targetFieldName.
+name (string, optional) - Auto-generated relationship name returned by Salesforce. Required for delete.
 
 Result
-relationship (object) - Created row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -56,22 +54,9 @@ Errors
 Example request
 
 manage_dmo_relationship({
-  "operation": "create",
-  "dataModelObjectName": "UnifiedIndividual__dlm",
-  "name": "EngagementHistory",
-  "label": "Engagement History",
-  "fromField": "Id__c",
-  "toDmo": "EngagementHistory__dlm",
-  "toField": "IndividualId__c",
-  "cardinality": "OneToMany"
+  "operation": ""
 })
 
 Example result
-{
-  "relationship": {
-    "name": "EngagementHistory",
-    "fromDmo": "UnifiedIndividual__dlm",
-    "toDmo": "EngagementHistory__dlm",
-    "cardinality": "OneToMany"
-  }
-}
+
+{ }

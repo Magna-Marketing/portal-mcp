@@ -20,22 +20,22 @@ Body
 SOAP UpdateRequest on Subscriber with Lists[] / SaveOptions.
 
 Input (parameters)
-operation (string, required) - "add" | "remove" | "updateStatus".
-listId (number, optional).
-listName (string, optional).
-customerKey (string, optional) - List external key.
-  One required.
-subscribers (object[], required) - Each:
-  subscriberKey (string, optional) - Or email.
-  email (string, optional).
-  status (string, optional, default "Active") - "Active" | "Unsubscribed" | "Held" | "Bounced". Used by updateStatus.
-  attributes (object, optional) - Subscriber attribute updates.
-allOrNone (boolean, optional, default false).
-skipIfAlreadyOnList (boolean, optional, default true).
+operation ("add" | "remove" | "update_status", required) - add creates membership, remove deletes membership, update_status updates membership
+status.
+list_id (number, optional) - Numeric Marketing Cloud List ID. Preferred when known.
+list_name (string, optional) - Exact List.ListName used to resolve list_id when list_id is not supplied.
+customer_key (string, optional) - Exact List.CustomerKey used to resolve list_id when list_id is not supplied.
+subscribers (object[], required) - Existing subscribers to add, remove, or update on the list. SOAP writes are capped at
+objects per call.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP Client context. Defaults to the
+authenticated Business Unit.
 
 Result
-results (array) - { subscriberKey, listId, status ("added"|"removed"|"updated"|"already_on_list"|"failed"), error }.
-summary (object) - { added, removed, updated, alreadyOnList, failed, total }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+listLookupResponse (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_write`.
@@ -51,8 +51,5 @@ Example request
 
 manage_list_subscribers({
   "operation": "add",
-  "listName": "Q3_Newsletter",
-  "subscribers": [
-    { "subscriberKey": "MEM-100023", "email": "jane.doe@example.com" }
-  ]
+  "subscribers": []
 })

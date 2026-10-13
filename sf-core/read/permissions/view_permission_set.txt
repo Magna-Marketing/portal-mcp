@@ -11,55 +11,50 @@ auditing what a group of users actually gets. Pair with
 `list_permission_set_assignments` to find who's already on it.
 
 Salesforce API
-REST API + Tooling API, v66.0.
-- Identity & system perms: SOQL on `PermissionSet`.
-- Object perms: SOQL on `ObjectPermissions WHERE ParentId = '<permsetId>'`.
-- Field perms: SOQL on `FieldPermissions WHERE ParentId = '<permsetId>'`.
-- Apex/VF access: `SetupEntityAccess` filtered by SetupEntityType.
-- License: SOQL on `PermissionSet.LicenseId` and `PermissionSetLicense`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, Label, Description, Type, Profile.Name, License.MasterLabel, IsCustom, IsOwnedByProfile, NamespacePrefix, Permissions* FROM PermissionSet WHERE Name = '{name}' OR Id = '{id}'
-GET /services/data/v66.0/query/?q=SELECT SObjectType, PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, PermissionsModifyAllRecords FROM ObjectPermissions WHERE ParentId = '{permsetId}'
-GET /services/data/v66.0/query/?q=SELECT SObjectType, Field, PermissionsRead, PermissionsEdit FROM FieldPermissions WHERE ParentId = '{permsetId}'
-GET /services/data/v66.0/tooling/query/?q=SELECT SetupEntityType, SetupEntityId FROM SetupEntityAccess WHERE ParentId = '{permsetId}'
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET requests).
+None.
 
 Input (parameters)
-name (string, optional) - Permission set Name (DeveloperName-equivalent).
-id (string, optional) - 15/18-char permission set Id.
-  One of `name` or `id` is required.
-includeFieldPermissions (boolean, optional, default true) - When false,
-  omit the (often large) field permissions array.
-includeApexAccess (boolean, optional, default true).
-includeVfAccess (boolean, optional, default true).
-includeTabSettings (boolean, optional, default true).
-includeUserCount (boolean, optional, default true) - Add the current
-  number of assigned users (one extra COUNT query).
+id (string, optional) - PermissionSet Id to retrieve; Salesforce Id string; required
+when name is omitted and preferred for exact lookup; example: 0PS5g000000ABCd; do not
+pass labels, multiple Ids, or SOQL fragments.
+name (string, optional) - PermissionSet API Name to retrieve; exact Name string;
+required when id is omitted; example: Sales_Manager_Access; do not pass labels,
+wildcards, or comma-separated names.
+includeObjectPermissions (boolean, optional) - Whether ObjectPermissions child rows are
+queried; boolean; default true; example: false; do not pass false when object CRUD
+access is needed.
+includeFieldPermissions (boolean, optional) - Whether FieldPermissions child rows are
+queried; boolean; default true; example: false; do not pass false when field-level
+access is needed.
+includeSetupEntityAccess (boolean, optional) - Whether SetupEntityAccess rows are
+queried; boolean; default true; example: false; do not pass false when Apex,
+Visualforce, custom permissions, or related setup access is needed.
+includeTabSettings (boolean, optional) - Whether PermissionSetTabSetting rows are
+queried; boolean; default false; example: true; do not pass true unless tab visibility
+is needed.
 
 Result
-permissionSet (object):
-  id, name, label, description, type ("Regular"|"Session"|"Group"),
-  isCustom (boolean), isOwnedByProfile (boolean),
-  namespacePrefix (string|null),
-  license (object|null) - { id, name, totalLicenses, usedLicenses }.
-  systemPermissions (object) - Map of permission name -> boolean (e.g.
-    "ApiEnabled": true, "ManageUsers": false, "ModifyAllData": false).
-    Only `true` entries are returned by default; pass `includeFalse=true`
-    to see explicit false flags.
-  objectPermissions (array) - Each: { sObject, read, create, edit,
-    delete, viewAll, modifyAll }.
-  fieldPermissions (array, optional) - Each: { sObject, field, read, edit }.
-  apexClassAccess (array) - { id, name, namespacePrefix }.
-  vfPageAccess (array) - { id, name }.
-  tabSettings (array) - { tabName, visibility ("Available"|"DefaultOn"|"DefaultOff"|"Hidden") }.
-  userCount (number, optional).
+Returns raw Salesforce QueryResult objects for the permission set and requested child
+objects.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+permissionSet (value) - included in the JSON returned by the tool.
+objectPermissions (value) - included in the JSON returned by the tool.
+fieldPermissions (value) - included in the JSON returned by the tool.
+setupEntityAccess (value) - included in the JSON returned by the tool.
+tabSettings (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" + read on `PermissionSet`,
@@ -77,35 +72,22 @@ Errors
 
 Example request
 
-view_permission_set({ "name": "MTG_Project_Manager", "includeFieldPermissions": false })
+view_permission_set({
+  "id": "0PS5g000000ABCd",
+  "name": "Sales_Manager_Access",
+  "includeObjectPermissions": false
+})
 
-Example result (truncated)
+Example result
 
 {
-  "permissionSet": {
-    "id": "0PSQg0000004ZyAA",
-    "name": "MTG_Project_Manager",
-    "label": "MTG Project Manager",
-    "type": "Regular",
-    "isCustom": true,
-    "isOwnedByProfile": false,
-    "license": { "id": "100Qg0000008abcAB", "name": "Salesforce" },
-    "systemPermissions": {
-      "ApiEnabled": true,
-      "RunReports": true,
-      "ViewSetup": false,
-      "ModifyAllData": false
-    },
-    "objectPermissions": [
-      { "sObject": "Project__c", "read": true, "create": true, "edit": true, "delete": false, "viewAll": false, "modifyAll": false },
-      { "sObject": "Account",    "read": true, "create": false, "edit": true, "delete": false, "viewAll": false, "modifyAll": false }
-    ],
-    "apexClassAccess": [
-      { "id": "01p4Q00000aBCdef", "name": "ProjectService" }
-    ],
-    "tabSettings": [
-      { "tabName": "Project__c", "visibility": "DefaultOn" }
-    ],
-    "userCount": 23
-  }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "PermissionSet"
+      }
+    }
+  ]
 }

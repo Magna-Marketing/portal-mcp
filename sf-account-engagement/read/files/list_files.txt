@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/files?fields={fields}&filter[folderId]=eq,33
+GET https://{pi-domain}/api/v5/objects/files
+Optional query: fields, filter[campaignId], filter[folderId], filter[isDeleted], filter[isTracked], filter[mimeType], filter[name], filter[trackerDomainId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,25 +21,22 @@ Body
 None.
 
 Input (parameters)
-folderId (number, optional).
-nameContains (string, optional).
-mimeType (string, optional) - Exact match (e.g. "image/png").
-isTracked (boolean, optional) - Whether download clicks are tracked.
-campaignId (number, optional).
-trackerDomainId (number, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,size,mimeType,
-  folderId,trackerDomainId,campaignId,vanityUrl,vanityUrlPath,
-  trackedUrl,url,bitlyShortUrl,bitlyIsPersonalized,salesforceId,
-  isTracked,isDeleted,createdAt,updatedAt,createdById,updatedById).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+folderId (number, optional) - Filter by folder id.
+nameContains (string, optional) - Filter files whose name contains this string (case-insensitive like match).
+mimeType (string, optional) - Filter by exact MIME type (e.g. "image/png", "application/pdf").
+isTracked (boolean, optional) - Filter to files where download clicks are tracked.
+campaignId (number, optional) - Filter by campaign id.
+trackerDomainId (number, optional) - Filter by tracker domain id.
+isDeleted (boolean, optional) - Include deleted files. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, size, mimeType, folderId, trackerDomainId,
+campaignId, vanityUrl, vanityUrlPath, trackedUrl, url, bitlyShortUrl,
+bitlyIsPersonalized, salesforceId, isTracked, isDeleted, createdAt, updatedAt,
+createdById, updatedById.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-files (array) - Each: { id, name, size, mimeType, url, vanityUrl,
-  trackedUrl, folderId, trackerDomainId, campaignId, salesforceId,
-  isTracked, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -51,12 +49,8 @@ Errors
 
 Example request
 
-list_files({ "folderId": 33, "mimeType": "image/png" })
+list_files({})
 
 Example result
-{
-  "files": [
-    { "id": 901, "name": "logo.png", "mimeType": "image/png",
-      "size": 18244, "url": "https://go.magnatech.com/l/.../logo.png" }
-  ]
-}
+
+{ }

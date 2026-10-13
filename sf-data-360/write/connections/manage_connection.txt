@@ -45,8 +45,7 @@ additionalProperties (object, optional / required for create) -
 isDefaultConnection (boolean, optional).
 
 Result
-connection (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -70,7 +69,5 @@ manage_connection({
 })
 
 Example result
-{
-  "connection": { "id": "0Z65800000000ABCAA", "name": "MTG_MCE",
-    "connectorType": "MarketingCloudEngagement", "status": "Active" }
-}
+
+{ }

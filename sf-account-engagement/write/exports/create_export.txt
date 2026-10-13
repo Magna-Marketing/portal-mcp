@@ -23,38 +23,19 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "object": "Prospect",
-  "procedure": "Prospect.FilterByUpdatedAt",
-  "arguments": {
-    "updated_after": "2026-04-01T00:00:00Z",
-    "updated_before": "2026-04-30T00:00:00Z"
-  },
-  "fields": ["id","email","firstName","lastName","score","grade",
-             "campaignId","createdAt","updatedAt"]
-}
+POST: fields, includeByteOrderMark, maxFileSizeBytes, procedure
 
 Input (parameters)
-object (string, required) - "Prospect" | "ListMembership" |
-  "VisitorActivity" | "Visit" | "Visitor" | "VisitorPageView" |
-  "Email" | "ListEmail" | "Form" | "FormField" | "FormHandler" |
-  "FormHandlerField" | "Folder" | "FolderContents" |
-  "BulkAction" | "Campaign" | "CustomField" | "CustomRedirect" |
-  "DynamicContent" | "EmailTemplate" | "EngagementStudioProgram" |
-  "ExternalActivity" | "File" | "LandingPage" | "LayoutTemplate" |
-  "LifecycleHistory" | "LifecycleStage" | "LifecycleStageProspect" |
-  "List" | "Opportunity" | "ProspectAccount" | "Tag" |
-  "TrackerDomain" | "User".
-procedure (string, required) - "<Object>.FilterByCreatedAt" |
-  "<Object>.FilterByUpdatedAt" | "<Object>.FilterByActivityDate"
-  (External Activity) | "<Object>.FilterByProspectUpdatedAt"
-  (ProspectAccount, Visitor).
-arguments (object, required) - Procedure-specific date / filter args.
-fields (string[], required) - Output column projection.
+procedure (string, required) - Export procedure name including object prefix. Examples: "Prospect.FilterByUpdatedAt",
+"Prospect.FilterByCreatedAt", "VisitorActivity.FilterByActivityDate". Required.
+arguments (object, required) - Procedure-specific filter arguments nested inside the procedure object. Key names depend
+on the procedure (e.g. "updatedAfter", "updatedBefore" as ISO-8601 strings). Required.
+fields (string[], required) - Array of field names to include in the export output. Required.
+maxFileSizeBytes (number, optional) - Maximum size per result chunk file in bytes. Defaults to 250 MB.
+includeByteOrderMark (boolean, optional) - When true, includes a UTF-8 BOM at the start of each CSV chunk.
 
 Result
-export (object) - { id, object, status: "Waiting", procedure,
-  arguments, fields, createdAt }.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -71,13 +52,11 @@ Errors
 Example request
 
 create_export({
-  "object": "Prospect",
-  "procedure": "Prospect.FilterByUpdatedAt",
-  "arguments": { "updated_after": "2026-04-01T00:00:00Z" },
-  "fields": ["id","email","firstName","score"]
+  "procedure": "",
+  "arguments": {},
+  "fields": []
 })
 
 Example result
-{
-  "export": { "id": 7782, "status": "Waiting", "object": "Prospect" }
-}
+
+{ }

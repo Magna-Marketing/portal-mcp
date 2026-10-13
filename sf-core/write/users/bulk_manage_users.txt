@@ -8,11 +8,9 @@ change manager, change time zone. Always run
 a count + sample of impacted users when `dryRun=true`.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `User` to select, then
-`composite/sobjects` PATCH in batches of 200.
+REST API (Data), v66.0.
 
 Endpoint
-GET  /services/data/v66.0/query/?q=SELECT Id, Username, Name FROM User WHERE ...
 PATCH /services/data/v66.0/composite/sobjects
 
 Headers
@@ -26,16 +24,47 @@ Body
 }
 
 Input (parameters)
-selection (object, required) - { userIds, usernames, profileNames, roleNames, department, isActiveOnly, customSoql }.
-operation (string, required) - "deactivate" | "activate" | "freeze" | "unfreeze" | "changeProfile" | "changeRole" | "changeManager" | "changeTimeZone" | "patch".
-profileName (string, optional) - For changeProfile.
-roleName (string, optional) - For changeRole.
-managerUsername (string, optional) - For changeManager.
-timeZoneSidKey (string, optional) - For changeTimeZone.
-patch (object, optional) - For "patch" arbitrary fields ({ Department, Title, ... }).
-dryRun (boolean, optional, default false).
-batchSize (number, optional, default 200).
-allOrNone (boolean, optional, default false).
+selection (unknown, required) -
+Represents User selection criteria; object with at least one criterion; no default;
+example {\"profileNames\":[\"Standard User\"],\"limit\":100}; do not run broad
+selections without a limit strategy.
+operation ("deactivate" | "activate" | "freeze" | "unfreeze" | "changeProfile" | "changeRole" | "changeManager" | "changeTimeZone" | "patch", required) -
+Represents the bulk operation; enum value; no default; example 'deactivate'; do not pass
+multiple operations.
+profileId (string, optional) -
+Represents target Profile Id for changeProfile; Salesforce Profile Id; used before
+profileName; example '00exx0000001234'; do not pass profile names.
+profileName (string, optional) -
+Represents target Profile.Name for changeProfile; exact string; used when profileId is
+omitted; example 'Standard User'; do not pass permission set labels.
+roleId (string, optional) -
+Represents target UserRole Id for changeRole; Salesforce UserRole Id; used before
+roleName; example '00Exx0000001234'; do not pass Group Ids.
+roleName (string, optional) -
+Represents target UserRole DeveloperName or Name for changeRole; exact string; used when
+roleId is omitted; example 'Sales_Manager'; do not pass profile names.
+managerId (string, optional) -
+Represents target ManagerId for changeManager; Salesforce User Id; used before
+managerUsername; example '005xx0000012345'; do not pass usernames.
+managerUsername (string, optional) -
+Represents target manager User.Username for changeManager; exact username string; used
+when managerId is omitted; example 'manager@example.com'; do not pass display names.
+timeZoneSidKey (string, optional) -
+Represents target User.TimeZoneSidKey for changeTimeZone; Salesforce time zone key
+string; required for changeTimeZone; example 'America/New_York'; do not pass GMT
+offsets.
+patch (object, optional) -
+Represents raw User fields for patch operation; object keyed by User field API names;
+required for patch; example {\"Department\":\"Sales\"}; do not include Id or attributes.
+dryRun (boolean, optional) -
+Represents whether to resolve users and build records without update APIs; boolean;
+defaults to false; example true; do not use when changes must be saved.
+batchSize (integer, optional) -
+Represents records per sObject Collections update call; integer 1-200; defaults to 200;
+example 100; do not exceed the REST collection limit.
+allOrNone (boolean, optional) -
+Represents sObject Collections rollback behavior; boolean; defaults to false; example
+true; do not set true unless one failure should roll back a batch.
 
 Result
 selection (object).
@@ -55,7 +84,6 @@ Errors
 Example request
 
 bulk_manage_users({
-  "selection": { "department": "Old Team", "isActiveOnly": true },
-  "operation": "deactivate",
-  "dryRun": true
+  "selection": "example",
+  "operation": "example"
 })

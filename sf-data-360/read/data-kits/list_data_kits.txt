@@ -10,7 +10,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-kits
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-kits
+Optional query: namespace
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -20,16 +21,10 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Installed" | "Available" | "Updating" |
-  "Failed".
-nameContains (string, optional).
-limit (number, optional, default 100).
+namespace (string, optional) - Namespace prefix of the data kit package. Omit to let Salesforce use its default scope.
 
 Result
-dataKits (array) - Each: { dataKitDevName, label, description,
-  version, status, publisher, componentCount, installedDate,
-  lastUpdatedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,13 +37,8 @@ Errors
 
 Example request
 
-list_data_kits({ "status": "Installed" })
+list_data_kits({})
 
 Example result
-{
-  "dataKits": [
-    { "dataKitDevName": "B2C_Retail_Foundation", "label": "B2C Retail Foundation",
-      "version": "1.5.0", "status": "Installed",
-      "publisher": "Salesforce", "componentCount": 14 }
-  ]
-}
+
+{ }

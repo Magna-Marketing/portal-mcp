@@ -15,18 +15,30 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP retrieve.
+SOAP request on List, ListSubscriber.
 
 Input (parameters)
-listId (number, optional).
-listName (string, optional).
-customerKey (string, optional).
-  One required.
-includeStatusBreakdown (boolean, optional, default true).
+list_id (number, optional) - Numeric Marketing Cloud List.ID. One of list_id, list_name, or customer_key is required.
+list_name (string, optional) - Exact List.ListName. One of list_id, list_name, or customer_key is required.
+customer_key (string, optional) - Exact List.CustomerKey. One of list_id, list_name, or customer_key is required.
+include_status_breakdown (boolean, optional) - When true, also retrieves raw ListSubscriber responses for each subscriber status on
+this list.
+status_breakdown_limit (number, optional) - Batch size for each status-specific ListSubscriber retrieve when
+include_status_breakdown is true.
+query_all_accounts (boolean, optional) - Sets SOAP QueryAllAccounts=true. Defaults to false so business_unit_id scoping remains
+precise.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP ClientID context. Defaults to the
+authenticated Business Unit.
 
 Result
-list (object) - Same fields as a `list_lists` row, plus:
-  statusBreakdown (object, when includeStatusBreakdown=true) - { active, unsubscribed, held, bounced, total }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+queryAllAccounts (value) - included in the JSON returned by the tool.
+statusBreakdownResponses (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_read`.
@@ -39,4 +51,4 @@ Errors
 
 Example request
 
-get_list({ "listName": "Q3_Newsletter" })
+get_list({})

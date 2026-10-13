@@ -15,22 +15,39 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP CreateRequest / UpdateRequest.
+SOAP request on SendClassification.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-customerKey (string, required) - SendClassification External Key.
-name (string, required for create).
-description (string, optional).
-sendClassificationType (string, optional, default "Default Commercial") - "Default Commercial" | "Default Transactional".
-senderProfileCustomerKey (string, required for create).
-deliveryProfileCustomerKey (string, required for create).
-sendPriority (string, optional) - "High" | "Medium" | "Low".
-honorPublicationListOptOutsForTransactionalSends (boolean, optional).
-archiveEmail (boolean, optional, default false).
+operation ("create" | "update" | "delete", required) - SOAP operation for SendClassification: create, update, or delete.
+customer_key (string, required) - SendClassification.CustomerKey external key. Required for every operation.
+name (string, optional) - SendClassification.Name. Required for create unless raw_send_classification_xml is
+supplied.
+description (string, optional) - SendClassification.Description.
+send_classification_type ("Marketing" | "Operational" | "Default Commercial" | "Default Transactional", optional) - Salesforce SendClassificationTypeEnum. Use Marketing for commercial sends or Operational
+for transactional sends. Friendly values Default Commercial and Default Transactional
+are accepted and mapped.
+sender_profile_customer_key (string, optional) - SenderProfile.CustomerKey included in this send classification. Required for create
+unless raw_send_classification_xml is supplied.
+delivery_profile_customer_key (string, optional) - DeliveryProfile.CustomerKey included in this send classification. Required for create
+unless raw_send_classification_xml is supplied.
+send_priority ("Burst" | "Normal" | "Low" | "High" | "Medium", optional) - Salesforce SendPriorityEnum. Valid documented values are Burst, Normal, and Low. High
+maps to Burst and Medium maps to Normal.
+honor_publication_list_opt_outs_for_transactional_sends (boolean, optional) - SendClassification.HonorPublicationListOptOutsForTransactionalSends.
+archive_email (boolean, optional) - SendClassification.ArchiveEmail.
+raw_send_classification_xml (string, optional) - Exact <Objects xsi:type="SendClassification">...</Objects> XML to send. Use for uncommon
+Salesforce fields not exposed by this schema.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID / REST
+Account-Context. Defaults to the authenticated session MID when present.
+client_business_unit_id (number, optional) - Optional SOAP object owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use when authenticating at parent level but writing into a
+child Business Unit.
 
 Result
-sendClassification (object) - { id, customerKey, name, sendClassificationType, senderProfileCustomerKey, deliveryProfileCustomerKey }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_write`.
@@ -45,9 +62,5 @@ Example request
 
 manage_send_classification({
   "operation": "create",
-  "customerKey": "MTG_Default_Commercial",
-  "name": "MTG Default Commercial",
-  "sendClassificationType": "Default Commercial",
-  "senderProfileCustomerKey": "MTG_Sender",
-  "deliveryProfileCustomerKey": "MTG_Delivery"
+  "customer_key": ""
 })

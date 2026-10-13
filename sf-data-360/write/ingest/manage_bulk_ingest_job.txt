@@ -26,21 +26,8 @@ Authorization: Bearer <data_cloud_token>
 Content-Type: application/json
 Accept: application/json
 
-Body (create)
-{
-  "object": "Order",
-  "sourceName": "ecommerce",
-  "operation": "upsert",
-  "contentType": "CSV",
-  "columnDelimiter": "COMMA",
-  "lineEnding": "LF"
-}
-
-Body (close)
-{ "state": "UploadComplete" }
-
-Body (abort)
-{ "state": "Aborted" }
+Body
+PATCH: state
 
 Input (parameters)
 operation (string, required) - "create" | "close" | "abort" | "delete".
@@ -55,8 +42,7 @@ columnDelimiter (string, optional, default "COMMA") - "COMMA" |
 lineEnding (string, optional, default "LF") - "LF" | "CRLF".
 
 Result
-job (object).
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -79,9 +65,5 @@ manage_bulk_ingest_job({
 })
 
 Example result
-{
-  "job": {
-    "id": "JOB_001", "sourceApiName": "ecommerce",
-    "objectApiName": "Order", "state": "Open"
-  }
-}
+
+{ }

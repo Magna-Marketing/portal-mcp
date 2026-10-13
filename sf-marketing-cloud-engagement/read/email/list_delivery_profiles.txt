@@ -18,12 +18,20 @@ Body
 SOAP retrieve on DeliveryProfile.
 
 Input (parameters)
-namePattern (string, optional).
-limit (number, optional, default 200).
+namePattern (string, optional) - SOAP like filter for DeliveryProfile.Name. Include Marketing Cloud wildcards if needed.
+limit (number, optional) - SOAP retrieve batch size. Defaults to 200, maximum 2500.
+business_unit_id (string, optional) - Business Unit MID used to scope the Marketing Cloud token and SOAP ClientID context.
+Defaults to the authenticated Business Unit.
 
 Result
-totalSize (number).
-deliveryProfiles (array) - { id, customerKey, name, description, dynamicEmailSubject, sourceAddressType, privateIPAddress, autoBccEmail, headerSalutationSource, headerContentArea, footerSalutationSource, footerContentArea, domainType, dateCreated, dateModified }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+namePattern (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+supported (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
+alternatives (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_read`.

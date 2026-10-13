@@ -8,8 +8,7 @@ Marketing Cloud API
 REST API (`/messaging/v1/{type}/definitions/{key}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}
-GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}
+GET https://{tenant}.rest.marketingcloudapis.com/messaging/v1/{type}/definitions/{definition_key}
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,12 +18,14 @@ Body
 None.
 
 Input (parameters)
-type (string, required) - "email" | "sms".
-definitionKey (string, required).
+type ("email" | "sms", required) - Transactional channel. Use email for /messaging/v1/email/definitions/{definitionKey} or
+sms for /messaging/v1/sms/definitions/{definitionKey}.
+definition_key (string, required) - Unique Transactional Messaging send definition key.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+Transactional Messaging REST request.
 
 Result
-definition (object) - { definitionKey, definitionId, name, description, status, classification, content: { customerKey | message } depending on type, subscriptions: { dataExtension, list }, options (object) }.
-queueMetrics (object|null) - { sent, queued, undeliverable, attempts }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_send` / `sms_send`.
@@ -37,4 +38,7 @@ Errors
 
 Example request
 
-get_transactional_definition({ "type": "email", "definitionKey": "MTG_OrderConfirmation" })
+get_transactional_definition({
+  "type": "email",
+  "definition_key": ""
+})

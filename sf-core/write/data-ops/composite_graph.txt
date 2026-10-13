@@ -14,7 +14,7 @@ Example: "@{acc1.id}" references the 'id' field from the node with
 referenceId "acc1".
 
 Salesforce API
-Composite Graph REST API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/composite/graph
@@ -45,18 +45,9 @@ Body
 }
 
 Input (parameters)
-graphs (object[], required) - Array of graph objects. Each:
-  graphId (string, required) - Unique identifier for this graph. Must be alphanumeric.
-  compositeRequest (object[], required) - Ordered list of sub-request nodes. Each:
-    method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
-    url (string, required) - Must start with /services/data/vXX.X/. Supports @{ref.field} cross-reference.
-    referenceId (string, required) - Unique ID for this node. Alphanumeric + underscores only.
-    body (object, optional) - Request body for POST/PATCH/PUT.
-    httpHeaders (object, optional) - Per-node HTTP headers, e.g. { "If-Match": "etag" }.
-
-NOTE: The 'allOrNonePerGraph' parameter documented in earlier versions does NOT exist in the API.
-Each graph is always implicitly all-or-none. This is a fundamental property of composite graphs
-and cannot be configured.
+graphs (unknown[], required) - Composite graphs payload; non-empty array where each
+graph has graphId and compositeRequest nodes; no default; example: [{ graphId: 'g1',
+compositeRequest: [...] }]; do not exceed 75 graphs, 500 total nodes, or 15 graph depth.
 
 Result (response body)
 {
@@ -103,15 +94,5 @@ Errors
 Example request
 
 composite_graph({
-  "graphs": [{
-    "graphId": "g1",
-    "compositeRequest": [
-      { "method": "POST", "referenceId": "acc",
-        "url": "/services/data/v66.0/sobjects/Account",
-        "body": { "Name": "ACME" } },
-      { "method": "POST", "referenceId": "con",
-        "url": "/services/data/v66.0/sobjects/Contact",
-        "body": { "LastName": "Doe", "AccountId": "@{acc.id}" } }
-    ]
-  }]
+  "graphs": "[{ graphId: 'g1', compositeRequest: [...] }]"
 })

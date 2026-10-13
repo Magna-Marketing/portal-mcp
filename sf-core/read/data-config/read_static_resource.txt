@@ -6,13 +6,11 @@ resource). Returns base64 by default; for known text content types the
 tool returns plain text.
 
 Salesforce API
-REST + Tooling, v66.0. `GET /tooling/sobjects/StaticResource/{id}/Body` or
-`/sobjects/StaticResource/{id}/Body`. For files inside a zip resource:
-`/sobjects/StaticResource/{id}/Body/<path>`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/sobjects/StaticResource/{id}/Body
-GET /services/data/v66.0/sobjects/StaticResource/{id}/Body/{filePath}
+GET /services/data/v66.0/sobjects/StaticResource/{param}
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -29,13 +27,14 @@ filePath (string, optional) - For zip resources, path to a single file inside.
 asBase64 (boolean, optional, default false) - When true, always return base64 (binary safety).
 
 Result
-resource (object) - { id, name, contentType, bodyLength, cacheControl }.
-content (object):
-  isText (boolean).
-  text (string|null) - Decoded text when not base64.
-  base64 (string|null) - Base64 bytes.
-  byteLength (number).
-filePath (string|null) - Echoed when set.
+object with raw StaticResource metadata, responseContentType, byteLength, filePath, and
+either text or base64 content.
+resource (value) - included in the JSON returned by the tool.
+responseContentType (value) - included in the JSON returned by the tool.
+byteLength (value) - included in the JSON returned by the tool.
+filePath (value) - included in the JSON returned by the tool.
+text (value) - included in the JSON returned by the tool.
+base64 (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".

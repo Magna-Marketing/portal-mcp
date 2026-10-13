@@ -18,13 +18,18 @@ Body
 SOAP PerformRequest with `Action=ClearData` on the DataExtension.
 
 Input (parameters)
-customerKey (string, required) - DE External Key.
-async (boolean, optional, default true) - Truncates run async; setting false waits for completion (small DEs only).
+customer_key (string, required) - Data Extension external key.
+confirm_truncate (boolean, optional) - Must be true to remove all rows from the Data Extension.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus REST Account-Context or SOAP
+ClientID. Defaults to the session BU when available.
+client_business_unit_id (number, optional) - Optional SOAP object Client.ID owner/context MID. Defaults to business_unit_id/session
+MID when numeric. Use this when parent authentication writes into a child BU.
 
 Result
-status (string) - "Pending" | "InProgress" | "Complete" | "Failed".
-requestId (string).
-truncatedRows (number, optional, when sync).
+tool (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_write`.
@@ -37,4 +42,6 @@ Errors
 
 Example request
 
-truncate_data_extension({ "customerKey": "Members_DE" })
+truncate_data_extension({
+  "customer_key": ""
+})

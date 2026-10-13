@@ -9,10 +9,11 @@ Marketing Cloud API
 REST API (`/asset/v1/content/assets`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets
-PATCH  https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}
-DELETE https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}
-POST   https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}/copy
+DELETE https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{asset_id}
+GET https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{asset_id}
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets
+PATCH https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{asset_id}
+PUT https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{asset_id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,21 +23,62 @@ Body
 Asset definition: { name, description, customerKey, assetType: { id, name }, category: { id }, content (HTML/Text/Markup), data (object), slots (object), meta (object) }.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "copy" | "delete".
-assetId (number, optional, required for non-create).
-customerKey (string, optional).
-name (string, required for create).
-description (string, optional).
-assetTypeId (number, required for create) - 196 block, 207 template, 208 htmlemail, 209 templatebasedemail, 210 textonlyemail, 213 smscontent, ...
-categoryId (number, required for create).
-content (string, optional) - HTML / text body.
-data (object, optional) - Asset-type-specific data structure (slots, blocks, etc.).
-fileProperties (object, optional) - For file assets.
-copyName (string, optional) - For copy operation.
-copyCategoryId (number, optional) - For copy operation.
+operation ("create" | "update" | "copy" | "delete", required) - create=POST /asset/v1/content/assets, update=PATCH or PUT
+/asset/v1/content/assets/{asset_id}, copy=GET source asset then POST
+/asset/v1/content/assets, delete=DELETE /asset/v1/content/assets/{asset_id}. Salesforce
+does not document a /copy endpoint.
+asset_id (number, optional) - Content Builder asset ID. Required for update, copy, and delete.
+update_method ("PATCH" | "PUT", optional) - HTTP method for update. PATCH is default for partial changes; PUT can be used when
+sending a full asset model.
+name (string, optional) - Asset name. Required for create unless raw_request is supplied. For copy, use copy_name
+to override the source name.
+customer_key (string, optional) - Asset customerKey. Recommended for create and copy.
+description (string, optional) - Asset description.
+asset_type_id (number, optional) - Content Builder assetType.id. Create defaults to 195 freeformblock unless raw_request or
+an asset type is supplied. Examples: 195 freeformblock, 208 htmlemail, 207
+templatebasedemail, 197 htmlblock, 196 textblock, 20 gif, 23 png, 28 pdf.
+asset_type_name (string, optional) - Content Builder assetType.name. If omitted, the tool infers common names from
+asset_type_id when possible. Create defaults to freeformblock when no asset type is
+supplied.
+category_id (number, optional) - Content Builder category/folder ID. Required for create unless raw_request supplies
+category.
+content (string, optional) - Simple content body for free-form blocks, text blocks, HTML blocks, or email assets.
+Complex emails often use views instead.
+design (string, optional) - Optional asset design payload.
+super_content (string, optional) - Optional superContent payload, sent as superContent.
+data (object, optional) - Asset-type-specific data object.
+file_properties (object, optional) - File metadata sent as fileProperties for document/image assets. Binary uploads should
+use upload_asset_binary.
+slots (object, optional) - Content Builder slots object for template and block based assets.
+blocks (object, optional) - Content Builder blocks object.
+views (object, optional) - Views object, such as html/text/subjectline content for email assets.
+meta (object, optional) - Asset metadata object.
+custom_fields (object, optional) - Custom fields object, sent as customFields.
+channels (object, optional) - Channels object, such as { "email": true } for email assets.
+tags (string[], optional) - Optional asset tags.
+status (value, optional) - Optional asset status. Passed through as supplied.
+model_version (number, optional) - Optional modelVersion. Salesforce file-upload examples use modelVersion 2.
+sharing_properties (object, optional) - Optional sharingProperties object. For local copies of shared assets, the tool can build
+sharedFrom/sharedFromMID automatically when source_business_unit_id is supplied.
+raw_request (object, optional) - Exact Salesforce request body for create or update. Use for asset model fields not
+covered by the schema.
+allow_structural_update (boolean, optional) - Advanced override for updating slots/blocks directly. Leave false for normal use. To add
+a free-form block to a Template-Based Email, use add_freeform_block_to_email instead.
+source_business_unit_id (string, optional) - For copy only: source Business Unit MID used to GET the existing asset. The new asset is
+created in business_unit_id/default BU.
+copy_name (string, optional) - For copy only: replacement name for the new asset. Defaults to "Copy of <source name>".
+copy_customer_key (string, optional) - For copy only: replacement customerKey for the new asset. Recommended because
+customerKey must be unique. Defaults to customer_key if supplied.
+copy_category_id (number, optional) - For copy only: replacement category.id for the new asset. Defaults to category_id if
+supplied, otherwise the source category.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Content Builder REST request. Defaults to the authenticated Business Unit when the
+session is already scoped to one.
 
 Result
-asset (object) - { id, customerKey, name, assetType, category, status, version, createdDate, modifiedDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
+sourceAssetResponse (value) - included in the JSON returned by the tool.
+createAssetResponse (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_write` (most), `documents_and_images_write` (file types).
@@ -50,10 +92,5 @@ Errors
 Example request
 
 manage_asset({
-  "operation": "create",
-  "name": "MTG_Welcome_Email",
-  "customerKey": "MTG_Welcome_Email",
-  "assetTypeId": 208,
-  "categoryId": 12345,
-  "content": "<html>...</html>"
+  "operation": "create"
 })

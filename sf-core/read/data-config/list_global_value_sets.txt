@@ -5,11 +5,11 @@ List Global Value Sets (`GlobalValueSet`). These are reusable picklist
 value lists that can be referenced from picklist fields across objects.
 
 Salesforce API
-Tooling API + Metadata API, v66.0.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName,Description,MasterLabel FROM GlobalValueSet
-POST /services/Soap/m/66.0    (readMetadata GlobalValueSet for values)
+GET /services/data/v66.0/tooling/query/
+GET /services/data/v66.0/tooling/sobjects/GlobalValueSet/{Id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,16 +19,27 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeValues (boolean, optional, default true).
-includeFieldUsage (boolean, optional, default false) - Show fields that reference each set.
+namePattern (string, optional) - Pattern for MasterLabel; string using * and ? wildcards
+converted to SOQL LIKE; no default; example: Industry*; do not pass regex, raw LIKE
+syntax, or multiple patterns.
+includeValues (boolean, optional) - Whether to include the Tooling API CustomValue
+field; boolean; default true; example: false; do not pass true when avoiding large
+picklist value arrays.
+whereClause (string, optional) - Additional SOQL WHERE condition for GlobalValueSet;
+string with or without WHERE; no default; example: MasterLabel LIKE 'Account%'; do not
+pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for GlobalValueSet; string with or
+without ORDER BY; default MasterLabel ASC; example: MasterLabel DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum GlobalValueSet rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-globalValueSets (array) - Each:
-  id, masterLabel, developerName, description, sorted (boolean), isStandard (boolean).
-  values (array, when includeValues=true) - [{ fullName, label, default, isActive }].
-  fieldUsage (array, when includeFieldUsage=true) - [{ object, field }].
+raw Salesforce Tooling QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -41,4 +52,8 @@ Errors
 
 Example request
 
-list_global_value_sets({ "includeValues": true, "includeFieldUsage": true })
+list_global_value_sets({
+  "namePattern": "Industry*",
+  "includeValues": false,
+  "whereClause": "MasterLabel LIKE 'Account%'"
+})

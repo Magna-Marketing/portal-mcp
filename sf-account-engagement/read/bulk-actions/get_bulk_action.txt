@@ -25,19 +25,7 @@ fields (string[], optional) - Default includes percentComplete and
   errorsRef.
 
 Result
-bulkAction (object):
-  id (number).
-  object (string), bulkAction (string).
-  status (string) - "Pending" | "Running" | "Complete" | "Error".
-  origin (string) - "API" | "UI" | "EngagementStudio".
-  count (number) - Total target records.
-  processedCount (number).
-  percentComplete (number) - 0-100.
-  errorCount (number).
-  errorsRef (string|null) - Pre-signed S3 URL valid for 1 hour;
-    download with HTTP GET.
-  fileName (string|null) - Source CSV name (when uploaded by a UI op).
-  createdAt, updatedAt (ISO-8601), createdById (number).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -53,15 +41,5 @@ Example request
 get_bulk_action({ "id": 88421 })
 
 Example result
-{
-  "bulkAction": {
-    "id": 88421,
-    "object": "Prospect",
-    "bulkAction": "AddToList",
-    "status": "Complete",
-    "count": 12450,
-    "processedCount": 12450,
-    "percentComplete": 100,
-    "errorCount": 0
-  }
-}
+
+{ }

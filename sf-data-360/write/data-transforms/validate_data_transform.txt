@@ -23,16 +23,24 @@ Body
 }
 
 Input (parameters)
-type (string, optional, default "Batch") - "Batch" | "Streaming".
-targetObject (string, required).
-sql (string, required).
-sourceObjects (string[], optional) - Override server-side detection.
+name (string, required) - Developer/API name of the data transform to validate (e.g. 'My_Transform'). No spaces.
+type ("Batch" | "Streaming", required) - Execution type of the transform at the root payload level. " + "Use 'Batch' for STL
+node-graph transforms. " + "This is SEPARATE from definition.type which must always be
+'STL' — " + "both fields are required simultaneously.
+definition (object, required) - Full transform definition object. " + "definition.type MUST be 'STL'. definition.version
+should be '65.0'. " + "definition.nodes: object map of node keys (e.g. LOAD_DATASET0,
+OUTPUT0) to node objects. " + "LOAD node: action='load', parameters.dataset={name,
+type:'dataLakeObject'}, parameters.fields=[...], " +
+"parameters.sampleDetails={sortBy:[], type:'TopN'}, sources=[]. " + "OUTPUT node:
+action='outputD360', parameters.name, parameters.type='dataLakeObject', " +
+"parameters.fieldsMappings=[{sourceField, targetField}], parameters.dedupOrder=[], " +
+"parameters.writeMode='OVERWRITE'|'UPSERT', sources=['LOAD_DATASET0']. " +
+"definition.outputDataObjects: array with category, label, name, type='dataLakeObject',
+" + "fields=[{isPrimaryKey, label, name, type}] — use 'type' key (not 'dataType'), never
+include 'id'.
 
 Result
-valid (boolean).
-errors (array) - Each: { code, message, line, column }.
-warnings (array) - Same shape.
-inferredSchema (object) - The output column shape the SQL produces.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -46,19 +54,11 @@ Errors
 Example request
 
 validate_data_transform({
-  "targetObject": "UnifiedIndividual__dlm",
-  "sql": "SELECT Id__c, FirstName__c FROM Contact__dlm"
+  "name": "",
+  "type": "",
+  "definition": {}
 })
 
 Example result
-{
-  "valid": true,
-  "errors": [],
-  "warnings": [],
-  "inferredSchema": {
-    "columns": [
-      { "name": "Id__c", "type": "TEXT" },
-      { "name": "FirstName__c", "type": "TEXT" }
-    ]
-  }
-}
+
+{ }

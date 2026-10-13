@@ -10,33 +10,64 @@ recommends using External Client Apps for all new integrations. Contact Salesfor
 Support if you must still create Connected Apps.
 
 Salesforce API
-SOAP Metadata API, v66.0. Metadata type: ConnectedApp.
-Use conn.metadata.create / update / delete (jsforce).
+Metadata API (SOAP), v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
+POST /services/Soap/m/66.0  (createMetadata ConnectedApp)
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-fullName (string, required) - DeveloperName of the Connected App.
-label (string, required for create).
-contactEmail (string, required for create).
-description (string, optional).
-oauth (object, optional) - {
-  scopes (string[])  - Api, Basic, Chatter, CustomPermissions, Email, FullAccess, Id,
-                       OpenId, Profile, RefreshToken, Wave, Web.
-  callbackUrl (string) - OAuth redirect_uri. Multiple URLs are newline-separated.
-  consumerKey (string, auto-generated if omitted).
-  isPkceRequired (boolean, default false).
-  isSecretRequiredForRefreshToken (boolean, default false).
-  isTokenExchangeEnabled (boolean, default false).
-}.
-policies (object, optional) - {
-  ipRelaxation ("enforceIpRestrictions" | "relaxIpRestrictions" | "relaxIpRestrictionsWithSecondFactor").
-  refreshTokenPolicy ("specific_lifetime" | "infinite" | "expire_immediate" | "expire_on_logout").
-  isAdminApprovedUsersOnly (boolean, default false).
-  singleLogoutUrl (string).
-}.
+operation ("create" | "update" | "delete", required) - Action to perform; enum create,
+update, or delete; no default; example update; do not pass deploy or upsert.
+fullName (string, required) - Connected App metadata fullName and DeveloperName; string
+API name; required for every operation; example MyApp; do not include the .connectedApp
+suffix.
+label (string, optional) - User-facing app label; string; required for create and
+unchanged when omitted on update; example My App; avoid labels that imply a different
+client.
+contactEmail (string, optional) - Admin contact email; email string; required for create
+and unchanged when omitted on update; example admin@example.com; do not pass an
+unmonitored mailbox.
+description (string, optional) - App description; string; omitted leaves existing text
+unchanged; example Partner API client; do not pass secrets or client credentials.
+oauth (object, optional) - OAuth configuration block; object matching
+ConnectedAppOauthConfig; omitted leaves OAuth config unchanged on update; example
+{\"scopes\":[\"Api\"],\"callbackUrl\":\"https://example.com/callback\"}; do not include
+secrets in descriptions.
+  scopes (string[], optional) - OAuth access scopes; array of
+  ConnectedAppOauthAccessScope values; omitted leaves scopes unchanged on update;
+  example [\"Api\", \"RefreshToken\"]; do not pass unknown scope strings.
+  callbackUrl (string, optional) - OAuth redirect URI list; string URL or
+  newline-separated URLs and required when creating OAuth config; example
+  https://example.com/callback; do not pass comma-separated URLs.
+  consumerKey (string, optional) - OAuth client id; string; Salesforce generates it when
+  omitted on create; example 3MVG9...; do not invent one unless migrating an existing
+  app.
+  isPkceRequired (boolean, optional) - Whether Authorization Code flow requires PKCE;
+  boolean; defaults to Salesforce behavior when omitted; example true; do not disable
+  for public clients without reason.
+  isSecretRequiredForRefreshToken (boolean, optional) - Whether refresh token requests
+  require the client secret; boolean; defaults to Salesforce behavior when omitted;
+  example true; do not set false for confidential clients unless required.
+  isTokenExchangeEnabled (boolean, optional) - Whether OAuth 2.0 Token Exchange is
+  enabled; boolean; defaults to Salesforce behavior when omitted; example false; do not
+  enable unless the integration uses token exchange.
+  singleLogoutUrl (string, optional) - Single logout endpoint; URL string; omitted
+  leaves existing logout URL unchanged; example https://example.com/logout; do not pass
+  a non-HTTPS production URL.
+oauthPolicy (object, optional) - OAuth access policy block; object matching
+ConnectedAppOauthPolicy; omitted leaves policy unchanged; example
+{\"refreshTokenPolicy\":\"expire_on_logout\"}; do not pass session-policy-only fields.
+  ipRelaxation ("enforceIpRestrictions" | "relaxIpRestrictions" |
+  "relaxIpRestrictionsWithSecondFactor", optional) - IP restriction behavior; enum
+  value; omitted leaves policy unchanged; example enforceIpRestrictions; do not use
+  relaxed values for high-risk apps without approval.
+  refreshTokenPolicy ("specific_lifetime" | "infinite" | "expire_immediate" |
+  "expire_on_logout", optional) - Refresh token lifetime behavior; enum value; omitted
+  leaves policy unchanged; example expire_on_logout; do not use infinite for short-lived
+  integrations.
+  isAdminApprovedUsersOnly (boolean, optional) - Whether only admin-approved users can
+  use the app; boolean; defaults to Salesforce behavior when omitted; example true; do
+  not set false for restricted integrations.
 
 Result
 { create | update | delete: <Metadata API SaveResult / DeleteResult> }
@@ -53,14 +84,6 @@ Errors
 Example request
 
 manage_connected_app({
-  "operation": "create",
-  "fullName": "MTG_External_Integration",
-  "label": "MTG External Integration",
-  "contactEmail": "ops@magnatech.com",
-  "oauth": {
-    "scopes": ["Api", "RefreshToken"],
-    "callbackUrl": "https://ops.magnatech.com/oauth/callback",
-    "isPkceRequired": true
-  },
-  "policies": { "isAdminApprovedUsersOnly": true, "refreshTokenPolicy": "specific_lifetime" }
+  "operation": "example",
+  "fullName": "example"
 })

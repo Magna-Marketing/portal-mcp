@@ -16,7 +16,8 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 
 Body
-{ "tag": "Spring 2026" }
+POST: name
+POST: tagId
 
 Input (parameters)
 id (number, required).
@@ -24,8 +25,7 @@ operation (string, required) - "add" | "remove".
 tag (string, required).
 
 Result
-success (boolean), customRedirectId (number), tag (string),
-operation (string).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -41,4 +41,5 @@ Example request
 manage_custom_redirect_tags({ "id": 612, "operation": "add", "tag": "Spring 2026" })
 
 Example result
-{ "success": true, "customRedirectId": 612, "tag": "Spring 2026", "operation": "add" }
+
+{ }

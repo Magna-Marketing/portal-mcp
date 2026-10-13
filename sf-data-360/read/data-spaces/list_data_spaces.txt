@@ -10,7 +10,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-spaces
+Optional query: limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -20,13 +21,14 @@ Body
 None.
 
 Input (parameters)
-limit (number, optional, default 100).
-offset (number, optional).
+limit (number, optional) - Maximum number of items to return, from 1 through 4999. Salesforce defaults to 50 when
+omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort order for the result set, either ASC or DESC. Salesforce returns ascending results
+when omitted.
 
 Result
-dataSpaces (array) - Each: { id, name, label, description,
-  isDefault, memberCount, createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,9 +44,5 @@ Example request
 list_data_spaces({})
 
 Example result
-{
-  "dataSpaces": [
-    { "id": "0a0xx0000000001", "name": "default", "label": "Default", "isDefault": true },
-    { "id": "0a0xx0000000002", "name": "EMEA",    "label": "EMEA Brand", "isDefault": false }
-  ]
-}
+
+{ }

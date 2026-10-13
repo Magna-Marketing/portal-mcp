@@ -5,32 +5,60 @@ Create / update / delete page layouts and assign them per profile +
 record type.
 
 Salesforce API
-Metadata API (`Layout`, `ProfileLayoutAssignment`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (updateMetadata Profile)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: behavior, field, emptySpace, customLink, height, width.
+JSON fields: label, layoutSectionStyle, detailHeading, editHeading, layoutColumns.
+JSON fields: relatedList, fields, sortField, sortOrder, customButtons, excludeButtons, quickActions.
+JSON fields: fullName, layoutSections, relatedLists, quickActionList, customButtons, excludeButtons, headers, showHighlightsPanel, showInteractionLogPanel.
+JSON fields: layout, recordType.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "assign".
-sObject (string, required).
-fullName (string, required) - "Project__c-Project Layout" or just "Project Layout".
-sections (array, optional) - [{ label, columns ("OneColumn"|"TwoColumn"|"CustomLinks"), style, layoutItems: [{ field, behavior ("Edit"|"Required"|"Readonly"), emptySpace }] }].
-relatedLists (array, optional) - [{ relatedList, fields, sortField, sortOrder, customButtons }].
-quickActions (array, optional) - Action names included.
-assignments (array, optional) - For "assign": [{ profileName, recordType, layoutName }].
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete" | "assign", required) - Metadata
+action to run. Values are create, update, upsert, delete, or assign; no default.
+Example: upsert. Do not pass delete unless the page layout should be removed.
+sObject (string, required) - Parent object API name. String required to qualify Layout
+names and assignments. Example: Account. Do not pass a label or record ID.
+fullName (string, required) - Layout fullName. Pass Object-Layout Name or Layout Name
+with sObject; required. Example: Account-Account Layout. Do not pass a FlexiPage name.
+sections (unknown[], optional) - Generated layout sections. Array of section objects;
+omitted by default. Example:
+[{\"label\":\"Main\",\"layoutItems\":[{\"field\":\"Name\"}]}]. Do not pass for
+assignment-only calls.
+relatedLists (unknown[], optional) - Related lists on the layout. Array of
+RelatedListItem objects; omitted by default. Example:
+[{\"relatedList\":\"Contacts\",\"fields\":[\"Name\"]}]. Do not pass relationship labels.
+quickActions (string[], optional) - Layout quick actions. Array of action names emitted
+as quickActionListItems; omitted by default. Example: [\"LogACall\"]. Do not pass button
+labels.
+customButtons (string[], optional) - Custom buttons on the layout. Array of button
+names; omitted by default. Example: [\"Submit_For_Approval\"]. Do not pass labels.
+excludeButtons (string[], optional) - Standard buttons to exclude. Array of button
+names; omitted by default. Example: [\"Delete\"]. Do not pass custom button names here.
+headers (string[], optional) - Layout header values. Array of LayoutHeader enum strings;
+omitted by default. Example: [\"PersonalTagging\"]. Do not pass arbitrary header text.
+showHighlightsPanel (boolean, optional) - Whether the highlights panel appears in
+console pages. Boolean; omitted by default. Example: true. Do not pass for layouts where
+Salesforce ignores it.
+showInteractionLogPanel (boolean, optional) - Whether the interaction log panel appears.
+Boolean; omitted by default. Example: false. Do not pass for unsupported objects.
+assignments (unknown[], optional) - Profile layout assignments. Array required for
+assign operation; omitted otherwise. Example:
+[{\"profileName\":\"Admin\",\"recordType\":\"Business\"}]. Do not pass for
+create/update/delete.
+metadata (unknown, required).
 
 Result
-deploy (object).
-layout (object) - Updated identity.
-assignments (array, when operation="assign") - Applied assignments.
+JSON from the raw Metadata API operation, or raw Profile update responses for assign.
+assignments (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -44,8 +72,8 @@ Errors
 Example request
 
 manage_page_layout({
-  "operation": "assign",
-  "sObject": "Project__c",
-  "fullName": "Project__c-Project_Layout",
-  "assignments": [{ "profileName": "MTG_Project_Manager", "recordType": "Internal_Project", "layoutName": "Project__c-Project_Layout" }]
+  "operation": "upsert.",
+  "sObject": "Account.",
+  "fullName": "Account-Account Layout.",
+  "metadata": "example"
 })

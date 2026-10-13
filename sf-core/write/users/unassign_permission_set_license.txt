@@ -5,11 +5,10 @@ Remove a Permission Set License assignment from one or more users. Mirrors
 `unassign_permission_set`.
 
 Salesforce API
-REST API (Data), v66.0. `DELETE /sobjects/PermissionSetLicenseAssign/{id}` (single) or `DELETE /composite/sobjects?ids=...` (bulk).
+REST API (Data), v66.0.
 
 Endpoint
-GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetLicenseAssign WHERE PermissionSetLicenseId = '...' AND AssigneeId IN (...)
-DELETE /services/data/v66.0/composite/sobjects?ids=...
+DELETE /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,18 +17,44 @@ Body
 None.
 
 Input (parameters)
-permissionSetLicenseName (string, optional).
-permissionSetLicenseId (string, optional).
-  One required.
-userIds (string[], optional).
-usernames (string[], optional).
-  One required.
-allOrNone (boolean, optional, default false).
-skipIfNotAssigned (boolean, optional, default true).
+permissionSetLicenseName (string, optional) - Represents PermissionSetLicense
+DeveloperName, MasterLabel, or PermissionSetLicenseKey; exact string; required when
+permissionSetLicenseId is omitted; example 'SalesConsole'; do not pass PermissionSet
+names.
+permissionSetLicenseId (string, optional) - Represents PermissionSetLicense Id;
+Salesforce Id string; required when permissionSetLicenseName is omitted; example
+'0PLxx0000001234'; do not pass PermissionSet Ids.
+userIds (string[], optional) - Represents users to unassign by Id; array of Salesforce
+User Id strings; required when usernames is omitted; example ['005xx0000012345']; do not
+pass Contact Ids.
+usernames (string[], optional) - Represents users to unassign by Username; array of
+exact usernames; required when userIds is omitted; example ['user@example.com']; do not
+pass display names.
+includeInactiveUsers (boolean, optional) - Represents whether inactive users can be
+resolved; boolean; defaults to true; example false; do not set false when revoking from
+inactive users.
+allOrNone (boolean, optional) - Represents sObject Collections delete rollback behavior;
+boolean; defaults to false; example true; do not set true unless one failure should roll
+back a batch.
+skipIfNotAssigned (boolean, optional) - Represents whether missing assignments are
+returned instead of failing; boolean; defaults to true; example false; do not set false
+for broad cleanup.
+batchSize (integer, optional) - Represents Ids per sObject Collections delete call;
+integer 1-200; defaults to 200; example 100; do not exceed the REST collection limit.
+dryRun (boolean, optional) - Represents whether to resolve assignments without DELETE
+calls; boolean; defaults to false; example true; do not use when assignments must be
+removed.
 
 Result
-results (array) - { userId, username, status ("removed"|"not_assigned"|"failed"), error }.
-summary (object) - { removed, notAssigned, failed, total }.
+JSON object with dryRun, permissionSetLicenseLookup, userLookup, assignmentLookup,
+notAssigned, deleteRequestIds, and deleteResponses.
+dryRun (value) - included in the JSON returned by the tool.
+permissionSetLicenseLookup (value) - included in the JSON returned by the tool.
+userLookup (value) - included in the JSON returned by the tool.
+assignmentLookup (value) - included in the JSON returned by the tool.
+notAssigned (value) - included in the JSON returned by the tool.
+deleteRequestIds (value) - included in the JSON returned by the tool.
+deleteResponses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Internal Users".
@@ -43,6 +68,7 @@ Errors
 Example request
 
 unassign_permission_set_license({
-  "permissionSetLicenseName": "Sales_Console_User",
-  "usernames": ["bob@magnatech.com"]
+  "permissionSetLicenseName": "example",
+  "permissionSetLicenseId": "example",
+  "userIds": []
 })

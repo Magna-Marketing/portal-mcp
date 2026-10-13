@@ -16,19 +16,25 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP retrieve on DataExtension + DataExtensionField.
+SOAP request on DataExtension, DataExtensionField.
 
 Input (parameters)
-id (string, optional) - DataExtension ObjectID.
-customerKey (string, optional) - External Key.
-name (string, optional).
-  One required.
-includeFields (boolean, optional, default true).
-includeRowCount (boolean, optional, default true).
+object_id (string, optional) - DataExtension ObjectID. One of object_id, customer_key, or name is required.
+customer_key (string, optional) - DataExtension external key / CustomerKey. One of object_id, customer_key, or name is
+required.
+name (string, optional) - DataExtension name. Uses a SOAP equals filter. One of object_id, customer_key, or name
+is required.
+include_fields (boolean, optional) - When true and customer_key is supplied, also retrieves DataExtensionField rows for the
+Data Extension.
+properties (string[], optional) - Optional SOAP property projection for DataExtension retrieve.
+field_properties (string[], optional) - Optional SOAP property projection for DataExtensionField retrieve.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context.
 
 Result
-dataExtension (object) - Same fields as `list_data_extensions` row, plus:
-  fields (array, when includeFields=true) - [{ name, fieldType ("Text"|"Number"|"Date"|"Boolean"|"EmailAddress"|"Phone"|"Decimal"|"Locale"), maxLength, isPrimaryKey, isRequired, defaultValue, ordinal, scale, customerKey }].
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
+fieldsResponse (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_read`.
@@ -41,4 +47,4 @@ Errors
 
 Example request
 
-get_data_extension({ "customerKey": "Members_DE" })
+get_data_extension({})

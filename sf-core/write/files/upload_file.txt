@@ -18,22 +18,54 @@ Authorization: Bearer <access_token>
 Content-Type: multipart/form-data; boundary=...        (set by tool)
 
 Body
-Multipart with two parts: JSON metadata (`PathOnClient`, `Title`,
-`Description`, `FirstPublishLocationId`) and binary `VersionData`.
+multipart/form-data with entity_content (JSON metadata) and VersionData (binary).
 
 Input (parameters)
-PathOnClient (string, required) - Display name + extension.
-Title (string, optional, default = PathOnClient).
-Description (string, optional).
-VersionData (string, required) - Base64-encoded contents.
-linkedToRecordIds (string[], optional) - Record Ids to attach to.
-ShareType (string, optional, default "V") - "V" (viewer) | "C" (collaborator) | "I" (inferred).
-Visibility (string, optional, default "AllUsers") - "AllUsers" | "InternalUsers" | "SharedUsers".
-firstPublishLocationId (string, optional) - Where the file is "owned" (record Id, library Id, or own user Id).
+PathOnClient (string, required) - Client file path/name; string with extension;
+required; example \"ProjectBrief.pdf\"; do not pass a server filesystem path unless it
+is the intended Salesforce name.
+VersionData (string, required) - File contents; base64 string; required; example
+\"JVBERi0x...\"; do not pass raw bytes, data URLs, or local paths.
+Title (string, optional) - Salesforce file title; string; defaults to PathOnClient;
+example \"Project Brief\"; omit to use the filename.
+Description (string, optional) - ContentVersion description; string; optional; example
+\"Initial project brief\"; avoid secrets.
+contentType (string, optional) - Multipart MIME type; string; defaults to
+application/octet-stream; example \"application/pdf\"; omit when unknown.
+linkedToRecordIds (string[], optional) - Additional ContentDocumentLink targets;
+Salesforce Id array; optional; example [\"001...\"]; do not repeat
+firstPublishLocationId.
+ShareType ("V" | "C" | "I", optional, default V) - Share type for additional links; enum
+V viewer, C collaborator, I inferred; defaults to V; example \"V\"; Salesforce restricts
+values by target.
+Visibility ("AllUsers" | "InternalUsers" | "SharedUsers", optional, default AllUsers) -
+Link visibility; enum AllUsers, InternalUsers, or SharedUsers; defaults to AllUsers;
+example \"InternalUsers\"; restrictions depend on target and org settings.
+firstPublishLocationId (string, optional) - Initial publish target Id; Salesforce Id
+string; optional; example \"001...\"; set only on first file version creation.
+OwnerId (string, optional) - Owner User Id; Salesforce Id string; optional; example
+\"005...\"; do not pass usernames.
+NetworkId (string, optional) - Experience Cloud Network Id; Salesforce Id string;
+optional; example \"0DB...\"; only valid when creating a file in a community context.
+Origin ("C" | "H", optional) - Content origin; enum C Content or H Chatter; optional;
+example \"C\"; omit for Salesforce default.
+SharingOption ("A" | "R", optional) - Sharing option; enum A allowed or R restricted;
+optional; example \"A\"; omit when not controlling downstream sharing.
+SharingPrivacy ("N" | "P", optional) - Sharing privacy; enum N or P; optional; example
+\"N\"; Salesforce enforces file privacy rules.
+TagCsv (string, optional) - Content tags; comma-separated string; optional; example
+\"proposal,customer\"; do not pass arrays.
+IsMajorVersion (boolean, optional) - Major version flag; boolean; optional; example
+true; omit for Salesforce default.
+RecordTypeId (string, optional) - ContentVersion record type Id; Salesforce Id string;
+optional; example \"012...\"; do not pass developer names.
 
 Result
-file (object) - { contentDocumentId, contentVersionId, title, fileType, fileExtension, contentSize }.
-links (array) - Created CDL rows: { id, linkedEntityId, shareType, visibility }.
+raw ContentVersion create response, lookup query response, and raw link create
+responses.
+createContentVersion (value) - included in the JSON returned by the tool.
+contentVersionLookup (value) - included in the JSON returned by the tool.
+createContentDocumentLinks (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "API Enabled" + write access on the target records.
@@ -48,7 +80,6 @@ Errors
 Example request
 
 upload_file({
-  "PathOnClient": "MTG_Project_Brief.pdf",
-  "VersionData": "JVBERi0xLjQK...",
-  "linkedToRecordIds": ["a01Qg0000020aBcDE"]
+  "PathOnClient": "example",
+  "VersionData": "example"
 })

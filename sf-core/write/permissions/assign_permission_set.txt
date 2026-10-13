@@ -11,13 +11,9 @@ For mass operations using selection criteria (profile, role, dept), see
 
 Salesforce API
 REST API (Data), v66.0.
-- Single: `POST /sobjects/PermissionSetAssignment`.
-- Bulk: `POST /composite/sobjects` with PermissionSetAssignment rows
-  (≤200 per call).
 
 Endpoint
-POST /services/data/v66.0/sobjects/PermissionSetAssignment            (single)
-POST /services/data/v66.0/composite/sobjects                          (bulk)
+POST /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
@@ -39,18 +35,31 @@ Body (bulk via composite/sobjects)
 }
 
 Input (parameters)
-permissionSetName (string, optional) - PermissionSet.Name.
-permissionSetId (string, optional) - PermissionSet Id.
-  One of permissionSetName or permissionSetId required.
-userIds (string[], optional) - User Ids.
-usernames (string[], optional) - User.Username values.
-  One of userIds or usernames is required.
-expirationDate (string, optional) - ISO 8601; assignment auto-removed
-  after this. Org must have "Assign Permission Sets with Expiration Date"
-  enabled.
-allOrNone (boolean, optional, default false).
-skipIfAlreadyAssigned (boolean, optional, default true) - Skip rather
-  than fail when the user already has this permset.
+permissionSetName (string, optional) - PermissionSet Name/API name to assign; string;
+required when permissionSetId is omitted; example 'MTG_Project_Manager'; do not pass the
+label.
+permissionSetId (string, optional) - PermissionSet Id to assign; Salesforce Id string;
+required when permissionSetName is omitted; example '0PSxx000000001A'; do not pass
+PermissionSetGroup Ids.
+userIds (string[], optional) - User Ids to assign; array of Salesforce User Id strings;
+required when usernames is omitted; example ['005xx0000012345']; do not pass contact
+Ids.
+usernames (string[], optional) - User.Username values to assign; array of exact
+usernames; required when userIds is omitted; example ['admin@example.com']; do not pass
+display names.
+includeInactiveUsers (boolean, optional) - Whether inactive users can be resolved;
+boolean; defaults to false; example false; do not enable unless assignments to inactive
+users are intentional.
+expirationDate (string, optional) - PermissionSetAssignment ExpirationDate; ISO
+date-time string; omitted means no expiration; example '2026-12-31T23:59:59.000Z'; do
+not pass date-only text.
+allOrNone (boolean, optional) - Composite sObject Collections allOrNone flag; boolean;
+defaults to false; example true; when true one failed row can roll back the batch.
+skipIfAlreadyAssigned (boolean, optional) - Whether existing assignments are queried and
+skipped; boolean; defaults to true; example true; do not set false unless duplicate
+errors are acceptable.
+batchSize (integer, optional) - Composite sObject collection batch size; integer 1-200;
+defaults to 200; example 100; do not pass values above the REST API limit.
 
 Result
 permissionSet (object) - { id, name, label }.
@@ -78,7 +87,7 @@ Errors
 Example request
 
 assign_permission_set({
-  "permissionSetName": "MTG_Project_Manager",
-  "usernames": ["jane.doe@magnatech.com", "john.smith@magnatech.com"],
-  "expirationDate": "2026-12-31T23:59:59Z"
+  "permissionSetName": "example",
+  "permissionSetId": "example",
+  "userIds": []
 })

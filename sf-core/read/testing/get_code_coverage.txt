@@ -6,11 +6,10 @@ last available test runs. Returns per-class numLines covered vs
 uncovered, plus a per-line coverage map (which lines weren't hit).
 
 Salesforce API
-Tooling API, v66.0. `ApexCodeCoverage` (per test class -> covered class)
-and `ApexCodeCoverageAggregate` (cumulative across all tests).
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage FROM ApexCodeCoverageAggregate WHERE ApexClassOrTrigger.Name IN (...)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered, Coverage FROM ApexCodeCoverageAggregate
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,23 +19,30 @@ Body
 None.
 
 Input (parameters)
-classOrTriggerNames (string[], optional) - Class/trigger API names. Omit for all.
-classOrTriggerIds (string[], optional).
-includePerLineCoverage (boolean, optional, default true).
-includeRecentTestList (boolean, optional, default false) - List the test classes that hit each covered class.
+apexClassOrTriggerId (string, optional) - ApexClassOrTriggerId to filter coverage
+aggregates; Salesforce ApexClass or ApexTrigger Id string; no default; example:
+01p5g0000012345; do not pass names, multiple Ids, or SOQL fragments.
+namePattern (string, optional) - Apex class or trigger Name pattern to match; string
+with * and ? wildcards converted to SOQL LIKE; no default; example: Account*; do not
+pass regex, raw LIKE syntax, or comma-separated names.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+ApexCodeCoverageAggregate; string with or without WHERE; no default; example:
+NumLinesUncovered > 0; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user
+input.
+orderBy (string, optional) - SOQL ORDER BY clause for ApexCodeCoverageAggregate; string
+with or without ORDER BY; default NumLinesUncovered DESC; example: NumLinesCovered DESC;
+do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ApexCodeCoverageAggregate rows to return; integer
+from 1 to 2000; default 200; example: 200; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-totalSize (number).
-coverage (array) - Each:
-  apexClassOrTriggerName (string).
-  apexClassOrTriggerId (string).
-  type ("Class"|"Trigger").
-  numLinesCovered (number).
-  numLinesUncovered (number).
-  totalLines (number).
-  percentCovered (number).
-  uncoveredLines (number[], when includePerLineCoverage=true).
-  recentTestClasses (string[], when includeRecentTestList=true).
+Returns the raw Salesforce QueryResult with totalSize, done, and coverage aggregate
+records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "Author Apex".
@@ -50,4 +56,8 @@ Errors
 
 Example request
 
-get_code_coverage({ "classOrTriggerNames": ["ProjectService", "ProjectTriggerHandler"], "includePerLineCoverage": true })
+get_code_coverage({
+  "apexClassOrTriggerId": "01p5g0000012345",
+  "namePattern": "Account*",
+  "whereClause": "NumLinesUncovered > 0"
+})

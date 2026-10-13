@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/landing-pages?fields={fields}&filter[campaignId]=eq,1024
+GET https://{pi-domain}/api/v5/objects/landing-pages
+Optional query: fields, filter[campaignId], filter[folderId], filter[formId], filter[isDeleted], filter[name], filter[trackerDomainId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,26 +21,21 @@ Body
 None.
 
 Input (parameters)
-campaignId (number, optional).
-formId (number, optional).
-folderId (number, optional).
-trackerDomainId (number, optional).
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,campaignId,folderId,
-  trackerDomainId,layoutTemplateId,formId,vanityUrl,vanityUrlPath,
-  url,bitlyShortUrl,bitlyIsPersonalized,title,description,
-  isDoNotIndex,isUseRedirectLocation,redirectLocation,salesforceId,
-  isDeleted,createdAt,updatedAt,createdById,updatedById).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+campaignId (number, optional) - Filter by campaign id.
+formId (number, optional) - Filter by embedded form id.
+folderId (number, optional) - Filter by folder id.
+trackerDomainId (number, optional) - Filter by tracker domain id.
+nameContains (string, optional) - Filter landing pages whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted landing pages. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, campaignId, folderId, trackerDomainId,
+layoutTemplateId, formId, vanityUrl, vanityUrlPath, url, bitly fields, title,
+description, isDoNotIndex, isUseRedirectLocation, redirectLocation, salesforceId,
+isDeleted, createdAt, updatedAt, createdById, updatedById.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-landingPages (array) - Each: { id, name, campaignId, folderId,
-  trackerDomainId, layoutTemplateId, formId, vanityUrl, vanityUrlPath,
-  url, title, description, isDoNotIndex, isUseRedirectLocation,
-  redirectLocation, salesforceId, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -52,12 +48,8 @@ Errors
 
 Example request
 
-list_landing_pages({ "campaignId": 1024 })
+list_landing_pages({})
 
 Example result
-{
-  "landingPages": [
-    { "id": 6612, "name": "Spring LP", "vanityUrl": "https://go.magnatech.com/spring",
-      "campaignId": 1024, "formId": 4421 }
-  ]
-}
+
+{ }

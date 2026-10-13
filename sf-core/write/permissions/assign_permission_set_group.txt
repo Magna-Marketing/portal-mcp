@@ -6,11 +6,10 @@ but writes `PermissionSetAssignment.PermissionSetGroupId` instead of
 `PermissionSetId`. Supports optional expiration date.
 
 Salesforce API
-REST API (Data), v66.0. `PermissionSetAssignment` sObject.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/composite/sobjects     (bulk ≤200)
-POST /services/data/v66.0/sobjects/PermissionSetAssignment
+POST /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
@@ -25,15 +24,30 @@ Body
 }
 
 Input (parameters)
-groupName (string, optional) - PSG DeveloperName.
-groupId (string, optional) - PSG Id.
-  One required.
-userIds (string[], optional).
-usernames (string[], optional).
-  One required.
-expirationDate (string, optional).
-allOrNone (boolean, optional, default false).
-skipIfAlreadyAssigned (boolean, optional, default true).
+groupName (string, optional) - PermissionSetGroup DeveloperName to assign; string;
+required when groupId is omitted; example 'Finance_Access_Group'; do not pass
+MasterLabel.
+groupId (string, optional) - PermissionSetGroup Id to assign; Salesforce Id string;
+required when groupName is omitted; example '0PGxx000000001A'; do not pass PermissionSet
+Ids.
+userIds (string[], optional) - User Ids to assign; array of Salesforce User Id strings;
+required when usernames is omitted; example ['005xx0000012345']; do not pass contact
+Ids.
+usernames (string[], optional) - User.Username values to assign; array of exact
+usernames; required when userIds is omitted; example ['admin@example.com']; do not pass
+display names.
+includeInactiveUsers (boolean, optional) - Whether inactive users can be resolved;
+boolean; defaults to false; example false; do not enable unless intentional.
+expirationDate (string, optional) - PermissionSetAssignment ExpirationDate; ISO
+date-time string; omitted means no expiration; example '2026-12-31T23:59:59.000Z'; do
+not pass date-only text.
+allOrNone (boolean, optional) - Composite sObject Collections allOrNone flag; boolean;
+defaults to false; example true; when true one failed row can roll back the batch.
+skipIfAlreadyAssigned (boolean, optional) - Whether existing assignments are queried and
+skipped; boolean; defaults to true; example true; do not set false unless duplicate
+errors are acceptable.
+batchSize (integer, optional) - Composite sObject collection batch size; integer 1-200;
+defaults to 200; example 100; do not pass values above the REST API limit.
 
 Result
 group (object) - { id, developerName, label, status }.
@@ -56,6 +70,7 @@ Errors
 Example request
 
 assign_permission_set_group({
-  "groupName": "MTG_Delivery_Bundle",
-  "usernames": ["jane.doe@magnatech.com"]
+  "groupName": "example",
+  "groupId": "example",
+  "userIds": []
 })

@@ -5,10 +5,11 @@ List Platform Event channels (custom channels that bundle Platform
 Events for streaming) and their members.
 
 Salesforce API
-Tooling API, v66.0. `PlatformEventChannelMember`.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT EventChannel, SelectedEntity, FilterExpression FROM PlatformEventChannelMember
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ChannelType, NamespacePrefix FROM PlatformEventChannel
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, EventChannel, SelectedEntity, FilterExpression, NamespacePrefix FROM PlatformEventChannelMember
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,12 +19,34 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeMembers (boolean, optional, default true).
+namePattern (string, optional) - PlatformEventChannel.DeveloperName or MasterLabel
+filter; string using * and ? wildcards converted to SOQL LIKE; no default; example:
+Orders_*; do not pass regex, raw LIKE syntax, or multiple patterns.
+includeMembers (boolean, optional) - Whether to also query PlatformEventChannelMember
+rows for the selected channels; boolean; default true; example: false; do not pass true
+when you only need channel definitions.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+PlatformEventChannel; string with or without WHERE; no default; example: NamespacePrefix
+= null; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+memberWhereClause (string, optional) - Additional SOQL WHERE condition for
+PlatformEventChannelMember when includeMembers is true; string with or without WHERE; no
+default; example: SelectedEntity LIKE 'Order%'; do not pass SELECT, FROM, ORDER BY,
+LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for PlatformEventChannel; string with
+or without ORDER BY; default DeveloperName ASC; example: MasterLabel ASC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum channel rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-records (array) - { id, developerName, masterLabel, channelType "event", members: [{ selectedEntity, filterExpression }] }.
+raw Salesforce Tooling QueryResult for channels, or an object containing raw channels
+and raw members QueryResults when includeMembers is true.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+channels (value) - included in the JSON returned by the tool.
+members (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -36,4 +59,8 @@ Errors
 
 Example request
 
-list_platform_event_channels({ "includeMembers": true })
+list_platform_event_channels({
+  "namePattern": "Orders_*",
+  "includeMembers": false,
+  "whereClause": "NamespacePrefix = null"
+})

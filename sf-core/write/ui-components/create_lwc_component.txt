@@ -34,22 +34,46 @@ Body (resource)
 }
 
 Input (parameters)
-componentName (string, required) - DeveloperName. Lowercase start,
-  alphanumeric + underscores, max 40 chars.
-masterLabel (string, required).
-description (string, optional).
-apiVersion (number, optional, default 66.0).
-isExposed (boolean, optional, default false).
-files (object, required):
-  js (string, required) - JavaScript controller.
-  xml (string, required) - Meta XML (*.js-meta.xml content).
-  html (string, optional) - HTML template.
-  css (string, optional).
-  svg (string, optional).
+componentName (string, required) - Represents the LWC bundle fullName and developer
+name; string starting with a lowercase letter, using only letters, numbers, and
+underscores, maximum 40 characters; no default; example: myCard; do not pass spaces,
+hyphens, namespace prefixes, or names ending in double underscores.
+masterLabel (string, required) - Represents the component label shown in Setup and
+builders; string up to 255 characters; no default; example: My Card; do not pass the API
+name when a user-facing label is intended.
+description (string, optional) - Represents the user-facing component description;
+string up to 255 characters; default is omitted; example: Displays account health; do
+not pass HTML or long documentation.
+apiVersion (number, optional) - Represents the LightningComponentBundle metadata
+apiVersion; number; defaults to 66.0; example: 66.0; do not pass versions above 66.0.
+isExposed (boolean, optional) - Represents whether the component is exposed to builders
+and other namespaces; boolean; defaults to false; example: true; do not pass true
+without matching targets in the XML file.
+files (object, optional) - Represents resource file contents to create; object with
+required js and xml strings plus optional html, css, and svg; no default; example:
+{\"js\":\"...\",\"xml\":\"...\"}; do not pass empty required files.
+  js (string, required) - Represents the JavaScript controller source; string content
+  for componentName.js; required; example: import { LightningElement } from 'lwc';
+  export default class MyCard extends LightningElement {}; do not pass a file path or
+  base64 content.
+  xml (string, required) - Represents the component meta XML source; string content for
+  componentName.js-meta.xml; required; example: <LightningComponentBundle
+  xmlns=\"http://soap.sforce.com/2006/04/metadata\"><apiVersion>66.0</apiVersion></LightningComponentBundle>;
+  do not pass JSON or XML for another metadata type.
+  html (string, optional) - Represents the HTML template source; string wrapped in a
+  root <template>; default is omitted; example: <template><p>Hello</p></template>; do
+  not pass multiple root templates.
+  css (string, optional) - Represents stylesheet source; string CSS content; default is
+  omitted; example: :host { display: block; }; do not pass compiled assets or external
+  URLs.
+  svg (string, optional) - Represents custom icon SVG source; string SVG content;
+  default is omitted; example: <svg viewBox=\"0 0 52 52\"></svg>; do not pass binary
+  image data.
 
-Result (raw Tooling API responses)
-bundle (object) - { id, success, errors }.
-resources (object) - Map of fileName → { id, success, errors }.
+Result
+object with raw bundleResult and resourceResults Tooling API responses.
+bundleResult (value) - included in the JSON returned by the tool.
+resourceResults (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -61,9 +85,5 @@ Example request
 
 create_lwc_component({
   "componentName": "myCard",
-  "masterLabel": "My Card",
-  "files": {
-    "js": "import { LightningElement, api } from 'lwc';\nexport default class MyCard extends LightningElement { @api recordId; }",
-    "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<LightningComponentBundle xmlns=\"http://soap.sforce.com/2006/04/metadata\">\n  <apiVersion>66.0</apiVersion>\n  <isExposed>true</isExposed>\n</LightningComponentBundle>"
-  }
+  "masterLabel": "My Card"
 })

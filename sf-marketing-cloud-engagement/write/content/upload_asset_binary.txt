@@ -18,17 +18,32 @@ Body
 Multipart with `metadata` JSON part + `file` binary part.
 
 Input (parameters)
-fileName (string, required).
-contentType (string, required) - MIME type.
-base64 (string, required) - Base64-encoded body.
-assetTypeId (number, required) - e.g. 23 (image) | 28 (pdf) | 39 (mp4).
-categoryId (number, required).
-name (string, optional, default = fileName without extension).
-description (string, optional).
-customerKey (string, optional).
+file_name (string, required) - File name to store in Content Builder, including extension. Sent as
+fileProperties.fileName.
+content_type (string, required) - MIME type of the file, sent in fileProperties.contentType for downstream clarity.
+Salesforce validates based on assetType and file content.
+base64 (string, required) - Base64-encoded file body. Salesforce documents JSON upload with this value in the asset
+file attribute, not multipart/form-data.
+asset_type_id (number, required) - Content Builder file assetType.id. Examples from Salesforce docs include 20 gif and 28
+pdf; common IDs include 23 png and 39 mp4.
+asset_type_name (string, optional) - Content Builder file assetType.name. If omitted, the tool infers common names from
+asset_type_id when possible.
+category_id (number, required) - Content Builder category/folder ID where the uploaded file asset is created.
+name (string, optional) - Asset display name. Defaults to file_name without its final extension.
+description (string, optional) - Optional asset description.
+customer_key (string, optional) - Optional unique Content Builder customerKey.
+model_version (number, optional) - Content Builder modelVersion. Salesforce file-upload examples use 2.
+file_properties (object, optional) - Additional fileProperties to merge with fileName and contentType.
+meta (object, optional) - Optional asset meta object.
+tags (string[], optional) - Optional asset tags.
+raw_request_overrides (object, optional) - Additional top-level fields merged into the Salesforce request body after the standard
+upload body is built.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Content Builder REST request. Defaults to the authenticated Business Unit when the
+session is already scoped to one.
 
 Result
-asset (object) - { id, customerKey, name, fileProperties: { fileName, sizeBytes, fileExtension, publishedURL }, assetType, category }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `documents_and_images_write`.
@@ -43,9 +58,9 @@ Errors
 Example request
 
 upload_asset_binary({
-  "fileName": "mtg-banner.png",
-  "contentType": "image/png",
-  "base64": "iVBORw0KG...",
-  "assetTypeId": 23,
-  "categoryId": 12345
+  "file_name": "",
+  "content_type": "",
+  "base64": "",
+  "asset_type_id": 1,
+  "category_id": 1
 })

@@ -19,7 +19,10 @@ Body
 { "values": [{ "oldValue": "MEM-100023", "newValue": "MEM-200023" }] }
 
 Input (parameters)
-updates (object[], required) - Each: { oldKey, newKey }.
+updates (object[], required) - Contact key rename requests. These are validated but not sent because no verified public
+Salesforce endpoint exists.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Contacts REST request.
 
 Result
 results (array) - { oldKey, newKey, status ("updated"|"not_found"|"failed"), error }.
@@ -35,4 +38,6 @@ Errors
 
 Example request
 
-update_contact_key({ "updates": [{ "oldKey": "MEM-100023", "newKey": "MEM-200023" }] })
+update_contact_key({
+  "updates": []
+})

@@ -5,31 +5,75 @@ Manage Workflow Rules and their actions (FieldUpdate, EmailAlert, Task,
 OutboundMessage). Legacy automation; for new builds prefer Flow.
 
 Salesforce API
-Metadata API (`Workflow`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (writeMetadata Workflow)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: fullName, active, description, triggerType, actions, timeTriggers.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
-object (string, required) - sObject API name (Workflow is per-sObject).
-fullName (string, required for non-create) - Rule fullName.
-label (string, required for create).
-active (boolean, optional, default true).
-evaluationCriteria (string, required for create) - "OnAllChanges" | "OnCreateOnly" | "OnCreateOrTriggeringUpdate".
-formula (string, optional).
-criteriaItems (array, optional) - [{ field, operation, value }].
-booleanFilter (string, optional).
-actions (object, optional) - { fieldUpdates: string[], alerts: string[], tasks: string[], outboundMessages: string[], flowTriggers: string[] }.
-timeTriggers (array, optional) - [{ offsetFromField, timeLength, workflowTimeTriggerUnit, actions }].
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete" | "activate" | "deactivate", required) -
+Requested WorkflowRule operation; enum create, update, upsert, delete, activate, or
+deactivate; no default; example: 'upsert'; do not use update/activate/deactivate for a
+rule that is not already in the Workflow container.
+object (string, required) -
+Workflow parent sObject; string object API name that owns the Workflow metadata
+container; no default; example: 'Opportunity'; do not pass labels, record Ids, or object
+prefixes in fullName.
+fullName (string, required) -
+WorkflowRule fullName within the object container; string DeveloperName without object
+prefix; no default; example: 'Notify_On_Close'; do not pass a label or Id.
+label (string, optional) -
+Friendly label context; string used only as description fallback by this tool; omitted
+has no effect; example: 'Notify On Close'; do not rely on it as the metadata identity.
+active (boolean, optional) -
+WorkflowRule active flag; boolean; defaults to true when creating unless deactivate is
+used; example: false; do not pass string booleans.
+evaluationCriteria ("onCreateOnly" | "onCreateOrTriggeringUpdate" | "onAllChanges" | "OnCreateOnly" | "OnCreateOrTriggeringUpdate" | "OnAllChanges", optional) -
+WorkflowRule triggerType; enum onCreateOnly, onCreateOrTriggeringUpdate, or
+onAllChanges, with legacy capitalized aliases accepted; required for create/upsert;
+example: 'onCreateOrTriggeringUpdate'; do not pass Flow trigger values.
+formula (string, optional) -
+WorkflowRule formula criteria; string formula evaluated by Salesforce; omitted when
+using criteriaItems; example: 'ISPICKVAL(StageName, \"Closed Won\")'; do not include
+leading '='.
+criteriaItems (object, required).
+  booleanFilter (string, optional) -
+  Criteria boolean filter; string combining criteria item indexes; omitted uses
+  Salesforce default evaluation; example: '1 AND (2 OR 3)'; do not reference missing
+  indexes.
+  criteriaItems (unknown[], optional) -
+  Criteria items; array of Metadata API filter item objects; omitted when formula is
+  used; example:
+  [{\"field\":\"Case.Priority\",\"operation\":\"equals\",\"value\":\"High\"}]; do not
+  pass SOQL WHERE clauses.
+  formula (string, optional) -
+  Formula criteria; string boolean formula evaluated by Salesforce; omitted when
+  criteriaItems are used; example: 'Priority = \"High\"'; do not include a leading '='.
+booleanFilter (string, optional) -
+WorkflowRule booleanFilter; string combining criteria item indexes; omitted means
+Salesforce default criteria behavior; example: '1 AND 2'; do not reference indexes that
+are not present.
+actions (unknown, optional) -
+WorkflowRule action references; object containing arrays of existing action names by
+action type; omitted attaches no actions; example: {\"alerts\":[\"Notify_Owner\"]}; do
+not define action bodies here.
+timeTriggers (object[], optional) -
+WorkflowRule timeTriggers; array of raw WorkflowTimeTrigger metadata objects; omitted
+adds none; example:
+[{\"offsetFromField\":\"CreatedDate\",\"timeLength\":\"1\",\"workflowTimeTriggerUnit\":\"Hours\"}];
+do not pass REST scheduled job records.
+description (string, optional) -
+WorkflowRule description; string metadata description; omitted uses label fallback or
+leaves existing value unchanged; example: 'Notify owner when opportunity closes'; do not
+pass criteria formula here.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -47,11 +91,9 @@ Errors
 Example request
 
 manage_workflow_rule({
-  "operation": "create",
-  "object": "Lead",
-  "fullName": "Notify_Owner_On_Hot_Lead",
-  "label": "Notify Owner on Hot Lead",
-  "evaluationCriteria": "OnCreateOrTriggeringUpdate",
-  "criteriaItems": [{ "field": "Lead.Rating", "operation": "equals", "value": "Hot" }],
-  "actions": { "alerts": ["Notify_Owner_Hot_Lead"] }
+  "operation": "upsert",
+  "object": "Opportunity",
+  "fullName": "Notify_On_Close",
+  "criteriaItems": {},
+  "metadata": "example"
 })

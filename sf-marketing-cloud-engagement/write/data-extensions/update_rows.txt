@@ -18,13 +18,20 @@ Body
 SOAP UpdateRequest with `Properties[]` matching DE fields.
 
 Input (parameters)
-customerKey (string, required).
-rows (object[], required) - Each row must include PK fields + the values to update.
-allOrNone (boolean, optional, default false).
+customer_key (string, required) - Data Extension external key.
+rows (value[], required) - Rows to update. Prefer { keys, values }. Flat field maps require key_fields so the tool
+can split keys from updated values.
+key_fields (string[], optional) - Primary-key field names, required when rows are supplied as flat field maps.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus REST Account-Context or SOAP
+ClientID. Defaults to the session BU when available.
+client_business_unit_id (number, optional) - Optional SOAP object Client.ID owner/context MID. Defaults to business_unit_id/session
+MID when numeric. Use this when parent authentication writes into a child BU.
 
 Result
-results (array) - { keys, success, errors }.
-totalUpdated (number), totalFailed (number).
+tool (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_write`.
@@ -39,6 +46,6 @@ Errors
 Example request
 
 update_rows({
-  "customerKey": "Members_DE",
-  "rows": [{ "MemberId": "MEM-100023", "TierName": "Platinum" }]
+  "customer_key": "",
+  "rows": []
 })

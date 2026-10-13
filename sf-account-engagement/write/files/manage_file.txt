@@ -10,9 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST   https://{pi-domain}/api/v5/objects/files          (create — multipart)
-PATCH  https://{pi-domain}/api/v5/objects/files/:id      (update — JSON)
-DELETE https://{pi-domain}/api/v5/objects/files/:id      (delete)
+POST https://{pi-domain}/api/v5/objects/files
+PATCH https://{pi-domain}/api/v5/objects/files/{id}
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -42,8 +41,8 @@ forceDelete (boolean, optional, default false) - When true, breaks
   references in emails / landing pages.
 
 Result
-file (object) - Created/updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -67,7 +66,5 @@ manage_file({
 })
 
 Example result
-{
-  "file": { "id": 901, "name": "logo.png", "size": 18244,
-    "url": "https://go.magnatech.com/l/.../logo.png" }
-}
+
+{ }

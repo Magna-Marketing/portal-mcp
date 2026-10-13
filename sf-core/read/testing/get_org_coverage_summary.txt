@@ -22,17 +22,15 @@ Body
 None.
 
 Input (parameters)
-breakdown (boolean, optional, default true) - Include per-class breakdown.
-underThreshold (number, optional) - Filter `breakdown` to classes with coverage below this percent (e.g. 75).
+None.
 
 Result
-orgWidePercent (number) - 0..100.
-totalLinesCovered (number).
-totalLinesUncovered (number).
-classCount (number).
-triggerCount (number).
-breakdown (array, when breakdown=true) - { name, type, numLinesCovered, numLinesUncovered, percentCovered }.
-classesUnderThreshold (number, when underThreshold provided).
+Returns the raw Salesforce QueryResult with totalSize, done, and records containing
+PercentCovered.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "Author Apex".
@@ -46,4 +44,4 @@ Errors
 
 Example request
 
-get_org_coverage_summary({ "underThreshold": 75 })
+get_org_coverage_summary({})

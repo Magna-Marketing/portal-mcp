@@ -6,37 +6,43 @@ double-opt-in), update their record, or query subscription status.
 For one-call status checks, use `read/mobile/list_sms_subscription_status`.
 
 Marketing Cloud API
-REST API (`/sms/v1/contacts/subscriptions` for status; opt-in flows
-via `/sms/v1/message/optin` or `manage_optin_message` write tool).
-For opt-out, fire a Stop / Unsubscribe keyword via `send_sms` or use
-the SOAP `MobileSubscription` object.
+REST API.
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/contacts/subscriptions          (status query in body, returns opt-in record)
-POST https://{tenant}.rest.marketingcloudapis.com/sms/v1/message/optin                   (trigger opt-in flow)
-POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx                          (SOAP MobileSubscription Create / Update / Delete)
+PATCH https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts
 
 Headers
 Authorization: Bearer <access_token>
-Content-Type: application/json (REST) or text/xml (SOAP)
+Content-Type: application/json
+Accept: application/json
 
 Body
-For status: { "mobileNumbers": ["+15551234567"], "keywords": [{ "keyword": "MTG", "shortCode": "12345", "countryCode": "US" }] }
+PATCH: messageText, mobileNumbers, shortCode, subscribers
 
 Input (parameters)
-operation (string, required) - "subscribe" | "unsubscribe" | "update" | "checkStatus".
-mobileNumber (string, optional) - E.164.
-mobileNumbers (string[], optional) - Bulk for checkStatus.
-keyword (string, optional).
-shortCode (string, optional).
-countryCode (string, optional, default "US").
-contactKey (string, optional).
-locale (string, optional).
-optInMessageId (number, optional, for subscribe via message-driven opt-in).
+operation ("subscribe" | "unsubscribe" | "update" | "check_status", required) - Subscribe/unsubscribe via queueMO, update MobileConnect subscription contact attributes,
+or check documented subscription status.
+mobile_number (string, optional) - Single mobile number for subscribe, unsubscribe, or update. For subscribe/unsubscribe,
+provide mobile_number or contact_key.
+mobile_numbers (string[], optional) - Mobile numbers for check_status. Salesforce allows up to 500 values.
+subscriber_keys (string[], optional) - Subscriber keys for check_status. Salesforce allows up to 500 values.
+contact_key (string, optional) - Contact key for update, or subscriber key for subscribe/unsubscribe when your tenant
+uses subscriber-key based queueMO.
+keyword (string, optional) - Inbound keyword to queue for subscribe. Also useful as context for update descriptions.
+opt_out_keyword (string, optional) - Inbound opt-out keyword to queue for unsubscribe. Defaults to STOP.
+short_code (string, optional) - Short or long code for subscribe/unsubscribe queueMO.
+keyword_id (value, optional) - Keyword/SubscriptionDefinitionID used when updating MobileConnect Subscriptions through
+Contacts.
+opt_in_status (number, optional) - MobileConnect Subscriptions Opt In Status value for update, for example 2 for opted in.
+opt_out_status (number, optional) - MobileConnect Subscriptions Opt Out Status value for update, for example 1 for opted
+out.
+contact_payload (object, optional) - Advanced raw Contacts PATCH payload. If provided for update, this payload is sent as-is
+to PATCH /contacts/v1/contacts.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-For subscribe / unsubscribe / update: subscription (object) - { id, mobileNumber, contactKey, codeId, keywordId, subscriptionStatus, subscribedDate }.
-For checkStatus: subscriptions (array) - [{ mobileNumber, keyword, shortCode, status ("Active"|"Pending"|"Unsubscribed"), subscribedDate, unsubscribedDate }].
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_send` (subscribe) / `sms_read` (status).

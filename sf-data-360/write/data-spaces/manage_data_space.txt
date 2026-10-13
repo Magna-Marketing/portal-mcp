@@ -34,7 +34,7 @@ description (string, optional).
 isDefault (boolean, optional).
 
 Result
-dataSpace (object) - Created / updated row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -54,4 +54,5 @@ manage_data_space({
 })
 
 Example result
-{ "dataSpace": { "id": "0a0xx0000000002", "name": "EMEA" } }
+
+{ }

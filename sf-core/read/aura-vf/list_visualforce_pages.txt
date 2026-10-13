@@ -9,8 +9,8 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ControllerKey, ControllerType, IsAvailableInTouch, ManageableState, Description FROM ApexPage
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ControllerType, ManageableState, Description FROM ApexComponent
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ControllerKey, ControllerType, IsAvailableInTouch, IsConfirmationTokenRequired, ManageableState, Description, CreatedDate, LastModifiedDate FROM ApexPage
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, MasterLabel, ApiVersion, NamespacePrefix, ControllerKey, ControllerType, ManageableState, Description, CreatedDate, LastModifiedDate FROM ApexComponent
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,15 +20,28 @@ Body
 None.
 
 Input (parameters)
-includePages (boolean, optional, default true).
-includeComponents (boolean, optional, default true).
-namePattern (string, optional).
-includeManaged (boolean, optional, default false).
-limit (number, optional, default 200).
+includePages (boolean, optional) - Whether to query ApexPage records; boolean; default
+true; example: true; pass false only when you want components only.
+includeComponents (boolean, optional) - Whether to query ApexComponent records; boolean;
+default true; example: false; pass false only when you want pages only.
+namePattern (string, optional) - Glob-style filter for Name using * and ?; string; no
+default; example: Account*; do not pass SOQL LIKE syntax, label text, or file suffixes.
+includeManaged (boolean, optional) - Whether to include managed package records;
+boolean; default false filters to unmanaged/null ManageableState; example: true; do not
+use this for namespace-specific filtering.
+whereClause (string, optional) - Additional SOQL WHERE condition applied to both object
+queries; string without the WHERE keyword; no default; example: ApiVersion >= 60.0; do
+not pass ORDER BY, LIMIT, SELECT, FROM, or untrusted user text.
+orderBy (string, optional) - SOQL ORDER BY fields applied to both object queries; string
+without ORDER BY; default Name; example: LastModifiedDate DESC NULLS LAST; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum records per object query; positive integer, clamped
+to 2000; default 200; example: 100; do not pass 0, negative values, or offsets.
 
 Result
-pages (array) - { id, name, masterLabel, apiVersion, controllerType, controllerKey, isAvailableInTouch, manageableState, description }.
-components (array) - { id, name, masterLabel, apiVersion, controllerType, manageableState, description }.
+Returns a JSON object containing raw pagesResult and componentsResult query responses.
+pagesResult (value) - included in the JSON returned by the tool.
+componentsResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -41,4 +54,8 @@ Errors
 
 Example request
 
-list_visualforce_pages({ "includeComponents": false })
+list_visualforce_pages({
+  "includePages": true,
+  "includeComponents": false,
+  "namePattern": "Account*"
+})

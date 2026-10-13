@@ -13,8 +13,10 @@ hits `{cdpTenantUrl}/api/v1/dataGraph/metadata`). Both return
 metadata; pick whichever is closer.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/metadata        (plane="connect", default)
-GET {cdpTenantUrl}/api/v1/dataGraph/metadata                            (plane="runtime")
+GET {salesforceInstanceUrl}/services/data/v65.0/api/v1/dataGraph/metadata
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-graphs/metadata
+GET {instanceUrl}/api/v1/dataGraph/metadata
+GET {instanceUrl}/api/v1/ssot/data-graphs/metadata
 
 Headers
 Authorization: Bearer <core_access_token>      (connect)
@@ -25,16 +27,13 @@ Body
 None.
 
 Input (parameters)
-plane (string, optional, default "connect") - "connect" | "runtime".
-dataSpace (string, optional, default "default").
-nameContains (string, optional).
-limit (number, optional, default 100).
+plane ("connect" | "runtime", optional) - API plane to call. `connect` uses `/ssot/data-graphs/metadata`; `runtime` uses
+`/api/v1/dataGraph/metadata`. Defaults to connect.
+dataspace (string, optional) - Data 360 data space to query. Supported by the Connect metadata endpoint; Salesforce
+uses the default data space when omitted.
 
 Result
-dataGraphs (array) - Each: { developerName, label, dataSpace,
-  primaryDmo, includedDmos (array), refreshFrequency, status,
-  recordCount, lastRefreshDate, createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (connect) or `cdp_api` (runtime).
@@ -50,13 +49,5 @@ Example request
 list_data_graphs({})
 
 Example result
-{
-  "dataGraphs": [
-    { "developerName": "UnifiedIndividualGraph",
-      "label": "Unified Individual Graph",
-      "primaryDmo": "UnifiedIndividual__dlm",
-      "includedDmos": ["EngagementHistory__dlm","Order__dlm"],
-      "refreshFrequency": "Hourly", "status": "Active",
-      "recordCount": 482000 }
-  ]
-}
+
+{ }

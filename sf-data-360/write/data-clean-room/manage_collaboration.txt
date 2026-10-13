@@ -1,4 +1,4 @@
-Tool: manage_collaboration
+Tool: manage_dcr_collaboration
 
 Description
 Create a new Data Clean Room collaboration with a partner. Only the
@@ -28,19 +28,18 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" only.
-apiName (string, required).
-label (string, required).
-providerIdOrName (string, required).
-partnerOrgIdentifier (string, required) - Identifier the partner uses
-  on their side (account name, org id, etc.).
-sharedDmos (string[], required) - DMOs whose data may participate
-  in the collaboration.
-specifications (string[], optional) - Pre-approved query
-  specifications to attach.
+operation ("create", required) - The operation to perform. Currently only 'create' is supported.
+apiName (string, required) - Unique developer/API name for the collaboration, e.g. 'MTG_PartnerX'.
+label (string, required) - Human-readable label for the collaboration.
+providerIdOrName (string, required) - ID or developer name of the registered DCR provider to use for this collaboration.
+partnerOrgIdentifier (string, required) - Identifier the partner uses on their side (account name, org ID, etc.).
+sharedDmos (string[], required) - Array of DMO API names whose data may participate in the collaboration, e.g.
+['UnifiedIndividual__dlm'].
+specifications (string[], optional) - Array of pre-approved query specification API names to attach to this collaboration.
+description (string, optional) - Optional description of the collaboration purpose.
 
 Result
-collaboration (object) - Created row in `Pending` status.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -54,19 +53,15 @@ Errors
 
 Example request
 
-manage_collaboration({
-  "operation": "create",
-  "apiName": "MTG_PartnerX",
-  "label": "MTG ↔ Partner X",
-  "providerIdOrName": "MTG_Snowflake_DCR",
-  "partnerOrgIdentifier": "ORG_PARTNER_X",
-  "sharedDmos": ["UnifiedIndividual__dlm"]
+manage_dcr_collaboration({
+  "operation": "",
+  "apiName": "",
+  "label": "",
+  "providerIdOrName": "",
+  "partnerOrgIdentifier": "",
+  "sharedDmos": []
 })
 
 Example result
-{
-  "collaboration": {
-    "id": "0YC580000000001",
-    "apiName": "MTG_PartnerX", "status": "Pending"
-  }
-}
+
+{ }

@@ -7,9 +7,9 @@ Marketing Cloud API
 REST API (`/asset/v1/content/categories`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories
-PATCH  https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories/{id}
-DELETE https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories/{category_id}
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories
+PUT https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/categories/{category_id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,15 +19,23 @@ Body
 { "name": "...", "parentId": 12345, "categoryType": "asset" }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "move" | "delete".
-categoryId (number, optional, required for non-create).
-name (string, required for create).
-description (string, optional).
-parentId (number, optional, required for create / move).
-categoryType (string, optional, default "asset") - "asset" | "asset-shared".
+operation ("create" | "update" | "move" | "delete", required) - create=POST /asset/v1/content/categories, update/move=PUT
+/asset/v1/content/categories/{category_id}, delete=DELETE
+/asset/v1/content/categories/{category_id}.
+category_id (number, optional) - Content Builder category ID. Required for update, move, and delete.
+name (string, optional) - Category/folder name. Required for create unless raw_request is supplied.
+description (string, optional) - Optional category description.
+parent_id (number, optional) - Parent category ID. Required for create and move unless raw_request supplies parentId.
+category_type ("asset" | "asset-shared", optional) - Content Builder category type. Defaults to asset on create. For update/move it is sent
+only when supplied.
+raw_request (object, optional) - Exact Salesforce request body for create, update, or move. Use for fields not covered by
+the schema.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Content Builder REST request. Defaults to the authenticated Business Unit when the
+session is already scoped to one.
 
 Result
-category (object) - { id, name, parentId, categoryType }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_write`.
@@ -41,7 +49,5 @@ Errors
 Example request
 
 manage_category({
-  "operation": "create",
-  "name": "MTG Q3 Campaigns",
-  "parentId": 12345
+  "operation": "create"
 })

@@ -6,7 +6,8 @@ list of fields used in Visualforce, LWC, and Apex to drive dynamic UIs
 without code changes.
 
 Salesforce API
-Tooling API + Metadata API, v66.0. Tooling API lists FieldSet records across sObjects; Metadata API returns the fields inside each FieldSet.
+Tooling API, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
 GET /services/data/v66.0/tooling/query?q=SELECT Id, DeveloperName, EntityDefinitionId FROM FieldSet
@@ -20,16 +21,32 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], required).
-namePattern (string, optional).
-includeFields (boolean, optional, default true).
+sObjects (string[], required) - sObject API names to inspect; array of valid object API
+names; no default; example: [\"Account\",\"Project__c\"]; do not pass labels,
+relationship names, or empty arrays.
+namePattern (string, optional) - Pattern for FieldSet.DeveloperName; string using * and
+? wildcards converted to SOQL LIKE; no default; example: *Edit*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+includeFields (boolean, optional) - Whether to include raw Metadata API FieldSet
+records; boolean; default true; example: false; do not pass true if Tooling API rows are
+enough.
+whereClause (string, optional) - Additional SOQL WHERE condition for FieldSet; string
+with or without WHERE; no default; example: DeveloperName LIKE 'Mobile%'; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for FieldSet; string with or without
+ORDER BY; default DeveloperName ASC; example: DeveloperName DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum FieldSet rows to return per sObject; integer from 1
+to 2000; default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-fieldSets (array) - Each:
-  sObject, fullName (e.g. "Project__c.Editable_Fields"), label, description.
-  availableFields (array, when includeFields=true) - { field, label, type }.
-  displayedFields (array, when includeFields=true) - { field, label, type, isRequired, isFieldManaged }.
+object with raw FieldSet QueryResults keyed by sObject plus optional raw Metadata API
+FieldSet records keyed by full name.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+queryResults (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration".
@@ -42,4 +59,6 @@ Errors
 
 Example request
 
-list_field_sets({ "sObjects": ["Project__c"] })
+list_field_sets({
+  "sObjects": "[\\\"Account\\\",\\\"Project__c\\\"]"
+})

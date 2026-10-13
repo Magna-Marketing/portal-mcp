@@ -8,10 +8,12 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions/{op}`).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/stop/{id}?versionNumber={v}
-POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/pause/{id}?versionNumber={v}
-POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/resume/{id}?versionNumber={v}
-POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/unpublish/{id}?versionNumber={v}
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{action}/{journey_id}
+Optional query: allVersions, versionNumber
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{action}/key:{journey_key}
+Optional query: allVersions, versionNumber
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+Optional query: $orderBy, $page, $pageSize, id, key, mostRecentVersionOnly, status
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,16 +23,24 @@ Body
 None.
 
 Input (parameters)
-journeyId (string, optional).
-journeyKey (string, optional).
-versionNumber (number, optional, default = latest published).
-action (string, required) - "stop" | "pause" | "resume" | "unpublish" | "unschedule".
-extendWaitEndDate (string, optional) - For resume; extends wait activity end dates.
+action ("stop" | "pause" | "resume" | "unpublish" | "unschedule", required) - Journey control action. Calls the matching
+/interaction/v1/interactions/{action}/{id|key} endpoint.
+journey_id (string, optional) - Journey definition ID. Required when journey_key is omitted.
+journey_key (string, optional) - Journey external key. Required when journey_id is omitted.
+version_number (number, optional) - Journey version number. When omitted and all_versions is false, the tool resolves the
+latest relevant version for the action.
+all_versions (boolean, optional) - Whether to apply the action to all versions where Salesforce supports allVersions. If
+false, versionNumber is sent.
+paused_days (number, optional) - Pause option: number of days to pause the journey. Salesforce default is 14.
+guardrail_action ("none" | "resume" | "stop", optional) - Pause option: action Salesforce takes after paused_days elapses.
+extend_wait_end_dates (boolean, optional) - Pause option: whether to extend Wait by Duration activity end dates while paused.
+retain_contact_injection_while_journey_paused (boolean, optional) - Pause option: whether new contacts are queued while the journey is paused.
+request_body (object, optional) - Advanced raw request body. When provided, it is merged with explicit pause options and
+explicit options take precedence.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header.
 
 Result
-journey (object) - { id, version, status, lastPublishedDate }.
-action (string).
-durationMs (number).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_write`.
@@ -43,4 +53,6 @@ Errors
 
 Example request
 
-control_journey({ "journeyKey": "MTG_Welcome_Series", "action": "pause" })
+control_journey({
+  "action": "stop"
+})

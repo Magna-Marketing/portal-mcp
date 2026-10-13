@@ -8,9 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST   {instanceUrl}/services/data/v{ver}/ssot/activations                                   (operation="create")
-PUT    {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId                     (operation="update")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId                     (operation="delete")
+PUT {salesforceInstanceUrl}/services/data/v65.0/ssot/activations/{activationId}
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/activations/{activationId}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -31,19 +30,26 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-activationId (string, required for update / delete).
-apiName (string, required for create).
-label (string, required for create).
-segmentId (string, required for create).
-activationTargetId (string, required for create).
-schedule (object, optional).
-contactPoints (array, optional) - Field mapping rules for the target.
-publishType (string, optional, default "FULL").
+operation ("update" | "delete", required) - The operation to perform. " + ""update" — PUT updated fields to an existing activation
+(requires activationId). " + ""delete" — permanently delete an activation (requires
+activationId). " + "To create a new activation use write.create_activation.
+activationId (string, optional) - Unique 18-char Salesforce ID of the activation to update or delete. Required. " +
+"Example: "85RgL00000025YHUAY"
+name (string, optional) - Updated developer/API name
+description (string, optional) - Updated human-readable description
+dataSpaceName (string, optional) - Updated data space name
+refreshType ("FULL_REFRESH" | "INCREMENTAL", optional) - Updated refresh type
+activationTargetName (string, optional) - Updated activation target name
+segmentApiName (string, optional) - Updated segment API name
+marketSegmentId (string, optional) - Updated segment ID
+activationTargetSubjectConfig (string, optional) - Updated root DMO config
+attributesConfig (object[], optional) - Updated output attributes config
+shouldExcludeDeletes (boolean, optional)
+shouldExcludeUpdates (boolean, optional)
+staticDataConfig (string[], optional)
 
 Result
-activation (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -57,13 +63,9 @@ Errors
 Example request
 
 manage_activation({
-  "operation": "create",
-  "apiName": "EMEA_to_MC",
-  "label": "EMEA High-value -> MC",
-  "segmentId": "0YS580000000001",
-  "activationTargetId": "0YT580000000001",
-  "contactPoints": [{ "apiName": "Email", "sourceField": "EmailAddress__c" }]
+  "operation": ""
 })
 
 Example result
-{ "activation": { "id": "0YA580000000001", "apiName": "EMEA_to_MC", "status": "Active" } }
+
+{ }

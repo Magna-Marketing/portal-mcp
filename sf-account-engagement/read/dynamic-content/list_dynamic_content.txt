@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/dynamic-contents?fields={fields}
+GET https://{pi-domain}/api/v5/objects/dynamic-contents
+Optional query: fields, filter[basedOnProspectApiFieldId], filter[basedOn], filter[folderId], filter[isDeleted], filter[name], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,23 +22,20 @@ Body
 None.
 
 Input (parameters)
-folderId (number, optional).
-nameContains (string, optional).
-basedOn (string, optional) - "PROSPECT_FIELD" | "TAG" | "GRADE" | "SCORE".
-basedOnProspectApiFieldId (string, optional) - When basedOn=PROSPECT_FIELD.
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,folderId,isDeleted,
-  createdById,updatedById,createdAt,updatedAt,basedOn,
-  basedOnProspectApiFieldId,trackerDomainId,embedCode,embedUrl,
-  tagReplacementLanguage).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+folderId (number, optional) - Filter by folder id.
+nameContains (string, optional) - Filter blocks whose name contains this string (case-insensitive like match).
+basedOn ("PROSPECT_FIELD" | "TAG" | "GRADE" | "SCORE", optional) - Filter by the criterion the dynamic content is based on.
+basedOnProspectApiFieldId (string, optional) - When basedOn=PROSPECT_FIELD, filter by the specific custom field API name (e.g.
+"region__c").
+isDeleted (boolean, optional) - Include deleted blocks. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, folderId, isDeleted, createdById, updatedById,
+createdAt, updatedAt, basedOn, basedOnProspectApiFieldId, trackerDomainId, embedCode,
+embedUrl, tagReplacementLanguage.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-dynamicContents (array) - Each: { id, name, folderId, basedOn,
-  basedOnProspectApiFieldId, trackerDomainId, embedCode, embedUrl,
-  tagReplacementLanguage, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -50,13 +48,8 @@ Errors
 
 Example request
 
-list_dynamic_content({ "basedOn": "PROSPECT_FIELD" })
+list_dynamic_content({})
 
 Example result
-{
-  "dynamicContents": [
-    { "id": 41, "name": "Region greeting", "basedOn": "PROSPECT_FIELD",
-      "basedOnProspectApiFieldId": "region__c",
-      "embedUrl": "https://go.magnatech.com/dc/41" }
-  ]
-}
+
+{ }

@@ -6,7 +6,7 @@ Supports plain-text and rich-text bodies, template-based rendering with merge
 fields, activity logging, threading tokens, and file attachments.
 
 Salesforce API
-REST API (Standard Invocable Action), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/actions/standard/emailSimple
@@ -52,27 +52,49 @@ Corrections vs. original documentation
   The raw response array contains { actionName, errors, isSuccess, outputValues }.
 
 Input (parameters)
-recipientAddresses (string, optional) - Comma-delimited To addresses (API v65.0+).
-ccAddresses (string, optional) - Comma-delimited CC addresses (API v65.0+).
-bccAddresses (string, optional) - Comma-delimited BCC addresses (API v65.0+).
-recipientId (string, optional) - Contact/Lead ID. Required when emailTemplateId is set.
-relatedRecordId (string, optional) - Non-person record for merge fields or secondary log target.
-emailSubject (string, optional) - Subject line. Required when no template.
-emailBody (string, optional) - Body content (plain or HTML). Required when no template.
-emailTemplateId (string, optional) - EmailTemplate ID. Requires recipientId.
-sendRichBody (boolean, optional, default false) - Render emailBody as HTML rich text.
-useLineBreaks (boolean, optional, default false) - Render line breaks as <br>.
-logEmailOnSend (boolean, optional, default false) - Log email on activity timelines.
-  Requires recipientId or relatedRecordId. Changes the daily email limit bucket.
-senderType (string, optional, default "CurrentUser") -
-  "CurrentUser" | "DefaultWorkflowUser" | "OrgWideEmailAddress".
-senderAddress (string, optional) - Org-wide email address. Required when senderType
-  is OrgWideEmailAddress.
-attachmentId (string, optional) - Comma-delimited Document/ContentVersion/Attachment
-  IDs (API v63.0+).
-attachmentIdCollection (string, optional) - Collection of attachment IDs (API v64.0+).
-addThreadingTokenToBody (boolean, optional) - Append Email-to-Case threading token to body.
-addThreadingTokenToSubject (boolean, optional) - Append threading token to subject.
+recipientAddresses (string, optional) - To recipients; comma-delimited email string;
+optional when recipientId is used; example \"jane@example.com,bob@example.com\";
+combined recipients must not exceed 150.
+ccAddresses (string, optional) - CC recipients; comma-delimited email string; optional;
+example \"manager@example.com\"; do not include display-name syntax.
+bccAddresses (string, optional) - BCC recipients; comma-delimited email string;
+optional; example \"audit@example.com\"; do not use when org compliance disables BCC.
+recipientId (string, optional) - Recipient Contact or Lead Id; Salesforce Id string;
+required with emailTemplateId; example \"003...\"; do not pass a User Id for template
+recipient context.
+relatedRecordId (string, optional) - Related record Id for merge fields or activity
+logging; Salesforce Id string; optional; example \"500...\"; do not pass person records
+here.
+emailSubject (string, optional) - Subject text; string; required when no emailTemplateId
+is passed; example \"Your case update\"; omit when template supplies the subject.
+emailBody (string, optional) - Email body; string plain text or HTML; required without
+emailTemplateId; example \"<p>Hello</p>\"; do not pass raw binary or attachment content.
+emailTemplateId (string, optional) - EmailTemplate Id; Salesforce Id string; optional;
+example \"00X...\"; requires recipientId and uses the single-email limit bucket.
+sendRichBody (boolean, optional) - Whether emailBody is treated as HTML; boolean;
+defaults to false; example true; do not set true for untrusted HTML.
+useLineBreaks (boolean, optional) - Whether rich-text line breaks become <br> tags;
+boolean; defaults to false; example true; only applies to rich body sends.
+logEmailOnSend (boolean, optional) - Whether to log sent email as activity; boolean;
+defaults to false; example true; requires recipientId or relatedRecordId.
+senderType ("CurrentUser" | "DefaultWorkflowUser" | "OrgWideEmailAddress", optional) -
+Sender type; enum CurrentUser, DefaultWorkflowUser, or OrgWideEmailAddress; defaults to
+CurrentUser; example \"OrgWideEmailAddress\"; org-wide requires senderAddress.
+senderAddress (string, optional) - Org-wide sender email address; email string; required
+when senderType is OrgWideEmailAddress; example \"support@example.com\"; do not pass the
+OrgWideEmailAddress Id.
+attachmentId (string, optional) - Attachment Ids; comma-delimited Document,
+ContentVersion, or Attachment Id string; optional; example \"068...,00P...\"; do not
+pass file bytes.
+attachmentIdCollection (string, optional) - Attachment Id collection; comma-delimited Id
+string; optional; example \"068...,069...\"; avoid passing both attachment fields unless
+Salesforce action expects it.
+addThreadingTokenToBody (boolean, optional) - Whether to append an Email-to-Case
+threading token to body; boolean; optional; example true; only useful with related
+case-style records.
+addThreadingTokenToSubject (boolean, optional) - Whether to append an Email-to-Case
+threading token to subject; boolean; optional; example true; avoid unless reply
+threading is needed.
 
 Result
 Array: [{ "actionName": "emailSimple", "errors": null, "isSuccess": true, "outputValues": {} }]
@@ -93,22 +115,10 @@ Errors
 - INVALID_EMAIL_ADDRESS
 - EMAIL_LIMIT_EXCEEDED
 
-Example request (free-form)
+Example request
 
 send_email({
-  "recipientAddresses": "jane.doe@magnatech.com",
-  "emailSubject": "Project Update",
-  "emailBody": "<p>Status: <b>Green</b></p>",
-  "sendRichBody": true,
-  "relatedRecordId": "a01Qg0000020aBcDE",
-  "logEmailOnSend": true
-})
-
-Example request (template)
-
-send_email({
-  "emailTemplateId": "00X4Q00000abcDE",
-  "recipientId": "003Qg0000020aBcDE",
-  "relatedRecordId": "a01Qg0000020aBcDE",
-  "logEmailOnSend": true
+  "recipientAddresses": "example",
+  "ccAddresses": "example",
+  "bccAddresses": "example"
 })

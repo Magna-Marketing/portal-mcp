@@ -27,13 +27,7 @@ fields (string[], optional) - Default expands `htmlMessage`,
   `template.*`.
 
 Result
-listEmail (object): id, name, subject, htmlMessage, textMessage,
-  status, sentAt, scheduledTime, campaignId, listIds (array),
-  suppressionListIds (array), emailTemplateId, operationalEmail,
-  senderOptions, replyToOptions, trackerDomainId, sentCount,
-  deliveredCount, uniqueOpenCount, totalOpenCount, uniqueClickCount,
-  totalClickCount, bounceCount, unsubscribeCount, spamComplaintCount,
-  optOutCount, deliveryRate, openRate, clickRate, createdAt, updatedAt.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -49,11 +43,5 @@ Example request
 get_list_email({ "id": 8821 })
 
 Example result
-{
-  "listEmail": {
-    "id": 8821, "name": "Spring Promo Send", "status": "Sent",
-    "sentAt": "2026-04-21T15:00:00Z",
-    "sentCount": 12450, "openRate": 36.7, "clickRate": 8.4,
-    "listIds": [301, 302]
-  }
-}
+
+{ }

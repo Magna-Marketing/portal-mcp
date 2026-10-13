@@ -7,10 +7,10 @@ JS/CSS shipped with VF/Aura/LWC, images, ZIP bundles. To download a
 resource use `read_static_resource`.
 
 Salesforce API
-Tooling API, v66.0. `StaticResource` sObject.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ContentType, BodyLength, CacheControl, Description, LastModifiedDate FROM StaticResource
+GET /services/data/v66.0/query/?q=SELECT Id, Name, NamespacePrefix, ContentType, BodyLength, CacheControl, Description, LastModifiedDate FROM StaticResource
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,15 +20,33 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-contentType (string, optional) - e.g. "application/zip", "text/javascript".
-namespacePrefix (string, optional).
-includeManaged (boolean, optional, default false).
-limit (number, optional, default 200).
+namePattern (string, optional) - Pattern for StaticResource.Name; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: SLDS*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+contentType (string, optional) - Content type filter; string compared to
+StaticResource.ContentType exactly; no default; example: application/zip; do not pass
+wildcards or comma-separated values.
+namespacePrefix (string, optional) - Namespace prefix filter; string compared to
+NamespacePrefix, with empty string meaning unpackaged resources; no default; example:
+mypkg; do not pass package labels or multiple namespaces.
+includeManaged (boolean, optional) - Whether to include managed-package resources when
+namespacePrefix is not provided; boolean; default false; example: true; do not pass true
+when you only want local unpackaged assets.
+whereClause (string, optional) - Additional SOQL WHERE condition for StaticResource;
+string with or without WHERE; no default; example: BodyLength > 1000; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for StaticResource; string with or
+without ORDER BY; default Name ASC; example: LastModifiedDate DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum StaticResource rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-staticResources (array) - { id, name, namespacePrefix, contentType, bodyLength, cacheControl ("Public"|"Private"), description, manageableState, lastModifiedDate }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -41,4 +59,8 @@ Errors
 
 Example request
 
-list_static_resources({ "contentType": "application/zip" })
+list_static_resources({
+  "namePattern": "SLDS*",
+  "contentType": "application/zip",
+  "namespacePrefix": "mypkg"
+})

@@ -20,14 +20,36 @@ Body
 None.
 
 Input (parameters)
-contentDocumentId (string, optional) - File whose shares to list.
-linkedEntityId (string, optional) - Record/user/group whose linked files to list.
-  At least one required.
-shareType (string, optional) - "V" | "C" | "I".
+contentDocumentId (string, optional) - ContentDocumentLink ContentDocumentId filter;
+string Id in 15- or 18-character format; no default but Salesforce requires this,
+linkedEntityId, or an equivalent whereClause; example: 069xx0000004C92AAE; do not pass
+ContentVersion Ids.
+linkedEntityId (string, optional) - ContentDocumentLink LinkedEntityId filter; string Id
+for a record, user, group, or library; no default but Salesforce requires this,
+contentDocumentId, or an equivalent whereClause; example: 001xx000003DGbYAAW; do not
+pass object names.
+shareType ("V" | "C" | "I", optional) - ShareType exact filter; enum V, C, or I; no
+default; example: V; do not pass labels such as Viewer or Collaborator.
+visibility ("AllUsers" | "InternalUsers" | "SharedUsers", optional) - Visibility exact
+filter; enum AllUsers, InternalUsers, or SharedUsers; no default; example:
+InternalUsers; do not pass lowercase values.
+whereClause (string, optional) - Additional ContentDocumentLink SOQL WHERE conditions
+without the WHERE keyword; string appended with AND after built-in filters; no default;
+example: LinkedEntityId IN ('001xx000003DGbYAAW'); must include ContentDocumentId or
+LinkedEntityId when no direct filter is set; do not pass SELECT, FROM, ORDER BY, LIMIT,
+or untrusted user text.
+orderBy (string, optional) - ContentDocumentLink ORDER BY clause without the ORDER BY
+keyword; string; default Id ASC; example: ShareType ASC; do not pass WHERE, LIMIT, or
+fields unavailable on ContentDocumentLink.
+limit (integer, optional) - Maximum ContentDocumentLink rows to return; integer from 1
+to 2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-shares (array) - Each: { id, contentDocumentId, fileTitle, linkedEntityId, linkedEntityName, linkedEntityType ("Account"|"User"|"Group"|"ContentWorkspace"|...), shareType, visibility }.
+Returns the raw ContentDocumentLink query response as a JSON object.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - File or record read.
@@ -40,4 +62,8 @@ Errors
 
 Example request
 
-list_file_shares({ "contentDocumentId": "069Qg0000004ZyAA" })
+list_file_shares({
+  "contentDocumentId": "069xx0000004C92AAE",
+  "linkedEntityId": "001xx000003DGbYAAW",
+  "shareType": "V"
+})

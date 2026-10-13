@@ -18,34 +18,20 @@ Authorization: Bearer <core_access_token>
 Content-Type: application/json
 Accept: application/json
 
-Body (create)
-{
-  "dataKitDevName": "MTG_Retail_Foundation",
-  "label": "MTG Retail Foundation",
-  "description": "Retail demo kit",
-  "components": [
-    { "componentName": "Order__dlm",            "componentType": "DataModelObject" },
-    { "componentName": "OrderToIndividual_map", "componentType": "Mapping" }
-  ]
-}
-
-Body (updateComponents)
-{
-  "components": [
-    { "componentName": "Order__dlm", "componentType": "DataModelObject" }
-  ]
-}
+Body
+POST: components
+PATCH: components
 
 Input (parameters)
-operation (string, required) - "create" | "updateComponents" | "delete".
-dataKitDevName (string, required).
-label (string, required for create).
-description (string, optional).
-components (array, required for create / updateComponents).
+operation ("create" | "updateComponents" | "delete", required) - The operation to perform: create, updateComponents, or delete.
+dataKitDevName (string, optional) - Developer/API name of the data kit. Required for all operations.
+label (string, optional) - Human-readable label for the data kit. Required for create.
+description (string, optional) - Description of the data kit.
+components (object[], optional) - Array of components to include in the data kit. Required for create and
+updateComponents.
 
 Result
-dataKit (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -60,13 +46,9 @@ Errors
 Example request
 
 manage_data_kit({
-  "operation": "create",
-  "dataKitDevName": "MTG_Retail_Foundation",
-  "label": "MTG Retail Foundation",
-  "components": [
-    { "componentName": "Order__dlm", "componentType": "DataModelObject" }
-  ]
+  "operation": ""
 })
 
 Example result
-{ "dataKit": { "dataKitDevName": "MTG_Retail_Foundation", "componentCount": 1 } }
+
+{ }

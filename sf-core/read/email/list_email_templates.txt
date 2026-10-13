@@ -6,10 +6,10 @@ List email templates (Classic + Lightning). Filter by folder, type
 body, merge fields, and active status.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `EmailTemplate`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, FolderId, Folder.Name, IsActive, OwnerId, Owner.Name, Subject, HtmlValue, Body, BrandTemplateId, TemplateType, TemplateStyle, ApiVersion, Description, Encoding FROM EmailTemplate
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, FolderId, Folder.Name, IsActive, OwnerId, Owner.Name, Subject, HtmlValue, Body, Markup, BrandTemplateId, EnhancedLetterheadId, TemplateType, TemplateStyle, ApiVersion, Description, Encoding, RelatedEntityType, UIType, NamespacePrefix, LastModifiedDate FROM EmailTemplate
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,16 +19,38 @@ Body
 None.
 
 Input (parameters)
-folderId (string, optional).
-type (string, optional) - "text" | "html" | "custom" | "visualforce".
-namePattern (string, optional).
-includeBody (boolean, optional, default false) - Include subject + body (heavier).
-isActive (boolean, optional, default true).
-limit (number, optional, default 200).
+folderId (string, optional) - EmailTemplate.FolderId filter; Salesforce folder Id
+string; no default; example: 00l5g000000abcAAA; do not pass folder names or multiple
+Ids.
+type ("text" | "html" | "custom" | "visualforce", optional) - EmailTemplate.TemplateType
+filter; enum text, html, custom, or visualforce; no default; example: html; do not pass
+Lightning UI labels or unsupported template styles.
+namePattern (string, optional) - Pattern for Name or DeveloperName; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: MTG_*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+relatedEntityType (string, optional) - RelatedEntityType filter for Lightning templates;
+object API name string; no default; example: Contact; do not pass object labels, ID
+prefixes, or multiple values.
+includeBody (boolean, optional) - Whether to include Subject, HtmlValue, Body, and
+Markup fields; boolean; default false; example: true; do not pass true when avoiding
+large template bodies.
+isActive (boolean, optional) - Active status filter; boolean; default true; example:
+false; do not pass false unless you specifically want inactive templates.
+whereClause (string, optional) - Additional SOQL WHERE condition for EmailTemplate;
+string with or without WHERE; no default; example: LastModifiedDate = LAST_N_DAYS:30; do
+not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for EmailTemplate; string with or
+without ORDER BY; default Name ASC; example: LastModifiedDate DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum EmailTemplate rows to return; integer from 1 to
+2000; default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-templates (array) - Each: { id, name, developerName, folderId, folderName, ownerName, isActive, type, subject (when includeBody), htmlBody (when includeBody), textBody (when includeBody), brandTemplateId, apiVersion, description }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "API Enabled" + read on `EmailTemplate`.
@@ -41,4 +63,8 @@ Errors
 
 Example request
 
-list_email_templates({ "type": "html", "namePattern": "MTG_*", "isActive": true })
+list_email_templates({
+  "folderId": "00l5g000000abcAAA",
+  "type": "html",
+  "namePattern": "MTG_*"
+})

@@ -22,23 +22,25 @@ Body
 None.
 
 Input (parameters)
-bundleName (string, required) - LWC DeveloperName (e.g. "projectCard").
-fileName (string, required) - File name including extension (e.g.
-  "projectCard.js", "projectCard.html", "projectCard.css",
-  "projectCard.js-meta.xml", "projectCard.svg").
-asBase64 (boolean, optional, default false) - For binary-ish files
-  (svg). Default returns plain text.
+bundleName (string, optional) - LWC DeveloperName containing the file; string folder
+name; required unless resourceId is provided; example: accountSummary; do not pass
+labels, namespaces, or full file paths.
+componentName (string, optional) - Alias for bundleName; string LWC DeveloperName;
+ignored when bundleName is present; example: contactTile; do not pass
+lwc/contactTile/contactTile.js.
+fileName (string, optional) - Resource file name inside the LWC folder; string including
+extension; required unless fileType or resourceId is provided; example:
+accountSummary.js-meta.xml; do not pass directory traversal, absolute paths, or lwc/
+prefixes.
+fileType ("js" | "html" | "css" | "xml" | "svg", optional) - Common LWC file extension
+used to derive the file name; enum js, html, css, xml, or svg; no default; example:
+html; do not pass js-meta.xml, json, or multiple extensions.
+resourceId (string, optional) - LightningComponentResource Id; Salesforce Id string;
+bypasses bundleName and fileName lookup when present; example: 0Rb5g0000001234CAA; do
+not pass bundle Ids or DeveloperName values.
 
 Result
-file (object):
-  id (string) - LightningComponentResource Id.
-  bundleId (string).
-  fileName (string).
-  format (string) - "js" | "html" | "css" | "xml" | "svg".
-  filePath (string) - e.g. "lwc/projectCard/projectCard.js".
-  sizeBytes (number).
-  source (string) - File contents (or base64 when asBase64=true).
-  lastModifiedDate (string).
+raw LightningComponentResource JSON object.
 
 Required permissions
 - "Customize Application".
@@ -52,19 +54,12 @@ Errors
 
 Example request
 
-read_lwc_file({ "bundleName": "projectCard", "fileName": "projectCard.js" })
+read_lwc_file({
+  "bundleName": "accountSummary",
+  "componentName": "contactTile",
+  "fileName": "accountSummary.js-meta.xml"
+})
 
 Example result
 
-{
-  "file": {
-    "id": "0Rt4Q00000abcXY",
-    "bundleId": "0Rb4Q00000abcDE",
-    "fileName": "projectCard.js",
-    "format": "js",
-    "filePath": "lwc/projectCard/projectCard.js",
-    "sizeBytes": 1842,
-    "source": "import { LightningElement, api, wire } from 'lwc';\nimport getProject from '@salesforce/apex/ProjectController.getProject';\n\nexport default class ProjectCard extends LightningElement {\n  @api recordId;\n  /* ... */\n}\n",
-    "lastModifiedDate": "2026-04-22T13:18:09.000+0000"
-  }
-}
+raw LightningComponentResource JSON object.

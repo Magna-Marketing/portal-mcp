@@ -9,8 +9,8 @@ Marketing Cloud API
 REST API (`/push/v1/location/`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/push/v1/location/
-GET https://{tenant}.rest.marketingcloudapis.com/push/v1/location/{locationId}
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/location/{location_id}
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/location
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,11 +20,20 @@ Body
 None.
 
 Input (parameters)
-locationId (string, optional) - Get a single location.
-namePattern (string, optional).
+location_id (string, optional) - Optional MobilePush location ID. When provided, the tool calls GET
+/push/v1/location/{locationId} and ignores list filters.
+name_pattern (string, optional) - Optional location name pattern, sent as name like {value}.
+location_type (value, optional) - Optional Salesforce locationType filter. Use 1 for geofence and 3 for beacon.
+raw_filter (string, optional) - Optional raw Salesforce $filter expression. If supplied, it is combined with generated
+filters. Salesforce supports name and locationType filters.
+order_by (string, optional) - Optional Salesforce $orderBy value, for example "modifiedDate DESC" or "name ASC".
+page (number, optional) - Salesforce $page value. Defaults to 1.
+page_size (number, optional) - Salesforce $pageSize value. Defaults to 25.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile REST request.
 
 Result
-locations (array) - { id, name, description, latitude, longitude, radiusInMeters, address, city, state, country, postalCode, isActive, createdDate, modifiedDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `push_read`.

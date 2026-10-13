@@ -10,7 +10,7 @@ A CustomNotificationType must already exist in the org. Provide its ID directly
 resolves to an ID via SOQL internally.
 
 Salesforce API
-REST API (Standard Invocable Action), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/actions/standard/customNotificationAction

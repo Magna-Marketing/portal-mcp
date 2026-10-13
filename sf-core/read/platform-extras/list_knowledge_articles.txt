@@ -19,16 +19,35 @@ Body
 None.
 
 Input (parameters)
-articleType (string, optional).
-language (string, optional, default org default).
-status (string|string[], optional) - "Draft" | "Online" | "Archived".
-isLatestVersionOnly (boolean, optional, default true).
-namePattern (string, optional).
-limit (number, optional, default 200).
+articleType (string, optional) - KnowledgeArticleVersion ArticleType exact match; string
+API value; no default; example: Knowledge; do not pass labels, wildcards,
+comma-separated values, or object API names.
+language (string, optional) - Article language filter; string language code stored by
+Salesforce; no default; example: en_US; do not pass locale labels or multiple values.
+status (string | string[], optional) - PublishStatus filter; string or array of strings;
+default Online, Draft, and Archived; example: Online; do not pass lowercase UI labels or
+empty arrays.
+isLatestVersionOnly (boolean, optional) - Whether only latest article versions are
+returned; boolean; default true; example: false; do not pass strings or expect
+archived-only filtering.
+pattern (string, optional) - Article title or URL name pattern; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: Password*; do not pass regex or
+raw LIKE syntax.
+whereClause (string, optional) - Additional KnowledgeArticleVersion SOQL WHERE
+condition; string with or without WHERE; no default; example: LastPublishedDate =
+LAST_N_DAYS:30; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - KnowledgeArticleVersion SOQL ORDER BY clause; string with
+or without ORDER BY; default LastPublishedDate DESC; example: Title ASC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum KnowledgeArticleVersion rows to return; integer from
+1 to 2000; default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-articles (array) - { id, knowledgeArticleId, title, urlName, articleNumber, articleType, language, publishStatus, validationStatus, isLatestVersion, isVisibleInPkb, isVisibleInCsp, isVisibleInPrm, firstPublishedDate, lastPublishedDate }.
+raw Salesforce QueryResult for KnowledgeArticleVersion records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Read Knowledge".
@@ -41,4 +60,8 @@ Errors
 
 Example request
 
-list_knowledge_articles({ "status": "Online", "language": "en_US" })
+list_knowledge_articles({
+  "articleType": "Knowledge",
+  "language": "en_US",
+  "status": "Online"
+})

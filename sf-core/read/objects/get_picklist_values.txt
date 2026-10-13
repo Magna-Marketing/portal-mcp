@@ -28,18 +28,15 @@ Body
 None (GET request).
 
 Input (parameters)
-sObject (string, required) - sObject API name.
-field (string, optional) - Field API name (e.g. "StageName"). When
-  omitted, returns picklist values for every picklist field on the
-  record type (heavier response).
-recordTypeId (string, optional, default "012000000000000AAA" = master) -
-  18-char Record Type Id. Use master ID when the object has no record
-  types or when you want the master picklist. Use `query_record_types`
-  to find a specific record type Id by DeveloperName.
-includeInactive (boolean, optional, default false) - Include picklist
-  entries with `active=false`.
-controllerValue (string, optional) - When the field is a dependent
-  picklist, the controlling-field value to filter against.
+sObject (string, required) - The Salesforce sObject API name that owns the picklist
+field; string such as "Opportunity" or "Project__c"; no default; pass an API name, not a
+label, SOQL fragment, or comma-separated list.
+field (string, optional) - The picklist field API name to fetch; string such as
+"StageName" or "Status__c"; omit to return all picklist fields for the record type; do
+not pass a relationship path, label, or multiple fields.
+recordTypeId (string, optional) - The Salesforce record type Id used to scope picklist
+values; 15- or 18-character Id string; defaults to the master record type Id
+012000000000000AAA; example: 012000000000000AAA; do not pass a developer name or label.
 
 Result
 For a single field:
@@ -73,13 +70,10 @@ Errors
 - INVALID_FIELD: field doesn't exist or isn't a picklist.
 - INVALID_RECORD_TYPE: recordTypeId is not on the sObject.
 
-Example request (single field, dependent picklist)
+Example request
 
 get_picklist_values({
-  "sObject": "Opportunity",
-  "field": "Sub_Stage__c",
-  "recordTypeId": "012Qg0000004aBcDE",
-  "controllerValue": "Negotiation"
+  "sObject": "example"
 })
 
 Example result
@@ -94,13 +88,6 @@ Example result
   "url": "/services/data/v66.0/ui-api/object-info/Opportunity/picklist-values/012Qg0000004aBcDE/Sub_Stage__c",
   "eTag": "12d4d1b21e1c"
 }
-
-Example request (all picklists on a record type)
-
-get_picklist_values({
-  "sObject": "Account",
-  "recordTypeId": "012000000000000AAA"
-})
 
 Result has picklistFieldValues keyed by field API name (Industry, Type,
 Rating, etc.).

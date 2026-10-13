@@ -4,11 +4,12 @@ Description
 List Quick Actions (object-specific and global). For each action: target object, label, type (Create | Update | LogACall | SendEmail | VisualforcePage | LightningComponent | Flow | InvocableAction | CustomVisualforce), associated record type, fields displayed.
 
 Salesforce API
-Tooling API + REST API, v66.0. `QuickActionDefinition` (Tooling) and `/sobjects/{sObject}/quickActions` (REST).
+Tooling API, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, Label, Type, EntityDefinitionId, OptionsCreateFeedItem, IconUrl, Description FROM QuickActionDefinition
-GET /services/data/v66.0/sobjects/{sObject}/quickActions/                 (per-sObject runtime list)
+POST /services/Soap/m/66.0  (readMetadata QuickAction)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Label, Type, ActionSubtype, EntityDefinitionId, SobjectType, TargetSobjectType, TargetField, TargetRecordTypeId, StandardLabel, OptionsCreateFeedItem, SuccessMessage, Description, NamespacePrefix, ManageableState, Language, Height, Width, IconId FROM QuickActionDefinition
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,17 +19,36 @@ Body
 None.
 
 Input (parameters)
-sObject (string, optional) - Limit to one sObject; "Global" for global actions.
-type (string|string[], optional) - Filter by quick action type.
-namePattern (string, optional).
-includeFields (boolean, optional, default false) - Include the action's layout fields.
+sObject (string, optional) - SobjectType exact filter for the quick action; string API
+name; no default means all scopes; example: Account or Global; do not pass labels,
+relationship names, wildcards, or SOQL fragments.
+type (string | string[], optional) - QuickActionDefinition Type filter; string or string
+array of v66 values such as Create, Update, SendEmail, Flow, LightningComponent, or
+VisualforcePage; no default; example: [\"Create\", \"Update\"]; do not pass labels or
+unsupported action subtypes.
+namePattern (string, optional) - DeveloperName filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: New_*; do not pass raw LIKE syntax,
+fullName values, or regex.
+includeMetadata (boolean, optional) - Whether to call Metadata API read for returned
+QuickAction full names; boolean; default false; example: true; pass false for a faster
+Tooling-only inventory.
+whereClause (string, optional) - Additional Tooling SOQL WHERE condition for
+QuickActionDefinition; string without WHERE; no default; example: ManageableState =
+'unmanaged'; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Tooling SOQL ORDER BY for QuickActionDefinition; string
+without ORDER BY; default SobjectType, DeveloperName; example: LastModifiedDate DESC; do
+not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum QuickActionDefinition rows to query; positive
+integer clamped to 2000; default 500; example: 100; do not pass 0, negatives, decimals,
+or offsets.
 
 Result
-totalSize (number).
-quickActions (array) - Each:
-  id, name, label, type, sObject ("Global" for global), description, iconUrl, recordTypeId (when applicable).
-  fields (array, when includeFields=true) - [{ fieldName, isRequired, defaultValue }].
-  invocableAction (object|null) - For Flow / InvocableAction types: { actionName, actionType, namespace }.
+Returns a JSON object with query, toolingResult, metadataFullNames, and optional
+metadataResult.
+query (value) - included in the JSON returned by the tool.
+toolingResult (value) - included in the JSON returned by the tool.
+metadataFullNames (value) - included in the JSON returned by the tool.
+metadataResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -41,4 +61,8 @@ Errors
 
 Example request
 
-list_quick_actions({ "sObject": "Account", "includeFields": true })
+list_quick_actions({
+  "sObject": "Account or Global",
+  "type": "[\\\"Create\\\", \\\"Update\\\"]",
+  "namePattern": "New_*"
+})

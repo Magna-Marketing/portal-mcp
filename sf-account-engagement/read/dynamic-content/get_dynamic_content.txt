@@ -10,7 +10,10 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/dynamic-contents/:id?fields={fields}
+GET https://{pi-domain}/api/v5/objects/dynamic-contents/{id}
+Optional query: fields
+GET https://{pi-domain}/api/v5/objects/dynamic-content-variations
+Optional query: fields, filter[dynamicContentId], limit
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -28,12 +31,8 @@ includeVariations (boolean, optional, default false) - When true,
   list_dynamic_content_variations is invoked for the same id.
 
 Result
-dynamicContent (object): id, name, folderId, basedOn,
-  basedOnProspectApiFieldId, trackerDomainId, embedCode, embedUrl,
-  baseContent, tagReplacementLanguage, isDeleted, createdAt, updatedAt.
-folder (object|null).
-variations (array, when includeVariations=true) - See
-  `list_dynamic_content_variations` shape.
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: variations.
 
 Required scopes
 - `pardot_api`.
@@ -49,10 +48,5 @@ Example request
 get_dynamic_content({ "id": 41, "includeVariations": true })
 
 Example result
-{
-  "dynamicContent": { "id": 41, "name": "Region greeting", "baseContent": "<p>Hello!</p>" },
-  "variations": [
-    { "id": 92, "comparison": "is", "operator": "EQUAL", "value1": "EMEA",
-      "content": "<p>Bonjour!</p>" }
-  ]
-}
+
+{ }

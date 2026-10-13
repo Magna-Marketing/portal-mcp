@@ -9,9 +9,11 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions/{id}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/key:{key}
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}?versionNumber=2
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{journey_id}
+Optional query: extras, versionNumber
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/key:{journey_key}
+Optional query: extras, versionNumber
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{eventDefinitionKey}
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,15 +23,20 @@ Body
 None.
 
 Input (parameters)
-journeyId (string, optional).
-journeyKey (string, optional).
-  One required.
-versionNumber (number, optional, default = latest).
-includeStats (boolean, optional, default false) - Include entry counts, current population.
+journey_id (string, optional) - Journey ID for version 1 of the journey. Required when journey_key is omitted.
+journey_key (string, optional) - Journey external key. Required when journey_id is omitted. Salesforce expects this as
+/interactions/key:{key}.
+version_number (number, optional) - Optional journey version number. If omitted, Salesforce returns the latest version.
+extras (value, optional) - Optional extra data to include: activities, outcome, stats, or all.
+include_audiences (boolean, optional) - When true, this tool also retrieves event definitions referenced by journey triggers and
+returns a composite JSON object with raw Salesforce responses.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-journey (object) - Verbatim journey definition: { id, key, name, description, version, status, workflowApiVersion, triggers (array), goals (array), activities (array): [{ key, name, type, configurationArguments, outcomes (array): [{ next, arguments }] }], lastPublishedDate, createdDate, modifiedDate, entryMode, defaults }.
-stats (object|null, when includeStats=true) - { totalEntries, currentPopulation, lastEntryDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
+journey (value) - included in the JSON returned by the tool.
+eventDefinitions (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `journeys_read`.
@@ -42,4 +49,4 @@ Errors
 
 Example request
 
-get_journey({ "journeyKey": "MTG_Welcome_Series" })
+get_journey({})

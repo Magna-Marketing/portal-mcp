@@ -6,15 +6,10 @@ add / remove / deactivate its values. Uses the Metadata API CRUD calls — NOT a
 deployRequest endpoint (which was incorrect in the original documentation).
 
 Salesforce API
-Metadata API, v66.0. Type: GlobalValueSet.
-CRUD-based calls via conn.metadata.create / update / upsert / delete.
+Metadata API (SOAP), v66.0.
 
-Endpoints (internal — called by jsforce Metadata client)
-POST   /services/data/v66.0/metadata/                        (create/update/upsert/delete)
-
-NOTE: The original doc listed "POST /services/data/v66.0/metadata/deployRequest".
-That is the deploy-based endpoint and is NOT used here. The Metadata API CRUD
-operations are the correct approach for GlobalValueSet.
+Endpoint
+POST /services/Soap/m/66.0  (readMetadata GlobalValueSet)
 
 Headers
 Authorization: Bearer <access_token>

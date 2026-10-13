@@ -6,18 +6,10 @@ Rule). Configures endpoint URL, fields included, and integration user used to
 authenticate the message.
 
 Salesforce API
-SOAP Metadata API, v66.0. Outbound messages are child records within the Workflow
-metadata container for the sObject.
-API: Read Workflow container → mutate outboundMessages array → create/update container.
-Use conn.metadata.read / create / update (jsforce).
+Metadata API (SOAP), v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
-
-Metadata structure
-The outbound message fullName stored in Salesforce is "SObjectName.MessageDeveloperName",
-e.g. "Opportunity.Notify_Partner_On_Won". The tool constructs this automatically from
-the sObject and fullName parameters.
+POST /services/Soap/m/66.0  (readMetadata Workflow)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
@@ -33,7 +25,10 @@ includeSessionId (boolean, optional, default false).
 useDeadLetterQueue (boolean, optional, default false).
 
 Result
-{ create | update | delete: <Metadata API SaveResult> }
+Returns the raw Metadata API create or update result, or a lookup-not-found JSON
+response.
+success (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".

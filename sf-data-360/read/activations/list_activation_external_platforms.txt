@@ -20,13 +20,10 @@ Body
 None.
 
 Input (parameters)
-platformType (string, optional).
-status (string, optional) - "Active" | "Paused" | "Failed".
+None.
 
 Result
-externalPlatforms (array) - Each: { id, name, label, platformType,
-  status, configuration (object), createdDate, lastModifiedDate,
-  targetCount }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,10 +39,5 @@ Example request
 list_activation_external_platforms({})
 
 Example result
-{
-  "externalPlatforms": [
-    { "id": "0YP580000000001", "name": "MTG_MCE_Default",
-      "platformType": "MarketingCloudEngagement",
-      "status": "Active", "targetCount": 4 }
-  ]
-}
+
+{ }

@@ -8,29 +8,31 @@ Get the status / validation result of a file import queued by
 - validationresult: detailed per-row validation errors.
 
 Marketing Cloud API
-REST API (`/data/v1/async/import/{id}/...`).
+SOAP API.
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import/{operationId}/summary
-GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import/{operationId}/validationsummary
-GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/import/{operationId}/validationresult
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+SOAP object: ImportResultsSummary
 
 Headers
 Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
 Accept: application/json
 
 Body
-None.
+SOAP request on ImportResultsSummary.
 
 Input (parameters)
-operationId (string, required).
-view (string, optional, default "summary") - "summary" | "validationsummary" | "validationresult".
-limit (number, optional, default 1000) - Only for `validationresult`.
+task_result_id (value, optional) - TaskResultID returned by starting or queueing an ImportDefinition. Preferred lookup.
+operation_id (value, optional) - Alias for task_result_id for compatibility with older docs.
+import_definition_customer_key (string, optional) - Optional ImportDefinitionCustomerKey lookup when TaskResultID is unavailable.
+properties (string[], optional) - Optional SOAP property projection for ImportResultsSummary retrieve.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context.
 
 Result
-For summary: { operationId, status ("Pending"|"InProgress"|"Complete"|"Failed"|"Cancelled"), startedAt, completedAt, totalRows, totalProcessed, totalErrors, totalDuplicates, totalSkipped, fileName }.
-For validationsummary: { rules: [{ ruleName, errorCount, sampleMessage }] }.
-For validationresult: { errors: [{ rowNumber, errorMessage, fieldName, ruleName }], hasMore }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_read`.
@@ -43,4 +45,4 @@ Errors
 
 Example request
 
-get_file_import_status({ "operationId": "abc123-def456", "view": "summary" })
+get_file_import_status({})

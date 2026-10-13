@@ -11,8 +11,10 @@ Marketing Cloud API
 REST API (`/interaction/v1/eventDefinitions`).
 
 Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/{event_definition_id}
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{event_definition_id}
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{event_definition_key}
 GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{eventDefinitionKey}
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,13 +24,19 @@ Body
 None.
 
 Input (parameters)
-eventDefinitionKey (string, optional) - Get a single event definition.
-type (string|string[], optional) - "APIEvent" | "DataExtension" | "SalesforceObject" | "AudienceBuilder" | "ContactEvent".
-namePattern (string, optional).
+event_definition_id (string, optional) - Optional event definition ID. When supplied, the tool calls GET
+/interaction/v1/eventDefinitions/{id}.
+event_definition_key (string, optional) - Optional eventDefinitionKey. When supplied, the tool calls GET
+/interaction/v1/eventDefinitions/key:{key}.
+name (string, optional) - Optional official Salesforce name query parameter. Salesforce searches the full event
+definition name for this value.
+page (number, optional) - Salesforce $page value for collection requests. Defaults to 1.
+page_size (number, optional) - Salesforce $pageSize value for collection requests. Defaults to 50, maximum 50.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-totalCount (number).
-items (array) - { id, key, name, description, type, mode, isVisibleInPicker, dataExtensionId, dataExtensionName, sourceApplicationExtensionId, schema (object) - { fields: [...] }, createdDate, modifiedDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -41,4 +49,4 @@ Errors
 
 Example request
 
-list_event_definitions({ "type": "APIEvent" })
+list_event_definitions({})

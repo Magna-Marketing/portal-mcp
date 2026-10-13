@@ -9,30 +9,38 @@ Marketing Cloud API
 REST API (`/contacts/v1/contacts/actions/delete`).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/actions/delete?type=keys
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/addresses/email/search
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/actions/delete
+Optional query: type
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "values": ["MEM-100023"],
-  "DeleteOperationType": "ContactAndAttributes"
-}
+POST: channelAddressList, maximumCount
 
 Input (parameters)
-contactKeys (string[], optional).
-contactIds (number[], optional).
-emails (string[], optional).
-  One required.
-operationType (string, optional, default "ContactAndAttributes") - "ContactOnly" | "ContactAndAttributes".
-deleteFromAllChannelAddresses (boolean, optional, default true).
+contact_keys (string[], optional) - ContactKey values to delete via type=keys.
+contact_ids (value[], optional) - ContactID values to delete via type=ids.
+emails (string[], optional) - Email addresses to resolve via POST /contacts/v1/addresses/email/search, then delete by
+resolved contactKey.
+list_reference (object, optional) - Delete contacts from a list/data extension via type=listReference.
+operation_type ("ContactAndAttributes" | "AttributesOnly", optional) - Salesforce DeleteOperationType. For enterprise-level deletes, Salesforce documents
+ContactAndAttributes.
+delete_list_when_completed (boolean, optional) - For listReference deletes, whether Salesforce should delete the source list when the
+operation completes.
+delete_list_contents_when_completed (boolean, optional) - For listReference deletes, whether Salesforce should clear the source list contents when
+the operation completes.
+maximum_email_matches (number, optional) - Maximum contact keys to resolve per email address when emails are supplied.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Contacts REST request.
 
 Result
-operationId (string) - Track via `/contacts/v1/contacts/actions/delete/processStatus/{operationId}`.
-status (string) - "Pending" | "Processing" | "Complete".
-counts (object) - { requested, queued, failed }.
+Raw Marketing Cloud response JSON, returned unchanged.
+email_search_response (value) - included in the JSON returned by the tool.
+delete_response (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `audiences_write`.
@@ -47,7 +55,4 @@ Errors
 
 Example request
 
-delete_contact({
-  "contactKeys": ["MEM-100023"],
-  "operationType": "ContactAndAttributes"
-})
+delete_contact({})

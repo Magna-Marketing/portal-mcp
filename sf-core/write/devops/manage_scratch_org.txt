@@ -7,49 +7,68 @@ loops. Definition includes edition, features, namespace, and
 post-create config.
 
 Salesforce API
-Tooling API, v66.0. `ScratchOrgInfo`.
+REST API (Data), v66.0.
 
 Endpoint
-POST   /services/data/v66.0/tooling/sobjects/ScratchOrgInfo
-DELETE /services/data/v66.0/tooling/sobjects/ScratchOrgInfo/{id}
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "OrgName": "MTG Dev",
-  "Edition": "Developer",
-  "Country": "US",
-  "ExpirationDate": "2026-05-29",
-  "Features": "EnableSetPasswordInApi;Communities",
-  "AdminEmail": "ops@magnatech.com",
-  "Description": "MTG dev scratch",
-  "ConnectedAppConsumerKey": "...",
-  "ConnectedAppCallbackUrl": "..."
-}
+JSON fields: OrgName, Edition, Country, DurationDays, AdminEmail, Features, Description, Namespace, ConnectedAppConsumerKey, ConnectedAppCallbackUrl, Username, Language, HasSampleData, Release, Snapshot, SourceOrg.
 
 Input (parameters)
-operation (string, required) - "create" | "delete".
-scratchOrgInfoId (string, optional, required for delete).
-orgName (string, required for create).
-edition (string, required for create) - "Developer" | "Enterprise" | "Group" | "Professional".
-country (string, optional, default "US").
-expirationDays (number, optional, default 7, max 30).
-adminEmail (string, optional).
-features (string, optional) - Semicolon-separated.
-description (string, optional).
-namespace (string, optional).
-connectedAppConsumerKey (string, optional).
-connectedAppCallbackUrl (string, optional).
+operation ("create" | "update" | "delete", required) - Action to perform; enum create,
+update, or delete; required; example \"create\"; do not pass status-only actions.
+scratchOrgInfoId (string, optional) - ScratchOrgInfo record Id; Salesforce Id string;
+required for update/delete; example \"2SR...\"; do not pass the created scratch org Id.
+orgName (string, optional) - Scratch org display name; string; required for create;
+example \"Feature Dev\"; avoid names that do not identify the work.
+edition (string, optional) - Scratch org edition; enum string; required for create
+unless snapshot or sourceOrg is used; example \"Developer\"; do not combine with
+snapshot or sourceOrg.
+country (string, optional) - Country code; string; defaults to US; example \"US\"; pass
+a valid Salesforce-supported country code.
+durationDays (number, optional) - Days until expiration; integer 1-30; defaults to 7;
+example 14; do not exceed Dev Hub limits.
+expirationDays (number, optional) - Alias for durationDays; integer 1-30; ignored when
+durationDays is set; example 7; prefer durationDays.
+adminEmail (string, optional) - Scratch org admin email; email string; optional; example
+\"admin@example.com\"; do not pass unverified or malformed emails.
+features (string | string[], optional) - Enabled features; semicolon string or string
+array; optional; example [\"Communities\",\"PersonAccounts\"]; do not pass unsupported
+feature names.
+description (string, optional) - ScratchOrgInfo description; string; optional; example
+\"PR 123 validation org\"; avoid secrets.
+namespace (string, optional) - Namespace to attach; string; optional; example \"acme\";
+do not pass a namespace unavailable to the Dev Hub.
+connectedAppConsumerKey (string, optional) - Connected app consumer key; string;
+optional; example \"3MVG9...\"; only pass keys intended for scratch org auth flows.
+connectedAppCallbackUrl (string, optional) - Connected app callback URL; URL string;
+optional; example \"http://localhost:1717/OauthRedirect\"; do not pass non-URL values.
+username (string, optional) - Requested admin username; username/email-like string;
+optional; example \"dev@example.com\"; Salesforce can still alter generated usernames.
+language (string, optional) - Language code; string; optional; example \"en_US\"; do not
+pass locale names.
+hasSampleData (boolean, optional) - Whether sample data is included; boolean; optional;
+example true; omit for Salesforce default behavior.
+release (string, optional) - Release track; enum Current, Previous, or Preview;
+optional; example \"Preview\"; only meaningful during release transitions.
+snapshot (string, optional) - Scratch org snapshot name or Id; string; optional; example
+\"BaseSnapshot\"; do not combine with edition or sourceOrg.
+sourceOrg (string, optional) - Source org Id for org-shape creation; Salesforce Id
+string; optional; example \"00D...\"; do not combine with edition or snapshot.
+fetchResult (boolean, optional) - Whether to query ScratchOrgInfo after create/update;
+boolean; defaults to true; example false; set false to reduce API calls.
 
 Result
-scratchOrgInfoId (string).
-status (string).
-username (string|null) - Populated when status=Active.
-authCode (string|null) - One-time exchange for OAuth tokens; expires fast.
-loginUrl (string|null).
+raw sObject write response with optional ScratchOrgInfo query response.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Dev Hub" + run from a Dev Hub org.
@@ -64,9 +83,5 @@ Errors
 Example request
 
 manage_scratch_org({
-  "operation": "create",
-  "orgName": "MTG Dev",
-  "edition": "Developer",
-  "expirationDays": 7,
-  "features": "EnableSetPasswordInApi;Communities"
+  "operation": "example"
 })

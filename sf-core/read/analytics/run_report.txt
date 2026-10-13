@@ -47,18 +47,8 @@ overrideStandardDateFilter (object, optional) - { column, durationValue }.
 overrideTopRows (object, optional) - { columnName, sortOrder, count }.
 
 Result
-Salesforce Analytics report-instance JSON, verbatim:
-attributes (object) - { type, reportId, reportName, ... }.
-reportMetadata (object) - The metadata used for this run (post-overrides).
-reportTypeMetadata (object) - Categories/joinedReports info.
-factMap (object) - Keyed by grouping path (e.g. "T!T", "0!T", "0_0!T"):
-  aggregates (array) - Grouping aggregates with `value` and `label`.
-  rows (array, when includeDetails=true) - Detail rows; each row:
-    dataCells: [{ value, label }] aligned with reportMetadata.detailColumns.
-groupingsAcross (object) - Column groupings.
-groupingsDown (object) - Row groupings.
-hasDetailRows (boolean).
-allData (boolean) - false when result was truncated to 2,000 rows.
+raw Analytics report run JSON with attributes, reportMetadata, reportTypeMetadata,
+reportExtendedMetadata, factMap, groupings, hasDetailRows, and allData.
 
 Required permissions
 - "API Enabled".

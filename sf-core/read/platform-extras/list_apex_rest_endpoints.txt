@@ -6,11 +6,10 @@ defined in Apex classes. Useful for understanding the org's bespoke
 REST surface, accessible at `/services/apexrest/<urlMapping>`.
 
 Salesforce API
-Tooling API, v66.0. SOQL on `ApexClass` body parsed for the
-`@RestResource` annotation.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, Body, ApiVersion, Status,BodyCrc,IsValid,LengthWithoutComments,NamespacePrefix FROM ApexClass
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ApiVersion, Status, IsValid, Body, BodyCrc, LengthWithoutComments FROM ApexClass
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,12 +19,30 @@ Body
 None.
 
 Input (parameters)
-includeManaged (boolean, optional, default false).
-namespacePrefix (string, optional).
+includeManaged (boolean, optional) - Whether managed-package classes are included;
+boolean; default false so NamespacePrefix must be null; example: true; do not pass
+strings such as \"true\" or expect package filtering when namespacePrefix is also set.
+namespacePrefix (string, optional) - Managed package namespace to match exactly; string
+API namespace; no default; example: acme; pass an empty value to ignore it, and do not
+pass wildcard, comma-separated, or label values.
+pattern (string, optional) - Apex class name pattern; string using * and ? wildcards
+converted to SOQL LIKE; no default; example: Account*Rest; do not pass regex or raw LIKE
+syntax.
+whereClause (string, optional) - Additional ApexClass SOQL WHERE condition; string with
+or without WHERE; no default; example: Status = 'Active'; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - ApexClass SOQL ORDER BY clause; string with or without
+ORDER BY; default Name ASC; example: ApiVersion DESC, Name ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ApexClass rows to return; integer from 1 to 2000;
+default 200; example: 50; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-apexRestEndpoints (array) - { className, classId, namespacePrefix, urlMapping (string), httpMethods (string[]) - "GET" | "POST" | "PUT" | "PATCH" | "DELETE" found via @HttpGet/@HttpPost/etc., methodNames (object) - { GET, POST, PUT, PATCH, DELETE: methodName }, apiVersion, status }.
+raw Salesforce Tooling QueryResult for ApexClass records with Body included.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Author Apex" / "View All Data".
@@ -38,4 +55,8 @@ Errors
 
 Example request
 
-list_apex_rest_endpoints({})
+list_apex_rest_endpoints({
+  "includeManaged": true,
+  "namespacePrefix": "acme",
+  "pattern": "Account*Rest"
+})

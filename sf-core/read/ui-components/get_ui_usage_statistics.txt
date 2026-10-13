@@ -10,15 +10,10 @@ Org-wide UI inventory and usage statistics:
 Use as a once-a-quarter dashboard input or before a UI cleanup project.
 
 Salesforce API
-Tooling API + Lightning Usage REST endpoints, v66.0.
-- `AuraDefinitionBundle`, `ApexPage`, `FlexiPage` for inventory.
-- `LightningUsageByPageMetrics`, `LightningUsageByFlexiPageMetrics`
-  (`/services/data/v66.0/lightning/...`) for actual user-traffic stats.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT COUNT() FROM AuraDefinitionBundle
-GET /services/data/v66.0/tooling/query/?q=SELECT COUNT() FROM ApexPage
-GET /services/data/v66.0/tooling/query/?q=SELECT COUNT() FROM FlexiPage
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -28,25 +23,25 @@ Body
 None.
 
 Input (parameters)
-includeUsageMetrics (boolean, optional, default true) - Pull traffic
-  stats from Lightning Usage. Requires "Modify All Data" or specific
-  permset.
-sinceDays (number, optional, default 30) - Window for traffic stats.
-includeBreakdownByApi (boolean, optional, default true).
+includeUsageMetrics (boolean, optional) - Whether to include a sampled
+MetadataComponentDependency count; boolean; default false; example: true; do not expect
+runtime traffic or page-view analytics.
+sinceDays (integer, optional) - Optional recent LastModifiedDate window for additional
+counts; positive integer days; no default; example: 30; do not pass decimals, negative
+values, or date strings.
+includeBreakdownByApi (boolean, optional) - Whether to include ApiVersion aggregate
+queries where the object supports ApiVersion; boolean; default false; example: true; do
+not use for FlexiPage because it has no ApiVersion field.
+componentType (string, optional) - Optional focus family for clients; string value lwc,
+aura, visualforce, or flexipage; no default and does not suppress other count queries;
+example: lwc; do not pass arrays.
 
 Result
-generatedAt (string).
-inventory (object):
-  aura (object) - { total, custom, managed, byApiVersion: { "62.0": 30 } }.
-  visualforce (object) - { total, custom, managed }.
-  flexiPage (object) - { total, byType: { "RecordPage": ..., "AppPage": ... } }.
-flexiPageStats (object):
-  averageComponentsPerPage (number).
-  medianComponentsPerPage (number).
-  maxComponentsOnAnyPage (number).
-  pageWithMost (object) - { name, label, count }.
-trafficStats (object|null, when includeUsageMetrics=true) - { topPages: [{ pageName, views, uniqueUsers }], topAppPages, dailyAverage }.
-apiVersionDistribution (object) - Across Aura components.
+raw Salesforce QueryResults for count and optional aggregate queries.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application", "View All Setup".
@@ -63,4 +58,8 @@ Errors
 
 Example request
 
-get_ui_usage_statistics({ "includeUsageMetrics": false })
+get_ui_usage_statistics({
+  "includeUsageMetrics": true,
+  "sinceDays": 30,
+  "includeBreakdownByApi": true
+})

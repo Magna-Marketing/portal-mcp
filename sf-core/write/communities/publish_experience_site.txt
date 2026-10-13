@@ -5,8 +5,8 @@ Publish (deploy) the staged content of an Experience site to its live URL.
 Required after editing pages, branding, or navigation in ExperienceBundle.
 
 Salesforce API
-Connect REST API, v66.0. POST /connect/communities/{communityId}/publish.
-Available since API version 46.0.
+Connect REST API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/connect/communities/{communityId}/publish

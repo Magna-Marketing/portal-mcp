@@ -6,10 +6,10 @@ release labels and root URLs. Use to validate that a chosen `apiVersion`
 in tools is supported.
 
 Salesforce API
-REST API, v66.0. `GET /services/data`.
+Salesforce API, v66.0.
 
 Endpoint
-GET /services/data
+GET /services/data/
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,8 +22,7 @@ Input (parameters)
 None.
 
 Result
-versions (array) - Each: { version (string, e.g. "66.0"), label (string, e.g. "Spring '26"), url ("/services/data/v66.0") }.
-latest (string) - Highest version.
+Returns the raw Salesforce versions array with label, url, and version values.
 
 Required permissions
 - "API Enabled".

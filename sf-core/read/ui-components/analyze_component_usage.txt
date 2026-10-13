@@ -8,14 +8,10 @@ and `RefMetadataComponentId` to read the referenced metadata and determine
 where the component is used. Use to safely change or remove a component.
 
 Salesforce API
-Tooling API, v66.0. `MetadataComponentDependency` filtered to FlexiPage
-parents, plus FlexiPage metadata reads for identifier/region.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency
-GET /services/data/v66.0/tooling/sobjects/FlexiPage/{RefMetadataComponentId}     (per match)
-GET /services/data/v66.0/tooling/sobjects/ApexPage/{RefMetadataComponentId}    
-GET /services/data/v66.0/tooling/sobjects/LightningComponentBundle/{RefMetadataComponentId}    
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency
 
 Headers
 Authorization: Bearer <access_token>
@@ -25,27 +21,35 @@ Body
 None.
 
 Input (parameters)
-name (string, required) - Component name (LWC DeveloperName,
-  "lightning:relatedList", etc.).
-type (string, required) - "LightningComponentBundle" | "AuraDefinitionBundle"
-  | "ApexPage" | "StandardLightningComponent".
-includePropertyValues (boolean, optional, default true).
+name (string, optional) - Metadata component name to resolve; string exact DeveloperName
+or Name for the selected type; optional when scanning with whereClause; example:
+accountSummary; do not pass file paths or labels.
+componentName (string, optional) - Alias for name; string exact component name; ignored
+when name is present; example: Account_Record_Page; do not pass multiple names.
+type (string, optional) - Metadata component type to resolve; string such as lwc, aura,
+visualforce, flexipage, LightningComponentBundle, AuraDefinitionBundle, ApexPage, or
+FlexiPage; default LightningComponentBundle; example: aura; do not pass labels.
+componentType (string, optional) - Alias for type; string metadata component type;
+ignored when type is present; example: visualforce; do not pass multiple values.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+MetadataComponentDependency; string with or without WHERE; no default; example:
+RefMetadataComponentType = 'FlexiPage'; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for MetadataComponentDependency; string with
+or without ORDER BY; no default; example: MetadataComponentType ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum dependency rows to return; integer from 1 to 2000;
+default 200; example: 200; do not pass offsets, decimals,.
 
 Result
-size (number).
-totalSize (number).
-done (boolean).
-queryLocator (string|null).
-entityTypeName (string) - "MetadataComponentDependency".
-records (array) - Each MetadataComponentDependency record:
-  attributes (object) - { type, url }.
-  Id (string).
-  MetadataComponentId (string).
-  MetadataComponentName (string).
-  MetadataComponentType (string).
-  RefMetadataComponentId (string).
-  RefMetadataComponentName (string).
-  RefMetadataComponentType (string).
+raw Salesforce QueryResult from MetadataComponentDependency with optional resolved
+component Id metadata.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+resolvedComponentId (value) - included in the JSON returned by the tool.
+result (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -58,4 +62,8 @@ Errors
 
 Example request
 
-analyze_component_usage({ "name": "projectCard", "type": "LightningComponentBundle" })
+analyze_component_usage({
+  "name": "accountSummary",
+  "componentName": "Account_Record_Page",
+  "type": "aura"
+})

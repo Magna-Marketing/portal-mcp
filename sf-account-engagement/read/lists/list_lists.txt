@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/lists?fields={fields}&filter[isPublic]=eq,true
+GET https://{pi-domain}/api/v5/objects/lists
+Optional query: fields, filter[campaignId], filter[folderId], filter[isCrmVisible], filter[isDeleted], filter[isDynamic], filter[isPublic], filter[name], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,24 +21,21 @@ Body
 None.
 
 Input (parameters)
-isDynamic (boolean, optional).
-isPublic (boolean, optional).
-isCrmVisible (boolean, optional).
-folderId (number, optional).
-campaignId (number, optional).
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,description,isPublic,
-  isDynamic,isCrmVisible,folderId,campaignId,createdAt,updatedAt,
-  createdById,updatedById,salesforceId,isDeleted,title).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+isDynamic (boolean, optional) - Filter to dynamic (criteria-based) or static lists.
+isPublic (boolean, optional) - Filter to public (self-subscribe enabled) lists.
+isCrmVisible (boolean, optional) - Filter to lists visible in the connected CRM.
+folderId (number, optional) - Filter by folder id.
+campaignId (number, optional) - Filter by campaign id.
+nameContains (string, optional) - Filter lists whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted lists. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, description, isPublic, isDynamic, isCrmVisible,
+folderId, campaignId, createdAt, updatedAt, createdById, updatedById, salesforceId,
+isDeleted, title.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-lists (array) - Each: { id, name, description, isPublic, isDynamic,
-  isCrmVisible, folderId, campaignId, salesforceId, title,
-  isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -50,12 +48,8 @@ Errors
 
 Example request
 
-list_lists({ "isDynamic": true })
+list_lists({})
 
 Example result
-{
-  "lists": [
-    { "id": 301, "name": "Active customers", "isDynamic": true,
-      "isPublic": true, "campaignId": 1024 }
-  ]
-}
+
+{ }

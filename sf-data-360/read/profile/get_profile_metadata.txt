@@ -6,27 +6,25 @@ with their searchable identifiers and relationships. Used as a
 discovery endpoint before calling `get_profile_record`.
 
 Salesforce API
-Connect plane (default) or runtime plane.
+Runtime plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/profile/metadata           (plane="connect", default)
-GET {cdpTenantUrl}/api/v1/profile/metadata                             (plane="runtime")
+GET {instanceUrl}/api/v1/metadata
+Optional query: entityType, entityCategory
 
 Headers
-Authorization: Bearer <core_access_token>      (connect)
-Authorization: Bearer <data_cloud_token>       (runtime)
+Authorization: Bearer <data_cloud_token>
 Accept: application/json
 
 Body
 None.
 
 Input (parameters)
-plane (string, optional, default "connect").
-dataSpace (string, optional, default "default").
+entityName (string, optional) - Optional Profile DMO API name to filter the metadata response, for example
+`ssot__Individual__dlm` or `Individual__dlm`.
 
 Result
-profileObjects (array) - Each: { dmoApiName, label, primaryKeyField,
-  searchableFields (array), relationships (array<{ name, toDmo }>) }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (connect) or `cdp_profile_api_read` (runtime).
@@ -42,13 +40,5 @@ Example request
 get_profile_metadata({})
 
 Example result
-{
-  "profileObjects": [
-    { "dmoApiName": "UnifiedIndividual__dlm",
-      "primaryKeyField": "Id__c",
-      "searchableFields": ["Id__c","EmailAddress__c"],
-      "relationships": [
-        { "name": "EngagementHistory", "toDmo": "EngagementHistory__dlm" }
-      ] }
-  ]
-}
+
+{ }

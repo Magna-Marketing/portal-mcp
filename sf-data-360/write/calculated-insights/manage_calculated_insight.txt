@@ -32,19 +32,25 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-apiName (string, required).
-label (string, required for create).
-dataSpace (string, optional, default "default").
-refreshFrequency (string, optional, default "Daily") - "Hourly" |
-  "Daily" | "Weekly" | "OnDemand".
-sql (string, required for create).
-measures (array, required for create).
-dimensions (array, required for create).
+operation ("create" | "update" | "delete", required) - The operation to perform: create, update, or delete
+apiName (string, required) - API name of the calculated insight. Used as the identifier for update/delete and as the
+name for create. Note: Salesforce appends '__cio' to the name on creation.
+definitionType ("CALCULATED_METRIC" | "EXTERNAL_METRIC" | "STREAMING_METRIC", optional) - Type of calculated insight definition. Required for create. CALCULATED_METRIC is the
+standard type for SQL-based insights.
+displayName (string, optional) - Human-readable display label for the calculated insight
+dataSpaceName (string, optional) - Data space name for the calculated insight (e.g. 'default')
+description (string, optional) - Optional description of what the calculated insight measures
+expression (string, optional) - SQL SELECT query that defines the calculated insight logic. Measures and dimensions are
+derived automatically by Salesforce from this expression.
+publishScheduleInterval ("One" | "Six" | "Twelve" | "TwentyFour" | "NotScheduled" | "ExternallyManaged" | "Streaming" | "SystemManaged", optional) - How often the calculated insight is published. One=hourly, Six=every 6h, Twelve=every
+12h, TwentyFour=daily, NotScheduled=paused.
+publishScheduleStartDateTime (string, optional) - ISO 8601 datetime when the publish schedule starts, e.g. '2025-12-11T12:00'. Required
+when setting a publishScheduleInterval.
+publishScheduleEndDate (string, optional) - Date when the publish schedule ends, e.g. '2026-12-31'. Omit or set to null for no end
+date.
 
 Result
-calculatedInsight (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -58,18 +64,10 @@ Errors
 Example request
 
 manage_calculated_insight({
-  "operation": "create",
-  "apiName": "CustomerLTV__cio",
-  "label": "Customer LTV",
-  "sql": "SELECT IndividualId__c, SUM(Amount__c) AS LifetimeValue__c FROM Order__dlm GROUP BY IndividualId__c",
-  "measures": [{ "apiName": "LifetimeValue__c", "dataType": "DECIMAL", "aggregation": "SUM" }],
-  "dimensions": [{ "apiName": "IndividualId__c", "dataType": "TEXT" }]
+  "operation": "",
+  "apiName": ""
 })
 
 Example result
-{
-  "calculatedInsight": {
-    "apiName": "CustomerLTV__cio",
-    "status": "Active", "refreshFrequency": "Daily"
-  }
-}
+
+{ }

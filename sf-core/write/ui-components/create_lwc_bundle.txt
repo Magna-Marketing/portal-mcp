@@ -7,16 +7,9 @@ Create a new Lightning Web Component (LWC) bundle. Supply either a
 Templates: basic (default), record, list, datatable, form.
 
 Salesforce API
-Tooling API, v66.0. Direct CRUD (no MetadataContainer needed).
-- POST LightningComponentBundle to create the bundle record.
-- POST LightningComponentResource once per file.
+Tooling API, v66.0.
 
-Correction vs. original doc: The original doc referenced MetadataContainer +
-ContainerAsyncRequest. As of API v45.0+, direct CRUD on
-LightningComponentBundle and LightningComponentResource is fully supported
-and does not require a MetadataContainer.
-
-Endpoints
+Endpoint
 POST /services/data/v66.0/tooling/sobjects/LightningComponentBundle
 POST /services/data/v66.0/tooling/sobjects/LightningComponentResource
 
@@ -46,24 +39,52 @@ LightningComponentResource Format values (confirmed from Salesforce docs):
   The meta XML file uses Format: "xml" with FilePath ending in ".js-meta.xml".
 
 Input (parameters)
-componentName (string, required) - DeveloperName. Start with lowercase letter,
-  alphanumeric + underscores only, max 40 chars.
-masterLabel (string, required) - Human-readable label.
-description (string, optional) - Max 255 chars.
-template (string, optional, default "basic") - "basic" | "record" | "list"
-  | "datatable" | "form". Ignored when files are provided.
-isExposed (boolean, optional, default true) - Expose in Lightning App Builder.
-apiVersion (number, optional, default 66.0) - Bundle API version.
-files (object, optional) - Explicit file contents overriding template:
-  html (string, optional) - Must start with <template>.
-  js (string, optional) - Must export a default LightningElement class.
-  css (string, optional).
-  xml (string, optional) - *.js-meta.xml content.
-  svg (string, optional).
+componentName (string, required) - Represents the LWC bundle fullName and developer
+name; string starting with a lowercase letter, using only letters, numbers, and
+underscores, maximum 40 characters; no default; example: accountSummary; do not pass
+spaces, hyphens, namespace prefixes, or names ending in double underscores.
+masterLabel (string, required) - Represents the component label shown in Setup and
+builders; string up to 255 characters; no default; example: Account Summary; do not pass
+the API name when a user-facing label is intended.
+description (string, optional) - Represents the user-facing component description;
+string up to 255 characters; default is a template description; example: Shows key
+account metrics; do not pass HTML or long documentation.
+template ("basic" | "record" | "list" | "datatable" | "form", optional) - Represents the
+starter file set to generate when files is omitted; enum basic, record, list, datatable,
+or form; defaults to basic; example: record; do not pass custom template names.
+isExposed (boolean, optional) - Represents whether generated metadata exposes the
+component to builders and other namespaces; boolean; defaults to true; example: false;
+do not rely on this when explicit xml is supplied because the XML content controls
+exposure.
+apiVersion (number, optional) - Represents the LightningComponentBundle metadata
+apiVersion; number; defaults to 66.0; example: 66.0; do not pass versions above 66.0.
+files (object, optional) - Represents explicit resource file contents; object keyed by
+html, js, css, xml, or svg; when present it overrides template generation; example:
+{\"js\":\"...\",\"xml\":\"...\"}; do not pass empty objects unless template output is
+desired.
+  html (string, optional) - Represents the HTML template source; string wrapped in a
+  root <template>; default comes from template or is omitted; example:
+  <template><p>Hello</p></template>; do not pass multiple root templates.
+  js (string, optional) - Represents the JavaScript controller source; string content
+  for componentName.js; default comes from template or is omitted; example: import {
+  LightningElement } from 'lwc'; export default class AccountSummary extends
+  LightningElement {}; do not pass a file path or base64 content.
+  css (string, optional) - Represents stylesheet source; string CSS content; default
+  comes from template or is omitted; example: :host { display: block; }; do not pass
+  external URLs.
+  xml (string, optional) - Represents the component meta XML source; string content for
+  componentName.js-meta.xml; default comes from template or is omitted; example:
+  <LightningComponentBundle
+  xmlns=\"http://soap.sforce.com/2006/04/metadata\"><apiVersion>66.0</apiVersion></LightningComponentBundle>;
+  do not pass JSON.
+  svg (string, optional) - Represents custom icon SVG source; string SVG content;
+  default is omitted; example: <svg viewBox=\"0 0 52 52\"></svg>; do not pass binary
+  image data.
 
-Result (raw Tooling API responses)
-bundle (object) - { id, success, errors } from POST LightningComponentBundle.
-resources (object) - Map of fileName → { id, success, errors } from each POST.
+Result
+object with raw bundleResult and resourceResults Tooling API responses.
+bundleResult (value) - included in the JSON returned by the tool.
+resourceResults (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -80,8 +101,6 @@ Errors
 Example request
 
 create_lwc_bundle({
-  "componentName": "projectCard",
-  "masterLabel": "Project Card",
-  "template": "record",
-  "isExposed": true
+  "componentName": "accountSummary",
+  "masterLabel": "Account Summary"
 })

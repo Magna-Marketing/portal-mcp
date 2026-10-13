@@ -13,21 +13,13 @@ Component types include `Bar`, `Column`, `Line`, `Pie`, `Donut`,
 `Funnel`, `Scatter`, `Gauge`, `Metric`, `Table`.
 
 Salesforce API
+Metadata API (SOAP), v66.0.
 Analytics REST API, v66.0.
 
-Corrections vs. original documentation:
-- There is NO dedicated /components sub-resource on the dashboard endpoint.
-  The old implementation's use of POST/PATCH/DELETE on
-  /analytics/dashboards/{id}/components is INCORRECT.
-- The correct approach is a read-modify-write pattern:
-  1. GET /analytics/dashboards/{id}/describe  — read current dashboardMetadata.
-  2. Modify the `components` array (or `layout`) in memory.
-  3. PATCH /analytics/dashboards/{id} with { dashboardMetadata: { components, layout } }.
-- The `layout` operation replaces `dashboardMetadata.layout` (not a component-level property).
-
-Endpoints
-GET   /services/data/v66.0/analytics/dashboards/{dashboardId}/describe     (read metadata)
-PATCH /services/data/v66.0/analytics/dashboards/{dashboardId}              (write back changes)
+Endpoint
+GET /services/data/v66.0/analytics/dashboards/{dashboardId}/describe
+PATCH /services/data/v66.0/analytics/dashboards/{dashboardId}
+POST /services/Soap/m/66.0  (updateMetadata)
 
 Headers
 Authorization: Bearer <access_token>
@@ -52,28 +44,38 @@ Body (PATCH — add component example)
 }
 
 Input (parameters)
-operation (string, required) - "list" | "describe" | "add" | "update" | "remove" | "layout".
-dashboardId (string, required).
-componentId (string, required for describe / update / remove).
-component (object, required for add / update) - Component definition:
-  componentType (string), header (string), report (string ID),
-  groupingColumn (string), aggregateColumn (string),
-  displayUnits ("Auto"|"Thousands"|"Millions"|"Billions"|"Trillions"),
-  drillEnabled (boolean), drillToFilter (boolean), drillToUrl (string),
-  filterColumns (array), legendPosition ("Bottom"|"Right"|"OnChart"|"Hidden"),
-  showPercentage (boolean), showValues (boolean), useReportChart (boolean).
-layout (object, required for layout) - Full replacement layout object:
-  { columns: [{ components: [{ id, columnSpan, rowSpan }] }] }.
-confirm (boolean, required for remove) - Must be true.
+operation ("list" | "describe" | "add" | "update" | "remove" | "layout", required) -
+Component operation. 'list' returns all components. 'describe' returns one component by
+componentId. 'add' appends a new component. 'update' merges fields into an existing
+component by componentId. 'remove' deletes a component (requires confirm: true).
+'layout' replaces the dashboard layout object.
+dashboardId (string, required) - 18-character Salesforce dashboard ID, e.g.
+'01Z5g000000ABCd'.
+componentId (string, optional) - 18-character component ID; required for describe,
+update, and remove.
+component (unknown, optional) - Component definition for 'add' (full object) or 'update'
+(partial merge). Omit null fields entirely — do not pass null values.
+layout (object, optional) - For 'layout' operation: full replacement layout object. For
+'add' on Lightning grid dashboards: a placement object { colspan, column, row, rowspan }
+(integers) that is appended to layout.components.
+confirm (boolean, optional) - Required true for 'remove' to confirm permanent deletion.
+dryRun (boolean, optional) - When true, return the PATCH request body that would be sent
+instead of executing it. Use to diagnose payload issues.
 
-Result (list)
-{ dashboardId, totalCount, components: [{ id, componentType, header, report, groupingColumn }] }
-
-Result (describe)
-{ dashboardId, component: <full component object> }
-
-Result (add / update / remove / layout)
-Raw PATCH response from the API — the updated dashboardMetadata.
+Result
+raw component metadata for list/describe or raw Salesforce dashboard save response for
+write operations.
+dryRun (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+success (value) - included in the JSON returned by the tool.
+dashboardId (value) - included in the JSON returned by the tool.
+addedComponent (value) - included in the JSON returned by the tool.
+componentCount (value) - included in the JSON returned by the tool.
+components (value) - included in the JSON returned by the tool.
+componentId (value) - included in the JSON returned by the tool.
+updatedComponent (value) - included in the JSON returned by the tool.
+body (value) - included in the JSON returned by the tool.
+warning (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Dashboards" (or "Modify All Data").
@@ -88,29 +90,9 @@ Errors
 - DASHBOARD_COMPONENT_LIMIT (add when at 25 components).
 - INVALID_REPORT_ID (source report doesn't exist or caller lacks read access).
 
-Example request (add a bar chart)
+Example request
 
 manage_dashboard_component({
-  "operation": "add",
-  "dashboardId": "01ZQg0000004ZyAA",
-  "component": {
-    "componentType": "Bar",
-    "header": "Pipeline by Stage",
-    "report": "00OQg0000004aBcDE",
-    "groupingColumn": "STAGE_NAME",
-    "aggregateColumn": "s!AMOUNT",
-    "displayUnits": "Auto"
-  }
-})
-
-Example request (replace layout)
-
-manage_dashboard_component({
-  "operation": "layout",
-  "dashboardId": "01ZQg0000004ZyAA",
-  "layout": {
-    "columns": [
-      { "components": [{ "id": "01aABC000001XyzAAA", "columnSpan": 6, "rowSpan": 4 }] }
-    ]
-  }
+  "operation": "example",
+  "dashboardId": "example"
 })

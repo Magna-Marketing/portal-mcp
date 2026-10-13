@@ -5,29 +5,44 @@ Control an automation's running state: start (run now), pause, resume,
 stop.
 
 Marketing Cloud API
-REST API (`/automation/v1/automations/{id}/actions/{action}`).
+REST API.
+SOAP API.
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/start
-POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/pause
-POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/resume
-POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/actions/stop
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{automation_id}/actions/runallonce
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/key:{automation_key}/actions/runallonce
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+SOAP object: Automation
 
 Headers
 Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
 Content-Type: application/json
+Accept: application/json
 
 Body
-None.
+SOAP request on Automation.
 
 Input (parameters)
-automationId (string, optional).
-automationKey (string, optional).
-  One required.
-action (string, required) - "start" | "pause" | "resume" | "stop".
+action ("start" | "pause" | "resume" | "stop", required) - start runs the automation once using REST /actions/runallonce. pause, resume, and stop
+use the SOAP Automation Perform operation and require automation_id/ObjectID.
+automation_id (string, optional) - Automation id/ObjectID. Required for pause, resume, and stop. Required for start when
+automation_key is omitted.
+automation_key (string, optional) - Automation external key. Supported for start via
+/automation/v1/automations/key:{key}/actions/runallonce.
+start_method ("auto" | "rest" | "soap", optional) - For start only: auto tries REST runallonce first and falls back to SOAP Perform start
+when automation_id is available; rest only uses runallonce; soap only uses SOAP Perform
+start and requires automation_id.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context REST header or
+SOAP ClientID context. Defaults to the authenticated Business Unit when the session is
+already scoped to one.
 
 Result
-result (object) - { id, action, status, startedAt (when start), instanceId (when start) }.
+Raw Marketing Cloud response JSON, returned unchanged.
+api (value) - included in the JSON returned by the tool.
+action (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `automations_execute`.
@@ -41,4 +56,6 @@ Errors
 
 Example request
 
-control_automation({ "automationKey": "mtg_nightly_member_sync", "action": "start" })
+control_automation({
+  "action": "start"
+})

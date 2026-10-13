@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/external-activities?fields={fields}&filter[extensionSalesforceId]=eq,...
+GET https://{pi-domain}/api/v5/objects/external-activities
+Optional query: fields, filter[activityDate], filter[extensionSalesforceId], filter[prospectEmail], filter[prospectId], filter[typeName], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,24 +22,19 @@ Body
 None.
 
 Input (parameters)
-extensionSalesforceId (string, optional) - SFDC id (`0Wx...`) of the
-  External Activity Type extension.
-typeName (string, optional).
-prospectId (number, optional).
-prospectEmail (string, optional).
-activityDateAfter (string, optional) - ISO-8601.
-activityDateBefore (string, optional) - ISO-8601.
-fields (string[], optional, default: id,extensionSalesforceId,
-  typeName,prospectId,externalId,value,activityDate,createdAt,
-  updatedAt,createdById,updatedById).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+extensionSalesforceId (string, optional) - SFDC id (0Wx...) of the External Activity Type extension.
+typeName (string, optional) - Filter by the activity type name (e.g. "Webinar Attended").
+prospectId (number, optional) - Filter by prospect id.
+prospectEmail (string, optional) - Filter by prospect email address.
+activityDateAfter (string, optional) - ISO-8601 datetime. Filter to activities after this date.
+activityDateBefore (string, optional) - ISO-8601 datetime. Filter to activities before this date.
+fields (string[], optional) - Field projection. Defaults to id, extensionSalesforceId, typeName, prospectId,
+externalId, value, activityDate, createdAt, updatedAt, createdById, updatedById.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-externalActivities (array) - Each: { id, extensionSalesforceId,
-  typeName, prospectId, externalId, value, activityDate, createdAt,
-  updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -51,13 +47,8 @@ Errors
 
 Example request
 
-list_external_activities({ "prospectId": 7745, "typeName": "Webinar Attended" })
+list_external_activities({})
 
 Example result
-{
-  "externalActivities": [
-    { "id": 4421, "typeName": "Webinar Attended", "prospectId": 7745,
-      "externalId": "WEB-2026-04-22-S1", "value": "Spring Webinar",
-      "activityDate": "2026-04-22T15:00:00Z" }
-  ]
-}
+
+{ }

@@ -31,9 +31,8 @@ id (number, required for update / delete).
 name (string, required for create / update).
 
 Result
-tag (object) - Created / updated row.
-deleted (boolean, when operation="delete") - Deleting a tag also
-  removes all `tagged-objects` join rows.
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -51,4 +50,5 @@ Example request
 manage_tag({ "operation": "update", "id": 211, "name": "Welcome FY26" })
 
 Example result
-{ "tag": { "id": 211, "name": "Welcome FY26" } }
+
+{ }

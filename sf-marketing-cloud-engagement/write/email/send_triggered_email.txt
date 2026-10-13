@@ -15,46 +15,47 @@ REST API (`/messaging/v1/messageDefinitionSends/key:{key}/send`) +
 SOAP fallback (`TriggeredSend.Create`).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/messageDefinitionSends/key:{triggeredSendCustomerKey}/send
-POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx                       (SOAP fallback)
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/messageDefinitionSends/key:{triggered_send_customer_key}/send
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+SOAP object: TriggeredSend
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json (REST) or text/xml (SOAP)
 
-Body (REST single-recipient)
-{
-  "From": { "Address": "noreply@magnatech.com", "Name": "MTG" },
-  "To": {
-    "Address": "jane.doe@example.com",
-    "SubscriberKey": "MEM-100023",
-    "ContactAttributes": {
-      "SubscriberAttributes": { "FirstName": "Jane", "TierName": "Gold" }
-    }
-  },
-  "OPTIONS": { "RequestType": "ASYNC" }
-}
+Body
+SOAP request on TriggeredSend.
 
 Input (parameters)
-triggeredSendCustomerKey (string, required).
-recipients (object[], required) - Each:
-  subscriberKey (string, required).
-  emailAddress (string, optional) - Updates / sets the subscriber's email.
-  attributes (object, optional) - Map of subscriber attribute names -> values for personalization (mapped to `ContactAttributes.SubscriberAttributes`).
-  status (string, optional, default "Active").
-fromAddress (string, optional) - Override From address.
-fromName (string, optional).
-saveAsActivity (boolean, optional, default true) - SOAP only.
-sendDate (string, optional, default now).
-requestType (string, optional, default "ASYNC") - "SYNC" | "ASYNC".
-conversationId (string, optional) - Idempotency-style identifier.
-messageId (string, optional) - Per-message Id; recommended for dedupe / status lookup.
-suppressTracking (boolean, optional).
+triggered_send_customer_key (string, required) - TriggeredSendDefinition.CustomerKey external key. REST calls
+/messaging/v1/messageDefinitionSends/key:{key}/send.
+recipients (object[], required) - Recipients to send to. REST sends are one recipient per Salesforce request; this tool
+loops over recipients and returns each raw response. SOAP sends can include multiple
+subscribers in one Create call.
+api_mode ("rest" | "soap", optional) - Use rest for Salesforce REST messageDefinitionSends API or soap for
+TriggeredSend.Create. Defaults to rest.
+fallback_to_soap (boolean, optional) - When api_mode is rest, retry the whole send using SOAP if the REST request fails.
+from_address (string, optional) - REST From.Address or SOAP Owner.FromAddress override. Usually inherited from the
+triggered send definition.
+from_name (string, optional) - REST From.Name or SOAP Owner.FromName override. Usually inherited from the triggered
+send definition.
+request_type ("SYNC" | "ASYNC", optional) - REST Options.RequestType. For SOAP, maps to CreateOptions RequestType Synchronous or
+Asynchronous.
+rest_request_overrides (object, optional) - Advanced REST body fields merged into each generated REST request. Values here override
+generated fields.
+raw_soap_triggered_send_xml (string, optional) - Exact <Objects xsi:type="TriggeredSend">...</Objects> XML for SOAP mode/fallback. Use
+for uncommon Salesforce fields.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID / REST
+Account-Context. Defaults to the authenticated session MID when present.
+client_business_unit_id (number, optional) - Optional SOAP object owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use when authenticating at parent level but writing into a
+child Business Unit.
 
 Result
-results (array) - Per recipient: { subscriberKey, success, errors (array), messageId, recipientSendId }.
-summary (object) - { sent, failed, total }.
-mode (string) - "REST" | "SOAP" depending on which path was taken.
+tool (value) - included in the JSON returned by the tool.
+mode (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_send`.
@@ -70,10 +71,6 @@ Errors
 Example request
 
 send_triggered_email({
-  "triggeredSendCustomerKey": "MTG_Welcome_TS",
-  "recipients": [
-    { "subscriberKey": "MEM-100023", "emailAddress": "jane.doe@example.com",
-      "attributes": { "FirstName": "Jane", "TierName": "Gold" } }
-  ],
-  "messageId": "MEM-100023-WELCOME-2026-04-30"
+  "triggered_send_customer_key": "",
+  "recipients": []
 })

@@ -4,10 +4,10 @@ Description
 List `CustomTab` records: tabs for custom objects, Visualforce pages, web tabs, Lightning Page tabs, and LWC tabs. Includes mounted component / page reference.
 
 Salesforce API
-Tooling API, v66.0. `CustomTab` Metadata + Tooling sObject.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, Name, SObjectName, IsCustom, Type, Url, Page, FlexiPage, MotifId, IsHidden, NamespacePrefix FROM CustomTab
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, ContentId, Description, DeveloperName, EncodingKey, HasSidebar, ManageableState, MasterLabel, MotifName, NamespacePrefix, Type, Url FROM CustomTab
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,14 +17,30 @@ Body
 None.
 
 Input (parameters)
-type (string, optional) - "SObject" | "Web" | "Visualforce" | "FlexiPage" | "LightningComponent" | "AuraComponent".
-namePattern (string, optional).
-includeManaged (boolean, optional, default false).
+type (unknown, optional) - CustomTab Type value; enum apexPage, aura, customObject,
+flexiPage, sControl, or url; no default; example: customObject; do not pass labels,
+metadata type names, or comma-separated values.
+namePattern (string, optional) - Pattern for DeveloperName or MasterLabel; string using
+* and ? wildcards converted to SOQL LIKE; no default; example: Account*; do not pass
+regex, raw LIKE syntax, or namespace-qualified names.
+includeManaged (boolean, optional) - Managed package inclusion flag based on
+NamespacePrefix; boolean; default false excludes namespaced records; example: true; do
+not pass a namespace value here.
+whereClause (string, optional) - Additional SOQL WHERE condition for CustomTab; string
+with or without WHERE; no default; example: ManageableState = 'unmanaged'; do not pass
+SELECT, FROM, ORDER BY, LIMIT, Metadata, FullName, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for CustomTab; string with or without
+ORDER BY; default DeveloperName ASC; example: MasterLabel ASC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum CustomTab rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-customTabs (array) - Each:
-  id, developerName, label, type, sObjectName (when SObject type), url (when Web), page (when Visualforce), flexiPage (when FlexiPage), motifId (icon style), isHidden, namespacePrefix.
+raw Salesforce Tooling QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -37,4 +53,8 @@ Errors
 
 Example request
 
-list_custom_tabs({ "type": "FlexiPage" })
+list_custom_tabs({
+  "type": "customObject",
+  "namePattern": "Account*",
+  "includeManaged": true
+})

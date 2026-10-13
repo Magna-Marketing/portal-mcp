@@ -6,10 +6,10 @@ TestWorker). Each run shows status, queued/processing/completed/failed
 test counts, who submitted, and start/complete times.
 
 Salesforce API
-REST API (Data) + Tooling, v66.0.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Status, JobType, ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors, CreatedDate, CompletedDate, ParentJobId, ApexClassId, MethodName, CreatedById, CreatedBy.Name FROM AsyncApexJob WHERE JobType IN ('TestRequest','TestWorker') ORDER BY CreatedDate DESC
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, AsyncApexJobId, Status, StartTime, EndTime, ClassesCompleted, ClassesEnqueued, MethodsCompleted, MethodsEnqueued, MethodsFailed, TestSetupTime, TestTime, UserId, IsAllTests, Source FROM ApexTestRunResult
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,15 +19,38 @@ Body
 None.
 
 Input (parameters)
-status (string|string[], optional) - "Queued" | "Preparing" | "Processing" | "Aborted" | "Completed" | "Failed".
-sinceHours (number, optional, default 168).
-parentJobId (string, optional).
-createdById (string, optional).
-limit (number, optional, default 100).
+asyncApexJobId (string, optional) -
+AsyncApexJob Id for a specific test run; Salesforce Id string; no default; example:
+7075g0000012345; do not pass ApexClass Ids, multiple Ids, or SOQL fragments.
+status ("Queued" | "Preparing" | "Processing" | "Aborted" | "Completed" | "Failed", optional) -
+ApexTestRunResult status to filter by; one Salesforce picklist value; no default;
+example: Completed; do not pass lowercase values, multiple statuses, or custom status
+text.
+userId (string, optional) -
+UserId that ran the test run; Salesforce User Id string; no default; example:
+0055g000000ABCd; do not pass usernames, names, or multiple Ids.
+sourcePattern (string, optional) -
+Source pattern for the test run origin; string with * and ? wildcards converted to SOQL
+LIKE; no default; example: Developer*; do not pass regex, raw LIKE syntax, or
+comma-separated sources.
+whereClause (string, optional) -
+Additional SOQL WHERE condition for ApexTestRunResult; string with or without WHERE; no
+default; example: StartTime = LAST_N_DAYS:7; do not pass SELECT, FROM, ORDER BY, LIMIT,
+or untrusted user input.
+orderBy (string, optional) -
+SOQL ORDER BY clause for ApexTestRunResult; string with or without ORDER BY; default
+StartTime DESC; example: EndTime DESC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) -
+Maximum ApexTestRunResult rows to return; integer from 1 to 2000; default 200; example:
+25; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-testRuns (array) - { id, status, jobType, extendedStatus, jobItemsProcessed, totalJobItems, numberOfErrors, createdById, createdByName, createdDate, completedDate, parentJobId }.
+Returns the raw Salesforce QueryResult with totalSize, done, and ApexTestRunResult
+records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "Author Apex".
@@ -40,4 +63,8 @@ Errors
 
 Example request
 
-list_apex_test_runs({ "sinceHours": 72 })
+list_apex_test_runs({
+  "asyncApexJobId": "7075g0000012345",
+  "status": "Completed",
+  "userId": "0055g000000ABCd"
+})

@@ -25,21 +25,28 @@ Body
 }
 
 Input (parameters)
-messageId (number, required) - MobilePush message Id.
-contactKeys (string[], optional).
-deviceTokens (string[], optional).
-audienceQuery (object, optional) - Query against an audience (advanced).
-alert (string, optional) - Push body override.
-title (string, optional).
-badge (number, optional).
-sound (string, optional).
-customKeys (object, optional) - Deeplink, action keys.
-sendDate (string, optional, default now).
+message_id (value, required) - MobilePush API-triggered message ID.
+device_tokens (string[], optional) - Device tokens to send to. Salesforce requires device_tokens or subscriber_keys.
+subscriber_keys (string[], optional) - Subscriber keys to send to. Salesforce requires device_tokens or subscriber_keys.
+inclusion_tags (string[], optional) - Optional tags that contacts must have to receive the push message.
+exclusion_tags (string[], optional) - Optional tags that exclude contacts from receiving the push message.
+override (boolean, optional) - When true, override message title, subtitle, body, and send settings.
+message_text (string, optional) - Override push body. Used by Salesforce when override is true.
+title (string, optional) - Override push title. Used by Salesforce when override is true.
+subtitle (string, optional) - Override push subtitle. Used by Salesforce when override is true.
+mutable_content (boolean, optional) - Enable rich push functionality. Sent to Salesforce as mutable-content.
+send_time (string, optional) - Future send time in Salesforce format YYYY-MM-DD HH:MM.
+blackout_window (object, optional) - Optional Salesforce blackoutWindow object.
+sound (string, optional) - Sound file name to play when the push arrives.
+badge (value, optional) - iOS badge value. Salesforce accepts values such as "+1".
+open_direct (string, optional) - OpenDirect value that routes users inside the app when they tap the message.
+custom_keys (object, optional) - CustomKeys object for MobilePush key-value pairs.
+custom_payload (object, optional) - CustomPayload object for additional platform payload values.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-sendId (string).
-status (string) - "Queued" | "Sending" | "Sent" | "Failed".
-audienceCount (number).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `push_send`.
@@ -53,8 +60,5 @@ Errors
 Example request
 
 send_push({
-  "messageId": 67890,
-  "contactKeys": ["MEM-100023"],
-  "alert": "Your reward is ready!",
-  "customKeys": { "deeplink": "mtg://rewards" }
+  "message_id": ""
 })

@@ -9,7 +9,7 @@ Marketing Cloud API
 REST API (`/legacy/v1/beta/groupconnect/messages/{messageId}/send`).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/messages/{messageId}/send
+POST https://{tenant}.rest.marketingcloudapis.com/ott/v1/send
 
 Headers
 Authorization: Bearer <access_token>
@@ -23,15 +23,36 @@ Body
 }
 
 Input (parameters)
-messageId (string, required) - GroupConnect message Id (template).
-subscribers (object[], required) - Each: { lineId | contactKey | groupConnectId }.
-messageType (string, optional, default "Text") - "Text" | "Image" | "Video" | "Sticker" | "Audio" | "Location" | "Carousel".
-content (string|object, required) - Text body or structured payload (carousel etc.).
-sendDate (string, optional, default now).
+raw_request (object, optional) - Exact single Salesforce POST /ott/v1/send request body. If provided, convenience
+parameters are ignored.
+raw_requests (object[], optional) - Multiple exact Salesforce POST /ott/v1/send request bodies. The tool performs one
+Salesforce API call per item and returns each raw response.
+message_key (string, optional) - Salesforce messageKey. Required unless raw_request/raw_requests is provided.
+User-defined unique message identifier, up to 100 Unicode characters.
+message_group_key (string, optional) - Salesforce messageGroupKey used to group related send requests.
+sender_type ("line" | "messenger", optional) - OTT platform for the sender. Salesforce supports line and messenger.
+sender_id (string, optional) - LINE channel ID or Messenger page ID for the registered sending resource.
+recipient (object, optional) - Single message recipient. Use recipients for composite multi-recipient sends.
+recipients (object[], optional) - Multiple recipients. Salesforce Chat Messaging has no batch endpoint, so the tool sends
+one POST /ott/v1/send request per recipient and returns each raw response.
+subject (string, optional) - Message subject/name stored by Salesforce.
+contents (object[], optional) - Message content blocks. Messenger allows 1 content block. LINE allows up to 5 content
+blocks.
+custom_keys (object[], optional) - Salesforce message.customKeys array. Messenger requires messagingType and requires tag
+when messagingType is MESSAGE_TAG.
+messaging_type ("RESPONSE" | "UPDATE" | "MESSAGE_TAG", optional) - Convenience field used to populate message.customKeys[0].messagingType for Messenger
+sends.
+tag (string, optional) - Convenience field used to populate message.customKeys[0].tag when messaging_type is
+MESSAGE_TAG.
+notification_type ("REGULAR" | "SILENT_PUSH" | "NO_PUSH", optional) - Convenience field used to populate message.customKeys[0].notificationType for Messenger
+sends.
+validity_period (value, optional) - Salesforce validityPeriod. Required by Salesforce; represents how long the request is
+valid.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+GroupConnect REST request.
 
 Result
-results (array) - { subscriberId, status, errors }.
-totalQueued (number).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `messaging_api_send`.
@@ -44,9 +65,4 @@ Errors
 
 Example request
 
-send_groupconnect_message({
-  "messageId": "abc123",
-  "subscribers": [{ "lineId": "U123abc" }],
-  "messageType": "Text",
-  "content": "Hello from MTG"
-})
+send_groupconnect_message({})

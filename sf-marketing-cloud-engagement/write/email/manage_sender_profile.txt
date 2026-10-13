@@ -15,23 +15,40 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP CreateRequest / UpdateRequest.
+SOAP request on SenderProfile.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-customerKey (string, required).
-name (string, required for create).
-description (string, optional).
-fromName (string, required for create).
-fromAddress (string, required for create).
-replyToName (string, optional).
-replyToAddress (string, optional).
-useDefaultRMMRules (boolean, optional, default true).
-autoForwardToAddress (string, optional).
-autoForwardSubject (string, optional).
+operation ("create" | "update" | "delete", required) - SOAP operation for SenderProfile: create, update, or delete.
+customer_key (string, required) - SenderProfile.CustomerKey external key. Required for every operation.
+name (string, optional) - SenderProfile.Name. Required for create unless raw_sender_profile_xml is supplied.
+description (string, optional) - SenderProfile.Description.
+from_name (string, optional) - SenderProfile.FromName. Required for create unless raw_sender_profile_xml is supplied.
+from_address (string, optional) - SenderProfile.FromAddress. The address must already be valid/verified in the Marketing
+Cloud account.
+reply_to_name (string, optional) - SenderProfile.ReplyToDisplayName.
+reply_to_address (string, optional) - SenderProfile.ReplyToAddress.
+use_default_rmm_rules (boolean, optional) - SenderProfile.UseDefaultRMMRules. Defaults to true on create when omitted.
+auto_forward_to_name (string, optional) - SenderProfile.AutoForwardToName for custom Reply Mail Management forwarding.
+auto_forward_to_address (string, optional) - SenderProfile.AutoForwardToEmailAddress for custom Reply Mail Management forwarding.
+auto_forward_triggered_send_customer_key (string, optional) - TriggeredSendDefinition.CustomerKey used by SenderProfile.AutoForwardTriggeredSend.
+auto_reply (boolean, optional) - SenderProfile.AutoReply. Requires account/RMM support.
+auto_reply_triggered_send_customer_key (string, optional) - TriggeredSendDefinition.CustomerKey used by SenderProfile.AutoReplyTriggeredSend.
+is_default_profile (boolean, optional) - SenderProfile.IsDefaultProfile. Use carefully because only one default sender profile
+should exist.
+raw_sender_profile_xml (string, optional) - Exact <Objects xsi:type="SenderProfile">...</Objects> XML to send. Use for uncommon
+Salesforce fields not exposed by this schema.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID / REST
+Account-Context. Defaults to the authenticated session MID when present.
+client_business_unit_id (number, optional) - Optional SOAP object owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use when authenticating at parent level but writing into a
+child Business Unit.
 
 Result
-senderProfile (object) - { id, customerKey, name, fromName, fromAddress, replyToName, replyToAddress }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_write`.
@@ -46,9 +63,5 @@ Example request
 
 manage_sender_profile({
   "operation": "create",
-  "customerKey": "MTG_Sender",
-  "name": "MTG Sender",
-  "fromName": "MTG",
-  "fromAddress": "noreply@magnatech.com",
-  "replyToAddress": "support@magnatech.com"
+  "customer_key": ""
 })

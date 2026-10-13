@@ -26,47 +26,16 @@ Body
 None (GET request).
 
 Input (parameters)
-sObject (string, required) - sObject API name (e.g. "Account",
-  "Project__c", "ApexClass").
-includeChildRelationships (boolean, optional, default true) - Whether to
-  include the childRelationships array.
-includeFields (boolean, optional, default true) - Whether to include the
-  fields array (huge for some standard objects; set false for a slim
-  metadata-only describe).
-includeRecordTypes (boolean, optional, default true) - Whether to include
-  recordTypeInfos.
-noCache (boolean, optional, default false) - Bypass MCP local cache.
+sObject (string, required) - The Salesforce sObject API name to describe; string such as
+"Account" or "Project__c"; no default; pass the exact API name, not a label, SOQL
+fragment, or comma-separated list.
+noCache (boolean, optional) - Whether to bypass the local 5-minute describe cache;
+boolean; default false; example: true; do not pass true unless metadata freshness
+matters more than API call reduction.
 
 Result
-name (string) - sObject API name.
-label, labelPlural (string).
-custom (boolean), customSetting (boolean).
-keyPrefix (string|null).
-queryable, createable, updateable, deletable, layoutable, searchable,
-  feedEnabled, triggerable, mruEnabled (boolean).
-fields (array) - Each field:
-  name (string) - API name.
-  label (string).
-  type (string) - id|string|reference|picklist|multipicklist|boolean|int
-    |double|currency|percent|date|datetime|email|phone|url|address|
-    location|textarea|encryptedstring|combobox|complexvalue.
-  length, precision, scale, byteLength.
-  nillable (boolean), createable, updateable, calculated, autoNumber,
-    defaultedOnCreate, defaultValue, restrictedPicklist, dependentPicklist.
-  picklistValues (array) - { value, label, active, defaultValue }.
-  referenceTo (string[]) - For reference fields, target sObjects.
-  relationshipName (string|null) - For dotted SOQL traversal.
-  relationshipOrder (number|null) - 0=master in master-detail.
-  cascadeDelete (boolean), restrictedDelete (boolean).
-  controllerName (string|null), externalId (boolean), unique (boolean).
-recordTypeInfos (array) - Each:
-  recordTypeId, name, developerName, master (boolean), available
-    (boolean for running user), defaultRecordTypeMapping, urls.layout.
-namedLayoutInfos (array) - { name, urls.layout }.
-childRelationships (array) - Each:
-  childSObject, field (FK on child), relationshipName, cascadeDelete,
-  deprecatedAndHidden, restrictedDelete.
-urls (object) - sobject, describe, rowTemplate, listviews, etc.
+raw Salesforce DescribeSObjectResult with fields, childRelationships, recordTypeInfos,
+urls, and object capability flags.
 
 Required permissions
 - API Enabled.
@@ -84,45 +53,10 @@ Errors
 
 Example request
 
-describe_object({ "sObject": "Opportunity", "includeChildRelationships": false })
+describe_object({
+  "sObject": "example"
+})
 
-Example result (truncated)
+Example result
 
-{
-  "name": "Opportunity",
-  "label": "Opportunity",
-  "labelPlural": "Opportunities",
-  "custom": false,
-  "keyPrefix": "006",
-  "queryable": true, "createable": true, "updateable": true,
-  "deletable": true, "searchable": true, "triggerable": true,
-  "fields": [
-    {
-      "name": "Id", "label": "Opportunity ID", "type": "id",
-      "length": 18, "nillable": false, "createable": false, "updateable": false
-    },
-    {
-      "name": "AccountId", "label": "Account ID", "type": "reference",
-      "referenceTo": ["Account"], "relationshipName": "Account",
-      "nillable": true, "createable": true, "updateable": true,
-      "restrictedDelete": false, "cascadeDelete": false
-    },
-    {
-      "name": "StageName", "label": "Stage", "type": "picklist",
-      "restrictedPicklist": false, "nillable": false,
-      "picklistValues": [
-        { "value": "Prospecting", "label": "Prospecting", "active": true, "defaultValue": false },
-        { "value": "Closed Won", "label": "Closed Won", "active": true, "defaultValue": false }
-      ]
-    }
-  ],
-  "recordTypeInfos": [
-    {
-      "recordTypeId": "012Qg0000004aBcDE",
-      "name": "Internal Project",
-      "developerName": "Internal_Project",
-      "master": false, "available": true, "defaultRecordTypeMapping": false,
-      "urls": { "layout": "/services/data/v66.0/sobjects/Opportunity/describe/layouts/012Qg0000004aBcDE" }
-    }
-  ]
-}
+raw Salesforce DescribeSObjectResult with fields, childRelationships, recordTypeInfos, urls, and object capability flags.

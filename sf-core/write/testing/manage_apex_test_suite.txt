@@ -5,30 +5,42 @@ Create / update / delete Apex Test Suites and manage their member
 classes.
 
 Salesforce API
-Tooling API, v66.0. `ApexTestSuite` + `TestSuiteMembership`.
+Tooling API, v66.0.
 
 Endpoint
-POST   /services/data/v66.0/tooling/sobjects/ApexTestSuite
-PATCH  /services/data/v66.0/tooling/sobjects/ApexTestSuite/{id}
-DELETE /services/data/v66.0/tooling/sobjects/ApexTestSuite/{id}
-POST   /services/data/v66.0/tooling/sobjects/TestSuiteMembership
-DELETE /services/data/v66.0/tooling/sobjects/TestSuiteMembership/{id}
+POST /services/data/v66.0/tooling/sobjects/TestSuiteMembership
+DELETE /services/data/v66.0/tooling/sobjects/TestSuiteMembership/{membershipId}
+POST /services/data/v66.0/tooling/sobjects/ApexTestSuite
+PATCH /services/data/v66.0/tooling/sobjects/ApexTestSuite/{Id}
+DELETE /services/data/v66.0/tooling/sobjects/ApexTestSuite/{Id}
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: ApexTestSuiteId, ApexClassId.
+JSON fields: TestSuiteName.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addClasses" | "removeClasses" | "setClasses".
-testSuiteName (string, required).
-classNames (string[], optional) - For add / remove / set / create.
+operation ("create" | "update" | "delete" | "addClasses" | "removeClasses" | "setClasses", required) -
+Suite operation to perform.
+testSuiteName (string, required) -
+Existing ApexTestSuite TestSuiteName. For create, this is the new suite name.
+newTestSuiteName (string, optional) -
+New TestSuiteName for update operations.
+classNames (string[], optional) -
+Apex test class names to add, remove, or set as suite members. Resolved through
+ApexClass.
+classIds (string[], optional) -
+ApexClass Ids to add, remove, or set as suite members.
+deleteMembershipsFirst (boolean, optional) -
+For delete, delete TestSuiteMembership records before deleting the ApexTestSuite.
+Default false because Salesforce cascades memberships.
 
 Result
-testSuite (object) - { id, testSuiteName, members: [{ classId, className }] }.
-classChanges (object) - { added, removed, unchanged }.
+grouped raw Salesforce lookup, create, patch, delete, and membership responses.
 
 Required permissions
 - "Author Apex".
@@ -42,7 +54,6 @@ Errors
 Example request
 
 manage_apex_test_suite({
-  "operation": "create",
-  "testSuiteName": "MTG_Smoke",
-  "classNames": ["ProjectServiceTest", "ProjectTriggerHandlerTest"]
+  "operation": "example",
+  "testSuiteName": "example"
 })

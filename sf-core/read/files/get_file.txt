@@ -6,13 +6,10 @@ links, owner, content type, size, custom fields. To download the bytes
 use `download_file_content`.
 
 Salesforce API
-REST API (Data) + Connect API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/sobjects/ContentDocument/{contentDocumentId}
-GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, VersionNumber, Title, FileExtension, ContentSize, FileType, IsLatest, CreatedDate, ContentModifiedDate FROM ContentVersion WHERE ContentDocumentId = '...' ORDER BY VersionNumber DESC
-GET /services/data/v66.0/query/?q=SELECT Id, LinkedEntityId, LinkedEntity.Name, ShareType, Visibility FROM ContentDocumentLink WHERE ContentDocumentId = '...'
-GET /services/data/v66.0/connect/files/{contentDocumentId}                              (Chatter Connect detail)
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,15 +19,16 @@ Body
 None.
 
 Input (parameters)
-contentDocumentId (string, optional).
-contentVersionId (string, optional) - Either is fine; tool resolves the document.
-includeAllVersions (boolean, optional, default true).
-includeShares (boolean, optional, default true).
+contentDocumentId (string, required) - ContentDocument Id for the Salesforce File;
+string Id in 15- or 18-character format; required with no default; example:
+069xx0000004C92AAE; do not pass ContentVersion, Attachment, or ContentDocumentLink Ids.
+includeShares (boolean, optional) - Whether to query ContentDocumentLink rows for the
+file; boolean; default false; example: true; do not pass strings such as \"true\".
 
 Result
-file (object) - { id, title, fileType, fileExtension, contentSize, ownerId, ownerName, latestVersionId, contentModifiedDate, isArchived, description, sharingPrivacy }.
-versions (array, when includeAllVersions=true) - { id, versionNumber, title, contentSize, fileType, isLatest, createdDate }.
-shares (array, when includeShares=true) - { id, linkedEntityId, linkedEntityName, linkedEntityType, shareType ("V"|"C"|"I"), visibility ("AllUsers"|"InternalUsers"|"SharedUsers") }.
+Returns a JSON object with raw file, latestVersion, and optional shares query response.
+file (value) - included in the JSON returned by the tool.
+latestVersion (value) - included in the JSON returned by the tool.
 
 Required permissions
 - File read share or "View All Data".
@@ -43,4 +41,6 @@ Errors
 
 Example request
 
-get_file({ "contentDocumentId": "069Qg0000004ZyAA" })
+get_file({
+  "contentDocumentId": "069xx0000004C92AAE"
+})

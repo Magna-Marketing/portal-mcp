@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/private-network-routes
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/private-network-routes
+Optional query: limit, offset
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,15 +20,12 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Active" | "Pending" | "Failed".
-networkType (string, optional) - "AwsPrivateLink" |
-  "AzurePrivateEndpoint" | "GcpPrivateServiceConnect" | "VpnTunnel".
-limit (number, optional, default 100).
+limit (number, optional) - Maximum number of private network routes to return, from 1 through 1000. Salesforce
+returns 100 rows when omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips 0 rows when omitted.
 
 Result
-routes (array) - Each: { id, name, label, networkType, status,
-  endpoint, vpcEndpointId (string|null), region, createdDate,
-  lastModifiedDate }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,13 +38,8 @@ Errors
 
 Example request
 
-list_private_network_routes({ "status": "Active" })
+list_private_network_routes({})
 
 Example result
-{
-  "routes": [
-    { "id": "0YN580000000001", "name": "MTG_Snowflake_PL",
-      "networkType": "AwsPrivateLink", "status": "Active",
-      "endpoint": "snowflake.mtg.internal" }
-  ]
-}
+
+{ }

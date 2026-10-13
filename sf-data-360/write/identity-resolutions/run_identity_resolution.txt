@@ -1,4 +1,4 @@
-Tool: run_identity_resolution
+Tool: run_identity_resolution_ruleset_now
 
 Description
 Trigger an on-demand Identity Resolution run. Async; returns a
@@ -19,16 +19,14 @@ Body
 { "runMode": "Incremental" }
 
 Input (parameters)
-identityResolution (string, required).
-runMode (string, optional, default "Incremental") - "Full" |
-  "Incremental".
-runIdempotencyKey (string, optional).
+identityResolution (string, required) - Developer name or ID of the Identity Resolution Ruleset to run (required)
+callingApp (string, required) - Identifier of the application initiating the run (required). Use 'Flow' when triggered
+from a Salesforce Flow, or your app/integration name for auditability
+callingAppInfo (string, required) - Additional metadata about the caller (required). Typically a version number, flow ID, or
+reference context (e.g., '10')
 
 Result
-runId (string).
-identityResolution (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (or `cdp_identityresolution_api` for runtime).
@@ -43,15 +41,12 @@ Errors
 
 Example request
 
-run_identity_resolution({
-  "identityResolution": "UnifiedIndividual_default",
-  "runMode": "Incremental"
+run_identity_resolution_ruleset_now({
+  "identityResolution": "",
+  "callingApp": "",
+  "callingAppInfo": ""
 })
 
 Example result
-{
-  "runId": "RUN_IR_2026-04-29T13",
-  "identityResolution": "UnifiedIndividual_default",
-  "status": "Queued",
-  "submittedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

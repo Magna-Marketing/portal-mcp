@@ -7,32 +7,48 @@ Marketing Cloud API
 REST API (`/automation/v1/automations/{id}/schedule`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/schedule
-DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/schedule
+PATCH https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{automation_id}
+PATCH https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/key:{automation_key}
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "icalRecur": "FREQ=DAILY;INTERVAL=1",
-  "timezoneName": "Eastern Standard Time",
-  "startDate": "2026-05-01T01:00:00",
-  "endDate": "2027-01-01T00:00:00"
-}
+PATCH: startSource
 
 Input (parameters)
-automationId (string, optional).
-automationKey (string, optional).
-operation (string, required) - "set" | "clear".
-icalRecur (string, optional, required for set) - iCal RRULE (e.g. "FREQ=DAILY;INTERVAL=1").
-timezoneName (string, optional, default "Eastern Standard Time").
-startDate (string, optional, default = now).
-endDate (string, optional).
+operation ("set" | "clear", required) - set/clear update the automation with PATCH /automation/v1/automations/{id|key:key}.
+automation_id (string, optional) - Automation id/ObjectID GUID. Strongly recommended for scheduling; many Marketing Cloud
+tenants reject automation_key here with an invalid GUID error.
+automation_key (string, optional) - Automation external key. Prefer automation_id for scheduling because Salesforce can
+parse this endpoint identifier as a GUID.
+ical_recur (string, optional) - iCalendar RRULE recurrence, for example FREQ=HOURLY;INTERVAL=1;COUNT=24 or
+FREQ=DAILY;INTERVAL=1;COUNT=30. Required for set unless raw_request is provided.
+timezone_name (string, optional) - Optional Salesforce timezone name, for example Central Standard Time or Eastern Standard
+Time. Numeric timezone_id is still required for typed schedule calls.
+timezone_id (number, optional) - Salesforce timezone ID, for example 20 for Central Standard Time. Required for typed
+schedule calls because many tenants require timezoneId.
+start_date (string, optional) - Schedule start date/time in the format expected by Salesforce, commonly ISO 8601 without
+timezone or with offset.
+end_date (string, optional) - Optional schedule end date/time.
+occurrences (number, optional) - Optional number of runs. If ical_recur does not include COUNT or UNTIL, this value is
+appended as COUNT and sent as occurrences.
+no_end_condition (boolean, optional) - Set to true to allow an ical_recur without COUNT or UNTIL (i.e. run the automation
+indefinitely). By default the tool rejects iCalRecur values that have no end condition.
+schedule_type_id (number, optional) - Optional Salesforce scheduleTypeId. Some tenants expect 2 for recurring scheduled
+automations.
+range_type_id (number, optional) - Optional Salesforce rangeTypeId. Some tenants expect 0 when using occurrences/COUNT.
+status_id (number, optional) - Optional Salesforce schedule statusId. Some tenants expect 0 for the schedule patch.
+scheduled_time (string, optional) - Optional next scheduled time when the endpoint requires it.
+raw_request (object, optional) - Exact Salesforce REST automation PATCH request body. When provided, this body is sent
+as-is.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context REST header or
+SOAP ClientID context. Defaults to the authenticated Business Unit when the session is
+already scoped to one.
 
 Result
-schedule (object) - { id, icalRecur, timezoneName, startDate, endDate, nextRunDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `automations_write`.
@@ -46,8 +62,5 @@ Errors
 Example request
 
 schedule_automation({
-  "automationKey": "mtg_nightly_member_sync",
-  "operation": "set",
-  "icalRecur": "FREQ=DAILY;INTERVAL=1;BYHOUR=1",
-  "timezoneName": "Eastern Standard Time"
+  "operation": "set"
 })

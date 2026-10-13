@@ -32,19 +32,23 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-dataModelObjectName (string, required for update / delete).
-developerName (string, required for create).
-label (string, required for create).
-category (string, optional, default "Other") - "Profile" |
-  "Engagement" | "Other" | "Account" | "Contact".
-primaryKeyField (string, required for create).
-fields (array, required for create) - [{ apiName, dataType,
-  isPrimaryKey, isExternalId, isRequired, defaultValue, length }].
+operation ("create" | "update" | "delete", required) - The operation to perform: create, update, or delete
+dataModelObjectName (string, optional) - API name of the existing DMO. Required for update and delete.
+name (string, optional) - API name of the object to create. Required for create.
+label (string, optional) - Label of the object to create. Required for create.
+description (string, optional) - Description of the object to create.
+dataSpaceName (string, optional) - Name of the data space. If unspecified, the default data space is used. Required for
+data graph resources.
+category ("Engagement" | "Other" | "Profile", optional) - Category of the data object: Engagement, Other, or Profile.
+eventDateTimeFieldName (string, optional) - Name of the event date and time field. Required when category is 'Engagement'.
+recordModifiedFieldName (string, optional) - Record modified field name.
+type ("DataLakeObject" | "DataModelObject", optional) - Type of data object: DataLakeObject or DataModelObject.
+status ("Active" | "Error" | "Inactive" | "Processing", optional) - Status of the DMO: Active, Error, Inactive, or Processing.
+primaryKeyField (string, optional) - API name of the field designated as the primary key. Required for create.
+fields (object[], optional) - Fields in the data object. Required for create.
 
 Result
-dataModelObject (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -61,16 +65,9 @@ Errors
 Example request
 
 manage_data_model_object({
-  "operation": "create",
-  "developerName": "ExtOrder__dlm",
-  "label": "External Order",
-  "category": "Engagement",
-  "primaryKeyField": "Id__c",
-  "fields": [
-    { "apiName": "Id__c",     "dataType": "TEXT", "isPrimaryKey": true },
-    { "apiName": "Amount__c", "dataType": "DECIMAL" }
-  ]
+  "operation": ""
 })
 
 Example result
-{ "dataModelObject": { "developerName": "ExtOrder__dlm", "category": "Engagement" } }
+
+{ }

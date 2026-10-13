@@ -6,10 +6,11 @@ that snapshot results into a custom object for trending. Each snapshot
 shows source report, target sObject + fields, schedule, last run.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `AnalyticSnapshot` and `AnalyticSnapshotState`.
+REST API (Data), v66.0.
 
 Endpoint
 GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, Description, SourceReportId, TargetObject, RunningUserId, GroupName FROM AnalyticSnapshot
+GET /services/data/v66.0/query/?q=SELECT Id, AnalyticSnapshotId, SourceField, TargetField, LastRunDate, NextRunDate FROM AnalyticSnapshotState
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,11 +20,36 @@ Body
 None.
 
 Input (parameters)
-includeFieldMappings (boolean, optional, default true).
+includeFieldMappings (boolean, optional) - Whether to query AnalyticSnapshotState rows
+for returned snapshots; boolean; default true; example: false; do not pass true if only
+snapshot metadata is needed.
+sourceReportId (string, optional) - Source report record Id filter; Salesforce Id
+string; no default; example: 00O5g0000012345; do not pass report names, URLs, or
+multiple Ids.
+targetObject (string, optional) - Target object API name exact match; string; no
+default; example: CustomSnapshot__c; do not pass labels, wildcards, or comma-separated
+values.
+pattern (string, optional) - Snapshot name or developer name pattern; string using * and
+? wildcards converted to SOQL LIKE; no default; example: Monthly*; do not pass regex or
+raw LIKE syntax.
+whereClause (string, optional) - Additional AnalyticSnapshot SOQL WHERE condition;
+string with or without WHERE; no default; example: GroupName = 'Sales'; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - AnalyticSnapshot SOQL ORDER BY clause; string with or
+without ORDER BY; default Name ASC; example: DeveloperName ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum rows per query to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-reportingSnapshots (array) - { id, name, developerName, description, sourceReportId, targetObject, runningUserId, fieldMappings (array, when includeFieldMappings=true): [{ sourceField, targetField }], lastRunDate, nextRunDate }.
+raw Salesforce QueryResult for AnalyticSnapshot and, when requested, raw QueryResult for
+AnalyticSnapshotState.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+analyticSnapshots (value) - included in the JSON returned by the tool.
+analyticSnapshotStates (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Reporting Snapshots".
@@ -36,4 +62,8 @@ Errors
 
 Example request
 
-list_reporting_snapshots({})
+list_reporting_snapshots({
+  "includeFieldMappings": false,
+  "sourceReportId": "00O5g0000012345",
+  "targetObject": "CustomSnapshot__c"
+})

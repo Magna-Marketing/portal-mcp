@@ -8,7 +8,10 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions/{id}/audit/all`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}/audit/all
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{journey_id}/audit/{action}
+Optional query: $page, $pageSize, mostRecentVersionOnly, mostRecentVersionOrRunningOnly, status, versionNumber
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/key:{journey_key}/audit/{action}
+Optional query: $page, $pageSize, mostRecentVersionOnly, mostRecentVersionOrRunningOnly, status, versionNumber
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,14 +21,23 @@ Body
 None.
 
 Input (parameters)
-journeyId (string, optional).
-journeyKey (string, optional).
-  One required.
-sinceDays (number, optional, default 90).
+journey_id (string, optional) - Journey ID. Required when journey_key is omitted.
+journey_key (string, optional) - Journey external key. Required when journey_id is omitted.
+action ("all" | "create" | "modify" | "publish" | "unpublish" | "delete", optional) - Audit action to retrieve. Salesforce supports all, create, modify, publish, unpublish,
+and delete.
+status ("Deleted" | "Draft" | "Paused" | "Published" | "ScheduledToPublish" | "ScheduledToSend" | "Sent" | "Stopped" | "Unpublished", optional) - Optional journey status filter for audit logs.
+version_number (number, optional) - Optional versionNumber query parameter. If omitted, Salesforce returns audit logs for
+all versions.
+most_recent_version_only (boolean, optional) - Optional mostRecentVersionOnly query parameter. Do not use with version_number.
+most_recent_version_or_running_only (boolean, optional) - Optional mostRecentVersionOrRunningOnly query parameter. Do not use with version_number
+or most_recent_version_only.
+page (number, optional) - Salesforce $page value. Defaults to 1.
+page_size (number, optional) - Salesforce $pageSize value. Defaults to 50, maximum 50.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-journeyId (string).
-events (array) - { date, userName, userId, action ("Created"|"Modified"|"Published"|"Stopped"|"Paused"|"Resumed"|"Versioned"), version, description }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -38,4 +50,4 @@ Errors
 
 Example request
 
-get_journey_history({ "journeyKey": "MTG_Welcome_Series" })
+get_journey_history({})

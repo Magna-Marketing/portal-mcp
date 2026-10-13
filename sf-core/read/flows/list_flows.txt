@@ -9,51 +9,60 @@ version numbers; pair with `read_flow` to get a single flow's full
 detail or XML.
 
 Salesforce API
-Tooling API, v66.0. Backed by `FlowDefinition` and `Flow` sObjects.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, ActiveVersionId FROM FlowDefinition
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DefinitionId, Definition.DeveloperName, MasterLabel, Description, ProcessType, Status, VersionNumber, ApiVersion, RunInMode, Environments, IsTemplate, ManageableState, TimeZoneSidKey, CreatedById, CreatedBy.Name, CreatedDate, LastModifiedById, LastModifiedBy.Name, LastModifiedDate FROM Flow
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-status (string|string[], optional) - "Active" | "Draft" | "Obsolete" |
-  "InvalidDraft". Defaults to all.
-processType (string|string[], optional) - "Flow" | "AutoLaunchedFlow" |
-  "RecordTrigger" | "ScreenFlow" | "Workflow" | "InvocableProcess" |
-  "PlatformEvent" | "ApprovalProcess".
-sObject (string, optional) - Filter record-triggered/process flows by
-  the sObject they target (matches Flow.ObjectType on the active
-  version).
-namePattern (string, optional) - Glob on DeveloperName.
-createdById (string, optional) - User Id (15/18-char) of creator.
-lastModifiedById (string, optional) - User Id of last modifier.
-modifiedSince (string, optional) - ISO 8601 timestamp.
-sortBy (string, optional, default "MasterLabel") - "MasterLabel" |
-  "DeveloperName" | "LastModifiedDate" | "Status" | "ProcessType".
-sortDirection (string, optional, default "ASC") - "ASC" | "DESC".
-groupBy (string, optional) - When set, response is grouped by this
-  field: "ProcessType" | "Status" | "ObjectType".
-limit (number, optional, default 200, max 2000).
+status (string | string[], optional) - Flow Status filter; enum or array of Active,
+Draft, Obsolete, UnderReview, or InvalidDraft; no default; example: [\"Active\",
+\"Draft\"]; do not pass lowercase labels or lifecycle values not supported by Tooling
+API v66.0.
+processType (string | string[], optional) - Flow ProcessType filter; string or array
+using Salesforce Tooling values such as Flow, AutoLaunchedFlow, Workflow,
+InvocableProcess, CustomEvent, PromptFlow, or OrchestrationFlow; no default; example:
+AutoLaunchedFlow; do not pass UI labels such as Screen Flow.
+pattern (string, optional) - Definition.DeveloperName wildcard filter using * and ?
+converted to SOQL LIKE; string; no default; example: Account_*; do not pass regex,
+labels, or raw LIKE syntax.
+namePattern (string, optional) - Legacy alias for pattern against
+Definition.DeveloperName; string with * and ? wildcards; ignored when pattern is
+provided; example: *_Subflow; prefer pattern and do not pass regex.
+createdById (string, optional) - CreatedById filter for the flow version; string User Id
+in 15- or 18-character format; no default; example: 005xx000001Sv6rAAC; do not pass
+usernames.
+lastModifiedById (string, optional) - LastModifiedById filter for the flow version;
+string User Id in 15- or 18-character format; no default; example: 005xx000001Sv6rAAC;
+do not pass usernames.
+modifiedSince (string, optional) - Lower bound for LastModifiedDate; ISO 8601 datetime
+string; no default; example: 2026-01-01T00:00:00.000Z; do not pass relative dates or
+locale-formatted dates.
+whereClause (string, optional) - Additional Tooling SOQL WHERE conditions for Flow
+without the WHERE keyword; string appended with AND after built-in filters; no default;
+example: ApiVersion >= 60.0; do not pass SELECT, FROM, ORDER BY, LIMIT, Metadata,
+FullName, or untrusted user text.
+orderBy (string, optional) - Flow ORDER BY clause without the ORDER BY keyword; string;
+default Definition.DeveloperName ASC, VersionNumber DESC; example: LastModifiedDate
+DESC; do not pass WHERE, LIMIT, Metadata, FullName, or fields unavailable on Tooling
+Flow.
+sortBy (string, optional) - Structured sort field kept for compatibility; enum of common
+Flow sortable fields; ignored when orderBy is provided; default
+Definition.DeveloperName; example: LastModifiedDate; do not pass labels or Metadata.
+sortDirection ("ASC" | "DESC", optional) - Direction for sortBy when orderBy is omitted;
+enum ASC or DESC; default ASC; example: DESC; do not pass lowercase values.
+limit (integer, optional) - Maximum Flow rows to return; integer from 1 to 2000; default
+200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
-Result (ungrouped)
-totalSize (number).
-flows (array) - Each:
-  definitionId, flowName, label, description, processType, status,
-  activeVersionNumber (number|null), latestVersionNumber (number),
-  objectType (string|null) - Target sObject for record-triggered flows.
-  createdById, createdByName, createdDate,
-  lastModifiedById, lastModifiedByName, lastModifiedDate.
-Result (grouped)
-groups (array) - Each:
-  key (string) - Group value.
-  count (number).
-  flows (array of the same shape).
+Result
+Returns the raw Tooling API Flow query response as a JSON object.
 
 Required permissions
 - API Enabled.
@@ -70,30 +79,11 @@ Errors
 Example request
 
 list_flows({
+  "status": "[\\\"Active\\\", \\\"Draft\\\"]",
   "processType": "AutoLaunchedFlow",
-  "status": "Active",
-  "sObject": "Opportunity",
-  "sortBy": "LastModifiedDate",
-  "sortDirection": "DESC",
-  "limit": 50
+  "pattern": "Account_*"
 })
 
 Example result
 
-{
-  "totalSize": 3,
-  "flows": [
-    {
-      "definitionId": "300Qg000000abcDEF",
-      "flowName": "Opportunity_Stage_Sync",
-      "label": "Opportunity Stage Sync",
-      "processType": "AutoLaunchedFlow",
-      "status": "Active",
-      "activeVersionNumber": 6,
-      "latestVersionNumber": 7,
-      "objectType": "Opportunity",
-      "lastModifiedByName": "Yamin Haji",
-      "lastModifiedDate": "2026-04-22T13:18:09.000+0000"
-    }
-  ]
-}
+Returns the raw Tooling API Flow query response as a JSON object.

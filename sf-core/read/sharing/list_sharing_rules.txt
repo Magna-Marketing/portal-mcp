@@ -4,10 +4,10 @@ Description
 List sharing rules for one or more objects: criteria-based, owner-based, and territory-based. Each rule shows its access level (Read | ReadWrite | TransferAccess | All), the source (group / role / role+sub / queue), and the target group. Use as input to consolidation and audits.
 
 Salesforce API
-Metadata API (`SharingRules` type) per sObject, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0    (readMetadata SharingRules per sObject)
+POST /services/Soap/m/66.0  (readMetadata SharingRules)
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,25 +17,32 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], required) - sObject API names.
-ruleTypes (string[], optional, default ["criteria","owner","territory"]).
-namePattern (string, optional) - Glob on rule fullName.
-accessLevel (string, optional) - Filter to "Read" | "Edit" | "All".
+sObject (string, optional) -
+Object API name whose SharingRules metadata should be read; string Salesforce sObject
+API name; no default; example: Account or Invoice__c; do not pass a sharing-rule name,
+label, SOQL, or multiple values.
+sObjectNames (string[], optional) -
+Object API names whose SharingRules metadata should be read; array of Salesforce sObject
+API names; default uses sObject or metadata listing; example: [\"Account\",
+\"Invoice__c\"]; do not pass labels, share object names, empty strings, or
+comma-separated text.
+sObjectPattern (string, optional) -
+Object API name pattern used against SharingRules metadata fullName; string with * and ?
+wildcards; no default; example: *_Invoice__c; do not pass regex, SOQL LIKE syntax, or
+multiple patterns.
+orderBy ("fullNameASC" | "fullNameDESC" | "lastModifiedDateASC" | "lastModifiedDateDESC", optional) -
+Metadata listing sort order before reading SharingRules; enum value; default fullName
+ASC; example: lastModifiedDate DESC; do not pass SOQL ORDER BY, arbitrary fields, or
+lowercase variants.
+limit (integer, optional) -
+Maximum SharingRules components to read when using metadata listing; integer from 1 to
+2000; default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
+includeMetadataListing (boolean, optional) -
+Whether to include raw FileProperties from Metadata API listMetadata; boolean; default
+false; example: true; do not pass when only SharingRules metadata is needed.
 
 Result
-totalRules (number).
-sharingRules (array) - Each:
-  sObject (string).
-  ruleType ("CriteriaBasedSharingRule"|"OwnerSharingRule"|"TerritorySharingRule").
-  fullName (string).
-  label (string).
-  description (string|null).
-  accessLevel (string).
-  sharedTo (object) - { type ("group"|"role"|"roleAndSubordinates"|"roleAndSubordinatesInternal"|"queue"|"allInternalUsers"|"allCustomerPortalUsers"|"allPartnerUsers"|"territory"|"territoryAndSubordinates"), name }.
-  sharedFrom (object|null) - For owner-based: same shape as sharedTo.
-  criteria (array, only criteria rules) - [{ field, operation, value }].
-  booleanFilter (string|null).
-  accountSettings (object|null) - For account rules: { caseAccessLevel, contactAccessLevel, opportunityAccessLevel }.
+Returns raw SharingRules metadata and optional raw FileProperties metadata listing.
 
 Required permissions
 - "View Setup and Configuration".
@@ -48,4 +55,8 @@ Errors
 
 Example request
 
-list_sharing_rules({ "sObjects": ["Account", "Opportunity"] })
+list_sharing_rules({
+  "sObject": "Account or Invoice__c",
+  "sObjectNames": "[\\\"Account\\\", \\\"Invoice__c\\\"]",
+  "sObjectPattern": "*_Invoice__c"
+})

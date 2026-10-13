@@ -9,7 +9,10 @@ Marketing Cloud API
 REST API (`/contacts/v1/attributes`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/attributes
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/attributeSetDefinitions/{attribute_set_definition_id}
+Optional query: $page, $pageSize
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/attributeSetDefinitions
+Optional query: $page, $pageSize
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,14 +22,15 @@ Body
 None.
 
 Input (parameters)
-attributeGroup (string, optional).
-attributeSet (string, optional).
-namePattern (string, optional).
-limit (number, optional, default 200).
+attribute_set_definition_id (string, optional) - Optional attribute set definition ID. When omitted, all attribute set definitions in the
+Contact Model are returned.
+page (number, optional) - Optional REST $page value if the tenant supports pagination on this endpoint.
+page_size (number, optional) - Optional REST $pageSize value if the tenant supports pagination on this endpoint.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-totalCount (number).
-attributes (array) - { name, label, dataType, length, isRequired, defaultValue, attributeGroupName, attributeSetName, dataExtensionCustomerKey, dataExtensionFieldName }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read`.
@@ -39,4 +43,4 @@ Errors
 
 Example request
 
-list_contact_attributes({ "attributeGroup": "Demographics" })
+list_contact_attributes({})

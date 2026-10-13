@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/tracker-domains?fields={fields}
+GET https://{pi-domain}/api/v5/objects/tracker-domains
+Optional query: fields, filter[isDeleted], filter[isPrimary], filter[sslStatus], filter[validationStatus], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,23 +22,18 @@ Body
 None.
 
 Input (parameters)
-isPrimary (boolean, optional).
-validationStatus (string, optional) - "validated" | "pending" |
-  "not_validated".
-sslStatus (string, optional) - "active" | "pending" | "not_validated".
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,domain,isPrimary,
-  defaultCampaignId,validationStatus,sslStatus,trackingCode,
-  createdAt,updatedAt,createdById,updatedById,isDeleted,
-  vanityUrlStatus,sslStatusDetails).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+isPrimary (boolean, optional) - Filter to the primary (or non-primary) tracker domain.
+validationStatus ("validated" | "pending" | "not_validated", optional) - Filter by DNS validation status.
+sslStatus ("active" | "pending" | "not_validated", optional) - Filter by SSL certificate status.
+isDeleted (boolean, optional) - Include deleted tracker domains. Default false.
+fields (string[], optional) - Field projection. Defaults to id, domain, isPrimary, defaultCampaignId,
+validationStatus, sslStatus, trackingCode, createdAt, updatedAt, createdById,
+updatedById, isDeleted, vanityUrlStatus, sslStatusDetails.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-trackerDomains (array) - Each: { id, domain, isPrimary,
-  defaultCampaignId, validationStatus, sslStatus, sslStatusDetails,
-  trackingCode, vanityUrlStatus, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -53,9 +49,5 @@ Example request
 list_tracker_domains({})
 
 Example result
-{
-  "trackerDomains": [
-    { "id": 7, "domain": "go.magnatech.com", "isPrimary": true,
-      "validationStatus": "validated", "sslStatus": "active" }
-  ]
-}
+
+{ }

@@ -7,15 +7,10 @@ results. For just the results once complete, use `list_apex_test_results`
 filtered by the same parent job.
 
 Salesforce API
-Tooling + REST API, v66.0.
-- `AsyncApexJob` for the parent.
-- `ApexTestQueueItem` for the queued test methods.
-- `ApexTestResult` for finished method outcomes.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Status, ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors, CompletedDate FROM AsyncApexJob WHERE Id = '{jobId}'
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, ApexClassId, ApexClass.Name, Status, ExtendedStatus, ParentJobId FROM ApexTestQueueItem WHERE ParentJobId = '{jobId}'
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, ApexClassId, ApexClass.Name, MethodName, Outcome, RunTime, StackTrace, Message FROM ApexTestResult WHERE AsyncApexJobId = '{jobId}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, AsyncApexJobId, Status, StartTime, EndTime, ClassesCompleted, ClassesEnqueued, MethodsCompleted, MethodsEnqueued, MethodsFailed, TestSetupTime, TestTime, UserId, IsAllTests, Source FROM ApexTestRunResult
 
 Headers
 Authorization: Bearer <access_token>
@@ -25,14 +20,17 @@ Body
 None.
 
 Input (parameters)
-jobId (string, required) - AsyncApexJob Id.
-includeResults (boolean, optional, default true).
+asyncApexJobId (string, required) - AsyncApexJob Id for the Apex test run; Salesforce Id
+string, typically starting with 707; required with no default; example: 7075g0000012345;
+do not pass ApexClass Ids, run result Ids, multiple Ids, or SOQL fragments.
 
 Result
-job (object) - { id, status, jobItemsProcessed, totalJobItems, numberOfErrors, completedDate, percentComplete }.
-queueItems (array) - { id, apexClassName, status ("Queued"|"Processing"|"Aborted"|"Completed"|"Failed"|"Preparing"|"Holding"), extendedStatus }.
-results (array, when includeResults=true) - { id, apexClassName, methodName, outcome ("Pass"|"Fail"|"CompileFail"|"Skip"), runTime (ms), message, stackTrace }.
-summary (object) - { passed, failed, skipped, total, durationMs }.
+Returns the raw Salesforce QueryResult with totalSize, done, and matching
+ApexTestRunResult records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "Author Apex".
@@ -45,4 +43,6 @@ Errors
 
 Example request
 
-get_apex_test_run_status({ "jobId": "707Qg00000abcDE" })
+get_apex_test_run_status({
+  "asyncApexJobId": "7075g0000012345"
+})

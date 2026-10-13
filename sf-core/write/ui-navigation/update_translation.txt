@@ -6,34 +6,78 @@ custom labels, custom apps, custom tabs, fields, picklist values,
 quick actions, record types, validation rules.
 
 Salesforce API
-Metadata API (`Translations`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (createMetadata Translations)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: object, field, name.
+JSON fields: object, field.
+JSON fields: object.
+JSON fields: fullName.
 
 Input (parameters)
-language (string, required) - Language code (e.g. "es", "fr_CA").
-operation (string, optional, default "merge") - "merge" | "replace".
-customLabels (object, optional) - Map of label name -> translation.
-customApplications (object, optional).
-fieldLabels (array, optional) - [{ object, field, label, help }].
-picklistValues (array, optional) - [{ object, field, masterLabel, translation }].
-quickActions (array, optional).
-recordTypes (array, optional) - [{ object, name, label, description }].
-validationRules (array, optional) - [{ object, name, errorMessage }].
-checkOnly (boolean, optional, default false).
+language (string, required) - Translation language code. String fullName for
+Translations and suffix for CustomObjectTranslation; required. Example: es or fr_CA. Do
+not pass a locale unsupported by Translation Workbench.
+operation ("merge" | "replace", optional) - How translation arrays are changed. merge
+updates requested entries by key and replace replaces touched arrays; defaults to merge.
+Example: merge. Do not use replace unless intentionally dropping omitted entries in
+touched arrays.
+customLabels (unknown, optional).
+customApplications (unknown | unknown[], optional) - CustomApplicationTranslation
+entries. Map of app name to label or array of name/label/description objects; omitted by
+default. Example: {\"Sales_App\":\"Ventas\"}. Do not pass app labels as keys.
+customTabs (unknown | unknown[], optional) - CustomTabTranslation entries. Map of tab
+name to label or array of name/label objects; omitted by default. Example:
+{\"Partner_Tab\":\"Socios\"}. Do not pass object labels as keys.
+quickActions (unknown[], optional) - Quick action translations. Array of name/label
+entries; global entries go to Translations and object entries go to
+CustomObjectTranslation.quickActions. Example: [{\"name\":\"New_Task\",\"label\":\"Nueva
+tarea\"}]. Do not mix global and object names incorrectly.
+fieldLabels (unknown[], optional) - Field label/help translations. Array of
+CustomFieldTranslation inputs; omitted by default. Example:
+[{\"object\":\"Account\",\"field\":\"Status__c\",\"label\":\"Estado\"}]. Do not pass
+picklist master labels here.
+picklistValues (unknown[], optional) - Picklist value translations. Array of
+PicklistValueTranslation inputs; omitted by default. Example:
+[{\"object\":\"Account\",\"field\":\"Status__c\",\"masterLabel\":\"Active\",\"translation\":\"Activo\"}].
+Do not use for standard value sets.
+recordTypes (unknown[], optional) - Record type translations. Array of object/name/label
+entries; omitted by default. Example:
+[{\"object\":\"Account\",\"name\":\"Business\",\"label\":\"Empresa\"}]. Do not pass
+record type labels as names.
+validationRules (unknown[], optional) - Validation rule error translations. Array of
+object/name/errorMessage entries; omitted by default. Example:
+[{\"object\":\"Account\",\"name\":\"Require_Status\",\"errorMessage\":\"Estado
+obligatorio\"}]. Do not pass formula names that are not validation rules.
+metadata (object, optional) - Raw top-level Translations fields to merge. Object using
+v66.0 field names; omitted by default. Example: {\"reportTypes\":[]}. Do not pass
+CustomObjectTranslation fields here.
+objectMetadata (object[], optional) - Raw per-object CustomObjectTranslation metadata.
+Array of object/metadata entries; omitted by default. Example:
+[{\"object\":\"Account\",\"metadata\":{\"nameFieldLabel\":\"Cliente\"}}]. Do not pass
+unsupported v66.0 fields.
+  object (string, required) - Object API name for this raw CustomObjectTranslation
+  metadata.String required.Example: Account.Do not pass a label.
+  metadata (object, required) - Raw CustomObjectTranslation fields to merge for this
+  object and language.Object using v66.0 field names; required.Example:
+  {\"nameFieldLabel\":\"Cliente\"}.Do not pass top-level Translations fields.
+checkOnly (boolean, optional) - Preview mode. Boolean; defaults to false and skips
+createMetadata/updateMetadata when true. Example: true. Do not use when you expect
+Salesforce to persist changes.
 
 Result
-deploy (object).
-language (string).
-counts (object) - { customLabels, customApplications, fieldLabels, picklistValues, quickActions, recordTypes, validationRules }.
+checkOnly (value) - included in the JSON returned by the tool.
+language (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+translations (value) - included in the JSON returned by the tool.
+customObjectTranslations (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Translation" + "Customize Application".
@@ -47,7 +91,5 @@ Errors
 Example request
 
 update_translation({
-  "language": "es",
-  "customLabels": { "MTG_Project_Welcome": "Bienvenido a MTG Projects." },
-  "fieldLabels": [{ "object": "Project__c", "field": "Status__c", "label": "Estado" }]
+  "language": "es or fr_CA."
 })

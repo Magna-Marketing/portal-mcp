@@ -6,11 +6,10 @@ and failure rows, run tests result, and code coverage warnings. Used by
 CI / CD pipelines after `deploy_metadata` to wait for completion.
 
 Salesforce API
-Metadata API + Tooling, v66.0.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/metadata/deployRequest/{deployId}?includeDetails=true
-GET /services/data/v66.0/tooling/sobjects/DeployRequest/{deployId}
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,20 +19,20 @@ Body
 None.
 
 Input (parameters)
-deployId (string, required).
-includeComponentSuccesses (boolean, optional, default true).
-includeComponentFailures (boolean, optional, default true).
-includeTests (boolean, optional, default true).
+deployId (string, required) - Deployment request Id to check; Salesforce Id string,
+commonly returned by metadata deployRequest or DeployRequest; required; example:
+0Af5g00000ABCDe; do not pass a job name, URL, empty string, or comma-separated Ids.
+includeToolingRecord (boolean, optional) - Whether to also query the Tooling API
+DeployRequest row; boolean; default true; example: false; pass false if the Metadata
+REST status response alone is enough.
 
 Result
-deployment (object):
-  id, status, done (boolean), checkOnly, rollbackOnError, ignoreWarnings, runTestsEnabled, testLevel,
-  numberComponentsTotal, numberComponentsDeployed, numberComponentErrors,
-  numberTestsTotal, numberTestsCompleted, numberTestErrors,
-  startDate, completedDate, elapsedMs, createdBy, errorStatusCode, errorMessage.
-componentSuccesses (array, optional) - { componentType, fileName, fullName, success, created, deleted, changed }.
-componentFailures (array, optional) - { componentType, fileName, fullName, problemType, problem, lineNumber, columnNumber }.
-runTestsResult (object, optional) - { numTestsRun, numFailures, totalTime, failures: [{ name, methodName, message, stackTrace }], successes: [{ name, methodName, time }], codeCoverageWarnings: [{ name, message }] }.
+Returns a JSON object with deployRequestUrl, raw deployRequestResult, optional
+toolingQuery, and optional raw toolingResult.
+deployRequestUrl (value) - included in the JSON returned by the tool.
+deployRequestResult (value) - included in the JSON returned by the tool.
+toolingQuery (value) - included in the JSON returned by the tool.
+toolingResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Modify Metadata Through Metadata API Functions".
@@ -46,4 +45,6 @@ Errors
 
 Example request
 
-get_deployment_status({ "deployId": "0Af4Q00000abcDE", "includeTests": true })
+get_deployment_status({
+  "deployId": "0Af5g00000ABCDe"
+})

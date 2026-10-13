@@ -20,16 +20,47 @@ Body
 SOAP CreateRequest / UpdateRequest / DeleteRequest on DataFolder.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "move" | "delete".
-folderId (number, optional, required for non-create).
-contentType (string, required) - "email" | "dataextension" | "triggered_send" | "automation_run" | "asset" | "list" | "queryactivity" | "filter" | "import" | etc.
-name (string, required for create).
-description (string, optional).
-parentFolderId (number, optional, required for create / move).
-allowChildren (boolean, optional, default true).
+operation ("create" | "update" | "move" | "delete", required) - Folder operation to perform. create uses SOAP Create DataFolder, update/move use SOAP
+Update DataFolder, and delete uses SOAP Delete DataFolder.
+folder_id (number, optional) - Numeric DataFolder.ID. Required for update, move, or delete when
+customer_key/object_id/raw_data_folder_xml is not supplied.
+customer_key (string, optional) - DataFolder.CustomerKey external key. Recommended for created folders and usable as an
+update/delete identifier when known.
+object_id (string, optional) - DataFolder.ObjectID system identifier. Useful when ID or customer_key is unavailable.
+content_type (string, optional) - DataFolder.ContentType, such as email, dataextension, triggered_send, automations,
+queryactivity, filteractivity, list, asset, shared_dataextension, or publication.
+Required for create unless raw_data_folder_xml is supplied.
+name (string, optional) - DataFolder.Name. Required for create unless raw_data_folder_xml is supplied. Optional
+for update.
+description (string, optional) - DataFolder.Description. Salesforce examples include this on create; omit only when your
+account allows it or raw_data_folder_xml supplies it.
+parent_folder_id (number, optional) - Parent DataFolder.ID. Required for create and move unless raw_data_folder_xml is
+supplied. Use 0 only for valid root-level folder operations.
+parent_folder_customer_key (string, optional) - Optional ParentFolder.CustomerKey when moving or creating under a parent identified by
+external key.
+parent_folder_object_id (string, optional) - Optional ParentFolder.ObjectID when moving or creating under a parent identified by
+ObjectID.
+allow_children (boolean, optional) - DataFolder.AllowChildren. Defaults to true on create because Salesforce otherwise
+defaults it to false.
+is_active (boolean, optional) - DataFolder.IsActive. Defaults to true on create.
+is_editable (boolean, optional) - DataFolder.IsEditable. Defaults to true on create because Salesforce otherwise defaults
+it to false.
+raw_data_folder_xml (string, optional) - Exact <Objects xsi:type="DataFolder">...</Objects> XML to send inside the SOAP request.
+Use for fields not covered by this schema.
+confirm_delete (boolean, optional) - Must be true when operation is delete.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the SOAP ClientID header. Defaults to
+the authenticated Business Unit when the session is already scoped to one.
+client_business_unit_id (number, optional) - Optional DataFolder.Client.ID owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use this when authenticating at parent level but writing
+folders in a child BU.
 
 Result
-folder (object) - { id, customerKey, name, contentType, parentFolderId, isActive, isEditable }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+action (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - Varies per `contentType`.
@@ -44,8 +75,5 @@ Errors
 Example request
 
 manage_folder({
-  "operation": "create",
-  "contentType": "dataextension",
-  "name": "MTG Member DEs",
-  "parentFolderId": 12345
+  "operation": "create"
 })

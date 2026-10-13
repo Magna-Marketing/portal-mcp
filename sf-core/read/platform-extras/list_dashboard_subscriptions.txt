@@ -18,12 +18,16 @@ Body
 None.
 
 Input (parameters)
-dashboardId (string, optional).
-ownerId (string, optional).
-includeInactive (boolean, optional, default false).
+dashboardId (string, optional) - Dashboard record Id to pass as analytics notifications
+recordId; Salesforce dashboard Id string; no default; example: 01Z5g0000012345; do not
+pass dashboard names, URLs, or multiple Ids.
+ownerId (string, optional) - Owner user Id for notifications when permitted; Salesforce
+user Id string; no default; example: 0055g0000012345; do not pass usernames, emails, or
+multiple Ids.
 
 Result
-subscriptions (array) - Same shape as `list_report_subscriptions` but `source: "dashboard"` and `dashboardId` instead of `reportId`.
+raw Analytics Notifications JSON array with notification fields such as id, source,
+recordId, schedule, and thresholds.
 
 Required permissions
 - "API Enabled" + "Subscribe to Dashboards".
@@ -36,4 +40,7 @@ Errors
 
 Example request
 
-list_dashboard_subscriptions({})
+list_dashboard_subscriptions({
+  "dashboardId": "01Z5g0000012345",
+  "ownerId": "0055g0000012345"
+})

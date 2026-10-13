@@ -18,13 +18,23 @@ Body
 SOAP UpdateRequest with AccountUser.Roles changes.
 
 Input (parameters)
-userId (number, optional).
-username (string, optional).
-  One required.
-operation (string, required) - "add" | "remove" | "set".
-roleIds (number[], optional).
-roleNames (string[], optional).
-  One of roleIds / roleNames required.
+user_id (number, optional) - Numeric AccountUser.ID. Required when username/email is not supplied.
+username (string, optional) - AccountUser.UserID username. Required when user_id/email is not supplied.
+email (string, optional) - AccountUser.Email. Required when user_id/username is not supplied.
+operation ("add" | "remove" | "set", required) - set sends the exact Role.ID collection; add/remove retrieve current AccountUser.Roles
+unless current_role_ids is supplied, then update the final collection.
+role_ids (number[], optional) - Role.ID numeric values to add/remove/set. Obtain from list_user_roles.
+role_names (string[], optional) - Role.Name values to resolve to Role.ID before add/remove/set.
+role_customer_keys (string[], optional) - Role.CustomerKey values (e.g. SYS_DEF_ADMIN, SYS_DEF_CONTENT, SYS_DEF_DATA,
+SYS_DEF_ANALYST, SYS_DEF_DS_USER) to add/remove/set. Preferred for system roles when
+numeric ID is unavailable.
+current_role_ids (number[], optional) - Optional current full AccountUser.Role IDs. If omitted for add/remove, the tool
+retrieves AccountUser.Roles first.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context. Defaults to
+the authenticated Business Unit when the session is already scoped to one.
+client_business_unit_id (number, optional) - Optional AccountUser.Client.ID owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use this when authenticating at parent level but writing user
+settings for a child BU.
 
 Result
 user (object) - { id, username }.
@@ -43,7 +53,5 @@ Errors
 Example request
 
 assign_user_role({
-  "username": "marketingops@magnatech.com",
-  "operation": "add",
-  "roleNames": ["Content Creator", "Channel Manager"]
+  "operation": "add"
 })

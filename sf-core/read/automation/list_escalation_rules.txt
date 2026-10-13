@@ -4,7 +4,7 @@ Description
 List Case escalation rules and their entries (criteria, business hours, escalation actions). Escalation actions can reassign the case, notify users, and update fields based on age/status.
 
 Salesforce API
-Metadata API (`EscalationRules`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
 POST /services/Soap/m/66.0   (readMetadata EscalationRules for Case)
@@ -17,16 +17,17 @@ Body
 None.
 
 Input (parameters)
-includeInactive (boolean, optional, default true).
-namePattern (string, optional).
+sObject ("Case", optional) - EscalationRules container object API name; only Case is
+supported by Salesforce; default Case; example: Case; do not pass custom objects,
+labels, or SOQL fragments.
+namePattern (string, optional) - Rule fullName selection hint using * and ? wildcards;
+string; no default; example: Premium_*; Metadata API reads the whole Case container, so
+this does not trim returned container data; do not pass regex or SOQL LIKE syntax.
 
 Result
-escalationRules (array) - Each:
-  fullName, active.
-  ruleEntries (array) - Each:
-    sortOrder, criteriaItems[], formula, booleanFilter,
-    businessHours (string|null) - BusinessHours name,
-    escalationActions (array) - [{ ageOver (minutes), ageOverFromField, assignTo (string), assignToTemplate (string), notifyTo (string|null), notifyTemplate (string|null), notifyAssignee (boolean) }].
+Returns a JSON object with metadataFullNames and metadataResult.
+metadataFullNames (value) - included in the JSON returned by the tool.
+metadataResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -39,4 +40,7 @@ Errors
 
 Example request
 
-list_escalation_rules({ "includeInactive": false })
+list_escalation_rules({
+  "sObject": "Case",
+  "namePattern": "Premium_*"
+})

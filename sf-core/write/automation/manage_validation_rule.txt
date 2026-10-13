@@ -6,10 +6,10 @@ formula that, when **true**, blocks the save with the configured error
 message and (optionally) attaches the message to a specific field.
 
 Salesforce API
-Metadata API (`ValidationRule`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (writeMetadata ValidationRule)
 
 Headers
 Authorization: Bearer <access_token>
@@ -28,15 +28,29 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-object (string, required) - sObject API name.
-fullName (string, required) - Validation rule DeveloperName.
-active (boolean, optional, default true).
-errorConditionFormula (string, required for create/update) - Boolean Apex formula.
-errorMessage (string, required for create/update).
-errorDisplayField (string, optional) - When omitted, error appears at top of page.
-description (string, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Requested
+ValidationRule operation; enum create, update, upsert, or delete; no default; example:
+'upsert'; do not use update for a rule that does not exist.
+object (string, required) - ValidationRule parent object; string sObject API name; no
+default; example: 'Account'; do not pass labels or record Ids.
+fullName (string, required) - ValidationRule fullName; string DeveloperName with
+optional ObjectApiName prefix; no default; example: 'Require_Industry'; do not include
+file extensions or labels.
+active (boolean, optional) - ValidationRule active flag; boolean; defaults to true for
+create/upsert; example: false; do not pass string booleans.
+errorConditionFormula (string, optional) - ValidationRule errorConditionFormula; string
+boolean formula required for create/upsert; no default; example: 'ISBLANK(Industry)'; do
+not include a leading '='.
+errorMessage (string, optional) - ValidationRule errorMessage; string message shown when
+the formula evaluates true, required for create/upsert; no default; example: 'Industry
+is required.'; do not pass HTML-only content.
+errorDisplayField (string, optional) - ValidationRule errorDisplayField; string field
+API name for field-level placement; omitted shows page-level error; example: 'Industry';
+do not pass labels or relationship paths.
+description (string, optional) - ValidationRule description; string metadata
+description; omitted leaves existing value unchanged; example: 'Requires Industry on
+business accounts'; do not pass formula text here.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -55,9 +69,8 @@ Errors
 Example request
 
 manage_validation_rule({
-  "operation": "create",
-  "object": "Opportunity",
-  "fullName": "Amount_required_for_close",
-  "errorConditionFormula": "ISCHANGED(StageName) && TEXT(StageName) == 'Closed Won' && ISBLANK(Amount)",
-  "errorMessage": "Amount must be set before closing won."
+  "operation": "upsert",
+  "object": "Account",
+  "fullName": "Require_Industry",
+  "metadata": "example"
 })

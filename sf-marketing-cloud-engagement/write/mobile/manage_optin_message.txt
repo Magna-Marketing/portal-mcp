@@ -25,18 +25,24 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-optInMessageId (number, optional, required for non-create).
-name (string, required for create).
-message (string, required for create) - Initial opt-in prompt.
-confirmationMessage (string, required for create) - Sent on successful confirm.
-shortCodes (string[], required for create).
-keywordsToTriggerOptIn (string[], required for create).
-keywordsForConfirmation (string[], required for create).
-locale (string, optional).
+operation ("create", optional) - Create an SMS opt-in message. Salesforce public REST references do not document
+update/delete routes for this resource.
+message_name (string, optional) - Opt-in message name. Sent as messageName. Required unless raw_body is provided.
+short_code (string, optional) - Short code for the opt-in message. Sent as shortCode. Required unless raw_body is
+provided.
+country_code (string, optional) - Two-letter country code. Sent as countryCode. Required unless raw_body is provided.
+keyword (string, optional) - Keyword that triggers the opt-in message. Required unless raw_body is provided.
+message_opt_in_type ("Single" | "Double" | "DoubleWithAge", optional) - Opt-in flow type sent as messageOptInType.
+response_message (string, optional) - Response/confirmation message sent as responseMessage.
+allow_single_opt_in (boolean, optional) - Whether to allow single opt-in. Sent as allowSingleOptIn.
+duplicate_opt_in_message (string, optional) - Message sent when the contact is already opted in. Sent as duplicateOptInMessage.
+optin_error_message (string, optional) - Message sent for opt-in errors. Sent as optinErrorMessage.
+raw_body (object, optional) - Advanced raw body for POST /sms/v1/message/optin. If provided, it is sent as-is.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-optInMessage (object) - { id, name, message, confirmationMessage, status }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_send`.
@@ -49,12 +55,4 @@ Errors
 
 Example request
 
-manage_optin_message({
-  "operation": "create",
-  "name": "MTG_Opt_In",
-  "message": "Reply YES to confirm your subscription to MTG alerts.",
-  "confirmationMessage": "Thanks! You're subscribed.",
-  "shortCodes": ["12345"],
-  "keywordsToTriggerOptIn": ["MTG"],
-  "keywordsForConfirmation": ["YES"]
-})
+manage_optin_message({})

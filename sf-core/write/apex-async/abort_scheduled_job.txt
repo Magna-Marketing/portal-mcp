@@ -27,14 +27,10 @@ jobName (string, optional) - CronJobDetail.Name to look up the ID.
   At least one of cronTriggerId or jobName is required.
 
 Result
-{
-  "aborted": true,
-  "cronTriggerId": "08e...",
-  "jobName": "MTG Daily Recalc",
-  "state": "DELETED"
-}
-On not-found: aborted=true with a note that the job was already deleted.
-On error: compile/exception details from the anonymous Apex response.
+raw executeAnonymous result plus raw CronTrigger query data when confirmation query
+succeeds.
+executeAnonymous (value) - included in the JSON returned by the tool.
+cronTrigger (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Author Apex" (to abort own jobs).

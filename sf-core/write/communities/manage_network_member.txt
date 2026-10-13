@@ -6,11 +6,12 @@ Controls who is an active member of the site. To control which profiles/permsets
 are eligible, use the site's membership configuration in Experience Workspaces.
 
 Salesforce API
-REST API (Data), v66.0. NetworkMember sObject.
+REST API (Data), v66.0.
 
-Endpoints
-POST   /services/data/v66.0/sobjects/NetworkMember          (add member)
-DELETE /services/data/v66.0/sobjects/NetworkMember/{id}      (remove member)
+Endpoint
+POST /services/data/v66.0/sobjects/NetworkMember
+DELETE /services/data/v66.0/sobjects/NetworkMember/{id}
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>

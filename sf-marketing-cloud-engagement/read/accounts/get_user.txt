@@ -15,20 +15,20 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP retrieve on AccountUser with filter on Id, Username, or Email.
+SOAP request on AccountUser, Account.
 
 Input (parameters)
-userId (number, optional) - Internal user Id.
-username (string, optional).
-email (string, optional).
-  One required.
-includeBusinessUnits (boolean, optional, default true).
-includeRolePermissions (boolean, optional, default false) - Heavy.
+user_id (number, optional) - Internal AccountUser ID.
+username (string, optional) - AccountUser.UserID username.
+email (string, optional) - AccountUser.Email address.
+business_unit_id (string, optional) - Business Unit MID used for SOAP ClientID context.
+query_all_accounts (boolean, optional) - Query users across parent and child accounts. Defaults to true.
+include_default_business_unit (boolean, optional) - Also retrieve the Account record for the user DefaultBusinessUnit when it is present.
+Defaults to true.
 
 Result
-user (object) - Same as a row from `list_users`, plus:
-  businessUnits (array) - [{ mid, name, isDefault }].
-  rolePermissions (array, when includeRolePermissions=true) - [{ permissionId, name, allowed }].
+tool (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `users_read`.
@@ -41,4 +41,4 @@ Errors
 
 Example request
 
-get_user({ "username": "marketingops@magnatech.com" })
+get_user({})

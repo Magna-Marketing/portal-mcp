@@ -19,15 +19,10 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Active" | "Indexing" | "Failed" | "Draft".
-sourceDmoApiName (string, optional).
-limit (number, optional, default 100).
+None.
 
 Result
-searchIndexes (array) - Each: { id, apiName, label, status,
-  sourceDmoApiName, embeddingModel, vectorDimension,
-  recordCount, lastIndexedDate, createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,14 +35,8 @@ Errors
 
 Example request
 
-list_search_indexes({ "status": "Active" })
+list_search_indexes({})
 
 Example result
-{
-  "searchIndexes": [
-    { "apiName": "ProductCatalog__si",
-      "sourceDmoApiName": "Product__dlm",
-      "embeddingModel": "openai.text-embedding-3-small",
-      "vectorDimension": 1536, "recordCount": 12000 }
-  ]
-}
+
+{ }

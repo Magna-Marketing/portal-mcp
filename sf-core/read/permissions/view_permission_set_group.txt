@@ -26,33 +26,31 @@ Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-name (string, optional) - PSG DeveloperName.
-id (string, optional) - 18-char PSG Id.
-  One of `name` or `id` required.
-includeUserCount (boolean, optional, default true).
-includeMutingPermset (boolean, optional, default true) - PSGs may have
-  a paired muting permset (PermissionSetGroupComponent with `Muting=true`).
+id (string, optional) - PermissionSetGroup Id to retrieve; Salesforce Id string;
+required when name is omitted and preferred for exact lookup; example: 0PG5g000000ABCd;
+do not pass permission set Ids, labels, multiple Ids, or SOQL fragments.
+name (string, optional) - PermissionSetGroup DeveloperName to retrieve; exact
+DeveloperName string; required when id is omitted; example: Revenue_Team_Group; do not
+pass MasterLabel, wildcards, or comma-separated names.
+includeComponents (boolean, optional) - Whether PermissionSetGroupComponent rows are
+queried; boolean; default true; example: false; do not pass false when component
+permission sets are needed.
+includeAssignments (boolean, optional) - Whether PermissionSetAssignment rows for the
+group are queried; boolean; default false; example: true; do not pass true unless
+assigned users are needed.
 
 Result
-group (object):
-  id (string).
-  developerName (string).
-  label (string).
-  description (string|null).
-  status (string) - "Updated" | "Outdated" | "Updating" | "Failed".
-    "Updating" means the org is recalculating effective permissions; new
-    assignments may take a few seconds to propagate. "Failed" requires
-    re-saving the group.
-  members (array) - Each:
-    permissionSetId (string).
-    name (string).
-    label (string).
-    isCustom (boolean).
-  mutingPermset (object|null) - When attached: { id, name, label }.
-  userCount (number, optional).
+Returns raw Salesforce QueryResult objects for the group and requested related records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+permissionSetGroup (value) - included in the JSON returned by the tool.
+components (value) - included in the JSON returned by the tool.
+assignments (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration".
@@ -70,22 +68,22 @@ Errors
 
 Example request
 
-view_permission_set_group({ "name": "MTG_Delivery_Bundle" })
+view_permission_set_group({
+  "id": "0PG5g000000ABCd",
+  "name": "Revenue_Team_Group",
+  "includeComponents": false
+})
 
 Example result
 
 {
-  "group": {
-    "id": "0PGQg00000004abAB",
-    "developerName": "MTG_Delivery_Bundle",
-    "label": "MTG Delivery Bundle",
-    "description": "Project delivery base perms",
-    "status": "Updated",
-    "members": [
-      { "permissionSetId": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager", "isCustom": true },
-      { "permissionSetId": "0PSQg0000004ZyBB", "name": "MTG_Time_Logger", "label": "MTG Time Logger", "isCustom": true }
-    ],
-    "mutingPermset": null,
-    "userCount": 18
-  }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "PermissionSetGroup"
+      }
+    }
+  ]
 }

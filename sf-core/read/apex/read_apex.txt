@@ -14,52 +14,61 @@ classes. For dependency analysis at component level use
 
 Salesforce API
 Tooling API, v66.0.
-- `GET /tooling/query/?q=SELECT ... FROM ApexClass WHERE ...`
-- `GET /tooling/sobjects/ApexClass/{id}` (full record incl. Body).
-- `GET /tooling/sobjects/ApexClass/describe`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=...
-GET /services/data/v66.0/tooling/sobjects/ApexClass/{id}
+GET /services/data/v66.0/tooling/sobjects/{type}/{id}
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ApiVersion, Status, IsValid, BodyCrc, LengthWithoutComments, ManageableState, CreatedById, CreatedDate, LastModifiedById, LastModifiedDate, SystemModstamp FROM ApexClass
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-name (string, optional) - Exact class name (e.g. "AccountTriggerHandler").
-  Mutually exclusive with `pattern`.
-pattern (string, optional) - Glob (e.g. "*Handler", "ProjectService*").
-  Returns matching classes. Mutually exclusive with `name`.
-includeBody (boolean, optional, default true when `name`, false when
-  `pattern`) - Include the Body field in the result.
-includeInactive (boolean, optional, default true) - Include classes
-  with Status != "Active" (e.g. "Deleted", "Inactive").
-namespacePrefix (string, optional) - Filter by namespace prefix; pass
-  empty string for the org's default namespace.
-managedOnly (boolean, optional, default false) - Only managed-package
-  classes (`ManageableState in ('installed','released')`).
-limit (number, optional, default 100, max 2000) - Pattern-mode cap.
+id (string, optional) - ApexClass record Id to retrieve directly; 15- or 18-character
+Tooling API Id; no default; example: 01p5g000000ABCdAAO; do not pass class names,
+ContentEntityId values, or multiple Ids.
+name (string, optional) - Exact Apex class name; non-empty ApexClass.Name value; no
+default; example: AccountTriggerHandler; do not pass wildcards, namespace prefixes, or
+file names ending in .cls.
+pattern (string, optional) - Apex class name pattern for list mode; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: *Service; do not pass regex, raw
+LIKE syntax, or a pattern with name or id.
+includeBody (boolean, optional) - Body field inclusion flag; boolean controlling whether
+Body is selected in SOQL list/name mode, while direct id retrieval returns Salesforce's
+default sObject payload; default true for name reads and false for list reads; example:
+true; do not pass strings or expect SymbolTable references from ApexClass.
+includeSymbolTable (boolean, optional) - SymbolTable field inclusion flag for SOQL
+reads; boolean that can make queries slower because Salesforce may compile symbols in
+the background; default false; example: true; do not pass true for broad listings unless
+needed.
+includeInactive (boolean, optional) - Inactive/deleted status inclusion flag; boolean;
+default true includes all Status values; example: false; do not pass strings such as
+Active or Inactive.
+namespacePrefix (string, optional) - NamespacePrefix filter; string matched exactly, or
+an empty string for unmanaged/default namespace; no default; example: acme; do not pass
+namespace-qualified class names or package labels.
+managedOnly (boolean, optional) - Managed package filter; boolean that limits
+ManageableState to installed or released; default false; example: true; do not pass a
+namespace value here.
+whereClause (string, optional) - Additional SOQL WHERE condition for ApexClass; string
+with or without WHERE; no default; example: ApiVersion < 60; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ApexClass list mode; string with
+or without ORDER BY; default Name ASC; example: LastModifiedDate DESC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ApexClass rows in list mode; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-For `name`:
-  apexClass (object):
-    id, name, namespacePrefix, apiVersion (number),
-    status ("Active"|"Inactive"|"Deleted"),
-    isValid (boolean) - false if compilation failed.
-    body (string) - Full source.
-    bodyCrc (number).
-    lengthWithoutComments (number).
-    manageableState (string).
-    createdById, createdDate, lastModifiedById, lastModifiedDate.
-    symbolTable (object|null) - Tooling symbol table when available.
-For `pattern`:
-  totalSize (number).
-  apexClasses (array of the above shape; without body when
-    includeBody=false).
+raw Tooling API sObject record for id/name reads, or raw Tooling API QueryResult with
+totalSize, done, records for list reads.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - API Enabled.
@@ -76,28 +85,24 @@ Errors
 - INSUFFICIENT_ACCESS_OR_READONLY: no permission to read class bodies.
 - NOT_FOUND: class with `name` not found in the requested namespace.
 
-Example request (single class with body)
+Example request
 
-read_apex({ "name": "ProjectTriggerHandler", "includeBody": true })
+read_apex({
+  "id": "01p5g000000ABCdAAO",
+  "name": "AccountTriggerHandler",
+  "pattern": "*Service"
+})
 
 Example result
 
 {
-  "apexClass": {
-    "id": "01p4Q00000abcDEF",
-    "name": "ProjectTriggerHandler",
-    "namespacePrefix": null,
-    "apiVersion": 62.0,
-    "status": "Active",
-    "isValid": true,
-    "lengthWithoutComments": 4823,
-    "manageableState": "unmanaged",
-    "body": "public with sharing class ProjectTriggerHandler {\n    /* ... */\n}\n",
-    "createdDate": "2025-04-12T15:23:18.000+0000",
-    "lastModifiedDate": "2026-03-04T20:12:45.000+0000"
-  }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "ApexClass"
+      }
+    }
+  ]
 }
-
-Example request (pattern, metadata only)
-
-read_apex({ "pattern": "*Handler", "includeBody": false, "limit": 200 })

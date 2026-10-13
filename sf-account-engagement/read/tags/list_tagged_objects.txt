@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/tagged-objects?fields={fields}&filter[tagId]=eq,:tagId
+GET https://{pi-domain}/api/v5/objects/tagged-objects
+Optional query: fields, filter[objectId], filter[objectType], filter[tagId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,21 +22,15 @@ Body
 None.
 
 Input (parameters)
-tagId (number, optional).
-objectId (number, optional).
-objectType (string, optional) - "Prospect" | "Campaign" | "Email" |
-  "EmailTemplate" | "File" | "Form" | "FormField" | "FormHandler" |
-  "LandingPage" | "LayoutTemplate" | "List" | "Opportunity" | "User" |
-  "CustomField" | "CustomRedirect" | "DynamicContent".
-fields (string[], optional, default: id,tagId,objectId,objectType,
-  createdAt,createdById).
-limit (number, optional, default 200).
-nextPageToken (string, optional).
+tagId (number, optional) - Filter to objects tagged with this tag id — answers "what is tagged with X?"
+objectId (number, optional) - Filter to tags on a specific object id.
+objectType ("Prospect" | "Campaign" | "Email" | "EmailTemplate" | "File" | "Form" | "FormField" | "FormHandler" | "LandingPage" | "LayoutTemplate" | "List" | "Opportunity" | "User" | "CustomField" | "CustomRedirect" | "DynamicContent", optional) - Filter by object type. Combine with objectId to answer "what tags does Y carry?"
+fields (string[], optional) - Field projection. Defaults to id, tagId, objectId, objectType, createdAt, createdById.
+limit (number, optional) - Page size. Default 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-taggedObjects (array) - Each: { id, tagId, objectId, objectType,
-  createdAt, createdById }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -48,11 +43,8 @@ Errors
 
 Example request
 
-list_tagged_objects({ "tagId": 211, "objectType": "Prospect" })
+list_tagged_objects({})
 
 Example result
-{
-  "taggedObjects": [
-    { "id": 9001, "tagId": 211, "objectId": 7745, "objectType": "Prospect" }
-  ]
-}
+
+{ }

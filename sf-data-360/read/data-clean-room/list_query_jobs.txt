@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/jobs
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/collaborations/{collaborationIdOrApiName}/jobs
+Optional query: filters, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,16 +20,18 @@ Body
 None.
 
 Input (parameters)
-collaborationIdOrApiName (string, required).
-status (string, optional) - "Queued" | "Running" |
-  "AwaitingApproval" | "Complete" | "Failed".
-limit (number, optional, default 100).
+collaborationIdOrApiName (string, required) - Data Clean Room collaboration ID or developer name whose query jobs should be listed.
+filters (string, optional) - Salesforce filter expression as a comma-separated list of equality expressions, such as
+'developerName eq MyCleanRoom'. No filter is applied when omitted.
+limit (number, optional) - Maximum number of records to return, from 1 through 20. Salesforce defaults to 20 when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
+orderBy (string, optional) - Sort order for the result set. Specify a field and ASC or DESC, such as 'createdDate
+DESC'. Salesforce returns items in retrieval order when omitted.
 
 Result
-jobs (array) - Each: { id, collaborationId, templateApiName,
-  status, partnerApprovalStatus, recordsProcessed, resultRef,
-  startedAt, completedAt, runByUserId }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -41,12 +44,10 @@ Errors
 
 Example request
 
-list_query_jobs({ "collaborationIdOrApiName": "MTG_PartnerX" })
+list_query_jobs({
+  "collaborationIdOrApiName": ""
+})
 
 Example result
-{
-  "jobs": [
-    { "id": "JOB_DCR_001", "templateApiName": "OverlapAudience",
-      "status": "Complete", "recordsProcessed": 482000 }
-  ]
-}
+
+{ }

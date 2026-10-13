@@ -29,13 +29,13 @@ username (string, optional) - Salesforce username. Alternative to userId for byU
 appName (string, optional) - Connected App name (AppName field). Required for byApp. Used in byUserAndApp.
 
 Result
-{
-  "revoked": <number>,
-  "total": <number>,
-  "results": [
-    { "tokenId": "...", "userId": "...", "appName": "...", "status": "revoked" | "failed", "error": "..." }
-  ]
-}
+Returns JSON with revoked count, total matched tokens, and per-token revoke status or
+lookup-not-found details.
+success (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
+revoked (value) - included in the JSON returned by the tool.
+results (value) - included in the JSON returned by the tool.
+total (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Connected Apps" + "Manage Users".

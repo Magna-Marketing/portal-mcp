@@ -15,14 +15,10 @@ Always run `preview_bulk_permission_operation` first.
 
 Salesforce API
 REST API (Data), v66.0.
-- Resolve current assignments via SOQL.
-- Compute the diff (toAdd, toRemove).
-- `POST/DELETE /composite/sobjects` in batches.
 
 Endpoint
-GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId, PermissionSetId, PermissionSetGroupId FROM PermissionSetAssignment WHERE AssigneeId IN (...)
-POST   /services/data/v66.0/composite/sobjects        (toAdd)
-DELETE /services/data/v66.0/composite/sobjects?ids=...   (toRemove)
+POST /services/data/v66.0/composite/sobjects
+DELETE /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
@@ -33,18 +29,55 @@ Posts of PermissionSetAssignment rows for additions; query-string ids
 for deletions.
 
 Input (parameters)
-selection (object, required) - Same as bulk_assign_permissions.
-permissionSetNames (string[], optional) - The new full list of permsets
-  the selected users should have at the end.
-permissionSetGroupNames (string[], optional) - Same for PSGs.
-includeOtherPermsets (boolean, optional, default true) - When true,
-  permsets / groups not in the new list but currently held by the user
-  are KEPT (so this becomes "ensure these are present"). When false
-  (default replacement semantics), they are REMOVED.
-expirationDate (string, optional) - For new assignments.
-dryRun (boolean, optional, default false).
-batchSize (number, optional, default 200).
-allOrNone (boolean, optional, default false).
+selection (object, required) - User selection criteria. At least one criterion is
+required.
+  userIds (string[], optional) - User record Ids to include; array of 15- or
+  18-character Salesforce Id strings; no default; example ['005xx0000012345']; do not
+  pass usernames here.
+  usernames (string[], optional) - User.Username values to include; array of exact
+  username strings; no default; example ['admin@example.com']; do not pass display
+  names.
+  profileNames (string[], optional) - Profile.Name values used to select users; array of
+  exact profile names; no default; example ['System Administrator']; do not pass profile
+  Ids.
+  roleNames (string[], optional) - UserRole.Name values used to select users; array of
+  exact role names; no default; example ['Sales Manager']; users without roles are
+  excluded when this is set.
+  department (string, optional) - Exact User.Department value used to select users;
+  string; no default; example 'Sales'; do not pass partial matches.
+  isActiveOnly (boolean, optional) - Whether to select only active users; boolean;
+  defaults to true; example false; do not set false unless inactive users must be
+  included.
+  customSoql (string, optional) - Additional User WHERE condition; SOQL condition text
+  without SELECT, FROM, WHERE, ORDER BY, or LIMIT; no default; example \"UserType =
+  'Standard'\"; do not pass untrusted text.
+  limit (integer, optional) - Maximum users to select; integer from 1 to 50000; defaults
+  to 50000; example 1000; do not pass 0 or values above 50000.
+permissionSetNames (string[], optional) - Desired PermissionSet Name/API names; string
+array; at least one target field is required; example ['MTG_Project_Manager']; do not
+pass labels.
+permissionSetIds (string[], optional) - Desired PermissionSet Ids; Salesforce Id array;
+at least one target field is required; example ['0PSxx000000001A']; do not pass group
+Ids.
+permissionSetGroupNames (string[], optional) - Desired PermissionSetGroup
+DeveloperNames; string array; at least one target field is required; example
+['Finance_Access_Group']; do not pass MasterLabel.
+permissionSetGroupIds (string[], optional) - Desired PermissionSetGroup Ids; Salesforce
+Id array; at least one target field is required; example ['0PGxx000000001A']; do not
+pass PermissionSet Ids.
+includeOtherPermsets (boolean, optional) - Whether currently assigned permission
+sets/groups outside the desired list are kept; boolean; defaults to false replacement
+semantics; example true; do not leave false unless removals are intended.
+expirationDate (string, optional) - ExpirationDate for new assignments; ISO date-time
+string; omitted means no expiration; example '2026-12-31T23:59:59.000Z'; do not pass
+date-only text.
+dryRun (boolean, optional) - Whether to compute changes without POST or DELETE
+/composite/sobjects; boolean; defaults to false; example true; do not use when
+assignments must change.
+batchSize (integer, optional) - Composite sObject collection batch size; integer 1-200;
+defaults to 200; example 100; do not pass values above the REST API limit.
+allOrNone (boolean, optional) - Composite sObject Collections allOrNone flag; boolean;
+defaults to false; example true; when true one failed row can roll back a batch.
 
 Result
 selection (object).
@@ -63,10 +96,8 @@ Errors
 - INSUFFICIENT_PERMSET_LICENSE during add phase aborts remaining adds.
 - ENTITY_IS_DELETED during remove phase is treated as success.
 
-Example request (replacement semantics)
+Example request
 
 bulk_update_permissions({
-  "selection": { "profileNames": ["Standard User"], "department": "Sales" },
-  "permissionSetGroupNames": ["MTG_Sales_Bundle"],
-  "permissionSetNames": ["MTG_Reports_Run"]
+  "selection": {}
 })

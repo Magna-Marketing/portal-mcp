@@ -5,12 +5,14 @@ Create / update / delete a Report or Dashboard subscription (scheduled
 email delivery).
 
 Salesforce API
-Analytics REST API, v66.0. `/analytics/notifications`.
+Analytics REST API, v66.0.
 
 Endpoint
-POST   /services/data/v66.0/analytics/notifications
-PATCH  /services/data/v66.0/analytics/notifications/{id}
-DELETE /services/data/v66.0/analytics/notifications/{id}
+GET /services/data/v66.0/analytics/notifications
+GET /services/data/v66.0/analytics/notifications/{param}
+DELETE /services/data/v66.0/analytics/notifications/{param}
+POST /services/data/v66.0/analytics/notifications
+PATCH /services/data/v66.0/analytics/notifications/{param}
 
 Headers
 Authorization: Bearer <access_token>
@@ -56,66 +58,44 @@ Body
 }
 
 Input (parameters)
-
-name (string, required) - Subscription name.
-
-source (string, required)
-- Notification source type.
-- Common values:
-  - "lightningReportSubscribe"
-  - "lightningDashboardSubscribe"
-
-recordId (string, required)
-- Report Id or Dashboard Id.
-
-schedule (object, required)
-- Notification schedule configuration.
-
-Example:
-{
-  "frequency": "daily" | "weekly" | "monthly",
-  "details": {
-    "time": number,
-    "daysOfWeek": string[],
-    "daysOfMonth": number[]
-  }
-}
-
-thresholds (array, optional)
-- Threshold-based conditions and actions.
-
-Example:
-[
-  {
-    "type": "condition",
-    "conditions": [
-      {
-        "colName": string,
-        "operation": "greaterThan" | "lessThan" | "equals",
-        "value": string
-      }
-    ],
-    "actions": [
-      {
-        "type": "sendEmail",
-        "configuration": {
-          "recipients": [
-            {
-              "id": string,
-              "type": "user" | "group" | "role"
-            }
-          ]
-        }
-      }
-    ]
-  }
-]
-
-active (boolean, optional, default true)
-- Whether the subscription is enabled.
+operation ("create" | "update" | "delete" | "read" | "list", required) - Represents the
+Analytics Notifications operation; valid values are create, update, delete, read, and
+list; there is no default; example: create; do not pass scheduleFutureRun.
+notificationId (string, optional) - Represents the notification/subscription ID;
+required for update, delete, and read; no default; example: 0Ni...; do not pass the
+report or dashboard ID here.
+name (string, optional) - Represents the subscription display name; required for create
+unless supplied in notificationOverride; no default; example: Daily Pipeline; do not
+pass an empty string.
+source (string, optional) - Represents the Analytics notification source; required for
+create and list; no default; example: lightningReportSubscribe; do not pass report or
+dashboard aliases.
+recordId (string, optional) - Represents the report or dashboard record ID being
+subscribed to; required for create unless overridden; no default; example: 00O...; do
+not pass folder IDs.
+schedule (object, optional) - Represents the Analytics notification schedule object;
+required for create unless overridden; no default; example:
+{\"frequency\":\"daily\",\"details\":{\"time\":9}}; do not pass cron strings.
+thresholds (object[], optional) - Represents raw threshold definitions with actions and
+conditions; defaults to a generated email threshold when recipients are supplied;
+example: [{\"type\":\"always\",\"actions\":[]}]; do not pass UI labels.
+conditions (object[], optional) - Represents convenience threshold conditions used with
+recipients; defaults to RowCount greaterThan 0; example:
+[{\"colName\":\"RowCount\",\"operation\":\"greaterThan\",\"value\":\"0\"}]; do not pass
+SOQL.
+recipients (object[], optional) - Represents recipients for a generated sendEmail
+threshold; defaults to none; example: [{\"id\":\"005...\",\"type\":\"user\"}]; do not
+pass email addresses without recipient IDs.
+  id (string, required) - Recipient user, group, or role ID.
+  type ("user" | "group" | "role", required) - Recipient type.
+active (boolean, optional) - Represents whether the notification is active; defaults to
+Salesforce behavior when omitted; example: true; do not pass string booleans.
+notificationOverride (object, optional) - Represents raw Analytics notification fields
+merged last; defaults to none; example: {\"deactivateOnTrigger\":false}; do not pass
+fields that conflict unless overriding is intended.
 
 Result
-subscription (object) - { id, name, source, recordId, recipients, schedule, active }.
+the raw Salesforce Analytics Notifications JSON response.
 
 Required permissions
 - "API Enabled" + "Schedule Reports" / "Subscribe to Dashboards".
@@ -129,10 +109,5 @@ Errors
 Example request
 
 manage_subscription({
-  "operation": "create",
-  "name": "Daily Pipeline Email",
-  "source": "report",
-  "recordId": "00OQg0000004aBcDE",
-  "schedule": { "type": "daily", "startTime": "09:00:00" },
-  "recipients": [{ "id": "005Qg0000020aBcDE", "type": "user" }]
+  "operation": "create"
 })

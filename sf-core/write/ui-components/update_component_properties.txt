@@ -28,8 +28,7 @@ visibilityRule (object|"clear", optional) - When set: replaces the rule;
   Object shape: { booleanFilter?, criteria: [{ leftValue, operator, rightValue? }] }.
 
 Result
-updateResult (object) - Raw Metadata API update response.
-componentInstance (object) - { identifier, before: { properties, visibilityRule }, after: { properties, visibilityRule } }.
+raw Metadata API SaveResult.
 
 Required permissions
 - "Customize Application".

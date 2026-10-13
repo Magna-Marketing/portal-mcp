@@ -18,15 +18,20 @@ Body
 { "query": { "property": "assetType.id", "simpleOperator": "in", "value": [4, 5, 6, 207] }, "page": { "page": 1, "pageSize": 50 } }
 
 Input (parameters)
-templateType (string, optional) - "freeform" | "templatebased" | "any" (default).
-categoryId (number, optional).
-namePattern (string, optional).
-page (number, optional, default 1).
-pageSize (number, optional, default 50).
+template_type ("any" | "email" | "web" | "default" | "journey_builder" | "json_message", optional) - Template type filter. any includes Salesforce template-family asset types: template,
+webtemplate, templatebasedemail, defaulttemplate, jbtemplate, and jsonmessagetemplate.
+category_id (number, optional) - Optional Content Builder category/folder ID filter using category.id.
+name_pattern (string, optional) - Optional Content Builder template name pattern. Sent to the advanced query endpoint as a
+name like filter.
+fields (string[], optional) - Optional response fields list for the advanced query. Omit to request broad useful asset
+fields including content, views, category, owner, and businessUnitAvailability.
+page (number, optional) - Advanced query page number. Defaults to 1.
+page_size (number, optional) - Advanced query page size. Defaults to 50, maximum 200.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and Account-Context header for this Content
+Builder REST request.
 
 Result
-count (number).
-templates (array) - Same shape as `list_assets.items` but pre-filtered to template types.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_read`.
@@ -39,4 +44,4 @@ Errors
 
 Example request
 
-list_templates({ "categoryId": 12345 })
+list_templates({})

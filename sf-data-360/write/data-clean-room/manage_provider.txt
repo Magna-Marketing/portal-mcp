@@ -1,4 +1,4 @@
-Tool: manage_provider
+Tool: manage_dcr_provider
 
 Description
 Register a new Data Clean Room provider with the org. Postman
@@ -37,7 +37,7 @@ providerType (string, required) - "Snowflake" | "AwsCleanRooms" |
 configuration (object, required) - Provider-type-specific config.
 
 Result
-provider (object) - Created row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -60,4 +60,5 @@ manage_provider({
 })
 
 Example result
-{ "provider": { "id": "0YP580000000001", "name": "MTG_Snowflake_DCR", "status": "Active" } }
+
+{ }

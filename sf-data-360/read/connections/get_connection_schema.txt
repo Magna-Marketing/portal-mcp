@@ -23,10 +23,7 @@ Input (parameters)
 connectionId (string, required).
 
 Result
-schema (object): connectionId, version, objects (array<{ name,
-  label, fields: array<{ apiName, dataType, isPrimaryKey,
-  isExternalId, isRequired }>, isPickable, recordCountEstimate }>),
-  lastDiscoveredDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,14 +39,5 @@ Example request
 get_connection_schema({ "connectionId": "0Z65800000000ABCAA" })
 
 Example result
-{
-  "schema": {
-    "connectionId": "0Z65800000000ABCAA", "version": 14,
-    "objects": [
-      { "name": "Send", "label": "Send",
-        "fields": [
-          { "apiName": "ID", "dataType": "NUMBER", "isPrimaryKey": true }
-        ] }
-    ]
-  }
-}
+
+{ }

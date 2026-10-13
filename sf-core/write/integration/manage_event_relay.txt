@@ -5,22 +5,13 @@ Create / update / delete / start / stop Event Relay configurations
 (forward Platform Events and CDC events to AWS EventBridge).
 
 Salesforce API
-Tooling API, v66.0. sObject: EventRelayConfig (available API 56.0+).
+Tooling API, v66.0.
 
 Endpoint
-POST   /services/data/v66.0/tooling/sobjects/EventRelayConfig           (create)
-PATCH  /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}      (update/start/stop)
-DELETE /services/data/v66.0/tooling/sobjects/EventRelayConfig/{id}      (delete)
-
-The Tooling API uses a { FullName, Metadata } wrapper for EventRelayConfig.
-For update/delete/start/stop, the record Id is resolved by querying FullName.
-
-IMPORTANT notes:
-- destinationResourceName must be a Named Credential reference: "callout:NamedCredentialName"
-  NOT a raw AWS ARN. The Named Credential stores the AWS account/region.
-- eventChannel is the full DeveloperName of the Platform Event channel including __chn suffix.
-- You CANNOT update eventChannel or destinationResourceName after creation. Delete and recreate.
-- state defaults to "STOP" on create. Use start/stop operations to change state.
+POST /services/data/v66.0/tooling/sobjects/EventRelayConfig
+PATCH /services/data/v66.0/tooling/sobjects/EventRelayConfig/{recordId}
+DELETE /services/data/v66.0/tooling/sobjects/EventRelayConfig/{recordId}
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -55,9 +46,9 @@ relayOption (string, optional) - JSON string: '{"ReplayRecovery":"LATEST"}' (def
   or '{"ReplayRecovery":"EARLIEST"}' to replay all stored events (up to 3 days).
 
 Result
-create: { id, success } — Tooling API insert response.
-update/start/stop: null or { success: true, id, developerName, state } when PATCH returns 204.
-delete: null or { success: true, id, developerName }.
+Returns the raw Tooling API create, patch, delete, or lookup-not-found JSON response.
+success (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application" + "Modify All Data".

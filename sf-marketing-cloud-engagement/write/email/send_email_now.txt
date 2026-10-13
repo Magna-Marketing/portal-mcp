@@ -19,26 +19,49 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP CreateRequest on Send.
+SOAP request on EmailSendDefinition.
 
 Input (parameters)
-emailId (number, optional) - Or emailCustomerKey.
-emailCustomerKey (string, optional).
-audience (object, required) - { type ("List"|"DataExtension"), id (List Id) | customerKey (DE Key) }.
-sendClassificationCustomerKey (string, optional).
-senderProfileCustomerKey (string, optional).
-deliveryProfileCustomerKey (string, optional).
-fromName (string, optional).
-fromAddress (string, optional).
-subject (string, optional) - Override email's subject.
-sendDate (string, optional, default now) - ISO timestamp; for scheduled sends.
-suppressTracking (boolean, optional, default false).
-isMultipart (boolean, optional, default true).
+email_send_definition_customer_key (string, optional) - Optional CustomerKey for the temporary EmailSendDefinition. Defaults to a generated key.
+Reuse an existing key only when you intend to update/start that definition later.
+email_send_definition_name (string, optional) - Optional Name for the generated EmailSendDefinition. Defaults to
+email_send_definition_customer_key.
+email_id (number, optional) - Email.ID legacy identifier or Content Builder legacyData.legacyId. Required when
+email_customer_key is not supplied.
+email_customer_key (string, optional) - Email.CustomerKey used when email_id is not supplied.
+audience (object, optional) - List or DataExtension audience to send to.
+send_classification_customer_key (string, optional) - SendClassification.CustomerKey. Recommended and often required by Salesforce for
+user-initiated sends.
+sender_profile_customer_key (string, optional) - Optional SenderProfile.CustomerKey override. Usually inherited from SendClassification.
+delivery_profile_customer_key (string, optional) - Optional DeliveryProfile.CustomerKey override. Usually inherited from
+SendClassification.
+from_name (string, optional) - Optional EmailSendDefinition.SenderProfile.FromName send-time override.
+from_address (string, optional) - Optional EmailSendDefinition.SenderProfile.FromAddress send-time override.
+subject (string, optional) - EmailSendDefinition.EmailSubject override. Salesforce requires this when updating send
+definitions that include Email.
+send_date (string, optional) - EmailSendDefinition.DeliveryScheduledTime ISO timestamp for scheduled sends. Omit to
+start immediately.
+suppress_tracking (boolean, optional) - EmailSendDefinition.SuppressTracking.
+is_multipart (boolean, optional) - EmailSendDefinition.IsMultipart. Defaults to true when omitted.
+deduplicate_by_email (boolean, optional) - EmailSendDefinition.DeduplicateByEmail.
+additional (string, optional) - EmailSendDefinition.Additional campaign/external metadata.
+cleanup_definition (boolean, optional) - Delete the generated EmailSendDefinition after the perform call. Defaults false to avoid
+deleting a send that may still be processing.
+raw_email_send_definition_xml (string, optional) - Exact <Objects xsi:type="EmailSendDefinition">...</Objects> XML to create. Use for
+advanced send definition fields.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID / REST
+Account-Context. Defaults to the authenticated session MID when present.
+client_business_unit_id (number, optional) - Optional SOAP object owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use when authenticating at parent level but writing into a
+child Business Unit.
 
 Result
-sendId (number).
-status (string) - "Pending" | "Scheduled" | "Sending".
-queuedCount (number, when known).
+tool (value) - included in the JSON returned by the tool.
+mode (value) - included in the JSON returned by the tool.
+emailSendDefinitionCustomerKey (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_send`.
@@ -52,8 +75,4 @@ Errors
 
 Example request
 
-send_email_now({
-  "emailCustomerKey": "MTG_Welcome",
-  "audience": { "type": "List", "id": 12345 },
-  "sendClassificationCustomerKey": "Default Commercial"
-})
+send_email_now({})

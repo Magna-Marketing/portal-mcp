@@ -7,41 +7,71 @@ controller.js, helper.js, renderer.js, style.css, design, svg,
 documentation).
 
 Salesforce API
-Tooling API, v66.0. `AuraDefinitionBundle` + `AuraDefinition` (uses the
-container/save pattern like `write_apex`).
+Tooling API, v66.0.
 
 Endpoint
-POST /services/data/v66.0/tooling/sobjects/MetadataContainer
-POST /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle
 POST /services/data/v66.0/tooling/sobjects/AuraDefinition
-PATCH /services/data/v66.0/tooling/sobjects/AuraDefinition/{id}
-DELETE /services/data/v66.0/tooling/sobjects/AuraDefinition/{id}
-DELETE /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle/{id}
-POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
+POST /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, ManageableState FROM AuraDefinition
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: DeveloperName, MasterLabel, Description, ApiVersion, Language.
+JSON fields: AuraDefinitionBundleId, DefType, Format, Source.
+JSON fields: Format, Source.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addDefinition" | "updateDefinition" | "deleteDefinition".
-name (string, required) - Bundle DeveloperName.
-masterLabel (string, required for create).
-description (string, optional).
-apiVersion (number, optional, default = org default).
-definitions (object[], optional) - For create / addDefinition / updateDefinition / deleteDefinition:
-  defType (string, required) - "COMPONENT" | "APPLICATION" | "EVENT" | "INTERFACE" | "CONTROLLER" | "HELPER" | "RENDERER" | "STYLE" | "DESIGN" | "SVG" | "DOCUMENTATION".
-  format (string, required) - "JS" | "CSS" | "XML" | "SVG".
-  source (string, required when not deleting).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete" | "addDefinition" | "updateDefinition" | "deleteDefinition", required) -
+Requested Aura write operation; enum create, update, upsert, delete, addDefinition,
+updateDefinition, or deleteDefinition; no default; example: 'upsert'; do not pass
+read-only actions or use update when the bundle may not exist.
+name (string, required) -
+AuraDefinitionBundle DeveloperName; string API name unique in the org namespace; no
+default; example: 'ExpenseCard'; do not include file extensions, namespace prefixes
+unless they are part of the DeveloperName, or folder paths.
+masterLabel (string, optional) -
+AuraDefinitionBundle MasterLabel; string label required for create and for upsert when
+creating; no default; example: 'Expense Card'; do not pass an empty string.
+description (string, optional) -
+AuraDefinitionBundle Description; string text stored on the bundle; omitted leaves the
+existing value unchanged; example: 'Reusable expense summary component'; do not pass
+markup source here.
+apiVersion (number | string, optional) -
+AuraDefinitionBundle ApiVersion field; number or numeric string supported by Tooling
+API, default 66.0 on create/upsert create; example: 66.0; do not pass arbitrary labels
+or REST path versions.
+language (string, optional) -
+AuraDefinitionBundle Language value; string used by Salesforce for bundle label
+language; omitted leaves the field unset or unchanged; example: 'en_US'; do not pass
+source language names like JavaScript.
+deleteDefinitionsFirst (boolean, optional) -
+Whether delete removes child AuraDefinition rows before deleting the bundle; boolean;
+defaults to true; example: false; do not pass true unless deleting all bundle resources
+is intended.
+definitions (object[], optional) -
+Aura definitions to mutate; array of DefType/Format/Source objects; omitted changes only
+the bundle fields; example:
+[{\"defType\":\"COMPONENT\",\"source\":\"<aura:component/>\"}]; do not include duplicate
+defType entries in one request.
+  defType (string, required) -
+  AuraDefinition DefType; enum APPLICATION, COMPONENT, CONTROLLER, DESIGN,
+  DOCUMENTATION, EVENT, HELPER, INTERFACE, RENDERER, STYLE, SVG, or TOKENS; no default;
+  example: 'COMPONENT'; do not pass file names such as cmp or js.
+  format (string, optional) -
+  AuraDefinition Format; enum JS, CSS, XML, or SVG; defaults from defType as JS for
+  CONTROLLER/HELPER/RENDERER, CSS for STYLE, SVG for SVG, and XML otherwise; example:
+  'XML'; do not pass MIME types.
+  source (string, optional) -
+  AuraDefinition Source; string containing the resource source code; required except for
+  deleteDefinition; example: '<aura:component></aura:component>'; do not pass base64 or
+  metadata XML envelopes.
 
 Result
-deploy (object).
-bundle (object) - { id, developerName, masterLabel, apiVersion, manageableState }.
-definitions (array) - Per def: { id, defType, format, sizeBytes, action ("created"|"updated"|"deleted") }.
+JSON containing the raw lookup, create, update, delete, and definition Tooling API
+responses produced by the requested operation.
 
 Required permissions
 - "Customize Application".
@@ -56,12 +86,6 @@ Errors
 Example request
 
 manage_aura_bundle({
-  "operation": "create",
-  "name": "AccountCard",
-  "masterLabel": "Account Card",
-  "apiVersion": 62.0,
-  "definitions": [
-    { "defType": "COMPONENT", "format": "XML", "source": "<aura:component>...</aura:component>" },
-    { "defType": "CONTROLLER", "format": "JS", "source": "({ doInit: function(c,e,h) { /* ... */ } })" }
-  ]
+  "operation": "upsert",
+  "name": "ExpenseCard"
 })

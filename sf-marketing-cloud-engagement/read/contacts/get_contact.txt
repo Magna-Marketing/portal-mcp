@@ -9,25 +9,37 @@ Marketing Cloud API
 REST API (`/contacts/v1/contacts/{contactKey}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/{contactKey}
-GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/id/{contactId}
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/search
+POST https://{tenant}.rest.marketingcloudapis.com/contacts/v1/addresses/search/ContactKey
+Optional query: $page, $pageSize
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/key:{contact_key}/Preferences
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/id:{contact_id}/Preferences
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None.
+POST: conditionSet, request
+POST: filterConditionOperator, filterConditionValue
 
 Input (parameters)
-contactKey (string, optional).
-contactId (number, optional).
-  One required.
-includeAttributeSets (boolean, optional, default true).
-attributeGroupName (string, optional) - Restrict to one attribute group.
+contact_key (string, optional) - Contact Key to search for. Provide either contact_key or contact_id.
+contact_id (number, optional) - Contact ID to search for. Provide either contact_key or contact_id.
+attributes (string[], optional) - Contact Builder attribute keys to request from /contacts/v1/contacts/search, for example
+"Contact.Contact Key" or "Email Addresses.Email Address". Defaults to Contact ID and
+Contact Key.
+include_addresses (boolean, optional) - When contact_key is provided, also call POST /contacts/v1/addresses/search/ContactKey
+and return that raw response.
+include_preferences (boolean, optional) - Also call the documented contact preferences endpoint by key or ID and return that raw
+response.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-contact (object) - { contactKey, contactId, contactStatus, dateCreated, dateModified, lastUpdatedDate, source, channelAddresses (array), attributeGroups (array): [{ groupName, attributeSets: [{ setName, values }] }] }.
+contactsSearch (value) - included in the JSON returned by the tool.
+addressesSearch (value) - included in the JSON returned by the tool.
+preferences (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `audiences_read`.
@@ -40,4 +52,4 @@ Errors
 
 Example request
 
-get_contact({ "contactKey": "MEM-100023" })
+get_contact({})

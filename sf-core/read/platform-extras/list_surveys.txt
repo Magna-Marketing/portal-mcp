@@ -8,8 +8,8 @@ Salesforce API
 REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, OwnerId, Status, IsActive, CreatedDate FROM Survey
-GET /services/data/v66.0/query/?q=SELECT Id, SurveyId, Name, NumberOfResponses, NumberOfInvitations FROM SurveyVersion WHERE SurveyId IN (...)
+GET /services/data/v66.0/query/?q=SELECT Id, OwnerId, Name, CreatedDate, DeveloperName, Description, ActiveVersionId, SurveyType, LatestVersionId, TotalVersionsCount FROM Survey
+GET /services/data/v66.0/query/?q=SELECT Id, SurveyId, Name, SurveyStatus, VersionNumber, CreatedDate FROM SurveyVersion
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,13 +19,40 @@ Body
 None.
 
 Input (parameters)
-status (string, optional).
-isActive (boolean, optional).
-includeStats (boolean, optional, default true).
+surveyType (string, optional) - Survey SurveyType exact match; string picklist/API
+value; no default; example: CustomerSatisfaction; do not pass labels if the org stores a
+different value, wildcards, or comma-separated values.
+surveyVersionStatus (string, optional) - SurveyVersion SurveyStatus exact match when
+includeVersions is true; string picklist value such as Active, Draft, Obsolete, or
+InvalidDraft; no default; example: Active; do not pass lowercase labels, wildcards, or
+multiple statuses.
+includeVersions (boolean, optional) - Whether to query SurveyVersion rows for returned
+surveys; boolean; default true; example: false; do not pass true when only Survey
+records are needed.
+pattern (string, optional) - Survey name, developer name, or description pattern; string
+using * and ? wildcards converted to SOQL LIKE; no default; example: NPS*; do not pass
+regex or raw LIKE syntax.
+ownerId (string, optional) - Survey OwnerId exact match; Salesforce user or queue Id
+string; no default; example: 0055g0000012345; do not pass user names, emails, or
+multiple Ids.
+whereClause (string, optional) - Additional Survey SOQL WHERE condition; string with or
+without WHERE; no default; example: CreatedDate = LAST_N_DAYS:90; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Survey SOQL ORDER BY clause; string with or without ORDER
+BY; default CreatedDate DESC; example: Name ASC; do not pass WHERE, LIMIT, SELECT, or
+FROM.
+limit (integer, optional) - Maximum rows per query to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-surveys (array) - { id, name, description, status, isActive, ownerId, ownerName, latestVersion (object, when includeStats=true): { id, numberOfInvitations, numberOfResponses } }.
+raw Salesforce QueryResult for Survey and, when requested, raw QueryResult for
+SurveyVersion.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+surveys (value) - included in the JSON returned by the tool.
+surveyVersions (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Surveys" / "View All Data".
@@ -38,4 +65,8 @@ Errors
 
 Example request
 
-list_surveys({ "isActive": true })
+list_surveys({
+  "surveyType": "CustomerSatisfaction",
+  "surveyVersionStatus": "Active",
+  "includeVersions": false
+})

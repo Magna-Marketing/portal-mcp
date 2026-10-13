@@ -4,12 +4,10 @@ Description
 List Queues with the sObjects each queue can own (`QueueSObject`) and the queue's members (users + groups). Queues are records of `Group` with Type='Queue'. Use for case routing, lead assignment, or to feed `manage_queue` updates.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `Group`, `QueueSObject`, `GroupMember`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, OwnerId, DoesSendEmailToMembers FROM Group WHERE Type = 'Queue'
-GET /services/data/v66.0/query/?q=SELECT QueueId, SobjectType FROM QueueSObject WHERE QueueId IN (...)
-GET /services/data/v66.0/query/?q=SELECT GroupId, UserOrGroupId FROM GroupMember WHERE GroupId IN (...)
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, Type, Description, Email, OwnerId, QueueRoutingConfigId, DoesSendEmailToMembers, RelatedId FROM Group
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,17 +17,25 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-sObject (string, optional) - Restrict to queues that own this sObject.
-includeMembers (boolean, optional, default true).
-limit (number, optional, default 200).
+pattern (string, optional) - Queue text pattern matched against Name or DeveloperName;
+string using * and ? wildcards converted to SOQL LIKE; no default; example: Support*; do
+not pass regex, raw LIKE syntax, or object names.
+whereClause (string, optional) - Additional SOQL WHERE condition for Group queues;
+string with or without WHERE and applied after Type = 'Queue'; no default; example:
+Email != null; do not pass SELECT, FROM, ORDER BY, LIMIT, Type filters that contradict
+Queue, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for Group queues; string with or
+without ORDER BY; default Name ASC; example: DeveloperName ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum queue rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-queues (array) - Each:
-  id, name, developerName, doesSendEmailToMembers.
-  supportedSObjects (string[]) - sObject API names.
-  members (array, when includeMembers=true) - { entityId, entityType ("User"|"Group"|"Role"|"RoleAndSubordinates"), name }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration".
@@ -42,4 +48,8 @@ Errors
 
 Example request
 
-list_queues({ "sObject": "Case", "includeMembers": true })
+list_queues({
+  "pattern": "Support*",
+  "whereClause": "Email != null",
+  "orderBy": "DeveloperName ASC"
+})

@@ -6,10 +6,13 @@ Abort an in-progress async Apex test run by job Id. Updates the
 rows to "Aborted".
 
 Salesforce API
-Tooling API, v66.0. PATCH `ApexTestQueueItem`.
+Tooling API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-PATCH /services/data/v66.0/tooling/sobjects/ApexTestQueueItem/{id}
+PATCH /services/data/v66.0/sobjects/AsyncApexJob/{jobId}
+PATCH /services/data/v66.0/tooling/sobjects/ApexTestQueueItem/{Id}
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,10 +22,18 @@ Body
 { "Status": "Aborted" }
 
 Input (parameters)
-jobId (string, required) - AsyncApexJob Id of the test run.
+jobId (string, required) - AsyncApexJob Id for the Apex test run, usually the Id
+returned by runTestsAsynchronous.
+queueItemIds (string[], optional) - Optional ApexTestQueueItem Ids to abort instead of
+discovering items by ParentJobId.
+abortParentJob (boolean, optional) - Also PATCH /sobjects/AsyncApexJob/{jobId} with
+Status='Aborted'. Defaults to false; ApexTestQueueItem patching is the Tooling API abort
+mechanism.
+includeProcessing (boolean, optional) - Also attempt to abort queue items currently in
+Processing status. Defaults to true.
 
 Result
-job (object) - { id, status: "Aborted", queueItemsAborted (number), queueItemsAlreadyComplete (number) }.
+grouped raw Salesforce lookup and patch responses.
 
 Required permissions
 - "Author Apex" / "Modify All Data".
@@ -35,4 +46,6 @@ Errors
 
 Example request
 
-abort_apex_test_run({ "jobId": "707Qg00000abcDE" })
+abort_apex_test_run({
+  "jobId": "example"
+})

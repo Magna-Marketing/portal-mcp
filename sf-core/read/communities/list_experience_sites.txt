@@ -6,11 +6,10 @@ partner portals, customer portals. Returns identity, status, URL,
 template, login policy, and member count.
 
 Salesforce API
-REST API + Connect API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, UrlPathPrefix, Status, Description, CreatedDate FROM Network
-GET /services/data/v66.0/connect/communities                                  (richer Connect API view)
+GET /services/data/v66.0/query/?q=SELECT Id, Name, UrlPathPrefix, Status, Description, OptionsReputationEnabled, OptionsSelfRegistrationEnabled, SelfRegProfileId, CreatedById, CreatedDate, LastModifiedById, LastModifiedDate, SystemModstamp FROM Network
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,13 +19,30 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Live" | "DownForMaintenance" | "UnderConstruction".
-namePattern (string, optional).
-includeMemberCount (boolean, optional, default true).
+status (string, optional) - Network status filter; string matched exactly against
+Network.Status; no default; example: Live; do not pass multiple values, labels in
+another language, or status text unknown to the org.
+pattern (string, optional) - Network text pattern matched against Name, UrlPathPrefix,
+or Description; string using * and ? wildcards converted to SOQL LIKE; no default;
+example: Customer*; do not pass regex, raw LIKE syntax, or multiple patterns.
+urlPathPrefix (string, optional) - Experience site URL path prefix filter; string
+matched exactly against Network.UrlPathPrefix; no default; example: customers; do not
+pass a full URL, leading slash, or domain.
+whereClause (string, optional) - Additional SOQL WHERE condition for Network; string
+with or without WHERE; no default; example: CreatedDate = LAST_N_DAYS:30; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for Network; string with or without
+ORDER BY; default Name ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum Network rows to return; integer from 1 to 2000;
+default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-sites (array) - { id, name, urlPathPrefix, status, siteUrl, optionsHttps, description, template (string), createdDate, memberCount (when includeMemberCount=true) }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Experiences" / "Create and Set Up Experiences".
@@ -39,4 +55,8 @@ Errors
 
 Example request
 
-list_experience_sites({ "status": "Live" })
+list_experience_sites({
+  "status": "Live",
+  "pattern": "Customer*",
+  "urlPathPrefix": "customers"
+})

@@ -17,27 +17,15 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "objects": [
-    {
-      "name": "Send", "label": "Send",
-      "fields": [
-        { "apiName": "ID",        "dataType": "NUMBER", "isPrimaryKey": true },
-        { "apiName": "EmailName", "dataType": "TEXT" },
-        { "apiName": "SentDate",  "dataType": "DATE_TIME" }
-      ]
-    }
-  ]
-}
+PUT: objects
 
 Input (parameters)
-connectionId (string, required).
-operation (string, required) - "upsert" only.
-objects (array, required) - [{ name, label, fields: [{ apiName,
-  dataType, isPrimaryKey, isExternalId, isRequired }] }].
+connectionId (string, required) - ID of the connection to update the schema for
+objects (object[], required) - Array of schema objects, each with name, label, and fields array. Fields have apiName,
+dataType, isPrimaryKey, isExternalId, isRequired
 
 Result
-schema (object) - Refreshed schema with new `version`.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -52,14 +40,10 @@ Errors
 Example request
 
 manage_connection_schema({
-  "connectionId": "0Z65800000000ABCAA",
-  "operation": "upsert",
-  "objects": [
-    { "name": "Send", "fields": [
-      { "apiName": "ID", "dataType": "NUMBER", "isPrimaryKey": true }
-    ] }
-  ]
+  "connectionId": "",
+  "objects": []
 })
 
 Example result
-{ "schema": { "connectionId": "0Z65800000000ABCAA", "version": 15 } }
+
+{ }

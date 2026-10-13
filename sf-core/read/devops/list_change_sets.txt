@@ -6,15 +6,10 @@ change sets are uploaded packages awaiting send to a target org;
 inbound are received and either deployed, validated, or pending.
 
 Salesforce API
-Tooling API, v66.0. `Package2`/`InstalledSubscriberPackage` are different;
-Change Sets are surfaced via Tooling sObjects: `Package` (legacy) and
-the Setup-only Change Set views (`OutboundChangeSet`, `InboundChangeSet`
-do not have public sObject names; data is exposed through
-`MetadataPackage` + `MetadataPackageVersion` and Setup pages).
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, Description, IsManaged, PackageCategory FROM MetadataPackage
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataPackageId, MajorVersion, MinorVersion, PatchVersion, BuildNumber, IsDeprecated, ReleaseState FROM MetadataPackageVersion
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataPackageId, Name, MajorVersion, MinorVersion, PatchVersion, BuildNumber, IsDeprecated, ReleaseState FROM MetadataPackageVersion
 
 Headers
 Authorization: Bearer <access_token>
@@ -24,14 +19,28 @@ Body
 None.
 
 Input (parameters)
-direction (string, optional) - "inbound" | "outbound" | "both" (default).
-includeComponents (boolean, optional, default false).
-limit (number, optional, default 100).
+metadataPackageId (string, optional) - Parent MetadataPackageId to match; Salesforce Id
+string; no default; example: 0335g00000ABCDe; do not pass package names, version Ids, or
+comma-separated Ids.
+namePattern (string, optional) - MetadataPackageVersion Name filter using * and ?
+wildcards; string converted to SOQL LIKE; no default; example: Release_*; do not pass
+raw LIKE syntax or regex.
+releaseState (string, optional) - ReleaseState exact match from MetadataPackageVersion;
+string; no default; example: Beta; do not pass labels, arrays, or SOQL fragments.
+whereClause (string, optional) - Additional Tooling SOQL WHERE condition for
+MetadataPackageVersion; string without WHERE; no default; example: IsDeprecated = false;
+do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Tooling SOQL ORDER BY for MetadataPackageVersion; string
+without ORDER BY; default Id DESC; example: MajorVersion DESC, MinorVersion DESC; do not
+pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum MetadataPackageVersion rows to query; positive
+integer clamped to 2000; default 200; example: 100; do not pass 0, negatives, decimals,
+or offsets.
 
 Result
-totalSize (number).
-changeSets (array) - { id, name, direction, status, sourceOrgId (when inbound), components (array, optional): [{ type, fullName }] }.
-metadataPackages (array, optional) - Package metadata that overlaps with change sets when applicable.
+Returns a JSON object with query and raw Tooling API result.
+query (value) - included in the JSON returned by the tool.
+result (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Deploy Change Sets" / "Modify Metadata Through Metadata API Functions".
@@ -44,4 +53,8 @@ Errors
 
 Example request
 
-list_change_sets({ "direction": "inbound" })
+list_change_sets({
+  "metadataPackageId": "0335g00000ABCDe",
+  "namePattern": "Release_*",
+  "releaseState": "Beta"
+})

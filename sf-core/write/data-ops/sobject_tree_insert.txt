@@ -21,7 +21,7 @@ KEY DIFFERENCES/CORRECTIONS from original documentation:
   200 unrelated records of the same type in one call.
 
 Salesforce API
-REST API (Composite), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/composite/tree/{sObject}
@@ -44,14 +44,13 @@ Body
 }
 
 Input (parameters)
-sObject (string, required) - Root sObject API name. Must match all root records' attributes.type.
-  Example: "Account", "Case", "MyObject__c".
-records (object[], required) - Array of root-level records. Each record:
-  attributes (object, required) - { type (string), referenceId (string) }. referenceId must
-    be alphanumeric + underscores, starting with a letter or digit.
-  <field> (any, optional) - Any sObject field values.
-  <ChildRelationshipName> (object, optional) - Nested children via the child relationship API name
-    (e.g. Contacts, Opportunities, Cases). Value is { records: [...] } with the same structure.
+sObject (string, required) - Root sObject API name; string that must match every root
+record's attributes.type; no default; example: 'Account'; do not pass a child
+relationship name.
+records (unknown[], required) - Root sObject tree records; non-empty array of records
+with attributes and writable field values, with children under relationship names; no
+default; example: [{ attributes: { type: 'Account', referenceId: 'acc1' }, Name: 'ACME'
+}]; do not exceed 200 total records, 5 object types, or 5 levels.
 
 Result
 {
@@ -91,20 +90,5 @@ Example request
 
 sobject_tree_insert({
   "sObject": "Account",
-  "records": [{
-    "attributes": { "type": "Account", "referenceId": "acc1" },
-    "Name": "ACME",
-    "Industry": "Technology",
-    "Contacts": {
-      "records": [
-        { "attributes": { "type": "Contact", "referenceId": "c1" }, "LastName": "Doe", "Email": "doe@acme.com" },
-        { "attributes": { "type": "Contact", "referenceId": "c2" }, "LastName": "Smith", "Email": "smith@acme.com" }
-      ]
-    },
-    "Opportunities": {
-      "records": [
-        { "attributes": { "type": "Opportunity", "referenceId": "o1" }, "Name": "ACME Phase 1", "StageName": "Prospecting", "CloseDate": "2026-12-31" }
-      ]
-    }
-  }]
+  "records": "[{ attributes: { type: 'Account', referenceId: 'acc1' }, Name: 'ACME' }]"
 })

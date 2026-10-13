@@ -20,19 +20,15 @@ Body
 None.
 
 Input (parameters)
-formHandlerId (number, required).
-isRequired (boolean, optional).
-fields (string[], optional, default: id,formHandlerId,name,
-  prospectApiFieldId,dataFormat,errorMessage,isMaintainInitialValue,
-  isRequired,sortOrder,createdAt,updatedAt).
-limit (number, optional, default 200).
-nextPageToken (string, optional).
+formHandlerId (number, required) - Form Handler id whose fields to list. Required.
+isRequired (boolean, optional) - Filter to required or non-required fields.
+fields (string[], optional) - Field projection. Defaults to id, formHandlerId, name, prospectApiFieldId, dataFormat,
+errorMessage, isMaintainInitialValue, isRequired, sortOrder, createdAt, updatedAt.
+limit (number, optional) - Page size. Default 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-formHandlerFields (array) - Each: { id, formHandlerId, name,
-  prospectApiFieldId, dataFormat (string), errorMessage, isRequired,
-  isMaintainInitialValue, sortOrder, createdAt, updatedAt }.
-nextPageToken (string|null).
+values (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `pardot_api`.
@@ -45,12 +41,12 @@ Errors
 
 Example request
 
-list_form_handler_fields({ "formHandlerId": 8101 })
+list_form_handler_fields({
+  "formHandlerId": 1
+})
 
 Example result
+
 {
-  "formHandlerFields": [
-    { "id": 1101, "name": "email", "prospectApiFieldId": "email", "isRequired": true },
-    { "id": 1102, "name": "firstname", "prospectApiFieldId": "first_name" }
-  ]
+  "values": null
 }

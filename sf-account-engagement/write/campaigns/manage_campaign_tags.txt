@@ -18,7 +18,8 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{ "tag": "Welcome 2026" }
+POST: name
+POST: tagId
 
 Input (parameters)
 id (number, required) - Campaign id.
@@ -26,10 +27,7 @@ operation (string, required) - "add" | "remove".
 tag (string, required) - Tag name (case-insensitive match).
 
 Result
-success (boolean).
-campaignId (number).
-tag (string).
-operation (string).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -46,4 +44,5 @@ Example request
 manage_campaign_tags({ "id": 1024, "operation": "add", "tag": "Welcome 2026" })
 
 Example result
-{ "success": true, "campaignId": 1024, "tag": "Welcome 2026", "operation": "add" }
+
+{ }

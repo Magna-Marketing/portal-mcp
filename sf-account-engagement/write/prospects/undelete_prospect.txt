@@ -9,7 +9,7 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST https://{pi-domain}/api/v5/objects/prospects/do/undelete
+POST https://{pi-domain}/api/v5/objects/prospects/{id}/do/undelete
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,11 +21,10 @@ Body
 { "ids": [7745, 7746] }
 
 Input (parameters)
-ids (number[], required) - Up to 200 prospect ids per call.
+id (number, required) - Pardot prospect id to restore.
 
 Result
-restored (number[]) - Successfully restored ids.
-errors (array) - Each: { id, code, message }.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -38,7 +37,10 @@ Errors
 
 Example request
 
-undelete_prospect({ "ids": [7745] })
+undelete_prospect({
+  "id": 1
+})
 
 Example result
-{ "restored": [7745], "errors": [] }
+
+{ }

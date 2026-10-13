@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/form-fields?fields={fields}&filter[formId]=eq,:formId&orderBy=sortOrder asc
+GET https://{pi-domain}/api/v5/objects/form-fields
+Optional query: fields, formId, limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,24 +22,18 @@ Body
 None.
 
 Input (parameters)
-formId (number, required).
-isRequired (boolean, optional).
-type (string, optional) - "Text" | "TextArea" | "Email" | "Number" |
-  "RadioButton" | "Checkbox" | "Dropdown" | "MultiSelect" | "Hidden" |
-  "Date" | "CrmUser".
-fields (string[], optional, default: id,formId,prospectApiFieldId,
-  type,name,label,isRequired,isAlwaysDisplay,isMaintainInitialValue,
-  isUseValuesPreFromField,sortOrder,errorMessage,cssClasses,
-  hasDependents,hasProgressiveProfiling,hasValues,createdAt,updatedAt).
-limit (number, optional, default 200).
-nextPageToken (string, optional).
+formId (number, required) - Form id whose fields to list. Required.
+isRequired (boolean, optional) - Filter to required or non-required fields.
+type ("Text" | "TextArea" | "Email" | "Number" | "RadioButton" | "Checkbox" | "Dropdown" | "MultiSelect" | "Hidden" | "Date" | "CrmUser", optional) - Filter by field type.
+fields (string[], optional) - Field projection. Defaults to id, formId, prospectApiFieldId, type, name, label,
+isRequired, isAlwaysDisplay, isMaintainInitialValue, isUseValuesPreFromField, sortOrder,
+errorMessage, cssClasses, hasDependents, hasProgressiveProfiling, hasValues, createdAt,
+updatedAt.
+limit (number, optional) - Page size. Default 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-formFields (array) - Each: { id, formId, prospectApiFieldId, type, name,
-  label, isRequired, isAlwaysDisplay, isMaintainInitialValue,
-  isUseValuesPreFromField, sortOrder, errorMessage, cssClasses,
-  hasDependents, hasProgressiveProfiling, hasValues, createdAt, updatedAt }.
-nextPageToken (string|null).
+values (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `pardot_api`.
@@ -51,14 +46,12 @@ Errors
 
 Example request
 
-list_form_fields({ "formId": 4421 })
+list_form_fields({
+  "formId": 1
+})
 
 Example result
+
 {
-  "formFields": [
-    { "id": 51, "name": "Email", "prospectApiFieldId": "email",
-      "type": "Email", "isRequired": true, "sortOrder": 0 },
-    { "id": 52, "name": "FirstName", "prospectApiFieldId": "first_name",
-      "type": "Text", "sortOrder": 1 }
-  ]
+  "values": null
 }

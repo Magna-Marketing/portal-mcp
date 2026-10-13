@@ -22,8 +22,7 @@ strict (boolean, optional, default false) - When true, all components in the
   region must be present in order. Returns an error if any are missing.
 
 Result
-updateResult (object) - Raw Metadata API update response.
-finalOrder (string[]) - Component identifiers in their new order.
+raw Metadata API SaveResult.
 
 Required permissions
 - "Customize Application".

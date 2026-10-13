@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-transforms
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms
+Optional query: filterGroup, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,17 +20,15 @@ Body
 None.
 
 Input (parameters)
-dataSpace (string, optional, default "default").
-type (string, optional) - "Batch" | "Streaming".
-status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
-nameContains (string, optional).
-limit (number, optional, default 100).
+filterGroup (unknown, required)
+limit (number, optional) - Maximum number of rows to return, from 1 through 20. Salesforce defaults to 20 when
+omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy ("DataTransformStatusAsc" | "DataTransformStatusDesc" | "LabelAsc" | "LabelDesc" | "LastRunStatusAsc" | "LastRunStatusDesc" | "LastRunTimeAsc" | "LastRunTimeDesc" | "MruAsc" | "MruDesc" | "NameAsc" | "NameDesc" | "TypeAsc" | "TypeDesc", optional) - Sort order for the result set. Salesforce returns records in retrieval order when
+omitted.
 
 Result
-dataTransforms (array) - Each: { id, developerName, label, type,
-  targetObject, sourceObjects (array), status, schedule (object),
-  lastRunStatus, lastRunDate, createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,14 +41,10 @@ Errors
 
 Example request
 
-list_data_transforms({ "type": "Batch" })
+list_data_transforms({
+  "filterGroup": ""
+})
 
 Example result
-{
-  "dataTransforms": [
-    { "developerName": "build_unified_individual",
-      "type": "Batch",
-      "targetObject": "UnifiedIndividual__dlm",
-      "status": "Active", "lastRunStatus": "Success" }
-  ]
-}
+
+{ }

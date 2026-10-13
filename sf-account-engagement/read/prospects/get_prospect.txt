@@ -10,7 +10,12 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/prospects/:id?fields={fields}
+GET https://{pi-domain}/api/v5/objects/prospects/{id}
+Optional query: fields
+GET https://{pi-domain}/api/v5/objects/list-memberships
+Optional query: fields, filter[prospectId], limit
+GET https://{pi-domain}/api/v5/objects/visitor-activities
+Optional query: fields, filter[prospectId], limit, orderBy
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -30,10 +35,8 @@ includeRecentActivities (boolean, optional, default false) - When
   true, runs `list_visitor_activities?prospectId=:id&limit=20`.
 
 Result
-prospect (object) - Same shape as `list_prospects` rows, plus full
-  audit relations.
-listMemberships (array, when includeListMemberships=true).
-recentActivities (array, when includeRecentActivities=true).
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: listMemberships, recentActivities.
 
 Required scopes
 - `pardot_api`.
@@ -49,12 +52,5 @@ Example request
 get_prospect({ "id": 7745, "includeListMemberships": true })
 
 Example result
-{
-  "prospect": {
-    "id": 7745, "email": "jane@example.com", "firstName": "Jane",
-    "score": 75, "grade": "A", "customFields": { "region__c": "EMEA" }
-  },
-  "listMemberships": [
-    { "id": 4421001, "listId": 301, "optedOut": false }
-  ]
-}
+
+{ }

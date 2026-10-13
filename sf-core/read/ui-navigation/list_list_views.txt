@@ -6,13 +6,10 @@ its results. List Views are the saved per-user / per-org filtered
 views ("My Open Cases", "All Open Opportunities").
 
 Salesforce API
-REST API, v66.0. `/sobjects/{sObject}/listviews/...`.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-GET /services/data/v66.0/sobjects/{sObject}/listviews/                                  (list)
-GET /services/data/v66.0/sobjects/{sObject}/listviews/{listViewId}/describe             (describe)
-GET /services/data/v66.0/sobjects/{sObject}/listviews/{listViewId}/results              (results)
-GET /services/data/v66.0/sobjects/{sObject}/listviews/recent                            (recently viewed list views)
+POST /services/Soap/m/66.0  (readMetadata ListView)
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,17 +19,34 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required).
-includeRecentOnly (boolean, optional, default false) - Use the `recent` endpoint.
-listViewId (string, optional) - When set, return that list view's describe and (optionally) results.
-includeResults (boolean, optional, default false).
-limit (number, optional, default 50).
+sObject (string, required) - Object API name whose ListView records are requested;
+non-empty Salesforce sObject API name; required; example: Account; do not pass labels,
+record IDs, field API names, or multiple objects.
+namePattern (string, optional) - Pattern for ListView Name or DeveloperName; string
+using * and ? wildcards converted to SOQL LIKE; no default; example: My_*; do not pass
+regex, raw LIKE syntax, or multiple patterns.
+includeManaged (boolean, optional) - Managed package inclusion flag based on
+NamespacePrefix; boolean; default false excludes namespaced records; example: true; do
+not pass a namespace value here.
+whereClause (string, optional) - Additional SOQL WHERE condition for ListView; string
+with or without WHERE; no default; example: IsSoqlCompatible = true; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ListView; string with or without
+ORDER BY; default Name ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+includeMetadata (boolean, optional) - Whether to include raw Metadata API ListView
+details such as columns, filters, filterScope, and sharedTo; boolean; default true;
+example: false; do not pass true if ListView row fields are enough.
+limit (integer, optional) - Maximum ListView rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-sObject (string).
-listViews (array) - Each: { id, label, developerName, soqlCompatible (boolean), describeUrl, resultsUrl }.
-listView (object, when listViewId provided) - Full describe: columns, query, scope, sortOrder, filterScope, lastModifiedDate.
-results (object, when includeResults=true) - { records: [{ columns: [{ value, label }], id }], size }.
+Salesforce QueryResult with totalSize, done, records; records include metadata when
+includeMetadata is true and Salesforce exposes it.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "API Enabled" + read on the sObject.
@@ -46,4 +60,6 @@ Errors
 
 Example request
 
-list_list_views({ "sObject": "Account", "listViewId": "00BQg0000004ZyAA", "includeResults": true })
+list_list_views({
+  "sObject": "Account"
+})

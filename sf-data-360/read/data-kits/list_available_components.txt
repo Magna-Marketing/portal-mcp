@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-kits/available-components
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-kits/available-components
+Optional query: componentType, dataKitDevName, limit, offset
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,16 +19,13 @@ Body
 None.
 
 Input (parameters)
-componentType (string, optional) - "DataModelObject" |
-  "DataLakeObject" | "CalculatedInsight" | "DataStream" |
-  "Mapping" | "Segment".
-nameContains (string, optional).
-limit (number, optional, default 100).
+limit (number, optional) - Maximum number of records to return, from 1 through 200. Salesforce defaults to 200 when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
 
 Result
-components (array) - Each: { componentName, componentType, label,
-  isInDataKit (boolean), dataKitName (string|null), createdDate,
-  lastModifiedDate }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,12 +38,8 @@ Errors
 
 Example request
 
-list_available_components({ "componentType": "DataModelObject" })
+list_available_components({})
 
 Example result
-{
-  "components": [
-    { "componentName": "Order__dlm", "componentType": "DataModelObject",
-      "isInDataKit": true, "dataKitName": "B2C_Retail_Foundation" }
-  ]
-}
+
+{ }

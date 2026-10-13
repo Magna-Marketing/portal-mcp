@@ -12,54 +12,43 @@ Use `describe_object` if you only need the record type list for a single
 object — it returns the same recordTypeInfos plus everything else.
 
 Salesforce API
-REST API (Data) + Tooling API, v66.0.
-- Identity rows from `RecordType` (data SOQL).
-- Visibility (per profile) from `Profile.recordTypeVisibilities` via the
-  Tooling API or Metadata API. The MCP layer prefers
-  `Tooling SOQL` against `RecordType` joined with describe layouts.
+REST API (Data), v66.0.
 
 Endpoint
-GET //services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, IsActive,Description,NamespacePrefix,SobjectType FROM RecordType WHERE SObjectType='{{sObject}}'
-GET /services/data/v66.0/sobjects/{sObject}/describe                  (recordTypeInfos)
-GET /services/data/v66.0/tooling/query/?q=SELECT Profile.Name, RecordType.SobjectType, RecordType.DeveloperName, Visible, Default FROM ProfileRecordTypeVisibility   (or composite)
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, IsActive, Description, NamespacePrefix, SobjectType, BusinessProcessId FROM RecordType
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-sObject (string, optional) - Restrict to one sObject API name. Omit for
-  all sObjects.
-namePattern (string, optional) - Glob/substring filter on DeveloperName
-  or Name. Supports `*`.
-includeInactive (boolean, optional, default false) - Include IsActive=false.
-includeVisibility (boolean, optional, default false) - When true, also
-  return visibility per profile (one row per profile per record type).
-profile (string, optional) - When set, restrict visibility to this profile
-  developer name.
+sObject (string, optional) - The sObject API name whose record types should be returned;
+string such as "Account" or "Opportunity"; no default means all objects; example:
+"Case"; do not pass labels, relationship paths, or comma-separated object names.
+namePattern (string, optional) - The RecordType Name or DeveloperName pattern; string
+using * as any characters and ? as one character, converted to SOQL LIKE; no default;
+example: "Business_*"; do not pass regex, raw LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for RecordType without
+the WHERE keyword; string; no default; example: "NamespacePrefix = null"; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted raw input.
+orderBy (string, optional) - The SOQL ORDER BY clause without the ORDER BY keyword;
+string; default "SobjectType ASC, DeveloperName ASC"; example: "Name ASC"; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - The maximum RecordType rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, decimals, negatives, offsets,.
+includeInactive (boolean, optional) - Whether inactive record types are included;
+boolean; default false; example: true; do not pass true when only assignable active
+record types are needed.
 
 Result
-recordTypes (array) - Each:
-  id (string) - 18-char Record Type Id.
-  name (string) - UI label.
-  developerName (string) - API-safe name.
-  sObject (string) - Owning sObject API name.
-  isActive (boolean).
-  isMaster (boolean) - true for the master record type per object.
-  description (string|null).
-  businessProcessId (string|null) - Used by Lead/Opportunity/Case stages.
-  defaultRecordTypeMapping (boolean) - Default for the running profile.
-  available (boolean) - Visible to the running user.
-  urls.layout (string).
-visibility (array, only when includeVisibility=true) - Each:
-  recordTypeId (string).
-  profileName (string).
-  profileId (string).
-  visible (boolean).
-  default (boolean).
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - API Enabled.
@@ -77,35 +66,21 @@ Errors
 Example request
 
 query_record_types({
-  "sObject": "Opportunity",
-  "includeVisibility": true,
-  "profile": "MTG_Project_Manager"
+  "sObject": "Case",
+  "namePattern": "Business_*",
+  "whereClause": "NamespacePrefix = null"
 })
 
 Example result
 
 {
-  "recordTypes": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "id": "012Qg0000004aBcDE",
-      "name": "Internal Project",
-      "developerName": "Internal_Project",
-      "sObject": "Opportunity",
-      "isActive": true,
-      "isMaster": false,
-      "businessProcessId": "0203000000000XYAB",
-      "available": true,
-      "defaultRecordTypeMapping": true,
-      "urls": { "layout": "/services/data/v66.0/sobjects/Opportunity/describe/layouts/012Qg0000004aBcDE" }
-    }
-  ],
-  "visibility": [
-    {
-      "recordTypeId": "012Qg0000004aBcDE",
-      "profileName": "MTG Project Manager",
-      "profileId": "00eQg0000008ZyXAB",
-      "visible": true,
-      "default": true
+      "attributes": {
+        "type": "SObject"
+      }
     }
   ]
 }

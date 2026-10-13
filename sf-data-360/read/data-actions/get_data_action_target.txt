@@ -20,9 +20,7 @@ Input (parameters)
 apiName (string, required).
 
 Result
-dataActionTarget (object): apiName, label, targetType, endpointUrl,
-  status, signingKeyConfigured, authType, configuration (object),
-  createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -38,10 +36,5 @@ Example request
 get_data_action_target({ "apiName": "WebhookTarget__dat" })
 
 Example result
-{
-  "dataActionTarget": {
-    "apiName": "WebhookTarget__dat",
-    "targetType": "Webhook",
-    "endpointUrl": "https://hooks.magnatech.com/cdp"
-  }
-}
+
+{ }

@@ -7,12 +7,13 @@ Visualforce template types. Optionally associates a BrandTemplate (classic
 letterhead) or Enhanced Letterhead.
 
 Salesforce API
-REST API (sObjects), v66.0.
+REST API (Data), v66.0.
 
-Endpoints
-POST   /services/data/v66.0/sobjects/EmailTemplate           (create)
-PATCH  /services/data/v66.0/sobjects/EmailTemplate/{id}      (update, activate, deactivate)
-DELETE /services/data/v66.0/sobjects/EmailTemplate/{id}      (delete)
+Endpoint
+GET /services/data/v66.0/query/
+POST /services/data/v66.0/sobjects/EmailTemplate
+PATCH /services/data/v66.0/sobjects/EmailTemplate/{templateId}
+DELETE /services/data/v66.0/sobjects/EmailTemplate/{templateId}
 
 Headers
 Authorization: Bearer <access_token>
@@ -44,23 +45,45 @@ Corrections vs. original documentation
   PATCH and DELETE return 204 No Content on success (the tool normalizes this).
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
-templateId (string, optional) - EmailTemplate record ID. Required for all ops except create.
-name (string, required for create) - Display name (EmailTemplate Name field, max 80 chars).
-developerName (string, optional) - API unique name (DeveloperName). Auto-generated from
-  name on create when omitted.
-folderId (string, required for create) - Folder or User ID where the template lives.
-type (string, required for create) - "text" | "html" | "custom" | "visualforce".
-subject (string, optional) - Subject line. Supports merge fields.
-htmlBody (string, optional) - HTML body content (HtmlValue field, max 384 KB).
-textBody (string, optional) - Plain text body (Body field, max 384 KB).
-brandTemplateId (string, optional) - ID of a BrandTemplate (classic letterhead) for
-  html-type templates.
-enhancedLetterheadId (string, optional) - ID of an Enhanced Letterhead (Lightning).
-encoding (string, optional, default "UTF-8") - Character encoding.
-description (string, optional) - Template description (max 4,000 chars).
-relatedEntityType (string, optional) - sObject API name for merge-field context,
-  e.g. "Account", "Contact", "Opportunity".
+operation ("create" | "update" | "delete" | "activate" | "deactivate", required) -
+Template action; enum create, update, delete, activate, or deactivate; required; example
+\"update\"; activate/deactivate only patch IsActive.
+templateCategory ("classic" | "lightning", optional, default classic) - Email template
+category; enum classic or lightning; defaults to classic for backward compatibility.
+REQUIRED whenever the user says Lightning, modern email template, Lightning Experience,
+or asks for the template to be editable/previewable in Lightning. Use lightning to
+create UiType SFX custom templates.
+templateId (string, optional) - EmailTemplate Id; Salesforce Id string; required for
+update/delete/activate/deactivate; example \"00X...\"; do not pass DeveloperName.
+name (string, optional) - Template display name; string; required for create; example
+\"Case Update\"; avoid duplicate confusing labels.
+developerName (string, optional) - Template DeveloperName; API name string; optional on
+create; example \"Case_Update\"; must start with a letter and avoid spaces, trailing
+underscores, and double underscores.
+folderId (string, optional) - Email template folder Id or private owner User Id;
+Salesforce Id string; required for create; example \"00l...\". For Lightning, use a
+Folder with Type=EmailTemplate; do not pass an org Id like 00D...
+type ("text" | "html" | "custom" | "visualforce", optional) - TemplateType value; enum
+text, html, custom, or visualforce; required for Classic create; Lightning always uses
+custom and rejects other values.
+subject (string, optional) - Subject line; string; optional; example \"Update for
+{!Contact.FirstName}\"; omit only when unchanged or not needed.
+htmlBody (string, optional) - HTML body mapped to HtmlValue; string; optional; example
+\"<p>Hello</p>\"; do not pass base64 or unsafe scripts.
+textBody (string, optional) - Plain text body mapped to Body for Classic. For Lightning,
+when htmlBody is omitted, this text is escaped and converted into minimal paragraph HTML
+so blank-line paragraph breaks are preserved in Lightning rendering; string; optional;
+example \"Hello\\n\\nWelcome\".
+brandTemplateId (string, optional) - BrandTemplate Id for classic letterhead; Salesforce
+Id string; optional; example \"016...\"; only use with compatible html templates.
+enhancedLetterheadId (string, optional) - EnhancedLetterhead Id; Salesforce Id string;
+optional; example \"0XH...\"; do not pass Letterhead metadata fullName.
+encoding (string, optional) - Character encoding; string; defaults by Salesforce when
+omitted; example \"UTF-8\"; do not pass invalid encoding names.
+description (string, optional) - Template description; string up to Salesforce field
+limits; optional; example \"Sent on case updates\"; avoid secrets.
+relatedEntityType (string, optional) - Related entity API name for merge fields; sObject
+API name string; optional; example \"Contact\"; do not pass labels or Ids.
 
 Result
 create:  { "id": "...", "success": true, "errors": [] }
@@ -82,13 +105,5 @@ Errors
 Example request
 
 manage_email_template({
-  "operation": "create",
-  "name": "MTG Project Status",
-  "developerName": "MTG_Project_Status_Email",
-  "folderId": "00lQg0000008abcAB",
-  "type": "html",
-  "subject": "Status update: {!Account.Name}",
-  "htmlBody": "<p>Status: <b>{!Account.Status__c}</b></p>",
-  "textBody": "Status: {!Account.Status__c}",
-  "relatedEntityType": "Account"
+  "operation": "example"
 })

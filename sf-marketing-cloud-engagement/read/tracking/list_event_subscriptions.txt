@@ -9,8 +9,8 @@ Marketing Cloud API
 REST API (`/platform/v1/ens-subscriptions`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscriptionId}
-GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions-by-cb/{callbackId}     (all subs for a callback)
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscription_id}
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions-by-cb/{callback_id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,8 +20,10 @@ Body
 None.
 
 Input (parameters)
-subscriptionId (string, optional) - Single subscription.
-callbackId (string, optional) - All subscriptions for a callback.
+subscription_id (string, optional) - ENS subscriptionId for GET /platform/v1/ens-subscriptions/{subscriptionId}.
+callback_id (string, optional) - ENS callbackId for GET /platform/v1/ens-subscriptions-by-cb/{callbackId}.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID context or REST
+Account-Context. Defaults to the authenticated Business Unit.
 
 Result
 subscriptions (array) - { subscriptionId, subscriptionName, callbackId, subscribedEventCategories, filters, status ("Active"|"Inactive"), createdDate, lastModifiedDate }.
@@ -37,4 +39,4 @@ Errors
 
 Example request
 
-list_event_subscriptions({ "callbackId": "abc-1234" })
+list_event_subscriptions({})

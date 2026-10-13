@@ -10,7 +10,7 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST https://{pi-domain}/api/v5/imports/:id/batches
+POST https://{pi-domain}/api/v5/imports/{importId}/batches
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -31,8 +31,7 @@ csvBase64 (string, optional) - Alternative to `csv`.
 filename (string, optional, default "batch-{n}.csv").
 
 Result
-batch (object) - { id, importId, status, rowCount, errorCount,
-  createdAt }.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -55,7 +54,5 @@ upload_import_batch({
 })
 
 Example result
-{
-  "batch": { "id": 1, "importId": 5512, "status": "Pending",
-    "rowCount": 1, "createdAt": "2026-04-29T13:02:11Z" }
-}
+
+{ }

@@ -5,11 +5,10 @@ Remove a permission set group assignment from one or more users. Same
 shape as `unassign_permission_set` but on PSG.
 
 Salesforce API
-REST API (Data), v66.0. Bulk DELETE on `PermissionSetAssignment` rows.
+REST API (Data), v66.0.
 
 Endpoint
-GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetAssignment WHERE PermissionSetGroupId = '...' AND AssigneeId IN (...)
-DELETE /services/data/v66.0/composite/sobjects?ids=...
+DELETE /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,19 +17,43 @@ Body
 None.
 
 Input (parameters)
-groupName (string, optional) - PSG DeveloperName.
-groupId (string, optional) - PSG Id.
-  One required.
-userIds (string[], optional).
-usernames (string[], optional).
-  One required.
-allOrNone (boolean, optional, default false).
-skipIfNotAssigned (boolean, optional, default true).
+groupName (string, optional) - PermissionSetGroup DeveloperName to remove; string;
+required when groupId is omitted; example 'Finance_Access_Group'; do not pass
+MasterLabel.
+groupId (string, optional) - PermissionSetGroup Id to remove; Salesforce Id string;
+required when groupName is omitted; example '0PGxx000000001A'; do not pass PermissionSet
+Ids.
+userIds (string[], optional) - User Ids to remove from; array of Salesforce User Id
+strings; required when usernames is omitted; example ['005xx0000012345']; do not pass
+contact Ids.
+usernames (string[], optional) - User.Username values to remove from; array of exact
+usernames; required when userIds is omitted; example ['admin@example.com']; do not pass
+display names.
+includeInactiveUsers (boolean, optional) - Whether inactive users can be resolved;
+boolean; defaults to false; example true; do not enable unless inactive users must be
+processed.
+allOrNone (boolean, optional) - Composite sObject Collections delete allOrNone flag;
+boolean; defaults to false; example true; when true one failed delete can roll back the
+batch.
+skipIfNotAssigned (boolean, optional) - Whether missing assignments are returned as
+notAssigned instead of failing; boolean; defaults to true; example true; do not set
+false for broad cleanups.
+batchSize (integer, optional) - Composite sObject collection batch size; integer 1-200;
+defaults to 200; example 100; do not pass values above the REST API limit.
+dryRun (boolean, optional) - Whether to compute deletes without calling DELETE
+/composite/sobjects; boolean; defaults to false; example true; do not use when you
+expect assignments to be removed.
 
 Result
-group (object).
-results (array) - { userId, username, status ("removed"|"not_assigned"|"failed"), assignmentId, error }.
-summary (object) - { removed, notAssigned, failed, total }.
+JSON object with dryRun, permissionSetGroupLookup, userLookup, assignmentLookup,
+notAssigned, deleteRequestIds, and deleteResponses.
+dryRun (value) - included in the JSON returned by the tool.
+permissionSetGroupLookup (value) - included in the JSON returned by the tool.
+userLookup (value) - included in the JSON returned by the tool.
+assignmentLookup (value) - included in the JSON returned by the tool.
+notAssigned (value) - included in the JSON returned by the tool.
+deleteRequestIds (value) - included in the JSON returned by the tool.
+deleteResponses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Assign Permission Sets" + "Manage Users".
@@ -44,6 +67,7 @@ Errors
 Example request
 
 unassign_permission_set_group({
-  "groupName": "MTG_Delivery_Bundle",
-  "usernames": ["jane.doe@magnatech.com"]
+  "groupName": "example",
+  "groupId": "example",
+  "userIds": []
 })

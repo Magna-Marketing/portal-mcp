@@ -22,34 +22,25 @@ Authorization: Bearer <core_access_token>
 Content-Type: application/json
 Accept: application/json
 
-Body (databases / schemas / objects)
-{ "database": "PROD_DB", "schema": "MARKETING" }
-
-Body (preview)
-{ "limit": 10 }
+Body
+POST: advancedAttributes
 
 Input (parameters)
-connectionId (string, required).
-subOperation (string, required) - "databases" | "schemas" | "objects" |
-  "fields" | "preview".
-database (string, optional) - For schemas / objects (when source has
-  databases).
-schema (string, optional) - For objects (when source has schemas).
-resourceName (string, required for "fields" / "preview") - The
-  source-side object name.
-limit (number, optional, default 10, max 100, preview-only).
+connectionId (string, required) - ID of the Data 360 connection to introspect.
+subOperation ("databases" | "schemas" | "objects" | "fields" | "preview", required) - Introspection operation. Uses POST /databases, /database-schemas, /objects,
+/objects/{resourceName}/fields, or /objects/{resourceName}/preview.
+resourceName (string, optional) - Required for fields and preview. Use 'files' for file-based connectors,
+object/table/view name for object or database connectors, custom object ID for data
+extensions, or data stream name for Marketing Cloud bundle streams.
+databaseName (string, optional) - Convenience alias added to advancedAttributes.databaseName when provided.
+database (string, optional) - Compatibility alias for databaseName.
+schemaName (string, optional) - Convenience alias added to advancedAttributes.schemaName when provided.
+schema (string, optional) - Compatibility alias for schemaName.
+fields (string[], optional) - Required for preview. List of source fields to return in preview records.
+limit (number, optional) - Maximum number of records for preview. Salesforce defaults to 100 when omitted.
 
 Result
-For databases / schemas:
-  items (array) - { name, label, recordCountEstimate? }.
-For objects:
-  objects (array) - [{ name, label, recordCountEstimate, isPickable }].
-For fields:
-  fields (array) - [{ apiName, dataType, isPrimaryKey, isExternalId,
-    isRequired }].
-For preview:
-  rows (array<object>) - First N rows from the source object.
-  fields (array) - Resolved field metadata for the rows.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -65,19 +56,10 @@ Errors
 Example request
 
 introspect_connection({
-  "connectionId": "0Z65800000000ABCAA",
-  "subOperation": "preview",
-  "resourceName": "Send",
-  "limit": 5
+  "connectionId": "",
+  "subOperation": ""
 })
 
 Example result
-{
-  "rows": [
-    { "ID": 12345, "EmailName": "Welcome Send", "SentDate": "2026-04-29T13:02:11Z" }
-  ],
-  "fields": [
-    { "apiName": "ID",        "dataType": "NUMBER", "isPrimaryKey": true },
-    { "apiName": "EmailName", "dataType": "TEXT" }
-  ]
-}
+
+{ }

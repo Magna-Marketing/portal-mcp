@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/form-handlers?fields={fields}
+GET https://{pi-domain}/api/v5/objects/form-handlers
+Optional query: fields, filter[campaignId], filter[folderId], filter[isAlwaysEmail], filter[isCookielessTracking], filter[isDataForwarded], filter[isDeleted], filter[name], filter[trackerDomainId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,27 +21,23 @@ Body
 None.
 
 Input (parameters)
-campaignId (number, optional).
-folderId (number, optional).
-trackerDomainId (number, optional).
-nameContains (string, optional).
-isDataForwarded (boolean, optional).
-isCookielessTracking (boolean, optional).
-isAlwaysEmail (boolean, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,campaignId,folderId,
-  trackerDomainId,salesforceId,isDataForwarded,isCookielessTracking,
-  isAlwaysEmail,isKioskMode,errorLocation,successLocation,embedUrl,
-  createdAt,updatedAt,createdById,updatedById,isDeleted).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+campaignId (number, optional) - Filter by campaign id.
+folderId (number, optional) - Filter by folder id.
+trackerDomainId (number, optional) - Filter by tracker domain id.
+nameContains (string, optional) - Filter form handlers whose name contains this string (case-insensitive like match).
+isDataForwarded (boolean, optional) - Filter by data forwarding status.
+isCookielessTracking (boolean, optional) - Filter by cookieless tracking status.
+isAlwaysEmail (boolean, optional) - Filter by always-email setting.
+isDeleted (boolean, optional) - Include deleted form handlers. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, campaignId, folderId, trackerDomainId,
+salesforceId, isDataForwarded, isCookielessTracking, isAlwaysEmail, isKioskMode,
+errorLocation, successLocation, embedUrl, createdAt, updatedAt, createdById,
+updatedById, isDeleted.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-formHandlers (array) - Each: { id, name, campaignId, folderId,
-  trackerDomainId, embedUrl, errorLocation, successLocation,
-  isDataForwarded, isCookielessTracking, isAlwaysEmail, isKioskMode,
-  salesforceId, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -53,13 +50,8 @@ Errors
 
 Example request
 
-list_form_handlers({ "campaignId": 1024 })
+list_form_handlers({})
 
 Example result
-{
-  "formHandlers": [
-    { "id": 8101, "name": "Marketo replacement",
-      "embedUrl": "https://go.magnatech.com/l/.../forms/8101",
-      "successLocation": "https://magnatech.com/thanks" }
-  ]
-}
+
+{ }

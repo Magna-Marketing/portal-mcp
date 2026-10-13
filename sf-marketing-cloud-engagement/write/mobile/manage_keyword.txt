@@ -21,15 +21,20 @@ Body
 { "keyword": "MTG", "codeId": 12345, "keywordType": "Information", "restriction": "None" }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-keywordId (number, optional, required for non-create).
-keyword (string, required for create) - Up to 12 chars uppercase.
-codeId (number, required for create) - Short-code Id.
-keywordType (string, required for create) - "Information" | "Help" | "Stop" | "MO" | "MT".
-restriction (string, optional, default "None").
+operation ("create" | "delete", required) - Create or delete a MobileConnect keyword. Salesforce public REST docs expose create and
+delete, but not update.
+keyword_id (value, optional) - Encoded keyword ID. Required for delete when deleting by ID.
+keyword (string, optional) - Keyword text. Required for create and for delete-by-keyword.
+short_code (string, optional) - Short code to create/delete the keyword on. Required for create unless long_code is
+used, and required for delete-by-keyword.
+long_code (string, optional) - Long code to create the keyword on. Use either short_code or long_code for create.
+country_code (string, optional) - Two-letter country code for the short or long code. Required for create and
+delete-by-keyword.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-keyword (object) - { id, keyword, codeId, keywordType, restriction }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `mobile_connect_write`.
@@ -43,8 +48,5 @@ Errors
 Example request
 
 manage_keyword({
-  "operation": "create",
-  "keyword": "MTG",
-  "codeId": 12345,
-  "keywordType": "Information"
+  "operation": "create"
 })

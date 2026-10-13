@@ -7,7 +7,7 @@ DailyBulkApiBatches, ConcurrentSyncLongRunningApexExecutions, etc.
 Use to monitor headroom before bulk loads or scheduled jobs.
 
 Salesforce API
-REST API, v66.0. `GET /limits`.
+REST API (Data), v66.0.
 
 Endpoint
 GET /services/data/v66.0/limits
@@ -20,23 +20,10 @@ Body
 None.
 
 Input (parameters)
-nearExhaustionThreshold (number, optional, default 0.8) - 0..1; flag entries above threshold.
+None.
 
 Result
-limits (object) - Map of limit name -> { Max, Remaining }. Examples:
-  DailyApiRequests, DailyAsyncApexExecutions, DailyAsyncApexTests,
-  DailyBulkApiBatches, DailyBulkV2QueryFileStorageMB, DailyBulkV2QueryJobs,
-  DailyDeliveredPlatformEvents, DailyDurableGenericStreamingApiEvents,
-  DailyDurableStreamingApiEvents, DailyEinsteinDataInsightsStoryCreation,
-  DailyFunctionsApiCallLimit, DailyGenericStreamingApiEvents,
-  DailyScratchOrgs, DailyStreamingApiEvents, DailyWorkflowEmails,
-  DataStorageMB, FileStorageMB, HourlyAsyncReportRuns, HourlyDashboardRefreshes,
-  HourlyDashboardResults, HourlyDashboardStatuses, HourlyManagedContentPublicRequests,
-  HourlyOdataCallout, HourlyPublishedPlatformEvents, HourlyPublishedStandardVolumePlatformEvents,
-  HourlySyncReportRuns, HourlyTimeBasedWorkflow, MassEmail, SingleEmail,
-  StreamingApiConcurrentClients, etc.
-nearExhaustion (array) - Limits where Used / Max ≥ threshold.
-generatedAt (string).
+Returns the raw limits object keyed by limit name with Max and Remaining values.
 
 Required permissions
 - "View Setup and Configuration".
@@ -49,4 +36,4 @@ Errors
 
 Example request
 
-get_org_limits({ "nearExhaustionThreshold": 0.7 })
+get_org_limits({})

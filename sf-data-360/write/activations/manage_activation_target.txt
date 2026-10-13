@@ -30,16 +30,19 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update".
-activationTargetId (string, required for update).
-name (string, required for create).
-label (string, required for create).
-targetType (string, required for create).
-externalPlatformName (string, required for create).
-targetConfig (object, required for create).
+operation ("create" | "update", required) - The operation to perform: create or update
+activationTargetId (string, optional) - Unique identifier of the activation target. Required for update.
+dataSpaceName (string, optional) - Data space name (usually 'default'). Required for create.
+name (string, optional) - Name of the activation target. Required for create.
+description (string, optional) - Description for the activation target
+platformType ("AmazonS3" | "AzureBlob" | "DataCloud" | "ExternalPlatform" | "GoogleCloudStorage" | "SalesforceMarketingCloud" | "Sftp", optional) - Platform type. Required for create.
+isCappingEnabled (boolean, optional) - Whether communication capping is enabled
+connector (object, optional) - Connector configuration. Properties vary by platformType. For AmazonS3: { name,
+outputFormat, bucketName, folderName, accessKey, secretKey }. Required for create.
+egressProperties (object, optional) - Egress properties for file-based targets (AmazonS3, AzureBlob, GoogleCloudStorage, Sftp)
 
 Result
-activationTarget (object) - Created / updated row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -53,13 +56,9 @@ Errors
 Example request
 
 manage_activation_target({
-  "operation": "create",
-  "name": "MTG_MCE_DE_EMEA",
-  "label": "MCE DE EMEA",
-  "targetType": "MarketingCloudEngagement",
-  "externalPlatformName": "MTG_MCE_Default",
-  "targetConfig": { "dataExtensionExternalKey": "DE_EMEA_HIGH_VALUE", "memberId": 5001234 }
+  "operation": ""
 })
 
 Example result
-{ "activationTarget": { "id": "0YT580000000001", "name": "MTG_MCE_DE_EMEA" } }
+
+{ }

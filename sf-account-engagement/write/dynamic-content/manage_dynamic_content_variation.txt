@@ -21,27 +21,18 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "dynamicContentId": 41,
-  "comparison": "is",
-  "operator": "EQUAL",
-  "value1": "EMEA",
-  "content": "<p>Bonjour!</p>"
-}
+POST: content, dynamicContentId, operator, value1, value2
 
 Input (parameters)
-operation (string, required) - "create" only.
-dynamicContentId (number, required).
-comparison (string, required) - "is" | "isNot" | "contains" |
-  "doesNotContain" | "isBetween".
-operator (string, required) - "EQUAL" | "NOT_EQUAL" |
-  "GREATER_THAN" | "LESS_THAN" | "BETWEEN".
-value1 (string, required).
-value2 (string, optional) - Required for "isBetween" / "BETWEEN".
-content (string, required) - HTML rendered when the rule matches.
+operation ("create", required) - Only "create" is supported by the v5 API for dynamic content variations.
+dynamicContentId (number, required) - Id of the parent Dynamic Content block. Required.
+operator ("is" | "contains" | "between" | "less-than" | "less-than-or-equal" | "greater-than" | "greater-than-or-equal", required) - Comparison operator for the variation rule. Required.
+value1 (string, required) - Primary comparison value. Required.
+value2 (string, optional) - Secondary value. Required when operator="between".
+content (string, required) - HTML content rendered when this variation rule matches. Required.
 
 Result
-variation (object) - Created row.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -56,13 +47,13 @@ Errors
 Example request
 
 manage_dynamic_content_variation({
-  "operation": "create",
-  "dynamicContentId": 41,
-  "comparison": "is",
-  "operator": "EQUAL",
-  "value1": "EMEA",
-  "content": "<p>Bonjour!</p>"
+  "operation": "",
+  "dynamicContentId": 1,
+  "operator": "",
+  "value1": "",
+  "content": ""
 })
 
 Example result
-{ "variation": { "id": 92, "dynamicContentId": 41, "value1": "EMEA" } }
+
+{ }

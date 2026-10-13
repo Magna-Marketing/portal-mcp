@@ -10,27 +10,35 @@ or `/hub/v1/dataevents/key:{key}/rowset` for sync up to 50 rows; SOAP
 `DataExtensionObject[ExternalKey]` for >50 rows.
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/hub/v1/dataevents/key:{customerKey}/rowset
+POST https://{tenant}.rest.marketingcloudapis.com/data/v1/async/dataextensions/key:{customer_key}/rows
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
 
 Headers
 Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
 Content-Type: application/json
+Accept: application/json
 
 Body
-[
-  { "keys": { "MemberId": "MEM-100023" }, "values": { "Email": "jane.doe@example.com", "TierName": "Gold" } }
-]
+POST: items
 
 Input (parameters)
-customerKey (string, required) - DE External Key.
-rows (object[], required) - Each row's field map. Tool wraps as `{ keys, values }` when DE has a PK.
-async (boolean, optional, default = auto-true when rows > 50).
+customer_key (string, required) - Data Extension external key.
+rows (object[], required) - Rows to insert as flat field maps. Field names must exactly match the Data Extension
+schema.
+async (boolean, optional) - When true, uses POST /data/v1/async/dataextensions/key:{key}/rows. Defaults to true for
+more than 50 rows, otherwise SOAP Create for synchronous insert-only behavior.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus REST Account-Context or SOAP
+ClientID. Defaults to the session BU when available.
+client_business_unit_id (number, optional) - Optional SOAP object Client.ID owner/context MID. Defaults to business_unit_id/session
+MID when numeric. Use this when parent authentication writes into a child BU.
 
 Result
-results (array) - { rowIndex, success, errors }.
-totalProcessed (number).
-totalFailed (number).
-asyncRequestId (string|null) - When async=true.
+Raw Marketing Cloud response JSON, returned unchanged.
+tool (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_write`.
@@ -46,8 +54,6 @@ Errors
 Example request
 
 insert_rows({
-  "customerKey": "Members_DE",
-  "rows": [
-    { "MemberId": "MEM-100023", "Email": "jane.doe@example.com", "TierName": "Gold" }
-  ]
+  "customer_key": "",
+  "rows": []
 })

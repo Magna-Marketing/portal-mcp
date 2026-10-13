@@ -26,39 +26,25 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (addValue)
-{ "value": "EMEA", "isDefault": false, "sortOrder": 1 }
-
-Body (addDependent)
-{ "dependentFormFieldId": 53, "triggerValue": "EMEA" }
-
-Body (addProgressive)
-{ "replacementProspectApiFieldId": "industry__c", "sortOrder": 0 }
+Body
+POST: replacementProspectApiFieldId, sortOrder
 
 Input (parameters)
-id (number, required) - Form field id.
-subOperation (string, required) - "addValue" | "addDependent" |
-  "addProgressive".
-
-For addValue:
-  value (string, required).
-  isDefault (boolean, optional, default false).
-  sortOrder (number, optional).
-
-For addDependent:
-  dependentFormFieldId (number, required) - The field shown when
-    triggerValue is selected.
-  triggerValue (string, required).
-
-For addProgressive:
-  replacementProspectApiFieldId (string, required) - Field shown on
-    return visits.
-  sortOrder (number, optional).
+id (number, required) - Form field id to operate on. Required.
+subOperation ("addValue" | "addDependent" | "addProgressive", required) - "addValue" appends a picklist value; "addDependent" adds a conditional child field;
+"addProgressive" adds a progressive-profiling replacement rule.
+value (string, optional) - Picklist value text. Required for subOperation="addValue".
+isDefault (boolean, optional) - Mark this picklist value as the default selection. Used with addValue. Default false.
+sortOrder (number, optional) - Display order for the picklist value or progressive rule. Used with addValue and
+addProgressive.
+dependentFormFieldId (number, optional) - Form field id to show conditionally. Required for subOperation="addDependent".
+triggerValue (string, optional) - The picklist value that triggers showing the dependent field. Required for
+subOperation="addDependent".
+replacementProspectApiFieldId (string, optional) - Prospect apiFieldId of the field shown on return visits. Required for
+subOperation="addProgressive".
 
 Result
-success (boolean).
-formField (object) - Refreshed form-field row.
-addedValue (object, addValue only) - { value, isDefault, sortOrder }.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -74,13 +60,10 @@ Errors
 Example request
 
 manage_form_field_options({
-  "id": 53, "subOperation": "addValue",
-  "value": "EMEA", "isDefault": false
+  "id": 1,
+  "subOperation": ""
 })
 
 Example result
-{
-  "success": true,
-  "formField": { "id": 53, "hasValues": true },
-  "addedValue": { "value": "EMEA", "isDefault": false }
-}
+
+{ }

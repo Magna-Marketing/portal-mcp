@@ -19,17 +19,19 @@ Body
 { "ContentDocumentId": "...", "LinkedEntityId": "...", "ShareType": "V", "Visibility": "AllUsers" }
 
 Input (parameters)
-ContentDocumentId (string, required).
-operation (string, required) - "share" | "unshare".
-links (object[], required) - Each:
-  LinkedEntityId (string, optional) - Record/User/Group/Library Id.
-  username (string, optional) - For User links.
-  ShareType (string, optional, default "V") - "V" | "C" | "I".
-  Visibility (string, optional, default "AllUsers").
+ContentDocumentId (string, required) - ContentDocument Id; Salesforce Id string;
+required; example \"069...\"; do not pass ContentVersionId.
+operation ("share" | "unshare", required) - Share action; enum share or unshare;
+required; example \"share\"; unshare deletes matching links.
+links (unknown[], required) - Share target entries; array with at least one object;
+required; example [{\"LinkedEntityId\":\"001...\",\"ShareType\":\"V\"}]; do not mix
+unrelated files in one call.
 
 Result
-results (array) - { linkId, linkedEntityId, status ("created"|"removed"|"already_exists"|"failed"), error }.
-summary (object) - { added, removed, failed, total }.
+raw lookup, create, and delete responses for each requested link.
+operation (value) - included in the JSON returned by the tool.
+ContentDocumentId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - File owner or Collaborator access.
@@ -43,10 +45,7 @@ Errors
 Example request
 
 share_file({
-  "ContentDocumentId": "069Qg0000004ZyAA",
-  "operation": "share",
-  "links": [
-    { "username": "jane.doe@magnatech.com", "ShareType": "C" },
-    { "LinkedEntityId": "a01Qg0000020aBcDE", "ShareType": "V" }
-  ]
+  "ContentDocumentId": "example",
+  "operation": "example",
+  "links": []
 })

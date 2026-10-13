@@ -9,8 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-PATCH  {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models/:configuredModelIdOrName    (operation="update")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models/:configuredModelIdOrName    (operation="delete")
+PATCH {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/{configuredModelIdOrName}
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/{configuredModelIdOrName}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -25,16 +25,16 @@ Body (update)
 }
 
 Input (parameters)
-operation (string, required) - "update" | "delete".
-configuredModelIdOrName (string, required).
-label (string, optional).
-status (string, optional) - "Active" | "Draft" | "Failed".
-modelArtifactId (string, optional) - Re-bind to a different artifact.
-inputSchema (object, optional), outputSchema (object, optional).
+operation ("update" | "delete", required) - The operation to perform: update or delete
+configuredModelIdOrName (string, required) - Configured model ID or API name
+label (string, optional) - Updated display label for the configured model.
+status ("Active" | "Draft" | "Failed", optional) - Updated status of the configured model.
+modelArtifactId (string, optional) - ID of the model artifact to associate.
+inputSchema (object, optional) - Input schema definition for the model.
+outputSchema (object, optional) - Output schema definition for the model.
 
 Result
-configuredModel (object) - Updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -49,10 +49,10 @@ Errors
 Example request
 
 manage_configured_model({
-  "operation": "update",
-  "configuredModelIdOrName": "ChurnPredictor",
-  "modelArtifactId": "MA_002"
+  "operation": "",
+  "configuredModelIdOrName": ""
 })
 
 Example result
-{ "configuredModel": { "apiName": "ChurnPredictor", "modelArtifactId": "MA_002" } }
+
+{ }

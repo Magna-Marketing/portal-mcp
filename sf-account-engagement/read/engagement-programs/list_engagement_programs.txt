@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/engagement-studio-programs?fields={fields}
+GET https://{pi-domain}/api/v5/objects/engagement-studio-programs
+Optional query: fields, limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,26 +21,20 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Draft" | "Running" | "Paused" |
-  "Completed" | "Error".
-folderId (number, optional).
-nameContains (string, optional).
-campaignId (number, optional).
-recipientListId (number, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,description,status,
-  recipientListId,suppressionListIds,businessHoursId,scheduleType,
-  campaignId,folderId,isDeleted,createdAt,updatedAt,createdById,
-  updatedById,publishedAt,startedAt,completedAt).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+status ("Draft" | "Running" | "Paused" | "Completed" | "Error", optional) - Filter by program status.
+folderId (number, optional) - Filter by folder id.
+nameContains (string, optional) - Filter programs whose name contains this string (case-insensitive like match).
+campaignId (number, optional) - Filter by campaign id.
+recipientListId (number, optional) - Filter by recipient list id.
+isDeleted (boolean, optional) - Include deleted programs. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, description, status, recipientListId,
+suppressionListIds, businessHoursId, scheduleType, campaignId, folderId, isDeleted,
+createdAt, updatedAt, createdById, updatedById, publishedAt, startedAt, completedAt.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-engagementPrograms (array) - Each: { id, name, description, status,
-  recipientListId, suppressionListIds (array), businessHoursId,
-  scheduleType ("Continuous" | "Schedule"), campaignId, folderId,
-  isDeleted, publishedAt, startedAt, completedAt, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -52,13 +47,8 @@ Errors
 
 Example request
 
-list_engagement_programs({ "status": "Running" })
+list_engagement_programs({})
 
 Example result
-{
-  "engagementPrograms": [
-    { "id": 311, "name": "Onboarding 2026", "status": "Running",
-      "recipientListId": 301, "campaignId": 1024,
-      "startedAt": "2026-03-01T00:00:00Z" }
-  ]
-}
+
+{ }

@@ -7,40 +7,92 @@ profile does not. Useful for migration to a "Standard User" baseline
 plus a small diff permset per role.
 
 Salesforce API
-Metadata API (`Profile` readMetadata + `PermissionSet` create), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0    (readMetadata both profiles)
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (createMetadata PermissionSet)
+GET /services/data/v66.0/query/?q=SELECT allowRead, allowCreate, allowEdit, allowDelete, viewAllRecords, modifyAllRecords, viewAllFields FROM PermissionSet
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A (the MCP server computes the diff and submits a create).
+JSON fields: field, readable, editable.
+JSON fields: fullName, label, description, license, userPermissions, objectPermissions, fieldPermissions, classAccesses, pageAccesses, customMetadataTypeAccesses, customSettingAccesses, customPermissions, externalDataSourceAccesses, flowAccesses, agentAccesses, genComputingSummaryDefAccess, servicePresenceStatusAccesses, tabSettings.
 
 Input (parameters)
-sourceProfile (string, required) - Profile DeveloperName whose extras
-  you want as a permset.
-baselineProfile (string, required, default "Standard_User") - Profile
-  to compare against.
-newPermsetName (string, required).
-newPermsetLabel (string, required).
-newPermsetDescription (string, optional).
-license (string, optional) - Default = source's license.
-includeFieldPermissions (boolean, optional, default true).
-includeSystemPermissions (boolean, optional, default true).
-includeObjectPermissions (boolean, optional, default true).
-includeApexAccess (boolean, optional, default true).
-includeVfAccess (boolean, optional, default true).
-includeTabSettings (boolean, optional, default false).
-checkOnly (boolean, optional, default false).
+sourceProfile (string, required) - Source Profile metadata fullName; string profile
+name; no default; example 'Custom Sales User'; do not pass Profile Id.
+baselineProfile (string, optional) - Baseline Profile metadata fullName; string profile
+name; defaults to Standard_User; example 'Minimum Access - Salesforce'; do not pass
+Profile Id.
+newPermsetName (string, required) - New PermissionSet metadata fullName; string API
+name; no default; example 'Sales_Profile_Delta'; do not reuse an existing name.
+newPermsetLabel (string, required) - New PermissionSet label; string up to 80
+characters; no default; example 'Sales Profile Delta'; do not pass labels with hidden
+environment names.
+newPermsetDescription (string, optional) - New PermissionSet description; string up to
+255 characters; omitted means no description; example 'Profile delta permissions'; do
+not pass private notes.
+license (string, optional) - PermissionSet license metadata value; string license name;
+defaults to source profile userLicense when available; example 'Salesforce'; do not pass
+LicenseId.
+includeFieldPermissions (boolean, optional) - Whether to include field permission
+differences; boolean; defaults to true; example true; do not disable if FLS is part of
+the migration.
+includeSystemPermissions (boolean, optional) - Whether to include user/system permission
+differences; boolean; defaults to true; example true; do not disable if system
+permissions are needed.
+includeObjectPermissions (boolean, optional) - Whether to include object permission
+differences; boolean; defaults to true; example true; do not disable if CRUD access is
+needed.
+includeApexAccess (boolean, optional) - Whether to include Apex class access
+differences; boolean; defaults to true; example true; do not disable if Apex execution
+is needed.
+includeVfAccess (boolean, optional) - Whether to include Visualforce page access
+differences; boolean; defaults to true; example true; do not disable if page access is
+needed.
+includeTabSettings (boolean, optional) - Whether to include Profile tab visibility
+differences as PermissionSet tabSettings; boolean; defaults to false; example true; do
+not enable unless tab changes are intended.
+includeCustomMetadataTypeAccesses (boolean, optional) - Whether to include custom
+metadata type access differences; boolean; defaults to true; example true; do not
+disable if custom metadata read access is needed.
+includeCustomSettingAccesses (boolean, optional) - Whether to include custom setting
+access differences; boolean; defaults to true; example true; do not disable if custom
+setting read access is needed.
+includeCustomPermissions (boolean, optional) - Whether to include custom permission
+differences; boolean; defaults to true; example true; do not disable if custom
+permission grants are needed.
+includeExternalDataSourceAccesses (boolean, optional) - Whether to include external data
+source access differences; boolean; defaults to true; example true; do not disable if
+Per User external data source access is needed.
+includeFlowAccesses (boolean, optional) - Whether to include flow access differences;
+boolean; defaults to true; example true; do not disable if flow access is needed.
+includeAgentAccesses (boolean, optional) - Whether to include Agentforce agent access
+differences; boolean; defaults to true; example true; do not disable if agent access is
+needed.
+includeGenComputingSummaryDefAccess (boolean, optional) - Whether to include enhanced
+summary access differences; boolean; defaults to true; example true; do not disable if
+API v66.0 summary access is needed.
+includeServicePresenceStatusAccesses (boolean, optional) - Whether to include service
+presence status access differences; boolean; defaults to true; example true; do not
+disable if Omni-Channel presence access is needed.
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Whether to build the diff payload without
+createMetadata; boolean; defaults to false; example true; do not use when the
+PermissionSet must be created.
 
 Result
-diffSummary (object) - Per-category: { onlyInSource: number, onlyInBaseline: number, common: number }.
-permissionSet (object) - { id, fullName, label, license,
-  copiedComponents } - Only "onlyInSource" perms were copied.
+checkOnly (value) - included in the JSON returned by the tool.
+sourceReadResponse (value) - included in the JSON returned by the tool.
+baselineReadResponse (value) - included in the JSON returned by the tool.
+diffSummary (value) - included in the JSON returned by the tool.
+permissionSetMetadata (value) - included in the JSON returned by the tool.
+createResponse (value) - included in the JSON returned by the tool.
+createdPermissionSetLookup (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -55,8 +107,8 @@ Errors
 Example request
 
 create_differential_permission_set({
-  "sourceProfile": "MTG_Project_Manager_Profile",
-  "baselineProfile": "Standard_User",
-  "newPermsetName": "MTG_Project_Manager_Diff",
-  "newPermsetLabel": "MTG Project Manager (Diff vs Standard User)"
+  "sourceProfile": "example",
+  "newPermsetName": "example",
+  "newPermsetLabel": "example",
+  "metadataOverride": "example"
 })

@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/configured-models
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/configured-models
+Optional query: status, modelType, nameContains, limit, offset
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,18 +20,14 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Active" | "Draft" | "Failed".
-modelType (string, optional) - "Classification" | "Regression" |
-  "TimeSeries" | "GenAI" | "Recommendation".
-nameContains (string, optional).
-limit (number, optional, default 100).
+nameContains (string, optional) - Optional server-side name substring filter when supported by the Salesforce endpoint.
+limit (number, optional) - Maximum number of records to return. Salesforce applies the endpoint default when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
 
 Result
-configuredModels (array) - Each: { id, apiName, label, modelType,
-  status, modelArtifactId, version, predictionEndpoint,
-  inputSchema (object), outputSchema (object), createdDate,
-  lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -43,13 +40,8 @@ Errors
 
 Example request
 
-list_configured_models({ "modelType": "Classification" })
+list_configured_models({})
 
 Example result
-{
-  "configuredModels": [
-    { "apiName": "ChurnPredictor", "label": "Churn Predictor",
-      "modelType": "Classification", "status": "Active",
-      "version": "1.2.0" }
-  ]
-}
+
+{ }

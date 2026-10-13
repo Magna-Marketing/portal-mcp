@@ -1,4 +1,4 @@
-Tool: run_clean_room_query
+Tool: run_dcr_query
 
 Description
 Execute a pre-approved query template inside a Data Clean Room
@@ -32,11 +32,7 @@ outputDmoApiName (string, optional) - When supplied, the result is
 runIdempotencyKey (string, optional).
 
 Result
-jobId (string).
-collaborationId (string).
-templateApiName (string).
-status (string) - "Queued" | "AwaitingApproval".
-submittedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -59,8 +55,5 @@ run_clean_room_query({
 })
 
 Example result
-{
-  "jobId": "JOB_DCR_2026-04-29T13",
-  "collaborationId": "0YC580000000001",
-  "status": "AwaitingApproval"
-}
+
+{ }

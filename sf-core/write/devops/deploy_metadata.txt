@@ -7,9 +7,10 @@ and `ignoreWarnings`. Returns a `deployId` to poll with
 `get_deployment_status`.
 
 Salesforce API
-Metadata API, v66.0.
+Metadata REST API, v66.0.
 
 Endpoint
+POST /services/data/v66.0/metadata/deployRequest/{validatedDeployRequestId}
 POST /services/data/v66.0/metadata/deployRequest
 
 Headers
@@ -34,25 +35,49 @@ Body
 }
 
 Input (parameters)
-zipBase64 (string, required) - Base64-encoded deployment zip.
-checkOnly (boolean, optional, default false).
-rollbackOnError (boolean, optional, default true).
-ignoreWarnings (boolean, optional, default false).
-allowMissingFiles (boolean, optional, default false).
-autoUpdatePackage (boolean, optional, default false).
-purgeOnDelete (boolean, optional, default false) - Skip Recycle Bin for deletions.
-runTests (string[], optional) - Specific test class names; required when testLevel="RunSpecifiedTests".
-testLevel (string, optional) - "NoTestRun" | "RunSpecifiedTests" | "RunLocalTests" | "RunAllTestsInOrg".
-singlePackage (boolean, optional, default true).
-waitForCompletion (boolean, optional, default true) - Poll until terminal.
+zipBase64 (string, optional) - Base64 package zip containing package.xml and metadata
+files; string; required unless validatedDeployRequestId is passed; example \"UEsDB...\";
+do not pass raw binary, a filesystem path, or an unpacked folder.
+validatedDeployRequestId (string, optional) - Validated deploy request Id for quick
+deploy; Salesforce Id string; when set the zip and deploy options are ignored; example
+\"0Af...\"; only pass a recent successful validation that Salesforce still allows quick
+deploying.
+checkOnly (boolean, optional) - Whether to validate without committing metadata;
+boolean; defaults to false; example true; do not use with validatedDeployRequestId.
+rollbackOnError (boolean, optional) - Whether any component failure rolls back the whole
+deploy; boolean; defaults to true in this tool and is required for production; example
+true; do not set false for production deploys.
+ignoreWarnings (boolean, optional) - Whether Metadata API warnings can still allow
+success; boolean; defaults to false; example true; do not use to ignore actual component
+errors.
+allowMissingFiles (boolean, optional) - Whether package.xml members missing from the zip
+are tolerated; boolean; defaults to false; example false; do not enable for strict
+release packages.
+autoUpdatePackage (boolean, optional) - Whether Salesforce can update package.xml from
+extra zip files; boolean; defaults to false; example false; avoid unless performing
+retrieve-after-deploy packaging flows.
+performRetrieve (boolean, optional) - Whether Salesforce performs a retrieve after
+deploy; boolean; defaults to false; example false; do not expect this to replace
+retrieve_metadata.
+purgeOnDelete (boolean, optional) - Whether destructive changes bypass the Recycle Bin
+where supported; boolean; defaults to false; example true; do not pass true unless
+permanent deletion is intended.
+runTests (string[], optional) - Apex test class names to run; array of class names;
+required when testLevel is RunSpecifiedTests; example [\"AccountTriggerTest\"]; do not
+pass method names or Ids.
+testLevel (string, optional) - Deployment test level; enum string; Salesforce chooses
+defaults when omitted; example \"RunLocalTests\"; RunSpecifiedTests requires runTests.
+singlePackage (boolean, optional) - Whether the zip contains a single package structure;
+boolean; defaults to true; example true; set false only for multi-package zips.
+filename (string, optional) - Multipart file name for the zip part; string ending in
+.zip is recommended; defaults to deploy.zip; example \"release.zip\"; do not include
+directory paths.
 
 Result
-deployId (string).
-status (string), done (boolean).
-componentSuccesses (array).
-componentFailures (array).
-runTestsResult (object|null) - { numTestsRun, numFailures, totalTime, failures, successes, codeCoverage, codeCoverageWarnings }.
-elapsedMs (number).
+the raw deployRequest response, returned as soon as Salesforce accepts the request. This
+tool does not wait for the deploy to finish. Call read.get_deployment_status with the
+returned id on a later step, and call it again while deployResult.status is not
+Succeeded, SucceededPartial, Failed, or Canceled and deployResult.done is not true.
 
 Required permissions
 - "Modify Metadata Through Metadata API Functions" + (production) "Deploy Change Sets".
@@ -67,9 +92,7 @@ Errors
 Example request
 
 deploy_metadata({
-  "zipBase64": "UEsDB...",
-  "checkOnly": false,
-  "rollbackOnError": true,
-  "testLevel": "RunSpecifiedTests",
-  "runTests": ["ProjectServiceTest", "ProjectTriggerHandlerTest"]
+  "zipBase64": "example",
+  "validatedDeployRequestId": "example",
+  "checkOnly": false
 })

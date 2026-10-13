@@ -4,28 +4,42 @@ Description
 Create / update / delete Custom Labels.
 
 Salesforce API
-Metadata API (`CustomLabel`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (writeMetadata CustomLabel)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: fullName, categories, language, protected, shortDescription, value.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-fullName (string, required) - Label DeveloperName.
-masterLabel (string, required for create).
-value (string, required for create/update) - The translated text.
-language (string, optional, default org default) - Language code.
-isProtected (boolean, optional, default false).
-categories (string, optional) - Semicolon-separated categories.
-shortDescription (string, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Metadata action to
+run. Values are create, update, upsert, or delete; no default. Example: upsert. Do not
+pass delete unless the label should be removed.
+fullName (string, required) - CustomLabel developer name. String fullName required by
+Metadata API. Example: Welcome_Message. Do not include spaces or namespace prefixes
+unless targeting a namespaced label.
+masterLabel (string, optional) - Convenience alias for shortDescription. String used
+only when shortDescription is omitted; no Salesforce field is emitted as masterLabel.
+Example: Welcome Message. Do not pass instead of value.
+value (string, optional) - Label text. String up to 1000 characters; required for
+create/upsert. Example: Welcome to the portal. Do not pass translated variants here; use
+Translations for localization.
+language (string, optional) - Language code for the master label value. String language
+code; defaults to en_US. Example: en_US. Do not pass a locale unsupported by Salesforce.
+isProtected (boolean, optional) - Protection flag. Boolean mapped to Metadata API
+protected; defaults to false. Example: false. Do not set true if subscriber org
+components must reference the label.
+categories (string, optional) - Comma-separated categories. String up to 255 characters;
+omitted by default. Example: Onboarding,Portal. Do not pass an array.
+shortDescription (string, optional) - Short description used in merge fields. String
+required for create/upsert unless masterLabel is provided. Example: Welcome Message. Do
+not pass an empty value.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -43,9 +57,7 @@ Errors
 Example request
 
 manage_custom_label({
-  "operation": "create",
-  "fullName": "MTG_Project_Welcome",
-  "masterLabel": "Project Welcome",
-  "value": "Welcome to MTG Projects.",
-  "language": "en_US"
+  "operation": "upsert.",
+  "fullName": "Welcome_Message.",
+  "metadata": "example"
 })

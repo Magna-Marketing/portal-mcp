@@ -20,10 +20,7 @@ Input (parameters)
 dataTransformNameOrId (string, required).
 
 Result
-schedule (object): scheduleType ("Cron" | "Interval" | "EventDriven" |
-  "Manual"), cronExpression (string|null), intervalMinutes
-  (number|null), startDate (ISO-8601|null), endDate (ISO-8601|null),
-  timeZone (string), isActive (boolean).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -41,11 +38,5 @@ get_data_transform_schedule({
 })
 
 Example result
-{
-  "schedule": {
-    "scheduleType": "Cron",
-    "cronExpression": "0 0 * * * ?",
-    "timeZone": "UTC",
-    "isActive": true
-  }
-}
+
+{ }

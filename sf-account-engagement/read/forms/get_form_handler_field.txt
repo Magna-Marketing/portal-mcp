@@ -22,9 +22,7 @@ id (number, required).
 fields (string[], optional).
 
 Result
-formHandlerField (object): id, formHandlerId, name,
-  prospectApiFieldId, dataFormat, errorMessage, isRequired,
-  isMaintainInitialValue, sortOrder, createdAt, updatedAt.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -40,7 +38,5 @@ Example request
 get_form_handler_field({ "id": 1101 })
 
 Example result
-{
-  "formHandlerField": { "id": 1101, "name": "email",
-    "prospectApiFieldId": "email", "isRequired": true }
-}
+
+{ }

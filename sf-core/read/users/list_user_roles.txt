@@ -4,10 +4,10 @@ Description
 List all UserRoles in the org with parent links so the role hierarchy is reconstructable. Each row includes the role's parent, opportunity-access setting, case-access setting, and number of users currently assigned. Use to plan reorgs, hierarchy edits via `manage_user_role`, or owner-based sharing analysis.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `UserRole`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, ParentRoleId, ParentRole.Name, OpportunityAccessForAccountOwner, CaseAccessForAccountOwner, ContactAccessForAccountOwner, MayForecastManagerShare, RollupDescription, PortalType, PortalAccountId FROM UserRole
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, ParentRoleId, LastModifiedDate FROM UserRole
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,16 +17,27 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional) - Glob on Name or DeveloperName.
-parentRoleName (string, optional) - Restrict to direct children of this role.
-includeUserCount (boolean, optional, default true) - Adds one COUNT() per role (heavier).
-includeHierarchy (boolean, optional, default false) - Returns roles arranged as a tree.
-portalType (string, optional) - "None" | "CustomerPortal" | "Partner".
+pattern (string, optional) - Role text pattern matched against Name or DeveloperName;
+string using * and ? wildcards converted to SOQL LIKE; no default; example: Sales*; do
+not pass regex, raw LIKE syntax, or hierarchy paths.
+parentRoleId (string, optional) - Parent role filter; 15- or 18-character Salesforce
+UserRole Id from ParentRoleId; no default; example: 00E5g000000ABCdEAO; do not pass role
+names, User Ids, or multiple Ids.
+whereClause (string, optional) - Additional SOQL WHERE condition for UserRole; string
+with or without WHERE; no default; example: DeveloperName != null; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for UserRole; string with or without
+ORDER BY; default Name ASC; example: DeveloperName ASC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum UserRole rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-roles (array, when not hierarchy) - Each: id, name, developerName, parentRoleId, parentRoleName, opportunityAccess, caseAccess, contactAccess, portalType, userCount (optional).
-hierarchy (object, when includeHierarchy=true) - Tree { role, children: [...] }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration".
@@ -39,4 +50,8 @@ Errors
 
 Example request
 
-list_user_roles({ "includeHierarchy": true, "includeUserCount": true })
+list_user_roles({
+  "pattern": "Sales*",
+  "parentRoleId": "00E5g000000ABCdEAO",
+  "whereClause": "DeveloperName != null"
+})

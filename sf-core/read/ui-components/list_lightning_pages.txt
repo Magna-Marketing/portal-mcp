@@ -7,10 +7,10 @@ in with `read_flexipage` / `read_flexipage_detailed`. For a generic
 component search across LWC/Aura/VF/FlexiPage use `search_ui_components`.
 
 Salesforce API
-Tooling API, v66.0. `FlexiPage` sObject.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, NamespacePrefix, ManageableState FROM FlexiPage WHERE EntityDefinitionId = '{sObject}' ORDER BY MasterLabel
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, EntityDefinition.QualifiedApiName, NamespacePrefix, ManageableState, Description, ParentFlexiPage, LastModifiedDate FROM FlexiPage
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,25 +20,35 @@ Body
 None.
 
 Input (parameters)
-sObject (string, optional) - Restrict to RecordPage FlexiPages for this
-  sObject API name (e.g. "Account", "Project__c"). Omit to list all
-  pages org-wide.
-type (string|string[], optional) - "RecordPage" | "AppPage" | "HomePage"
-  | "EmbeddedServiceMinView" | "CommApp". Default: all.
-namePattern (string, optional) - Glob filter on DeveloperName.
-includeManaged (boolean, optional, default false).
-limit (number, optional, default 200, max 2000).
+sObject (string, optional) - Record page object API name; string matching
+EntityDefinition.QualifiedApiName; no default; example: Account; do not pass labels, key
+prefixes, or multiple objects.
+objectName (string, optional) - Alias for sObject; string object API name; ignored when
+sObject is present; example: CustomObject__c; do not pass relationship names.
+type (string | string[], optional) - FlexiPage Type filter; string or array of
+Salesforce values such as AppPage, HomePage, RecordPage, or CommAppPage; no default;
+example: RecordPage; do not pass lowercase labels or comma-separated strings inside an
+array item.
+namePattern (string, optional) - DeveloperName pattern; string with * and ? wildcards
+converted to SOQL LIKE; no default; example: Account*; do not pass regex or raw LIKE
+syntax.
+includeManaged (boolean, optional) - Whether managed package pages can be returned;
+boolean; default false; example: true; do not use for user permission filtering.
+whereClause (string, optional) - Additional SOQL WHERE condition for FlexiPage; string
+with or without WHERE; no default; example: LastModifiedDate = LAST_N_DAYS:90; do not
+pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for FlexiPage; string with or without ORDER
+BY; default MasterLabel ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum FlexiPage rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass offsets, decimals,.
 
 Result
-totalSize (number).
-pages (array) - Each:
-  id (string).
-  name (string) - DeveloperName.
-  label (string) - MasterLabel.
-  type (string).
-  sObject (string|null) - Resolved from EntityDefinitionId.
-  namespacePrefix (string|null).
-  manageableState (string).
+raw Salesforce QueryResult with FlexiPage records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -51,14 +61,22 @@ Errors
 
 Example request
 
-list_lightning_pages({ "sObject": "Project__c" })
+list_lightning_pages({
+  "sObject": "Account",
+  "objectName": "CustomObject__c",
+  "type": "RecordPage"
+})
 
 Example result
 
 {
-  "totalSize": 2,
-  "pages": [
-    { "id": "0M04Q00000aBcDef", "name": "Project__c_Record_Page",      "label": "Project Record Page",      "type": "RecordPage", "sObject": "Project__c" },
-    { "id": "0M04Q00000aBcDfg", "name": "Project__c_Record_Page_Sales","label": "Project Record - Sales",   "type": "RecordPage", "sObject": "Project__c" }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "FlexiPage"
+      }
+    }
   ]
 }

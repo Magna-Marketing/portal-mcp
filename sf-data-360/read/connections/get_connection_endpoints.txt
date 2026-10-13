@@ -22,8 +22,7 @@ Input (parameters)
 connectionId (string, required).
 
 Result
-endpoints (array) - Each: { name, url, isReachable (boolean),
-  authType, lastCheckedDate, error (object|null) }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,11 +38,5 @@ Example request
 get_connection_endpoints({ "connectionId": "0Z65800000000ABCAA" })
 
 Example result
-{
-  "endpoints": [
-    { "name": "auth", "url": "https://mc7xxxxxxxxxxx.auth.marketingcloudapis.com/v2/token",
-      "isReachable": true, "authType": "OAuth2_ClientCredentials" },
-    { "name": "rest", "url": "https://mc7xxxxxxxxxxx.rest.marketingcloudapis.com",
-      "isReachable": true }
-  ]
-}
+
+{ }

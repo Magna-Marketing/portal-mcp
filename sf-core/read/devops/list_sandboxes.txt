@@ -10,7 +10,7 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, SandboxName, LicenseType, Status, ActivationUserGroupId, AutoActivate, ApexClassId, CopyChatter, Description, HistoryDays, SourceId, TemplateId, CreatedById, CreatedDate, EndDate, StartDate FROM SandboxInfo
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, SandboxName, LicenseType, Description, SourceId, TemplateId, ApexClassId, AutoActivate, CopyChatter, HistoryDays FROM SandboxInfo
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,13 +20,31 @@ Body
 None.
 
 Input (parameters)
-licenseType (string, optional) - "DEVELOPER" | "DEVELOPER_PRO" | "PARTIAL" | "FULL".
-status (string, optional) - "Pending" | "Processing" | "Activating" | "Completed" | "Failed" | "Aborted".
-namePattern (string, optional).
+licenseType ("DEVELOPER" | "DEVELOPER_PRO" | "PARTIAL" | "FULL", optional) - SandboxInfo
+LicenseType exact match; documented picklist; no default; example: DEVELOPER; do not
+pass labels, lowercase values, or multiple values.
+namePattern (string, optional) - SandboxName filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: DEV*; do not pass raw LIKE syntax, regex,
+or production org names.
+sourceId (string, optional) - SourceId for cloned sandbox source SandboxInfo; Salesforce
+Id string; no default; example: 0GQ5g00000ABCDe; do not pass SandboxName or
+comma-separated Ids.
+templateId (string, optional) - TemplateId for the sandbox template; Salesforce Id
+string; no default; example: 0TT5g00000ABCDe; do not pass template names or SOQL
+fragments.
+whereClause (string, optional) - Additional Tooling SOQL WHERE condition for
+SandboxInfo; string without WHERE; no default; example: Description != null; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Tooling SOQL ORDER BY for SandboxInfo; string without ORDER
+BY; default SandboxName; example: LicenseType, SandboxName; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum SandboxInfo rows to query; positive integer clamped
+to 2000; default 200; example: 25; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-sandboxes (array) - { id, sandboxName, licenseType, status, autoActivate, copyChatter, description, historyDays, sourceId, templateId, createdById, createdDate, startDate, endDate }.
+Returns a JSON object with query and raw Tooling API result.
+query (value) - included in the JSON returned by the tool.
+result (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Sandboxes" + run from production.
@@ -40,4 +58,8 @@ Errors
 
 Example request
 
-list_sandboxes({ "licenseType": "DEVELOPER" })
+list_sandboxes({
+  "licenseType": "DEVELOPER",
+  "namePattern": "DEV*",
+  "sourceId": "0GQ5g00000ABCDe"
+})

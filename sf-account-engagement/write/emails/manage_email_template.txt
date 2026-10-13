@@ -18,44 +18,32 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (create)
-{
-  "name": "Welcome",
-  "subject": "Welcome to Magna",
-  "htmlMessage": "<html>...</html>",
-  "textMessage": "...",
-  "type": "HtmlAndText",
-  "isOneToOneEmail": true,
-  "isAutoResponderEmail": true,
-  "campaignId": 1024,
-  "trackerDomainId": 7,
-  "senderOptions": { "type": "GENERAL_USER", "address": "noreply@magnatech.com", "name": "Magna" },
-  "replyToOptions": { "type": "GENERAL_USER", "address": "support@magnatech.com" },
-  "tagReplacementLanguage": "ENGLISH"
-}
+Body
+POST: campaignId, folderId, htmlMessage, isAutoResponderEmail, isDripEmail, isListEmail, isOneToOneEmail, name, replyToOptions, senderOptions, subject, textMessage, trackerDomainId, type
+PATCH: campaignId, folderId, htmlMessage, isAutoResponderEmail, isDripEmail, isListEmail, isOneToOneEmail, name, replyToOptions, senderOptions, subject, textMessage, trackerDomainId, type
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-id (number, required for update / delete).
-name (string, required for create).
-subject (string, required for create).
-htmlMessage (string, optional), textMessage (string, optional).
-type (string, optional, default "HtmlAndText") - "HtmlAndText" |
-  "HtmlOnly" | "TextOnly".
-isOneToOneEmail (boolean, optional).
-isAutoResponderEmail (boolean, optional).
-isDripEmail (boolean, optional).
-isListEmail (boolean, optional).
-campaignId (number, optional).
-trackerDomainId (number, optional).
-folderId (number, optional).
-senderOptions (object, optional) - See `send_one_to_one_email`.
-replyToOptions (object, optional).
-tagReplacementLanguage (string, optional, default "ENGLISH").
+operation ("create" | "update" | "delete", required) - "create" creates a new email template; "update" modifies it; "delete" permanently
+removes it.
+id (number, optional) - Email template id. Required for update and delete.
+name (string, optional) - Template name. Required for create.
+subject (string, optional) - Email subject line. Required for create.
+htmlMessage (string, optional) - HTML email body.
+textMessage (string, optional) - Plain-text fallback body. Defaults to empty string if omitted.
+type ("HtmlAndText" | "HtmlOnly" | "TextOnly", optional) - Template type. Default "HtmlAndText".
+isOneToOneEmail (boolean, optional) - Mark template as suitable for one-to-one sends.
+isAutoResponderEmail (boolean, optional) - Mark template as an auto-responder template.
+isDripEmail (boolean, optional) - Mark template as a drip/engagement studio template.
+isListEmail (boolean, optional) - Mark template as a list email template.
+campaignId (number, required) - Campaign id to associate with the template. Required.
+trackerDomainId (number, required) - Tracker domain id for tracking links. Required.
+folderId (number, optional) - Folder to organize the template in.
+senderOptions (value[], optional) - Default sender configuration. Must be an array.
+replyToOptions (value[], optional) - Default reply-to configuration. Must be an array.
 
 Result
-emailTemplate (object) - Created/updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -71,14 +59,11 @@ Errors
 Example request
 
 manage_email_template({
-  "operation": "create",
-  "name": "Welcome",
-  "subject": "Welcome to Magna",
-  "htmlMessage": "<html>...</html>",
-  "isAutoResponderEmail": true,
-  "campaignId": 1024,
-  "senderOptions": { "type": "GENERAL_USER", "address": "noreply@magnatech.com" }
+  "operation": "",
+  "campaignId": 1,
+  "trackerDomainId": 1
 })
 
 Example result
-{ "emailTemplate": { "id": 451, "name": "Welcome", "isAutoResponderEmail": true } }
+
+{ }

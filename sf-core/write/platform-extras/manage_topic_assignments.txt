@@ -9,25 +9,45 @@ Salesforce API
 REST API (Data), v66.0.
 
 Endpoint
-POST   /services/data/v66.0/sobjects/TopicAssignment
-DELETE /services/data/v66.0/sobjects/TopicAssignment/{id}
+POST /services/data/v66.0/sobjects/Topic
+POST /services/data/v66.0/sobjects/TopicAssignment
+DELETE /services/data/v66.0/sobjects/TopicAssignment/{assignmentId}
+DELETE /services/data/v66.0/sobjects/TopicAssignment/{Id}
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{ "TopicId": "0TOQg0000004ZyAA", "EntityId": "a01Qg0000020aBcDE" }
+JSON fields: Name.
+JSON fields: TopicId, EntityId, NetworkId.
 
 Input (parameters)
-operation (string, required) - "assign" | "unassign".
-recordId (string, required).
-topicNames (string[], optional) - For "assign", create-on-demand topics by name.
-topicIds (string[], optional).
-entityType (string, optional) - sObject API name (auto-derived from record Id key prefix).
+operation ("assign" | "unassign", required) - Whether to create or remove
+TopicAssignment rows.
+recordId (string, optional) - Record, feed item, or file ID to tag. Required unless
+unassigning by assignmentIds.
+topicIds (string[], optional) - Topic record IDs to assign or unassign.
+topicNames (string[], optional) - Topic names to resolve. For assign, missing topics are
+created by default.
+assignmentIds (string[], optional) - TopicAssignment IDs to delete directly. Only used
+with unassign.
+networkId (string, optional) - Optional Experience Cloud NetworkId to include when
+creating TopicAssignment rows.
+createMissingTopics (boolean, optional) - For assign with topicNames, create missing
+Topic records. Defaults to true.
+unassignAll (boolean, optional) - For unassign, delete all TopicAssignment rows for
+recordId when no topic filter should be applied. Defaults to false.
 
 Result
-results (array) - { topicId, topicName, status ("assigned"|"unassigned"|"already"|"failed"), error }.
+grouped raw Salesforce responses for topic query/create, assignment query, and
+assignment create/delete calls.
+topicQuery (value) - included in the JSON returned by the tool.
+topicCreates (value) - included in the JSON returned by the tool.
+assignmentQuery (value) - included in the JSON returned by the tool.
+assignmentCreates (value) - included in the JSON returned by the tool.
+assignmentDeletes (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Assign Topics" / "Create Topics".
@@ -41,7 +61,5 @@ Errors
 Example request
 
 manage_topic_assignments({
-  "operation": "assign",
-  "recordId": "a01Qg0000020aBcDE",
-  "topicNames": ["Q3-2026", "Internal-Project"]
+  "operation": "example"
 })

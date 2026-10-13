@@ -18,15 +18,10 @@ Body
 None.
 
 Input (parameters)
-segmentApiNameOrId (string, required).
-includeFilter (boolean, optional, default true) - Returns the
-  criteria graph as `filter`.
+segmentApiName (string, required) - API name of the segment to retrieve, for example `Running_Shoe_Promo_Audience`.
 
 Result
-segment (object): id, apiName, label, description, status,
-  publishStatus, dmoApiName, populationCount, schedule,
-  filter (object|null) - { rootGroup ("AND"|"OR"), conditions, nestedGroups, sourceDmos },
-  lastPublishedAt, lastPublishStatus, createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,19 +34,10 @@ Errors
 
 Example request
 
-get_segment({ "segmentApiNameOrId": "EMEAHighValue" })
+get_segment({
+  "segmentApiName": ""
+})
 
 Example result
-{
-  "segment": {
-    "id": "0YS580000000001", "apiName": "EMEAHighValue",
-    "publishStatus": "Published", "populationCount": 18420,
-    "filter": {
-      "rootGroup": "AND",
-      "conditions": [
-        { "field": "Region__c",       "op": "eq",  "value": "EMEA" },
-        { "field": "LifetimeValue__c","op": "gte", "value": 5000 }
-      ]
-    }
-  }
-}
+
+{ }

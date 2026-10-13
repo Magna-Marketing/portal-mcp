@@ -16,17 +16,40 @@ Authorization: Bearer <access_token>
 Content-Type: multipart/form-data
 
 Body
-JSON metadata: { ContentDocumentId, PathOnClient, Title, ReasonForChange (optional) } + binary VersionData.
+multipart/form-data with entity_content (JSON metadata) and VersionData (binary).
 
 Input (parameters)
-ContentDocumentId (string, required).
-PathOnClient (string, required) - Updated file name + extension.
-Title (string, optional, default = PathOnClient).
-ReasonForChange (string, optional).
-VersionData (string, required).
+ContentDocumentId (string, required) - Existing ContentDocument Id; Salesforce Id
+string; required; example \"069...\"; do not pass ContentVersionId.
+PathOnClient (string, required) - Client file path/name for new version; string with
+extension; required; example \"Proposal_v2.pdf\"; do not pass local file paths as data.
+VersionData (string, required) - New file contents; base64 string; required; example
+\"JVBERi0x...\"; do not pass raw bytes or data URLs.
+Title (string, optional) - Version title; string; defaults to PathOnClient; example
+\"Proposal v2\"; omit to keep title aligned to filename.
+ReasonForChange (string, optional) - Revision reason; string; optional; example
+\"Updated pricing\"; do not pass audit-only comments with secrets.
+Description (string, optional) - ContentVersion description; string; optional; example
+\"Second revision\"; omit when unchanged.
+contentType (string, optional) - Multipart MIME type; string; defaults to
+application/octet-stream; example \"application/pdf\"; omit when unknown.
+OwnerId (string, optional) - Owner User Id; Salesforce Id string; optional; example
+\"005...\"; do not pass usernames.
+SharingOption ("A" | "R", optional) - Sharing option; enum A allowed or R restricted;
+optional; example \"A\"; omit when not changing file sharing behavior.
+SharingPrivacy ("N" | "P", optional) - Sharing privacy; enum N or P; optional; example
+\"P\"; Salesforce enforces record/file visibility rules.
+TagCsv (string, optional) - Content tags; comma-separated string; optional; example
+\"contract,renewal\"; do not pass arrays.
+IsMajorVersion (boolean, optional) - Major version flag; boolean; optional; example
+true; omit for Salesforce default.
+RecordTypeId (string, optional) - ContentVersion record type Id; Salesforce Id string;
+optional; example \"012...\"; do not pass developer names.
 
 Result
-file (object) - { contentDocumentId, contentVersionId, versionNumber, title, contentSize }.
+raw ContentVersion create response plus raw lookup query response.
+createContentVersion (value) - included in the JSON returned by the tool.
+contentVersionLookup (value) - included in the JSON returned by the tool.
 
 Required permissions
 - File Collaborator access (share type "C") or owner.
@@ -40,8 +63,7 @@ Errors
 Example request
 
 update_file_version({
-  "ContentDocumentId": "069Qg0000004ZyAA",
-  "PathOnClient": "MTG_Project_Brief_v2.pdf",
-  "ReasonForChange": "Updated scope section",
-  "VersionData": "JVBERi0xLjQK..."
+  "ContentDocumentId": "example",
+  "PathOnClient": "example",
+  "VersionData": "example"
 })

@@ -22,10 +22,7 @@ id (number, required).
 fields (string[], optional) - Default expands `defaultCampaign.*`.
 
 Result
-trackerDomain (object): id, domain, isPrimary, defaultCampaignId,
-  validationStatus, sslStatus, sslStatusDetails, trackingCode,
-  vanityUrlStatus, isDeleted, createdAt, updatedAt.
-defaultCampaign (object|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -41,9 +38,5 @@ Example request
 get_tracker_domain({ "id": 7 })
 
 Example result
-{
-  "trackerDomain": {
-    "id": 7, "domain": "go.magnatech.com",
-    "isPrimary": true, "sslStatus": "active"
-  }
-}
+
+{ }

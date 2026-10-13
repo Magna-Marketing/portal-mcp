@@ -7,36 +7,98 @@ to a target group/role with a specified access level (Read | Edit |
 TransferAccess | All for Account-related rules).
 
 Salesforce API
-Metadata API (`SharingRules`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
 POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (readMetadata SharingRules)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: fullName, label, description, accessLevel, sharedTo, sharedFrom, criteriaItems, booleanFilter, includeRecordsOwnedByAll, includeHVUOwnedRecords, accountSettings.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-sObject (string, required).
-ruleType (string, required) - "criteria" | "owner" | "territory".
-fullName (string, required) - Rule DeveloperName.
-label (string, required for create).
-description (string, optional).
-accessLevel (string, required for create/update) - "Read" | "Edit" | "All" | "TransferAccess" (Lead/Case only).
-sharedTo (object, required) - { type, name } (see list_sharing_rules for shape).
-sharedFrom (object, required for owner-based rules).
-criteria (array, required for criteria-based) - [{ field, operation ("equals"|"notEqual"|"lessThan"|"greaterThan"|"contains"|"notContains"|"startsWith"|"includes"|"excludes"), value }].
-booleanFilter (string, optional).
-accountSettings (object, optional, only Account rules) - { caseAccessLevel, contactAccessLevel, opportunityAccessLevel }.
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Represents the rule
+operation; enum create, update, upsert, or delete; no default; example 'upsert'; do not
+pass deploy.
+sObject (string, required) - Represents the sObject API name that owns the SharingRules
+container; standard or custom object name; no default; example 'Account' or
+'Project__c'; do not pass a record Id.
+ruleType ("criteria" | "owner" | "territory" | "guest", required) - Represents the child
+sharing rule collection; enum criteria, owner, territory, or guest; no default; example
+'criteria'; do not pass removed pre-v33 metadata type names.
+fullName (string, required) - Represents the sharing rule DeveloperName inside the
+object container; string without object prefix; no default; example
+'Share_With_Project_Managers'; do not pass a label.
+label (string, optional) - Represents the sharing rule label; string; required by
+Salesforce for create and usually for upsert; example 'Share with Project Managers'; do
+not pass the API name here.
+description (string, optional) - Represents the admin-facing rule description; string;
+omitted by default; example 'Shares western region records'; do not pass HTML-only
+content.
+accessLevel ("Read" | "Edit" | "All" | "TransferAccess", optional) - Represents the
+access level granted by the rule; enum validated by Salesforce per object and rule type;
+required for non-delete writes; example 'Read'; do not pass Edit for guest rules.
+sharedTo (object, optional) - Represents who receives access; object with Metadata API
+shared-to type and name; required for non-delete writes; example
+{\"type\":\"group\",\"name\":\"Project_Managers\"}; do not pass Salesforce record Ids.
+  type ("allCustomerPortalUsers" | "allInternalUsers" | "allPartnerUsers" |
+  "channelProgramGroup" | "channelProgramGroups" | "group" | "groups" | "manager" |
+  "managerAndSubordinatesInternal" | "portalRole" | "portalRoleAndSubordinates" |
+  "queue" | "role" | "roleAndSubordinates" | "roleAndSubordinatesInternal" | "roles" |
+  "territory" | "territoryAndSubordinates", required) - Represents the Metadata API
+  shared entity child element; enum value; no default; example 'group'; do not pass
+  display-only labels.
+  name (string, required) - Represents the shared entity metadata reference; developer
+  name or supported metadata value; no default; example 'Project_Managers'; do not pass
+  Salesforce record Ids.
+sharedFrom (object, optional) - Represents owner or territory source for owner and
+territory rules; object with Metadata API shared-from type and name; required for owner
+and territory writes; example {\"type\":\"role\",\"name\":\"Sales\"}; do not pass for
+criteria rules.
+  type ("allCustomerPortalUsers" | "allInternalUsers" | "allPartnerUsers" |
+  "channelProgramGroup" | "channelProgramGroups" | "group" | "groups" | "manager" |
+  "managerAndSubordinatesInternal" | "portalRole" | "portalRoleAndSubordinates" |
+  "queue" | "role" | "roleAndSubordinates" | "roleAndSubordinatesInternal" | "roles" |
+  "territory" | "territoryAndSubordinates", required) - Represents the Metadata API
+  shared entity child element; enum value; no default; example 'group'; do not pass
+  display-only labels.
+  name (string, required) - Represents the shared entity metadata reference; developer
+  name or supported metadata value; no default; example 'Project_Managers'; do not pass
+  Salesforce record Ids.
+criteria (unknown[], optional) - Represents criteria items for criteria or guest rules;
+array of filter entries; required for criteria and guest writes; example
+[{\"field\":\"Region__c\",\"operation\":\"equals\",\"value\":\"West\"}]; do not pass for
+pure owner rules.
+booleanFilter (string, optional) - Represents advanced criteria logic; string using
+1-based item indexes; omitted by default; example '1 AND (2 OR 3)'; do not include
+WHERE.
+includeRecordsOwnedByAll (boolean, optional) - Represents whether criteria rules include
+records owned by users without roles; boolean; omitted by default; example true; do not
+pass for unrelated rule types unless Salesforce supports it.
+includeHVUOwnedRecords (boolean, optional) - Represents whether guest rules include
+high-volume-user owned records; boolean; omitted by default; example true; do not pass
+for owner sharing rules.
+accountSettings (object, optional) - Represents Account-specific child access settings;
+object with case, contact, and opportunity access levels; omitted by default; example
+{\"caseAccessLevel\":\"Read\"}; do not pass for non-Account objects.
+  caseAccessLevel ("None" | "Read" | "Edit", optional).
+  contactAccessLevel ("None" | "Read" | "Edit", optional).
+  opportunityAccessLevel ("None" | "Read" | "Edit", optional).
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Represents whether to build metadata without calling
+Metadata API; boolean; defaults to false; example true; do not use when the rule must be
+saved.
 
 Result
-deploy (object).
-rule (object) - Updated rule shape (same as `list_sharing_rules` row).
+checkOnly (value) - included in the JSON returned by the tool.
+readResponse (value) - included in the JSON returned by the tool.
+existingRule (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+writeResponse (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Sharing" + "Customize Application".
@@ -51,12 +113,9 @@ Errors
 Example request
 
 manage_sharing_rule({
-  "operation": "create",
-  "sObject": "Project__c",
-  "ruleType": "criteria",
-  "fullName": "MTG_Active_Projects_To_PMs",
-  "label": "Active Projects to PMs",
-  "accessLevel": "Edit",
-  "criteria": [{ "field": "Status__c", "operation": "equals", "value": "Active" }],
-  "sharedTo": { "type": "group", "name": "MTG_Project_Managers" }
+  "operation": "example",
+  "sObject": "example",
+  "ruleType": "example",
+  "fullName": "example",
+  "metadataOverride": "example"
 })

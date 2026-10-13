@@ -18,11 +18,16 @@ When captureDebugLog=true the tool:
 
 Salesforce API
 Tooling API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/executeAnonymous/?anonymousBody={url-encoded-source}
-
-(jsforce wraps this as conn.tooling.executeAnonymous(apexCode))
+POST /services/data/v66.0/tooling/sobjects/DebugLevel
+POST /services/data/v66.0/tooling/sobjects/TraceFlag
+DELETE /services/data/v66.0/tooling/sobjects/TraceFlag/{traceFlagId}
+DELETE /services/data/v66.0/tooling/sobjects/DebugLevel/{debugLevelId}
+GET /services/data/v66.0/tooling/query/
+GET /services/data/v66.0/chatter/users/me
+GET /services/data/v66.0/tooling/sobjects/ApexLog/{Id}/Body
 
 Headers
 Authorization: Bearer <access_token>
@@ -43,19 +48,11 @@ debugLevels (object, optional) - Override per-category log levels when
   Defaults: ApexCode=DEBUG, System=DEBUG, Callout/Database/Validation=INFO, rest=NONE.
 
 Result
-{
-  "result": {
-    "compiled": true,
-    "compileProblem": null,
-    "line": null,
-    "column": null,
-    "success": true,
-    "exceptionMessage": null,
-    "exceptionStackTrace": null
-  },
-  "debugLog": "<full log text or null>",
-  "debugLogId": "07L..."
-}
+raw Salesforce executeAnonymous result with optional raw ApexLog body and log ID when
+debug capture is enabled.
+executeAnonymous (value) - included in the JSON returned by the tool.
+debugLog (value) - included in the JSON returned by the tool.
+debugLogId (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Author Apex".
@@ -82,7 +79,7 @@ execute_anonymous({
 Example result
 
 {
-  "result": { "compiled": true, "success": true, "exceptionMessage": null },
-  "debugLog": "10:14:23.0 ... USER_DEBUG|[1]|DEBUG|inserted: 0014Q00000abcDE\n",
-  "debugLogId": "07L4Q00000XyZab"
+  "executeAnonymous": null,
+  "debugLog": null,
+  "debugLogId": null
 }

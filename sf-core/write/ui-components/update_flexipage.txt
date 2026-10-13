@@ -17,19 +17,34 @@ Reads via metadata.read(), updates via metadata.update() (SOAP).
 Correction vs. original doc: Uses SOAP Metadata API (jsforce), not REST deployRequest.
 
 Input (parameters)
-fullName (string, required) - DeveloperName of the FlexiPage.
-label (string, optional) - New display label.
-description (string, optional) - New description.
-template (string, optional) - New template name.
-regions (array, optional) - Replacement region list:
-  name (string), type (string), appendable (boolean).
-  Overwrites all existing regions. Omit to keep current regions.
+fullName (string, required) - Represents the FlexiPage metadata fullName; string
+existing in Metadata API; no default; example: Project__c_Record_Page; do not pass a
+label, record Id, or assignment name.
+label (string, optional) - Represents the replacement page masterLabel; string; default
+is no change; example: Project Record Page v2; do not pass the API name when a
+user-facing label is intended.
+description (string, optional) - Represents the replacement page description; string;
+default is no change; example: Updated for sales process; do not pass HTML or long
+documentation.
+template (string, optional) - Represents the replacement FlexiPage template name;
+string; default is no change; example: flexipage:recordHomeWithHeader; do not pass
+unsupported template names because regions may become invalid.
+regions (object[], optional) - Represents a complete replacement region list; array of
+region objects; default is no change; example:
+[{\"name\":\"main\",\"type\":\"Region\"}]; do not pass unless you intend to remove
+existing component instances.
+  name (string, required) - Represents the FlexiPageRegion name; string unique within
+  the page and valid for the template; no default inside an entry; example: main; do not
+  pass duplicate names.
+  type ("Region" | "Facet" | "Background", optional) - Represents the FlexiPageRegion
+  type; enum Region, Facet, or Background; defaults to Region; example: Region; do not
+  pass arbitrary strings.
+  appendable (boolean, optional) - Represents whether components can be appended to the
+  region; boolean converted to Appendable or NotAppendable; defaults to true; example:
+  false; do not pass string flag values.
 
-Result (raw Metadata API update response)
-fullName (string).
-success (boolean).
-id (string).
-errors (array).
+Result
+raw Metadata API SaveResult.
 
 Required permissions
 - "Customize Application".
@@ -41,10 +56,8 @@ Errors
 - NOT_FOUND on fullName.
 - INVALID_FIELD on bad template or region type.
 
-Example request (rename + describe)
+Example request
 
 update_flexipage({
-  "fullName": "Project__c_Record_Page",
-  "label": "Project Record Page (v2)",
-  "description": "Adds the new Status panel"
+  "fullName": "Project__c_Record_Page"
 })

@@ -8,7 +8,7 @@ Salesforce API
 REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, TalkingAbout, NetworkId, CreatedDate, SystemModstamp, ManagedTopicType FROM Topic
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Description, TalkingAbout, NetworkId, CreatedDate, SystemModstamp FROM Topic
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,14 +18,33 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-networkId (string, optional) - Restrict to one Experience site.
-includeAssignmentCounts (boolean, optional, default true).
-limit (number, optional, default 200).
+pattern (string, optional) - Topic name or description pattern; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: Product*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+networkId (string, optional) - Topic NetworkId exact match; Salesforce Network Id
+string; no default; example: 0DB5g0000001234; do not pass network names, URLs, or
+multiple Ids.
+includeAssignmentCounts (boolean, optional) - Whether to query TopicAssignment aggregate
+counts for returned topics; boolean; default true; example: false; do not pass true if
+only Topic records are needed.
+whereClause (string, optional) - Additional Topic SOQL WHERE condition; string with or
+without WHERE; no default; example: TalkingAbout > 0; do not pass SELECT, FROM, ORDER
+BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Topic SOQL ORDER BY clause; string with or without ORDER
+BY; default Name ASC; example: TalkingAbout DESC; do not pass WHERE, LIMIT, SELECT, or
+FROM.
+limit (integer, optional) - Maximum rows per query to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-topics (array) - { id, name, description, talkingAbout, networkId, assignmentCount (when includeAssignmentCounts=true) }.
+raw Salesforce QueryResult for Topic and, when requested, raw aggregate QueryResult for
+TopicAssignment counts.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+topics (value) - included in the JSON returned by the tool.
+topicAssignmentCounts (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "API Enabled".
@@ -38,4 +57,8 @@ Errors
 
 Example request
 
-list_topics({})
+list_topics({
+  "pattern": "Product*",
+  "networkId": "0DB5g0000001234",
+  "includeAssignmentCounts": false
+})

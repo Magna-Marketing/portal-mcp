@@ -8,7 +8,7 @@ within 10 days using `deploy_metadata`'s `quickDeploy` option (when
 supported).
 
 Salesforce API
-Metadata API, v66.0. Same as `deploy_metadata` with `checkOnly=true`.
+Metadata REST API, v66.0.
 
 Endpoint
 POST /services/data/v66.0/metadata/deployRequest
@@ -21,17 +21,50 @@ Body
 Same as deploy_metadata but with `checkOnly=true`.
 
 Input (parameters)
-zipBase64 (string, required).
-testLevel (string, optional, default "RunLocalTests").
-runTests (string[], optional).
-allowMissingFiles, autoUpdatePackage, ignoreWarnings (boolean, optional).
-waitForCompletion (boolean, optional, default true).
+zipBase64 (string, required) - Base64 package zip containing package.xml and metadata
+files; string; required; example \"UEsDB...\"; do not pass raw binary, a path, or
+unpacked files.
+rollbackOnError (boolean, optional) - Whether validation rolls back on any component
+failure; boolean; defaults to true; example true; do not set false for production-like
+validation.
+ignoreWarnings (boolean, optional) - Whether warnings can still allow validation
+success; boolean; defaults to false; example false; warnings are not component errors.
+allowMissingFiles (boolean, optional) - Whether package.xml entries missing from the zip
+are tolerated; boolean; defaults to false; example false; avoid for release validation.
+autoUpdatePackage (boolean, optional) - Whether Salesforce can update package.xml from
+zip contents; boolean; defaults to false; example false; usually leave omitted.
+performRetrieve (boolean, optional) - Whether Salesforce retrieves deployed metadata
+after validation; boolean; defaults to false; example false; validation does not save
+metadata.
+purgeOnDelete (boolean, optional) - Whether destructive changes would bypass recycle
+behavior if later deployed; boolean; defaults to false; example false; do not enable
+casually.
+runTests (string[], optional) - Apex test class names; array of class names; required
+when testLevel is RunSpecifiedTests; example [\"InvoiceServiceTest\"]; do not pass
+methods or Ids.
+testLevel (string, optional) - Validation test level; enum string; Salesforce chooses
+defaults when omitted; example \"RunLocalTests\"; RunSpecifiedTests requires runTests.
+singlePackage (boolean, optional) - Whether the zip contains one package root; boolean;
+defaults to true; example true; use false only for multi-package zips.
+filename (string, optional) - Multipart zip file name; string; defaults to deploy.zip;
+example \"validation.zip\"; do not include a local file path.
+waitForCompletion (boolean, optional) - Whether to poll until validation completes;
+boolean; defaults to true; example true; pass false to return the async id quickly.
+includeDetails (boolean, optional) - Whether polled status includes component/test
+details; boolean; defaults to true; example false; set false to keep payload smaller.
+pollIntervalMs (number, optional) - Polling interval in milliseconds; positive number;
+defaults to 5000; example 10000; avoid very low values.
+maxWaitMs (number, optional) - Maximum polling duration in milliseconds; positive
+number; defaults to 1800000; example 900000; pass waitForCompletion false for long
+validations.
 
 Result
-Same shape as `deploy_metadata` result; `checkOnly=true`. Successful
-validations are eligible for quickDeploy within 10 days.
-quickDeployEligible (boolean) - true when validation succeeded and tests passed.
-validationId (string) - Use as quickDeploy reference.
+raw validation response, or { validation, status, quickDeployEligible, validationId }
+when polling is enabled.
+validation (value) - included in the JSON returned by the tool.
+status (value) - included in the JSON returned by the tool.
+quickDeployEligible (value) - included in the JSON returned by the tool.
+validationId (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Modify Metadata Through Metadata API Functions".
@@ -45,6 +78,5 @@ Errors
 Example request
 
 validate_deploy({
-  "zipBase64": "UEsDB...",
-  "testLevel": "RunLocalTests"
+  "zipBase64": "example"
 })

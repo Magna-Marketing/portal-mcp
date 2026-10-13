@@ -25,11 +25,8 @@ includeFields (boolean, optional, default false) - Returns
   `formHandlerFields[]`.
 
 Result
-formHandler (object): id, name, campaignId, folderId, trackerDomainId,
-  embedUrl, errorLocation, successLocation, isDataForwarded,
-  isCookielessTracking, isAlwaysEmail, isKioskMode, salesforceId,
-  isDeleted, createdAt, updatedAt.
-formHandlerFields (array, when includeFields=true).
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: formHandlerFields.
 
 Required scopes
 - `pardot_api`.
@@ -45,9 +42,5 @@ Example request
 get_form_handler({ "id": 8101, "includeFields": true })
 
 Example result
-{
-  "formHandler": { "id": 8101, "name": "Marketo replacement" },
-  "formHandlerFields": [
-    { "id": 1101, "name": "email", "prospectApiFieldId": "email", "isRequired": true }
-  ]
-}
+
+{ }

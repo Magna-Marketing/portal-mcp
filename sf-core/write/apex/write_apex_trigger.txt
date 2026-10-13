@@ -39,12 +39,10 @@ status (string, optional, default "Active") - "Active" | "Inactive".
 checkOnly (boolean, optional, default false).
 
 Result
-Same shape as write_apex:
-{
-  "deploy": { "containerId", "state", "done", "errorMessage", "componentSuccesses", "componentFailures" },
-  "apexTrigger": { "Id", "Name", "ApiVersion", "Status", "IsValid", "TableEnumOrId", "LastModifiedDate" }
-}
-apexTrigger is null on checkOnly or failure.
+raw ContainerAsyncRequest result plus the raw ApexTrigger query record when a saved
+trigger is queried.
+containerAsyncRequest (value) - included in the JSON returned by the tool.
+apexTrigger (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Author Apex".

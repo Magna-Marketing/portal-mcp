@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/activations
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/activations
+Optional query: batchSize, offset, orderBy, filters
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,21 +20,16 @@ Body
 None.
 
 Input (parameters)
-dataSpace (string, optional).
-segmentId (string, optional).
-targetType (string, optional) - "MarketingCloudEngagement" |
-  "MarketingCloudNext" | "S3" | "Snowflake" | "AppExchange" |
-  "AdNetwork".
-status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
-nameContains (string, optional).
-limit (number, optional, default 100).
+batchSize (number, optional) - Number of results to return, from 1 through 200. Salesforce defaults to 20 when omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort by createdDate, for example 'createdDate desc'. If omitted, Salesforce returns
+items by ID in ascending order.
+filters (string, optional) - Salesforce filter expression. Supported filter names: name, marketSegmentId,
+activationTargetId, activationRefreshType, activationStatus. Example: 'activationStatus
+in active AND activationRefreshType in incremental'.
 
 Result
-activations (array) - Each: { id, apiName, label, segmentId,
-  targetType, targetConfig (object), status, schedule, contactPoints
-  (array), lastRunStatus, lastRunDate, populationCount, createdDate,
-  lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -46,13 +42,8 @@ Errors
 
 Example request
 
-list_activations({ "targetType": "MarketingCloudEngagement" })
+list_activations({})
 
 Example result
-{
-  "activations": [
-    { "id": "0YA580000000001", "apiName": "EMEA_to_MC",
-      "segmentId": "0YS580000000001", "targetType": "MarketingCloudEngagement",
-      "status": "Active" }
-  ]
-}
+
+{ }

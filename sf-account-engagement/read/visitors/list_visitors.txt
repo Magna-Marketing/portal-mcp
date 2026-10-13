@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/visitors?fields={fields}
+GET https://{pi-domain}/api/v5/objects/visitors
+Optional query: fields, filter[createdAt], filter[createdAt][lte], filter[hostName], filter[ipAddress], filter[prospectId], filter[updatedAt], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,26 +22,22 @@ Body
 None.
 
 Input (parameters)
-prospectId (number, optional) - Filter to visitors stapled to a
-  given prospect.
-companyName (string, optional) - Reverse-IP firmographic match.
-isIdentified (boolean, optional).
-createdAfter (string, optional) - ISO-8601.
-fields (string[], optional, default: id,prospectId,piVID,
-  companyName,companyDomain,city,state,country,latitude,longitude,
-  campaignParameter,mediumParameter,sourceParameter,contentParameter,
-  termParameter,visitCount,pageViewCount,isIdentified,createdAt,
-  updatedAt).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+prospectId (number, optional) - Filter to visitors matched to a specific prospect.
+isIdentified (boolean, optional) - true to return only visitors matched to a prospect, false to return only anonymous
+visitors.
+hostNameContains (string, optional) - Case-insensitive like match on hostName.
+ipAddress (string, optional) - Exact IP address filter.
+createdAfter (string, optional) - ISO-8601 datetime. Return visitors created after this time.
+createdBefore (string, optional) - ISO-8601 datetime. Return visitors created before this time.
+updatedAfter (string, optional) - ISO-8601 datetime. Return visitors updated after this time.
+fields (string[], optional) - Field projection. Defaults to id, visitorId, prospectId, firstName, lastName, email,
+company, city, state, country, hostName, ipAddress, pageViewCount, source, medium,
+campaign, referrerType, createdAt, updatedAt, browser, platform.
+limit (number, optional) - Page size. Default 50, max 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-visitors (array) - Each: { id, prospectId, piVID, companyName,
-  companyDomain, city, state, country, latitude, longitude,
-  campaignParameter, mediumParameter, sourceParameter,
-  contentParameter, termParameter, visitCount, pageViewCount,
-  isIdentified, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -53,12 +50,8 @@ Errors
 
 Example request
 
-list_visitors({ "isIdentified": false, "limit": 25 })
+list_visitors({})
 
 Example result
-{
-  "visitors": [
-    { "id": 5512001, "piVID": "abc-12345", "companyName": "Example LLC",
-      "visitCount": 4, "pageViewCount": 18, "isIdentified": false }
-  ]
-}
+
+{ }

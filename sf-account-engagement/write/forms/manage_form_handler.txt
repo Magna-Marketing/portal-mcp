@@ -52,8 +52,8 @@ isKioskMode (boolean, optional, default false) - Don't cookie the
   visitor (shared device).
 
 Result
-formHandler (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -75,7 +75,5 @@ manage_form_handler({
 })
 
 Example result
-{
-  "formHandler": { "id": 8101, "name": "Marketo replacement",
-    "embedUrl": "https://go.magnatech.com/l/.../forms/8101" }
-}
+
+{ }

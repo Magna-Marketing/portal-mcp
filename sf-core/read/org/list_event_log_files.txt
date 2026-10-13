@@ -21,15 +21,33 @@ Body
 None.
 
 Input (parameters)
-eventType (string|string[], optional) - "Login" | "Logout" | "API" | "ApexExecution" | "ApexCallout" | "ApexTrigger" | "ApexUnexpectedException" | "ReportExport" | "Report" | "Search" | "URI" | "VisualforceRequest" | "RestApi" | "BulkApi" | "ContentDocumentLink" | "ContentDistribution" | "ContentTransfer" | "DashboardRun" | "ReportRun" | "AsyncReportRun" | "LightningPageView" | "LightningPerformance" | "PlatformEncryptionEvent" | "Sites" | etc.
-dateFrom (string, optional) - YYYY-MM-DD.
-dateTo (string, optional) - YYYY-MM-DD.
-interval (string, optional, default "Hourly") - "Hourly" | "Daily".
-limit (number, optional, default 200).
+eventType (string, optional) - EventLogFile EventType exact match; string picklist value
+from Event Monitoring; no default; example: API; do not pass labels, comma-separated
+values, regex, or SOQL operators.
+eventTypePattern (string, optional) - EventType filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: Login*; do not pass raw LIKE syntax, regex,
+or multiple patterns.
+logDateFrom (string, optional) - Minimum LogDate filter; ISO-8601 dateTime or Salesforce
+date literal string; no default; example: 2026-05-01T00:00:00.000Z; do not pass
+local-only dates, unquoted SOQL fragments, or end dates earlier than this value.
+logDateTo (string, optional) - Maximum LogDate filter; ISO-8601 dateTime or Salesforce
+date literal string; no default; example: 2026-05-16T00:00:00.000Z; do not pass
+local-only dates, unquoted SOQL fragments, or start dates later than this value.
+whereClause (string, optional) - Additional SOQL WHERE condition for EventLogFile;
+string without WHERE; no default; example: LogFileLength > 0; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for EventLogFile; string without ORDER BY;
+default LogDate DESC; example: EventType ASC, LogDate DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum EventLogFile rows to query; positive integer clamped
+to 2000; default 200; example: 200; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-eventLogFiles (array) - { id, eventType, logDate, logFileLength, apiVersion, sequence, interval, fieldNames (string[]), fieldTypes (string[]) }.
+Returns the raw Salesforce QueryResult for EventLogFile records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Event Log Files" + Event Monitoring license.
@@ -43,4 +61,8 @@ Errors
 
 Example request
 
-list_event_log_files({ "eventType": "Login", "dateFrom": "2026-04-22", "dateTo": "2026-04-29" })
+list_event_log_files({
+  "eventType": "API",
+  "eventTypePattern": "Login*",
+  "logDateFrom": "2026-05-01T00:00:00.000Z"
+})

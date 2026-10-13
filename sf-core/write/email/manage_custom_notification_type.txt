@@ -7,37 +7,10 @@ publish_custom_notification to route notifications to desktop (bell icon) and/or
 mobile push.
 
 Salesforce API
-Metadata API (CustomNotificationType), v66.0. Managed via jsforce
-conn.metadata CRUD methods.
+Metadata API (SOAP), v66.0.
 
-Endpoints (internal, via jsforce)
-conn.metadata.create("CustomNotificationType", metadata)
-conn.metadata.read("CustomNotificationType", fullName)
-conn.metadata.update("CustomNotificationType", metadata)
-conn.metadata.delete("CustomNotificationType", fullName)
-
-Corrections vs. original documentation
-- The original doc listed "NotificationChannel": "Desktop;Mobile" and used the
-  REST sObjects endpoint POST /sobjects/CustomNotificationType. Both are incorrect:
-  * The Metadata API (and Tooling API) expose separate boolean fields:
-    "desktop" and "mobile" — NOT a single "NotificationChannel" string.
-  * CustomNotificationType is not creatable/updatable via the standard sObjects
-    REST API; it must go through the Metadata API.
-- "iconName" is NOT a valid Metadata API field for CustomNotificationType. Removed.
-- "defaultTitle" and "defaultBody" are NOT valid Metadata API fields. Removed.
-- "channels" string[] parameter replaced by "desktop" (boolean) and "mobile"
-  (boolean) to match the actual Metadata API schema.
-- The Metadata API field "customNotifTypeName" is the notification type name
-  (max 80 chars), separate from "masterLabel" (display label).
-
-Metadata type fields
-fullName            string   Required. Maps to developerName parameter.
-masterLabel         string   Required. Display label.
-customNotifTypeName string   Required. Notification type name (max 80 chars).
-  Defaults to masterLabel when omitted.
-description         string   Optional. Max 255 chars.
-desktop             boolean  Required. Enable desktop (bell icon) channel.
-mobile              boolean  Required. Enable mobile push channel.
+Endpoint
+POST /services/Soap/m/66.0  (deleteMetadata CustomNotificationType)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".

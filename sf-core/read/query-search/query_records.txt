@@ -27,17 +27,20 @@ Body
 None (GET request).
 
 Input (parameters)
-soql (string, required) - The full SELECT statement, no surrounding quotes.
-  Example: SELECT Id, Name, StageName FROM Opportunity WHERE IsClosed = false
-  ORDER BY CloseDate DESC LIMIT 50.
-includeDeleted (boolean, optional, default false) - When true, hits
-  /queryAll and includes records in the Recycle Bin (IsDeleted = true).
-batchSize (number, optional, 200..2000) - Sets Sforce-Query-Options for
-  large result sets. Server-side pagination still applies; the tool
-  follows nextRecordsUrl until done.
-allRows (boolean, optional, default false) - When true, the tool follows
-  nextRecordsUrl pagination and returns all rows; when false, returns
-  only the first page (caller can repaginate explicitly).
+soql (string, required) - The full SOQL SELECT statement to execute; string beginning
+with SELECT; no default; example: "SELECT Id, Name FROM Account WHERE Name LIKE
+\'Acme%\' ORDER BY Name LIMIT 50"; do not pass DML, SOSL, Apex, multiple statements,.
+includeDeleted (boolean, optional) - Whether to use queryAll so deleted and archived
+rows can be returned when the SOQL matches them; boolean; default false; example: true;
+do not pass true unless you need deleted or archived records.
+batchSize (integer, optional) - The Sforce-Query-Options batch size hint for returned
+records; integer from 200 to 2000; no default header is sent; example: 500; do not pass
+0, decimals, values outside the range, or use it as a LIMIT replacement.
+useToolingApi (boolean, optional) - Whether to route the query through the Tooling API
+endpoint instead of the standard REST query endpoint; boolean; default false; example:
+true; use when querying Tooling API objects such as ValidationRule, ApexClass,
+ApexTrigger, WorkflowRule, MetadataComponentDependency, or any object that returns 'not
+supported' on the standard endpoint; do not pass true for standard CRM objects.
 
 Result
 totalSize (number) - Total number of rows matched by the query.
@@ -72,7 +75,9 @@ Errors
 
 Example request
 
-GET /services/data/v66.0/query/?q=SELECT+Id,Name,StageName,Account.Name,Owner.Email+FROM+Opportunity+WHERE+IsClosed=false+AND+CloseDate=THIS_QUARTER+ORDER+BY+Amount+DESC+LIMIT+10
+query_records({
+  "soql": "SELECT Id, Name FROM Account WHERE Name LIKE \\'Acme%\\' ORDER BY Name LIMIT 50"
+})
 
 Example result
 
@@ -99,9 +104,3 @@ Example result
     }
   ]
 }
-
-Example with subquery (parent-to-child)
-
-soql: SELECT Id, Name, (SELECT Id, Email FROM Contacts WHERE IsDeleted = false) FROM Account WHERE Id = '0011U00001abcDEFAB'
-
-records[0].Contacts.records[].Id / Email is the child collection.

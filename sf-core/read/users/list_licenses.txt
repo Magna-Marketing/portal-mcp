@@ -4,13 +4,10 @@ Description
 List the org's user licenses, permission set licenses, and (optionally) feature licenses. Returns total / used / available counts and the assignments for each. Use to confirm capacity before bulk user creation, permission set rollout, or feature enablement.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `UserLicense`, `PermissionSetLicense`, `PermissionSetLicenseAssign`, `UserPackageLicense` (managed package), `FeatureLicense`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, MasterLabel, Status, TotalLicenses, UsedLicenses, MonthlyLoginsEntitlement, MonthlyLoginsUsed FROM UserLicense
-GET /services/data/v66.0/query/?q=SELECT Id, MasterLabel, DeveloperName, TotalLicenses, UsedLicenses, ExpirationDate, Status, MaximumPermissionsActivities, IsAvailableForIntegrations FROM PermissionSetLicense
-GET /services/data/v66.0/query/?q=SELECT PermissionSetLicenseId, AssigneeId, Assignee.Username FROM PermissionSetLicenseAssign WHERE PermissionSetLicenseId IN (...)
-GET /services/data/v66.0/query/?q=SELECT Id, FeatureType, Name, TotalCount, UsedCount FROM FeatureLicense
+GET /services/data/v66.0/query/?q=SELECT Id, Name, MasterLabel, LicenseDefinitionKey, Status, UsedLicenses, TotalLicenses, UsedLicensesLastUpdated FROM UserLicense
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,17 +17,30 @@ Body
 None.
 
 Input (parameters)
-type (string, optional, default "all") - "user" | "permset" | "package" | "feature" | "all".
-includeAssignments (boolean, optional, default false) - For permset licenses, include the assignee list (heavier).
-nearExhaustionThreshold (number, optional, default 0.9) - 0..1; flag entries where usedLicenses / totalLicenses ≥ threshold.
+pattern (string, optional) - License text pattern matched against Name, MasterLabel, or
+LicenseDefinitionKey; string using * and ? wildcards converted to SOQL LIKE; no default;
+example: Salesforce*; do not pass regex, raw LIKE syntax, or profile names.
+status ("Active" | "Disabled", optional) - UserLicense status filter; enum Active or
+Disabled; no default; example: Active; do not pass lowercase values, labels, or multiple
+statuses.
+licenseDefinitionKey (string, optional) - Exact LicenseDefinitionKey filter; string key
+that identifies a user license; no default; example: SFDC; do not pass the
+human-readable license label.
+whereClause (string, optional) - Additional SOQL WHERE condition for UserLicense; string
+with or without WHERE; no default; example: TotalLicenses > 0; do not pass SELECT, FROM,
+ORDER BY, LIMIT, UsedLicenses filters in API v64.0 or later, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for UserLicense; string with or
+without ORDER BY; default Name ASC; example: TotalLicenses DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum UserLicense rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-generatedAt (string).
-userLicenses (array) - { id, name, masterLabel, status, totalLicenses, usedLicenses, availableLicenses, monthlyLoginsEntitlement, monthlyLoginsUsed }.
-permissionSetLicenses (array) - { id, masterLabel, developerName, totalLicenses, usedLicenses, availableLicenses, expirationDate, status, assignments (optional) }.
-packageLicenses (array, optional).
-featureLicenses (array, optional) - { name, type, totalCount, usedCount, availableCount }.
-warnings (array) - Entries near or at exhaustion.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Internal Users" / "View Setup and Configuration".
@@ -43,4 +53,8 @@ Errors
 
 Example request
 
-list_licenses({ "type": "all", "includeAssignments": false })
+list_licenses({
+  "pattern": "Salesforce*",
+  "status": "Active",
+  "licenseDefinitionKey": "SFDC"
+})

@@ -1,4 +1,4 @@
-Tool: respond_collaboration_invitation
+Tool: respond_dcr_collaboration_invitation
 
 Description
 Accept or reject an inbound Data Clean Room collaboration invitation.
@@ -7,8 +7,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-PUT {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/actions/accept-invitation
-PUT {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/collaborations/:collaborationIdOrApiName/actions/reject-invitation
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/collaborations/{collaborationIdOrApiName}/actions/accept
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/collaborations/{collaborationIdOrApiName}/actions/reject
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -32,8 +32,7 @@ approvedSpecifications (string[], optional, accept-only).
 reason (string, optional, reject-only).
 
 Result
-collaboration (object) - Updated row.
-status (string) - "Accepted" | "Declined".
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -53,7 +52,5 @@ respond_collaboration_invitation({
 })
 
 Example result
-{
-  "collaboration": { "apiName": "PartnerY_Inbound", "status": "Accepted" },
-  "status": "Accepted"
-}
+
+{ }

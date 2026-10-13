@@ -20,8 +20,7 @@ Body
 None.
 
 Input (parameters)
-type (string, optional) - "standard" | "custom" | "all" (default "all").
-includeDeprecated (boolean, optional, default false).
+None.
 
 Result
 reportTypes (array) - Each:
@@ -44,7 +43,7 @@ Errors
 
 Example request
 
-list_report_types({ "type": "custom" })
+list_report_types({})
 
 Example result
 

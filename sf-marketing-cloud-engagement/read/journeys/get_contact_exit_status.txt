@@ -15,13 +15,19 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{ "OperationId": "abc-456-def" }
+POST: ContactKey, DefinitionKey
 
 Input (parameters)
-operationId (string, required).
+contact_key (value, required) - ContactKey from the remove-contact request. Salesforce accepts a single contact key or
+an array of up to 50 contacts.
+definition_key (string, required) - DefinitionKey / journey external key. This is the same for all journey versions.
+versions (number[], optional) - Optional journey versions to check. Omit to check the relevant versions Salesforce
+returns for the request.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-operation (object) - { operationId, status ("Pending"|"InProgress"|"Complete"|"Failed"), startedAt, completedAt, totalContacts, processedContacts, failedContacts, errors (array) }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -34,4 +40,7 @@ Errors
 
 Example request
 
-get_contact_exit_status({ "operationId": "abc-456-def" })
+get_contact_exit_status({
+  "contact_key": "",
+  "definition_key": ""
+})

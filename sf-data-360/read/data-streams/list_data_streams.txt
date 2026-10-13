@@ -10,7 +10,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-streams
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-streams
+Optional query: connectionName, filter, includeMappings, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -20,20 +21,17 @@ Body
 None.
 
 Input (parameters)
-connectionId (string, optional).
-status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
-refreshMode (string, optional) - "Full" | "Incremental" | "Streaming".
-nameContains (string, optional).
-limit (number, optional, default 100).
-offset (number, optional).
+connectionName (string, optional) - Name of the data stream connection to filter by.
+filter (string, optional) - Filter for a narrower result set, such as connector type filters 'MC' or 'SFDC'.
+includeMappings (unknown, required)
+limit (number, optional) - Maximum number of rows to return, from 1 through 200. Salesforce defaults to 10 when
+omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort order for the result set. Salesforce supports ordering by fields such as Id,
+DataConnectorId, DataConnectorType, DataSourceId, or DeveloperName.
 
 Result
-dataStreams (array) - Each: { id, developerName, label,
-  connectionId, sourceObject, refreshMode, schedule (object),
-  status, dataLakeObjectName, lastRunStatus, lastRunDate,
-  recordCount, createdById, createdDate, lastModifiedById,
-  lastModifiedDate }.
-totalSize (number), nextPageUrl (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -46,18 +44,10 @@ Errors
 
 Example request
 
-list_data_streams({ "status": "Active" })
+list_data_streams({
+  "includeMappings": ""
+})
 
 Example result
-{
-  "dataStreams": [
-    { "id": "0bcxx0000000001",
-      "developerName": "mc_sends",
-      "label": "MCE Sends",
-      "connectionId": "0Z65800000000ABCAA",
-      "refreshMode": "Incremental",
-      "status": "Active",
-      "dataLakeObjectName": "mc_sends__dll",
-      "lastRunStatus": "Success", "recordCount": 12450 }
-  ]
-}
+
+{ }

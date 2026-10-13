@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/custom-redirects?fields={fields}&filter[campaignId]=eq,1024
+GET https://{pi-domain}/api/v5/objects/custom-redirects
+Optional query: fields, filter[campaignId], filter[folderId], filter[isDeleted], filter[name], filter[trackerDomainId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,25 +22,19 @@ Body
 None.
 
 Input (parameters)
-campaignId (number, optional).
-trackerDomainId (number, optional).
-folderId (number, optional).
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,salesforceId,folderId,name,
-  destinationUrl,campaignId,trackerDomainId,vanityUrlPath,vanityUrl,
-  trackedUrl,url,gaSource,gaMedium,gaTerm,gaContent,gaCampaign,
-  bitlyIsPersonalized,bitlyShortUrl,createdAt,updatedAt,createdById,
-  updatedById,isDeleted).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+campaignId (number, optional) - Filter by campaign id.
+trackerDomainId (number, optional) - Filter by tracker domain id.
+folderId (number, optional) - Filter by folder id.
+nameContains (string, optional) - Filter redirects whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted custom redirects. Default false.
+fields (string[], optional) - Field projection. Defaults to id, salesforceId, folderId, name, destinationUrl,
+campaignId, trackerDomainId, vanityUrlPath, vanityUrl, trackedUrl, url, UTM fields,
+bitly fields, createdAt, updatedAt, createdById, updatedById, isDeleted.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-customRedirects (array) - Each: { id, name, destinationUrl, vanityUrl,
-  vanityUrlPath, trackedUrl, url, campaignId, trackerDomainId, folderId,
-  gaSource, gaMedium, gaTerm, gaContent, gaCampaign, bitlyShortUrl,
-  bitlyIsPersonalized, salesforceId, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -52,12 +47,8 @@ Errors
 
 Example request
 
-list_custom_redirects({ "campaignId": 1024 })
+list_custom_redirects({})
 
 Example result
-{
-  "customRedirects": [
-    { "id": 612, "name": "Spring promo", "vanityUrl": "https://go.magnatech.com/r/spring",
-      "destinationUrl": "https://magnatech.com/spring", "campaignId": 1024 }
-  ]
-}
+
+{ }

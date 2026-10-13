@@ -21,9 +21,7 @@ Input (parameters)
 queryId (string, required).
 
 Result
-success (boolean).
-queryId (string).
-status (string) - "Cancelled".
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,4 +38,5 @@ Example request
 cancel_sql_query({ "queryId": "Q_async_2026-04-29" })
 
 Example result
-{ "success": true, "queryId": "Q_async_2026-04-29", "status": "Cancelled" }
+
+{ }

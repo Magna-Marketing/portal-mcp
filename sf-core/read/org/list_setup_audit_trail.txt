@@ -19,16 +19,40 @@ Body
 None.
 
 Input (parameters)
-sinceHours (number, optional, default 24, max 4380=180 days).
-section (string|string[], optional) - Filter to specific Setup sections (e.g. "Profile", "PermissionSet", "Workflow Rule", "Approval Process", "Apex Class", "Lightning Component", "Flow", "Custom Field").
-userId (string, optional) - Filter to changes by this user.
-namespacePrefix (string, optional) - Filter to changes from a managed package namespace.
-limit (number, optional, default 500, max 50000).
+action (string, optional) - SetupAuditTrail Action exact match; string category of the
+setup change; no default; example: PermSetCreate; do not pass Display text, multiple
+actions, or SOQL operators.
+actionPattern (string, optional) - Action filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: PermSet*; do not pass raw LIKE syntax,
+regex, or Display text.
+sectionPattern (string, optional) - Section filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: Manage Users; do not pass raw LIKE syntax,
+regex, or Action values.
+createdById (string, optional) - CreatedById reference filter; Salesforce User Id
+string; no default; example: 0055g00000ABCDe; do not pass usernames, emails, multiple
+Ids, or relationship fields.
+createdDateFrom (string, optional) - Minimum CreatedDate filter; ISO-8601 dateTime or
+Salesforce date literal string; no default; example: 2026-05-01T00:00:00.000Z; do not
+pass local-only dates or untrusted SOQL fragments.
+createdDateTo (string, optional) - Maximum CreatedDate filter; ISO-8601 dateTime or
+Salesforce date literal string; no default; example: 2026-05-16T00:00:00.000Z; do not
+pass local-only dates or an end value earlier than the start value.
+whereClause (string, optional) - Additional SOQL WHERE condition for SetupAuditTrail;
+string without WHERE; no default; example: DelegateUser != null; do not pass SELECT,
+FROM, ORDER BY, LIMIT, aggregate queries, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for SetupAuditTrail; string without ORDER BY;
+default CreatedDate DESC; example: Action ASC, CreatedDate DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum SetupAuditTrail rows to query; positive integer
+clamped to 2000; default 200; example: 200; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-totalSize (number).
-auditEntries (array) - { id, action, section, display, createdById, createdByName, delegateUser, createdDate, responsibleNamespacePrefix }.
-hasMore (boolean).
+Returns the raw Salesforce QueryResult for SetupAuditTrail records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Modify All Data".
@@ -42,4 +66,8 @@ Errors
 
 Example request
 
-list_setup_audit_trail({ "section": "PermissionSet", "sinceHours": 168 })
+list_setup_audit_trail({
+  "action": "PermSetCreate",
+  "actionPattern": "PermSet*",
+  "sectionPattern": "Manage Users"
+})

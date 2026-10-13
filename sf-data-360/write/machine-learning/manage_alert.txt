@@ -49,7 +49,7 @@ webhookUrl (string, optional).
 isActive (boolean, optional).
 
 Result
-alert (object) - Created / updated row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -72,4 +72,5 @@ manage_alert({
 })
 
 Example result
-{ "alert": { "alertId": "AL_001", "isActive": true } }
+
+{ }

@@ -29,8 +29,7 @@ position (number|"start"|"end", optional, default "end") - Insertion position.
 visibilityRule (object, optional) - { booleanFilter?, criteria: [{ leftValue, operator, rightValue? }] }.
 
 Result
-updateResult (object) - Raw Metadata API update response.
-inserted (object) - { region, componentName, identifier, position }.
+raw Metadata API SaveResult.
 
 Required permissions
 - "Customize Application".

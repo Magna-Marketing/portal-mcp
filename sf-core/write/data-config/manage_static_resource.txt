@@ -6,13 +6,11 @@ The file body is supplied as a base64-encoded string. For update/upsert/delete t
 tool first queries StaticResource by Name to obtain the Id, then performs PATCH/DELETE.
 
 Salesforce API
-Tooling API, v66.0. StaticResource sObject.
+Tooling API, v66.0.
 
-Endpoints
-POST   /services/data/v66.0/tooling/sobjects/StaticResource           (create)
-PATCH  /services/data/v66.0/tooling/sobjects/StaticResource/{id}      (update)
-DELETE /services/data/v66.0/tooling/sobjects/StaticResource/{id}      (delete)
-GET    /services/data/v66.0/tooling/query/?q=<SOQL>                   (lookup by Name)
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/StaticResource
+DELETE /services/data/v66.0/tooling/sobjects/StaticResource
 
 Headers
 Authorization: Bearer <access_token>
@@ -38,13 +36,25 @@ NamespacePrefix  – string, optional. For managed package resources.
 BodyLength       – integer, read-only. Returned in lookup/GET responses.
 
 Input (parameters)
-operation       (string, required) – "create" | "update" | "upsert" | "delete".
-name            (string, required) – Resource Name. Used as lookup key for all operations.
-contentType     (string, required for create) – MIME type.
-cacheControl    (enum "Public"|"Private", optional, default "Public").
-description     (string, optional).
-base64          (string, required for create/update/upsert) – Base64-encoded body. Max 5 MB unencoded.
-namespacePrefix (string, optional).
+operation ("create" | "update" | "upsert" | "delete", required) - Requested
+StaticResource operation; enum create, update, upsert, or delete; no default; example:
+'upsert'; do not pass read operations here.
+name (string, required) - StaticResource Name; string unique in the org or namespace
+using letters, numbers, and underscores; required for all operations; example:
+'MyStyles'; do not include a file extension or spaces.
+contentType (string, optional) - StaticResource ContentType MIME value; string required
+for create and for upsert when creating; omitted on update leaves the current content
+type unchanged; example: 'text/css'; do not pass an unsupported or informal type like
+'css'.
+cacheControl ("Public" | "Private", optional) - StaticResource CacheControl value; enum
+Public or Private; defaults to Public on create/upsert-create when omitted; example:
+'Public'; do not pass lowercase values.
+description (string, optional) - StaticResource Description value; string; omitted
+leaves the existing description unchanged on update; example: 'Shared app stylesheet';
+do not pass binary content here.
+base64 (string, optional) - StaticResource Body value; base64-encoded file content
+string required for create and upsert-create; omitted on update changes only metadata
+fields; example: 'Ym9keSB7fQ=='; do not pass raw file bytes or data: URLs.
 
 Result
 Returns a JSON object with:
@@ -73,9 +83,6 @@ Corrections vs original doc
 Example request
 
 manage_static_resource({
-  "operation": "create",
-  "name": "MTG_BrandLogo",
-  "contentType": "image/png",
-  "cacheControl": "Public",
-  "base64": "iVBORw0KG..."
+  "operation": "upsert",
+  "name": "MyStyles"
 })

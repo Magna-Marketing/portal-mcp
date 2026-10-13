@@ -27,9 +27,7 @@ fields (string[], optional) - Default expands `folder.*` and
   `createdBy.*`/`updatedBy.*`.
 
 Result
-folderContent (object): id, objectType, objectId, folderId, name,
-  isDeleted, createdAt, updatedAt, createdById, updatedById.
-folder (object|null) - { id, name, parentFolderId, path }.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -45,10 +43,5 @@ Example request
 get_folder_content({ "id": 9001 })
 
 Example result
-{
-  "folderContent": {
-    "id": 9001, "objectType": "Email", "objectId": 99821,
-    "folderId": 33, "name": "Welcome", "isDeleted": false
-  },
-  "folder": { "id": 33, "name": "Spring 2026", "path": "/Marketing/Spring 2026" }
-}
+
+{ }

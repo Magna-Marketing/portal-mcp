@@ -31,9 +31,8 @@ css (string, optional).
 xml (string, optional) - Meta XML content.
 svg (string, optional).
 
-Result (raw Tooling API responses)
-bundleId (string).
-files (object) - Map of fileName → { id, success, errors } or { success: true } for 204.
+Result
+object keyed by fileName with raw Tooling API responses.
 
 Required permissions
 - "Customize Application".

@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/opportunities?fields={fields}&filter[stage]=eq,Closed Won
+GET https://{pi-domain}/api/v5/objects/opportunities
+Optional query: fields, filter[campaignId], filter[isDeleted], filter[name], filter[salesforceId], filter[stage], filter[status], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,23 +21,20 @@ Body
 None.
 
 Input (parameters)
-stage (string, optional).
-status (string, optional) - "Won" | "Lost" | "Open".
-campaignId (number, optional).
-salesforceId (string, optional).
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,value,probability,
-  stage,status,closedAt,salesforceId,campaignId,createdAt,updatedAt,
-  createdById,updatedById,isDeleted,type,prospectIds).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+stage (string, optional) - Filter by stage name (e.g. "Closed Won", "Proposal").
+status ("Won" | "Lost" | "Open", optional) - Filter by opportunity status.
+campaignId (number, optional) - Filter by campaign id.
+salesforceId (string, optional) - Filter by SFDC Opportunity 18-char id.
+nameContains (string, optional) - Filter opportunities whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted opportunities. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, value, probability, stage, status, closedAt,
+salesforceId, campaignId, createdAt, updatedAt, createdById, updatedById, isDeleted,
+type, prospectIds.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-opportunities (array) - Each: { id, name, value (number), probability,
-  stage, status, closedAt, salesforceId, campaignId, type,
-  prospectIds (number[]), isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -49,12 +47,8 @@ Errors
 
 Example request
 
-list_opportunities({ "status": "Won" })
+list_opportunities({})
 
 Example result
-{
-  "opportunities": [
-    { "id": 1101, "name": "Acme renewal", "value": 50000, "probability": 100,
-      "stage": "Closed Won", "status": "Won", "campaignId": 1024 }
-  ]
-}
+
+{ }

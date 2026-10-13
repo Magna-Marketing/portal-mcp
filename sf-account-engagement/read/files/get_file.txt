@@ -29,11 +29,8 @@ includeBytes (boolean, optional, default false) - When true, the
   (`fileBase64`).
 
 Result
-file (object): id, name, size, mimeType, url, vanityUrl, trackedUrl,
-  folderId, trackerDomainId, campaignId, salesforceId, isTracked,
-  isDeleted, createdAt, updatedAt.
-folder (object|null), trackerDomain (object|null).
-fileBase64 (string, when includeBytes=true).
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: fileBase64.
 
 Required scopes
 - `pardot_api`.
@@ -49,7 +46,5 @@ Example request
 get_file({ "id": 901 })
 
 Example result
-{
-  "file": { "id": 901, "name": "logo.png", "mimeType": "image/png",
-    "size": 18244, "url": "https://go.magnatech.com/l/.../logo.png" }
-}
+
+{ }

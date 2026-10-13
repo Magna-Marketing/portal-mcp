@@ -27,27 +27,31 @@ Body
 None.
 
 Input (parameters)
-type (string, optional, default "lwc") - "lwc" | "aura".
-namespacePrefix (string, optional, default "" for default namespace).
-nameSimilarityThreshold (number, optional, default 0.7) - 0..1; lower =
-  more sensitive name match.
-contentSimilarityThreshold (number, optional, default 0.6) - 0..1; lower
-  = more sensitive content match.
-maxClusters (number, optional, default 25).
-includeFileBreakdown (boolean, optional, default false).
+type (string, optional) - Component family to inspect; string accepted values lwc, aura,
+or visualforce; default lwc; example: aura; do not pass flexipage or multiple values.
+componentType (string, optional) - Alias for type; string component family; ignored when
+type is present; example: visualforce; do not pass arrays or metadata labels.
+namespacePrefix (string, optional) - NamespacePrefix filter; string namespace without
+trailing __; no default; example: mypkg; do not pass component-qualified names.
+nameSimilarityThreshold (number, optional) - Minimum name similarity threshold for
+future scoring; number from 0 to 1; default 0.8; example: 0.9; do not pass percentages
+or strings.
+maxClusters (integer, optional) - Maximum duplicate clusters to return; integer from 1
+to 2000; default 25; example: 20; do not pass 0, decimals,.
+whereClause (string, optional) - Additional SOQL WHERE condition for the selected
+object; string with or without WHERE; no default; example: LastModifiedDate =
+LAST_N_DAYS:365; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for the selected object; string with or
+without ORDER BY; default name field ascending; example: LastModifiedDate DESC; do not
+pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum source records to inspect; integer from 1 to 2000;
+default 1000; example: 500; do not pass offsets, decimals,.
 
 Result
-type (string).
-clusters (array) - Each:
-  representative (object) - { id, name, label, apiVersion, isExposed }
-    (the first/oldest member).
-  members (array) - { id, name, label, lastModifiedDate, similarityToRepresentative (0..1) }.
-  averageSimilarity (number).
-  recommendation (string) - "consolidate", "rename to share base",
-    "keep separate (low overlap)".
-  fileBreakdown (object, optional) - Per file: { fileName,
-    averageSimilarityAcrossMembers }.
-totalCandidates (number).
+raw candidate records grouped into derived duplicate clusters.
+type (value) - included in the JSON returned by the tool.
+source (value) - included in the JSON returned by the tool.
+clusters (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -61,4 +65,8 @@ Errors
 
 Example request
 
-find_duplicate_components({ "type": "lwc", "nameSimilarityThreshold": 0.6 })
+find_duplicate_components({
+  "type": "aura",
+  "componentType": "visualforce",
+  "namespacePrefix": "mypkg"
+})

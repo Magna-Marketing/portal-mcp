@@ -15,19 +15,37 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP UpdateRequest.
+SOAP request on AccountUser.
 
 Input (parameters)
-userId (number, optional).
-username (string, optional).
-  One required.
-operation (string, required) - "add" | "remove" | "setDefault".
-businessUnitIds (number[], optional) - MIDs to add / remove.
-defaultBusinessUnitId (number, optional, only for setDefault).
+user_id (number, optional) - Numeric AccountUser.ID. Required when username/email is not supplied.
+username (string, optional) - AccountUser.UserID username. Required when user_id/email is not supplied.
+email (string, optional) - AccountUser.Email. Required when user_id/username is not supplied.
+operation ("add" | "remove" | "set" | "setDefault", required) - set sends the exact AssociatedBusinessUnits collection; add/remove calculate a final
+collection from current_associated_* plus business_unit_*; setDefault updates
+DefaultBusinessUnit only.
+business_unit_ids (number[], optional) - Business Unit MIDs to add/remove/set as AccountUser.AssociatedBusinessUnits. Do not mix
+IDs and customer keys.
+business_unit_customer_keys (string[], optional) - Business Unit CustomerKeys to add/remove/set as AccountUser.AssociatedBusinessUnits. Do
+not mix IDs and customer keys.
+current_associated_business_unit_ids (number[], optional) - Current full AssociatedBusinessUnits MID collection. Required for add/remove by MID
+because Salesforce does not expose this property via retrieve.
+current_associated_business_unit_customer_keys (string[], optional) - Current full AssociatedBusinessUnits CustomerKey collection. Required for add/remove by
+key because Salesforce does not expose this property via retrieve.
+default_business_unit_id (number, optional) - DefaultBusinessUnit MID to set, required for setDefault by MID.
+default_business_unit_customer_key (string, optional) - DefaultBusinessUnitObject.CustomerKey to set, required for setDefault by customer key.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context. Defaults to
+the authenticated Business Unit when the session is already scoped to one.
+client_business_unit_id (number, optional) - Optional AccountUser.Client.ID owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use this when authenticating at parent level but writing user
+settings for a child BU.
 
 Result
-user (object) - { id, username, defaultBusinessUnitId, businessUnits: [{ id, name, isDefault }] }.
-changes (object).
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `users_write` + Enterprise edition.
@@ -41,7 +59,5 @@ Errors
 Example request
 
 assign_user_to_business_unit({
-  "username": "marketingops@magnatech.com",
-  "operation": "add",
-  "businessUnitIds": [5001234, 5001235]
+  "operation": "add"
 })

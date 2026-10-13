@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/segments
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/segments
+Optional query: batchSize, offset, dataspace, filters, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,20 +20,17 @@ Body
 None.
 
 Input (parameters)
-dataSpace (string, optional, default "default").
-status (string, optional) - "Active" | "Paused" | "Failed" | "Draft".
-publishStatus (string, optional) - "Published" | "Publishing" |
-  "Stale" | "NotPublished".
-nameContains (string, optional).
-limit (number, optional, default 100).
-offset (number, optional).
+batchSize (number, optional) - Maximum number of segments to return, from 1 through 200. Salesforce applies its
+endpoint default when omitted.
+offset (number, optional) - Number of segments to skip before returning results. Salesforce skips no rows when
+omitted.
+dataspace (string, optional) - Data space name. Salesforce uses the default data space when omitted.
+filters (string, optional) - Salesforce Data 360 filter expression for segment attributes, such as `SegmentStatus eq
+Active` or `Name contains Promo`.
+orderBy (string, optional) - Sort expression for the result set, such as `Name ASC` or `CreatedDate DESC`.
 
 Result
-segments (array) - Each: { id, apiName, label, description, status,
-  publishStatus, dmoApiName, populationCount, schedule,
-  lastPublishedAt, lastPublishStatus, createdDate, lastModifiedDate,
-  createdById }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -45,13 +43,8 @@ Errors
 
 Example request
 
-list_segments({ "publishStatus": "Published" })
+list_segments({})
 
 Example result
-{
-  "segments": [
-    { "id": "0YS580000000001", "apiName": "EMEAHighValue",
-      "label": "EMEA High-value Customers",
-      "publishStatus": "Published", "populationCount": 18420 }
-  ]
-}
+
+{ }

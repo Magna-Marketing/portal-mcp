@@ -19,52 +19,41 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (create)
-{
-  "name": "Demo Request",
-  "campaignId": 1024,
-  "folderId": 33,
-  "trackerDomainId": 7,
-  "layoutTemplateId": 71,
-  "thankYouContent": "<p>Thanks!</p>",
-  "submitButtonText": "Request demo",
-  "isCaptchaEnabled": true,
-  "isCookielessTracking": false,
-  "labelAlignment": "above",
-  "fontFamily": "Arial",
-  "fontSize": "14px",
-  "tagReplacementLanguage": "ENGLISH"
-}
+Body
+POST: afterFormContent, beforeFormContent, campaignId, checkboxAlignment, folderId, fontColor, fontFamily, fontSize, isAlwaysDisplay, isCaptchaEnabled, isCookieless, isUseRedirectLocation, labelAlignment, layoutTemplateId, name, radioAlignment, redirectLocation, requiredCharacter, showNotProspect, submitButtonText, tagReplacementLanguage, thankYouCode, thankYouContent, trackerDomainId
 
 Input (parameters)
-operation (string, required) - "create" | "delete".
-id (number, required when operation="delete").
-name (string, required when create).
-campaignId (number, required when create).
-folderId (number, optional).
-trackerDomainId (number, optional).
-layoutTemplateId (number, optional).
-thankYouContent (string, optional) - Inline HTML.
-thankYouCode (string, optional) - Custom JS / pixel firing on submit.
-isUseRedirectLocation (boolean, optional, default false).
-redirectLocation (string, optional).
-beforeFormContent (string, optional), afterFormContent (string, optional).
-submitButtonText (string, optional, default "Submit").
-isCaptchaEnabled (boolean, optional, default true).
-isCookielessTracking (boolean, optional, default false).
-isAlwaysDisplay (boolean, optional, default false) - "Show this form
-  to known prospects" toggle.
-showNotProspect (boolean, optional, default false).
-fontFamily (string, optional), fontSize (string, optional),
-  fontColor (string, optional).
-labelAlignment (string, optional) - "above" | "left" | "right".
-radioAlignment (string, optional), checkboxAlignment (string, optional).
-requiredCharacter (string, optional, default "*").
-tagReplacementLanguage (string, optional, default "ENGLISH").
+operation ("create" | "delete", required) - "create" creates a new form; "delete" soft-deletes it (restorable within 90 days via
+undelete_form).
+id (number, optional) - Form id. Required for delete.
+name (string, optional) - Form display name. Required for create.
+campaignId (number, optional) - Campaign to attribute form submissions to. Required for create.
+folderId (number, optional) - Folder to organize the form in.
+trackerDomainId (number, optional) - Tracker domain for the embedded form URL.
+layoutTemplateId (number, optional) - Layout template id to wrap the form in branded HTML.
+thankYouContent (string, optional) - Inline HTML shown after successful submission.
+thankYouCode (string, optional) - Custom JS or pixel-firing code executed on submit.
+isUseRedirectLocation (boolean, optional) - Redirect to a URL instead of showing thankYouContent. Default false.
+redirectLocation (string, optional) - Redirect URL. Used when isUseRedirectLocation=true.
+beforeFormContent (string, optional) - HTML displayed above the form fields.
+afterFormContent (string, optional) - HTML displayed below the form fields.
+submitButtonText (string, optional) - Label for the submit button. Default "Submit".
+isCaptchaEnabled (boolean, optional) - Enable reCAPTCHA on the form. Default true.
+isCookieless (boolean, optional) - Disable cookie-based visitor tracking. Default false.
+isAlwaysDisplay (boolean, optional) - Show the form to already-identified prospects. Default false.
+showNotProspect (boolean, optional) - Show the form to visitors with no prospect record. Default false.
+fontFamily (string, optional) - CSS font-family for the form.
+fontSize (string, optional) - CSS font-size for the form (e.g. "14px").
+fontColor (string, optional) - CSS color for the form text (e.g. "#333333").
+labelAlignment ("above" | "left" | "right", optional) - Position of field labels relative to inputs.
+radioAlignment (string, optional) - Alignment for radio button groups.
+checkboxAlignment (string, optional) - Alignment for checkbox groups.
+requiredCharacter (string, optional) - Character appended to required field labels. Default "*".
+tagReplacementLanguage (string, optional) - HML rendering language. Default "ENGLISH".
 
 Result
-form (object) - Created row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -78,11 +67,9 @@ Errors
 Example request
 
 manage_form({
-  "operation": "create",
-  "name": "Demo Request",
-  "campaignId": 1024,
-  "submitButtonText": "Request demo"
+  "operation": ""
 })
 
 Example result
-{ "form": { "id": 4421, "name": "Demo Request", "campaignId": 1024 } }
+
+{ }

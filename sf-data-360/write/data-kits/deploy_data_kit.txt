@@ -32,11 +32,7 @@ dataSpace (string, optional, default "default").
 runIdempotencyKey (string, optional).
 
 Result
-deploymentId (string).
-dataKitDevName (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
-componentCount (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -54,9 +50,5 @@ Example request
 deploy_data_kit({ "dataKitDevName": "MTG_Retail_Foundation" })
 
 Example result
-{
-  "deploymentId": "DEP_DK_2026-04-29T13",
-  "dataKitDevName": "MTG_Retail_Foundation",
-  "status": "Queued",
-  "componentCount": 14
-}
+
+{ }

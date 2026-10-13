@@ -23,9 +23,7 @@ Input (parameters)
 segmentApiName (string, required).
 
 Result
-segmentApiName (string).
-estimatedCount (number).
-estimateGeneratedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -43,8 +41,5 @@ Example request
 count_segment({ "segmentApiName": "EMEAHighValue" })
 
 Example result
-{
-  "segmentApiName": "EMEAHighValue",
-  "estimatedCount": 18420,
-  "estimateGeneratedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

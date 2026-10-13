@@ -19,13 +19,25 @@ Body
 None.
 
 Input (parameters)
-includeBranding (boolean, optional, default true) - Include color hex codes and image references.
+namePattern (string, optional) - Pattern for DeveloperName or MasterLabel; string using
+* and ? wildcards converted to SOQL LIKE; no default; example: Corporate*; do not pass
+regex, raw LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+LightningExperienceTheme; string with or without WHERE; no default; example: IsDeleted =
+false; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for LightningExperienceTheme; string
+with or without ORDER BY; default Id ASC; example: CreatedDate DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum LightningExperienceTheme rows to return; integer
+from 1 to 2000; default 200; example: 100; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-activeTheme (string|null) - DeveloperName of the active theme.
-themes (array) - Each:
-  id, developerName, masterLabel, description, defaultBrandingSet (string|null).
-  branding (object, when includeBranding=true) - { headerColor, primaryColor, secondaryColor, accentColor, brandImageUrl, logoImageUrl, faviconUrl, backgroundImageUrl }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -38,4 +50,8 @@ Errors
 
 Example request
 
-list_lightning_themes({ "includeBranding": true })
+list_lightning_themes({
+  "namePattern": "Corporate*",
+  "whereClause": "IsDeleted = false",
+  "orderBy": "CreatedDate DESC"
+})

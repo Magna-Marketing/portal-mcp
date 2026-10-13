@@ -8,12 +8,11 @@ use `read_lwc_file`. To get an even fuller picture (metadata + files +
 descriptive blocks) use `get_lwc_bundle_info`.
 
 Salesforce API
-Tooling API, v66.0. `LightningComponentBundle` and (for the file list)
-`LightningComponentResource`.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, IsExposed, NamespacePrefix, ManageableState, Description, CreatedDate, LastModifiedDate FROM LightningComponentBundle WHERE DeveloperName LIKE '...' OR DeveloperName = '...'
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, LightningComponentBundleId FROM LightningComponentResource WHERE LightningComponentBundleId = '{bundleId}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, ManageableState, Description, IsExposed, TargetConfigs, CreatedDate, LastModifiedDate FROM LightningComponentBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, LightningComponentBundleId, ManageableState, Source, LastModifiedDate FROM LightningComponentResource
 
 Headers
 Authorization: Bearer <access_token>
@@ -23,31 +22,39 @@ Body
 None.
 
 Input (parameters)
-name (string, optional) - Exact DeveloperName.
-pattern (string, optional) - Glob (e.g. "project*"). Mutually exclusive with `name`.
-includeFiles (boolean, optional, default true) - Include the file
-  metadata list (no contents).
-includeManaged (boolean, optional, default false).
+name (string, optional) - LWC DeveloperName to read exactly; string matching the bundle
+API name; no default; example: accountSummary; do not pass file paths, labels, or
+namespace prefixes.
+componentName (string, optional) - Alias for name; string LWC DeveloperName; ignored
+when name is present; example: contactTile; do not pass lwc/contactTile/contactTile.js.
+pattern (string, optional) - LWC DeveloperName pattern; string with * and ? wildcards
+converted to SOQL LIKE; no default; example: account*; do not use with name or pass
+regex.
+namePattern (string, optional) - Alias for pattern; string wildcard pattern; ignored
+when pattern is present; example: *Summary; do not pass raw LIKE syntax.
+includeFiles (boolean, optional) - Whether to also query LightningComponentResource rows
+for matching bundles; boolean; default true; example: false; do not use to request
+transformed source.
+includeManaged (boolean, optional) - Whether managed package bundles can be returned;
+boolean; default false; example: true; do not use for permission filtering.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+LightningComponentBundle; string with or without WHERE; no default; example: ApiVersion
+>= 60.0; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for LightningComponentBundle; string with or
+without ORDER BY; default DeveloperName ASC; example: LastModifiedDate DESC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum LWC bundles to return; integer from 1 to 2000;
+default 200; example: 50; do not pass offsets, decimals,.
 
-Result (single)
-bundle (object):
-  id (string).
-  name (string) - DeveloperName.
-  label (string) - MasterLabel.
-  apiVersion (number).
-  isExposed (boolean).
-  namespacePrefix (string|null).
-  manageableState (string).
-  description (string|null).
-  createdDate, lastModifiedDate (string).
-  files (array, when includeFiles=true) - Each:
-    id (string).
-    fileName (string) - e.g. "projectCard.js".
-    format (string) - "js" | "html" | "css" | "xml" | "svg".
-    filePath (string).
-Result (pattern)
-totalSize (number).
-bundles (array of single shape).
+Result
+raw Salesforce QueryResult for LightningComponentBundle and, when requested, raw
+LightningComponentResource QueryResult.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+bundles (value) - included in the JSON returned by the tool.
+resources (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application" / "View Setup and Configuration".
@@ -60,19 +67,22 @@ Errors
 
 Example request
 
-read_lwc({ "name": "projectCard" })
+read_lwc({
+  "name": "accountSummary",
+  "componentName": "contactTile",
+  "pattern": "account*"
+})
 
 Example result
 
 {
-  "bundle": {
-    "id": "0Rb4Q00000abcDE", "name": "projectCard", "label": "Project Card",
-    "apiVersion": 62.0, "isExposed": true, "manageableState": "unmanaged",
-    "files": [
-      { "id": "0Rt4Q00000abcXY", "fileName": "projectCard.js",          "format": "js" },
-      { "id": "0Rt4Q00000abcYZ", "fileName": "projectCard.html",        "format": "html" },
-      { "id": "0Rt4Q00000abcZA", "fileName": "projectCard.css",         "format": "css" },
-      { "id": "0Rt4Q00000abcAB", "fileName": "projectCard.js-meta.xml", "format": "xml" }
-    ]
-  }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "LightningComponentResource"
+      }
+    }
+  ]
 }

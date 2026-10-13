@@ -20,9 +20,7 @@ Input (parameters)
 configuredModelIdOrName (string, required).
 
 Result
-configuredModel (object): id, apiName, label, modelType, status,
-  modelArtifactId, version, predictionEndpoint, inputSchema,
-  outputSchema, runtimeFramework, createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -38,9 +36,5 @@ Example request
 get_configured_model({ "configuredModelIdOrName": "ChurnPredictor" })
 
 Example result
-{
-  "configuredModel": {
-    "apiName": "ChurnPredictor", "modelType": "Classification",
-    "status": "Active", "version": "1.2.0"
-  }
-}
+
+{ }

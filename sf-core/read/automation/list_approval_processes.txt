@@ -4,11 +4,12 @@ Description
 List Approval Processes (`ProcessDefinition`) for an sObject, showing entry criteria, approval steps with approvers, initial submitters, final approval/rejection actions, and current activation status.
 
 Salesforce API
-Metadata API (`ApprovalProcess` per sObject) + Tooling API (`ProcessDefinition`), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, DeveloperName, TableEnumOrId, Type, State, Description FROM ProcessDefinition WHERE Type = 'Approval'
-POST /services/Soap/m/66.0   (readMetadata ApprovalProcess for full configuration)
+POST /services/Soap/m/66.0  (readMetadata ApprovalProcess)
+GET /services/data/v66.0/process/approvals/
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,20 +19,30 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional).
-includeInactive (boolean, optional, default false).
-namePattern (string, optional).
-includeFullConfig (boolean, optional, default true) - Includes step approvers and actions.
+sObjects (string[], optional) - Object API names used to select ApprovalProcess metadata
+fullNames in Object.Process format; string array; no default means all listed approval
+processes; example: [\"Opportunity\"]; do not pass labels, record Ids, or SOQL
+fragments.
+namePattern (string, optional) - Approval process metadata fullName or process-name
+filter using * and ? wildcards; string; no default; example: Opportunity.Discount_*; do
+not pass regex or SOQL LIKE syntax.
+includeRestList (boolean, optional) - Whether to call GET
+/services/data/v66.0/process/approvals/; boolean; default true; example: false; pass
+false when only Metadata API configuration is needed.
+includeMetadata (boolean, optional) - Whether to read ApprovalProcess metadata for
+selected fullNames; boolean; default true; example: false; pass false to list metadata
+without reading full configurations.
+limit (integer, optional) - Maximum ApprovalProcess metadata components to read;
+positive integer clamped to 2000; default 200; example: 50; do not pass 0, negatives,
+decimals, or offsets.
 
 Result
-totalSize (number).
-approvalProcesses (array) - Each:
-  id, name, developerName, sObject, state ("Active"|"Inactive"|"Disabled"), description.
-  entryCriteria (object|null) - { booleanFilter, criteriaItems[], formula }.
-  approvalSteps (array, when includeFullConfig=true) - Each: { stepNumber, label, description, criteria, assignedApprover ({ type, name }), allowDelegate, ifCriteriaNotMet }.
-  initialSubmitters (array) - { type, name }.
-  recordEditability (string).
-  approvalAction, rejectionAction, recallAction, finalApprovalAction, finalRejectionAction (object) - { name, type ("FieldUpdate"|"FlowAction"|...) }.
+Returns a JSON object with optional processApprovalsResult, metadataListResult,
+metadataFullNames, and optional metadataResult.
+processApprovalsResult (value) - included in the JSON returned by the tool.
+metadataListResult (value) - included in the JSON returned by the tool.
+metadataFullNames (value) - included in the JSON returned by the tool.
+metadataResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -44,4 +55,8 @@ Errors
 
 Example request
 
-list_approval_processes({ "sObjects": ["Opportunity"], "includeInactive": false })
+list_approval_processes({
+  "sObjects": "[\\\"Opportunity\\\"]",
+  "namePattern": "Opportunity.Discount_*",
+  "includeRestList": false
+})

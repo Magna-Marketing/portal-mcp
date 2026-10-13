@@ -45,11 +45,12 @@ deprecationNote (string, optional, default "Deprecated on <today>") -
 disableExposure (boolean, optional, default true) - Sets IsExposed=false.
 
 Result
-bundle (object) - { id, oldName, newName, oldLabel, newLabel, isExposed }.
-updateResult (object) - Raw PATCH response.
-remainingPlacements (string[]) - FlexiPage DeveloperNames that may still
-  reference the old component name (best-effort query).
-warning (string, optional) - Surfaces when remainingPlacements is non-empty.
+object containing raw updateResult and optional raw flexiPageQueryResult.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+updateResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".

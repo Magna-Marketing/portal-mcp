@@ -6,34 +6,58 @@ Articles are versioned: `KnowledgeArticleVersion` rows are created per
 draft, and publishing transitions a draft to `Online`.
 
 Salesforce API
-REST API (Data) + Connect API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/sobjects/{ArticleType}__kav                    (create draft)
-PATCH /services/data/v66.0/sobjects/{ArticleType}__kav/{id}              (update draft)
-POST /services/data/v66.0/connect/knowledgeArticles/{kavId}/publish      (publish)
-POST /services/data/v66.0/connect/knowledgeArticles/{kavId}/archive     (archive)
-DELETE /services/data/v66.0/sobjects/KnowledgeArticleVersion/{id}        (delete)
+POST /services/data/v66.0/sobjects/{param}
+PATCH /services/data/v66.0/sobjects/{param}/{param}
+GET /services/data/v66.0/knowledgeManagement/articleVersions/masterVersions/{param}
+POST /services/data/v66.0/knowledgeManagement/articleVersions/masterVersions
+PATCH /services/data/v66.0/knowledgeManagement/articleVersions/masterVersions/{param}
+DELETE /services/data/v66.0/knowledgeManagement/articleVersions/masterVersions/{param}
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: articleId.
+JSON fields: Title, UrlName, Language, Summary.
+JSON fields: Title, UrlName, Summary.
+JSON fields: publishStatus, versionNumber, publishScheduleDate.
+JSON fields: publishStatus, archiveScheduleDate.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "publish" | "archive" | "delete" | "newVersion".
-articleType (string, required for create) - Custom article type with `__kav` suffix.
-articleVersionId (string, optional, required for non-create).
-title (string, optional).
-urlName (string, optional).
-fields (object, optional) - Map of additional field API names -> values.
-language (string, optional, default org default).
-asMajorVersion (boolean, optional, default false, only for publish).
+operation ("create" | "update" | "publish" | "archive" | "delete" | "newVersion" | "read", required) -
+Operation to perform.
+articleType (string, optional) -
+Article version sObject API name for draft CRUD, for example Knowledge__kav or FAQ__kav.
+Defaults to Knowledge__kav.
+articleVersionId (string, optional) -
+Knowledge article version ID. Required for update, publish, archive, delete, and read.
+knowledgeArticleId (string, optional) -
+KnowledgeArticleId/articleId. Required for newVersion.
+title (string, optional) -
+Article title. Mapped to Title for create/update.
+urlName (string, optional) -
+Article URL name. Mapped to UrlName for create/update.
+language (string, optional) -
+Article language. Mapped to Language for create.
+summary (string, optional) -
+Optional Summary field for create/update.
+fields (object, optional) -
+Additional article version fields, for example Body__c, IsVisibleInPkb, or
+validation-specific custom fields.
+asMajorVersion (boolean, optional) -
+Publish as a major version by sending versionNumber=NextVersion. Applies to publish.
+publishScheduleDate (string, optional) -
+ISO-8601 date/time for scheduled publication. Applies to publish.
+archiveScheduleDate (string, optional) -
+ISO-8601 date/time for scheduled archive. Applies to archive.
 
 Result
-article (object) - { id, knowledgeArticleId, articleNumber, title, urlName, publishStatus, language, isLatestVersion }.
+the raw Salesforce REST response, with empty 204 responses returned as provided by the
+client.
 
 Required permissions
 - "Manage Articles" + Knowledge enabled on the org.
@@ -47,9 +71,5 @@ Errors
 Example request
 
 manage_knowledge_article({
-  "operation": "create",
-  "articleType": "FAQ__kav",
-  "title": "How to reset MFA",
-  "urlName": "how-to-reset-mfa",
-  "fields": { "Body__c": "<p>Follow these steps...</p>" }
+  "operation": "example"
 })

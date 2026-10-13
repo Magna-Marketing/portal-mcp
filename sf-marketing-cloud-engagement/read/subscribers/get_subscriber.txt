@@ -19,17 +19,27 @@ Body
 SOAP retrieve filtered by SubscriberKey or EmailAddress.
 
 Input (parameters)
-subscriberKey (string, optional).
-email (string, optional).
-subscriberId (number, optional).
-  One required.
-includeListMemberships (boolean, optional, default true).
-includeAttributes (boolean, optional, default true).
+subscriber_key (string, optional) - Exact Subscriber.SubscriberKey. One of subscriber_key, email_address, or subscriber_id
+is required.
+email_address (string, optional) - Exact Subscriber.EmailAddress. One of subscriber_key, email_address, or subscriber_id is
+required.
+subscriber_id (number, optional) - Numeric SOAP Subscriber.ID. One of subscriber_key, email_address, or subscriber_id is
+required.
+include_list_memberships (boolean, optional) - When true, requests the Subscriber.Lists property from SOAP.
+include_attributes (boolean, optional) - When true, requests the Subscriber.Attributes property from SOAP.
+query_all_accounts (boolean, optional) - Sets SOAP QueryAllAccounts=true. Defaults to false so business_unit_id scoping remains
+precise.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP ClientID context. Defaults to the
+authenticated Business Unit.
 
 Result
-subscriber (object) - { subscriberKey, subscriberId, emailAddress, status ("Active"|"Unsubscribed"|"Held"|"Bounced"), unsubscribedDate, emailTypePreference ("HTML"|"Text"), createdDate, modifiedDate }.
-attributes (object, when includeAttributes=true) - Map of attribute name -> value.
-listMemberships (array, when includeListMemberships=true) - [{ listId, listName, status, dateJoined, dateUnsubscribed }].
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+queryAllAccounts (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_read`.
@@ -42,4 +52,4 @@ Errors
 
 Example request
 
-get_subscriber({ "email": "jane.doe@example.com" })
+get_subscriber({})

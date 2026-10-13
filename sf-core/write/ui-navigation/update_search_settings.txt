@@ -6,31 +6,54 @@ search behavior, document content search, CJK optimization, and the
 running user's pinned search scope order.
 
 Salesforce API
-Metadata API (`SearchSettings`) + REST API (`/search/scopeOrder`), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest                 (org settings)
-PATCH /services/data/v66.0/search/scopeOrder                     (running user's scope order)
+GET /services/data/v66.0/search/scopeOrder
+POST /services/Soap/m/66.0  (updateMetadata SearchSettings)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: name, sObject.
+JSON fields: fullName, searchSettingsByObject.
 
 Input (parameters)
-target (string, required) - "org" | "user".
-documentContentSearchEnabled (boolean, optional, target=org).
-optimizeSearchForCJKEnabled (boolean, optional, target=org).
-recentlyViewedUsersForBlankLookupEnabled (boolean, optional, target=org).
-searchSettingsByObject (array, optional, target=org) - [{ sObject, enhancedLookupEnabled, lookupAutoCompleteEnabled, resultsPerPageCount }].
-scopeOrder (string[], optional, target=user) - Ordered sObject names for the user's pinned global search scope.
-checkOnly (boolean, optional, default false).
+settings (unknown, optional) - Org-level SearchSettings fields to merge. Object with
+v66.0 fields; required unless searchSettingsByObject has entries. Example:
+{\"singleSearchResultShortcutEnabled\":true}. Do not pass unsupported REST-only
+settings.
+searchSettingsByObject (unknown[], optional) - Per-object search settings. Array of
+ObjectSearchSetting entries; omitted by default. Example:
+[{\"name\":\"Account\",\"resultsPerPageCount\":25}]. Do not include objects that are
+unavailable in the target org.
+objectSettingsOperation ("merge" | "replace", optional) - How object settings are
+applied. merge preserves existing entries by name, replace sends exactly the provided
+entries; defaults to merge. Example: merge. Do not use replace unless intentionally
+removing omitted object entries.
+includeCurrentUserScopeOrder (boolean, optional) - Whether to also call GET
+/search/scopeOrder. Boolean; defaults to false. Example: true. Do not expect this tool
+to update scope order because v66.0 documents it as read-only.
+checkOnly (boolean, optional) - Preview mode. Boolean; defaults to false and skips
+updateMetadata when true. Example: true. Do not use when you expect Salesforce to
+persist changes.
+fullName (string, optional) - Settings component fullName. String; defaults to Search.
+Example: Search. Do not pass an object name.
 
 Result
-deploy (object|null).
-settings (object) - Updated values.
+JSON containing checkOnly, fullName, objectSettingsOperation, raw readResponse,
+generated metadata, raw updateResponse or null, and optional raw
+currentUserScopeOrderResponse.
+checkOnly (value) - included in the JSON returned by the tool.
+fullName (value) - included in the JSON returned by the tool.
+objectSettingsOperation (value) - included in the JSON returned by the tool.
+readResponse (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+updateResponse (value) - included in the JSON returned by the tool.
+currentUserScopeOrderResponse (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application" for org-level.
@@ -45,6 +68,7 @@ Errors
 Example request
 
 update_search_settings({
-  "target": "org",
-  "searchSettingsByObject": [{ "sObject": "Project__c", "enhancedLookupEnabled": true, "lookupAutoCompleteEnabled": true, "resultsPerPageCount": 25 }]
+  "settings": "{\\\"singleSearchResultShortcutEnabled\\\":true}.",
+  "searchSettingsByObject": "[{\\\"name\\\":\\\"Account\\\",\\\"resultsPerPageCount\\\":25}].",
+  "objectSettingsOperation": "merge."
 })

@@ -16,35 +16,35 @@ per-app base URLs:
   call into.
 
 Endpoint
-GET  https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
-GET  https://{tenant}.auth.marketingcloudapis.com/v2/discovery?client_id={clientId}&resource=acct:{userId}
-POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx        (`Retrieve` Account for richer fields)
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/tokenContext
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/endpoints
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+SOAP object: Account
+GET https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
+GET https://{tenant}.auth.marketingcloudapis.com/v2/discovery
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json (REST) or text/xml (SOAP)
 
 Body
-None for the GETs. SOAP envelope built by the MCP server.
+SOAP request on Account.
 
 Input (parameters)
-includeBusinessUnits (boolean, optional, default true).
-includeBaseUrls (boolean, optional, default true) - Calls `/v2/discovery`.
+business_unit_id (string, optional) - Business Unit MID used to request a BU-scoped token and SOAP ClientID context.
+include_base_urls (boolean, optional) - Call /platform/v1/endpoints to retrieve tenant endpoint URLs. Defaults to true.
+include_account (boolean, optional) - Retrieve the current Account record by MID through SOAP. Defaults to true.
+include_business_units (boolean, optional) - Retrieve accessible Account records with QueryAllAccounts=true through SOAP. Defaults to
+true.
+include_token_context (boolean, optional) - Call /platform/v1/tokenContext to include the raw token context. Defaults to true.
+include_discovery (boolean, optional) - Also call the auth-host /v2/discovery endpoint when client_id and a discovery resource
+are available. Defaults to false.
+discovery_resource (string, optional) - Optional resource query value for /v2/discovery, for example acct:123456. Defaults to
+the selected/current MID when available.
 
 Result
-tenant (object):
-  subdomain (string), authUrl (string), restInstanceUrl (string), soapInstanceUrl (string).
-discovery (object|null, when includeBaseUrls=true) - { rest_instance_url, soap_instance_url, auth_url, additional_base_urls (array) }.
-account (object):
-  id (number) - MID.
-  name (string).
-  edition (string) - "ProEdition" | "EnterpriseEdition" | "Corporate" etc.
-  enterpriseId (number).
-  parentId (number|null).
-  accountType (string) - "EnterpriseLite" | "Enterprise2" | "BusinessUnit".
-  timeZone (string).
-  currency (string).
-businessUnits (array, when includeBusinessUnits=true and account is enterprise) - [{ id, name, accountType }].
+userInfo (value) - included in the JSON returned by the tool.
+tokenResponse (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `accounts_read`.

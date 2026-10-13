@@ -8,7 +8,8 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions/?id={id}&extras=all&mostRecentVersionOnly=false`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/?id={id}&extras=all&mostRecentVersionOnly=false
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+Optional query: $page, $pageSize, extras, id, key, mostRecentVersionOnly
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,12 +19,18 @@ Body
 None.
 
 Input (parameters)
-journeyId (string, optional).
-journeyKey (string, optional).
-  One required.
+journey_id (string, optional) - Journey ID. Required when journey_key is omitted. Salesforce returns all versions when
+id is used with mostRecentVersionOnly=false.
+journey_key (string, optional) - Journey external key. Required when journey_id is omitted.
+extras (value, optional) - Optional extra data to include for each version. Defaults to stats. Use all only when
+you need complete definitions.
+page (number, optional) - Salesforce $page value. Defaults to 1.
+page_size (number, optional) - Salesforce $pageSize value. Defaults to 50, maximum 50.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-versions (array) - Each: { version, status, lastPublishedDate, createdDate, modifiedDate, definitionType, totalEntries, currentPopulation }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -36,4 +43,4 @@ Errors
 
 Example request
 
-list_journey_versions({ "journeyKey": "MTG_Welcome_Series" })
+list_journey_versions({})

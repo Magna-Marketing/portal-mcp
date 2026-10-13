@@ -24,28 +24,12 @@ Body
 None.
 
 Input (parameters)
-name (string, required) - DeveloperName (e.g. "Project__c_Record_Page").
-includeXml (boolean, optional, default false) - Include the raw XML
-  body. Off by default; structured form is more useful.
+name (string, required) - FlexiPage DeveloperName; string exact API name; no default;
+example: Account_Record_Page; do not pass labels, URLs, Metadata API file paths, or
+multiple names.
 
 Result
-flexiPage (object):
-  id, name, label, type ("RecordPage"|"AppPage"|"HomePage"|...),
-  sObject (string|null) - Resolved from EntityDefinitionId for RecordPage,
-    null otherwise.
-  namespacePrefix (string|null), manageableState (string),
-  description (string|null).
-  template (string) - Lightning template name (e.g. "flexipage:headerLabel").
-  regions (array) - Each:
-    name (string) - Region API name (e.g. "header", "main", "right").
-    type (string) - "Region" | "Facet".
-    appendable (boolean).
-    components (array) - Each:
-      identifier (string) - Component identifier in the region.
-      componentName (string) - "lightning:relatedListContainer", or
-        "c:projectCard" for custom LWC.
-      componentInstanceProperties (array) - { name, value }.
-xml (string, optional) - Raw FlexiPage metadata XML when includeXml=true.
+object with raw queried FlexiPage row and raw Tooling sObject response.
 
 Required permissions
 - "Customize Application".
@@ -58,23 +42,10 @@ Errors
 
 Example request
 
-read_flexipage({ "name": "Project__c_Record_Page" })
+read_flexipage({
+  "name": "Account_Record_Page"
+})
 
-Example result (truncated)
+Example result
 
-{
-  "flexiPage": {
-    "id": "0M04Q00000aBcDef", "name": "Project__c_Record_Page",
-    "label": "Project Record Page", "type": "RecordPage", "sObject": "Project__c",
-    "template": "flexipage:recordHomeWithHeader",
-    "regions": [
-      { "name": "main", "type": "Region", "components": [
-        { "identifier": "highlight_panel", "componentName": "force:highlightsPanel" },
-        { "identifier": "tabs",            "componentName": "flexipage:tabset" }
-      ]},
-      { "name": "right", "type": "Region", "components": [
-        { "identifier": "card",            "componentName": "c:projectCard" }
-      ]}
-    ]
-  }
-}
+object with raw queried FlexiPage row and raw Tooling sObject response.

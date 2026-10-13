@@ -22,16 +22,28 @@ Body
 None.
 
 Input (parameters)
-slice (string, optional, default "apps") - "apps" | "appUsers" | "appUserTokens".
-appId (string, optional) - Required for slices "appUsers" / "appUserTokens".
-userId (string, optional) - For "appUserTokens".
-page (number, optional, default 0).
-pageSize (number, optional, default 100, max 200).
+namePattern (string, optional) - ConnectedApplication Name filter using * and ?
+wildcards; string converted to SOQL LIKE; no default; example: Salesforce*; do not pass
+raw LIKE syntax, regex, client secrets, or comma-separated names.
+startUrlPattern (string, optional) - StartUrl filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: https://app.example.com/*; do not pass
+regex, SOQL fragments, or callback URLs unless they are stored in StartUrl.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+ConnectedApplication; string without WHERE; no default; example:
+OptionsAllowAdminApprovedUsersOnly = true; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for ConnectedApplication; string without
+ORDER BY; default Name; example: Name ASC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ConnectedApplication rows to query; positive integer
+clamped to 2000; default 200; example: 50; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-slice (string).
-results (array) - Shape varies per slice. Common keys: { appId, appName, userId, username, lastUsedDate, totalApiCalls, scopes, tokenIds }.
-hasMore (boolean), page (number).
+Returns the raw Salesforce QueryResult for ConnectedApplication records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Connected Apps" + "View Setup and Configuration".
@@ -44,4 +56,8 @@ Errors
 
 Example request
 
-get_oauth_app_usage({ "slice": "apps" })
+get_oauth_app_usage({
+  "namePattern": "Salesforce*",
+  "startUrlPattern": "https://app.example.com/*",
+  "whereClause": "OptionsAllowAdminApprovedUsersOnly = true"
+})

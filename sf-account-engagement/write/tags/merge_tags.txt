@@ -11,7 +11,7 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST https://{pi-domain}/api/v5/objects/tags/:id/do/mergeTags
+POST https://{pi-domain}/api/v5/objects/tags/{mainTagId}/do/merge
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,18 +20,15 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{ "sourceTagIds": [212, 213] }
+POST: mergeTagIds
 
 Input (parameters)
-id (number, required) - Target tag id (the survivor).
-sourceTagIds (number[], required) - Tags to absorb into `id`. Up to
-  50 sources per call.
+mainTagId (number, required) - Tag id of the tag to keep. All tag-object associations from the source tags will be
+moved here.
+mergeTagIds (number[], required) - Tag ids to merge into the mainTag. These tags will be deleted after the merge.
 
 Result
-success (boolean).
-tag (object) - Refreshed target tag (with updated objectCount).
-mergedCount (number) - Number of tagged-object rows rewritten.
-deletedTagIds (number[]) - Source tags that were deleted.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -46,12 +43,11 @@ Errors
 
 Example request
 
-merge_tags({ "id": 211, "sourceTagIds": [212, 213] })
+merge_tags({
+  "mainTagId": 1,
+  "mergeTagIds": []
+})
 
 Example result
-{
-  "success": true,
-  "tag": { "id": 211, "name": "Welcome 2026", "objectCount": 41 },
-  "mergedCount": 27,
-  "deletedTagIds": [212, 213]
-}
+
+{ }

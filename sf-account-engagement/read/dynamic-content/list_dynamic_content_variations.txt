@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/dynamic-content-variations?filter[dynamicContentId]=eq,:id&fields={fields}
+GET https://{pi-domain}/api/v5/objects/dynamic-content-variations
+Optional query: fields, limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,18 +22,14 @@ Body
 None.
 
 Input (parameters)
-dynamicContentId (number, required).
-fields (string[], optional, default: id,dynamicContentId,comparison,
-  content,operator,value1,value2).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+dynamicContentId (number, required) - Dynamic Content block id whose variations to list. Required.
+fields (string[], optional) - Field projection. Defaults to id, dynamicContentId, comparison, content, operator,
+value1, value2.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-variations (array) - Each: { id, dynamicContentId, comparison
-  ("is" | "isNot" | "contains" | "doesNotContain" | "isBetween"),
-  operator (EQUAL | NOT_EQUAL | GREATER_THAN | LESS_THAN | BETWEEN),
-  value1 (string), value2 (string|null), content (string - HTML) }.
-nextPageToken (string|null).
+variations (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `pardot_api`.
@@ -45,12 +42,12 @@ Errors
 
 Example request
 
-list_dynamic_content_variations({ "dynamicContentId": 41 })
+list_dynamic_content_variations({
+  "dynamicContentId": 1
+})
 
 Example result
+
 {
-  "variations": [
-    { "id": 92, "dynamicContentId": 41, "comparison": "is",
-      "operator": "EQUAL", "value1": "EMEA", "content": "<p>Bonjour!</p>" }
-  ]
+  "variations": null
 }

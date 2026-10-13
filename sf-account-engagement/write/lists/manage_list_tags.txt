@@ -16,7 +16,8 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 
 Body
-{ "tag": "MQL" }
+POST: name
+POST: tagId
 
 Input (parameters)
 id (number, required).
@@ -24,7 +25,7 @@ operation (string, required) - "add" | "remove".
 tag (string, required).
 
 Result
-success (boolean), listId (number), tag (string), operation (string).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -40,4 +41,5 @@ Example request
 manage_list_tags({ "id": 301, "operation": "add", "tag": "MQL" })
 
 Example result
-{ "success": true, "listId": 301, "tag": "MQL", "operation": "add" }
+
+{ }

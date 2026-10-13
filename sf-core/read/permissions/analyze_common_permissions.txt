@@ -13,12 +13,10 @@ Use to plan deduplication before running `generate_migration_plan` or
 `extract_permissions_from_profile`.
 
 Salesforce API
-REST API + Tooling, v66.0. SOQL on `Profile`, `ObjectPermissions`,
-`FieldPermissions`, `PermissionSet`. The MCP server intersects the
-permission sets server-side.
+REST API (Data), v66.0.
 
 Endpoint
-N/A (composite of read queries).
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Label, Description, Type, ProfileId, Profile.Name, LicenseId, PermissionSetGroupId, IsCustom, IsOwnedByProfile, NamespacePrefix, CreatedDate, LastModifiedDate, PermissionsApiEnabled, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, PermissionsAuthorApex, PermissionsViewSetup FROM PermissionSet
 
 Headers
 Authorization: Bearer <access_token>
@@ -28,32 +26,24 @@ Body
 None.
 
 Input (parameters)
-scope (string, required) - "profiles" | "permissionSets" | "both".
-ids (string[], optional) - Profile or PermissionSet Ids to analyze. If
-  omitted, all custom profiles or permission sets in the org are used.
-names (string[], optional) - Same as `ids` but using DeveloperNames.
-threshold (number, optional, default 100) - Percent (0-100). 100 = held
-  by every analyzed entity; 80 = held by ≥80% (then the remaining ones
-  are listed as "missing").
-includeFieldPermissions (boolean, optional, default false) - Heavy.
-limit (number, optional, default 100) - Cap on returned consolidation
-  candidates.
+namePattern (string, optional) - PermissionSet Name pattern to match; string with * and
+? wildcards converted to SOQL LIKE; no default; example: Sales_*; do not pass regex, raw
+LIKE syntax, labels, or comma-separated names.
+whereClause (string, optional) - Additional SOQL WHERE condition for PermissionSet;
+string without WHERE; no default; example: IsCustom = true AND IsOwnedByProfile = false;
+do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for PermissionSet; string without ORDER BY;
+default Name ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT, or
+FROM.
+limit (integer, optional) - Maximum PermissionSet rows to query; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-analyzed (array) - Each: { id, name, label, type ("Profile"|"PermissionSet") }.
-common (object):
-  systemPermissions (string[]) - Permissions held by all (>= threshold).
-  objectPermissions (array) - Each: { sObject, read, create, edit,
-    delete, viewAll, modifyAll, percentHolding (number) }.
-  fieldPermissions (array, optional) - { sObject, field, read, edit,
-    percentHolding }.
-consolidationCandidates (array) - Suggested permsets:
-  proposedName (string).
-  proposedLabel (string).
-  contains (object) - { systemPermissions, objectPermissions, fieldPermissions }.
-  wouldReplaceFrom (string[]) - Profile/permset names to remove these
-    perms from once the new permset is created.
-  estimatedUsersBenefit (number).
+Returns a raw Salesforce QueryResult for PermissionSet records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration", read on metadata sObjects.
@@ -68,38 +58,21 @@ Errors
 Example request
 
 analyze_common_permissions({
-  "scope": "profiles",
-  "names": ["MTG_Project_Manager_Profile", "MTG_Delivery_Profile", "MTG_Sales_Profile"],
-  "threshold": 80,
-  "includeFieldPermissions": false
+  "namePattern": "Sales_*",
+  "whereClause": "IsCustom = true AND IsOwnedByProfile = false",
+  "orderBy": "LastModifiedDate DESC"
 })
 
 Example result
 
 {
-  "analyzed": [
-    { "name": "MTG_Project_Manager_Profile", "type": "Profile" },
-    { "name": "MTG_Delivery_Profile",        "type": "Profile" },
-    { "name": "MTG_Sales_Profile",           "type": "Profile" }
-  ],
-  "common": {
-    "systemPermissions": ["ApiEnabled", "RunReports", "ViewMyTeamsDashboards"],
-    "objectPermissions": [
-      { "sObject": "Account",     "read": true, "edit": true, "create": false, "delete": false, "viewAll": false, "modifyAll": false, "percentHolding": 100 },
-      { "sObject": "Opportunity", "read": true, "edit": true, "create": true,  "delete": false, "viewAll": false, "modifyAll": false, "percentHolding": 100 },
-      { "sObject": "Project__c",  "read": true, "edit": true, "create": true,  "delete": false, "viewAll": false, "modifyAll": false, "percentHolding": 67 }
-    ]
-  },
-  "consolidationCandidates": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "proposedName": "MTG_Account_Read_Edit",
-      "proposedLabel": "MTG | Account Read+Edit",
-      "contains": {
-        "systemPermissions": ["ApiEnabled", "RunReports"],
-        "objectPermissions": [{ "sObject": "Account", "read": true, "edit": true }]
-      },
-      "wouldReplaceFrom": ["MTG_Project_Manager_Profile", "MTG_Delivery_Profile", "MTG_Sales_Profile"],
-      "estimatedUsersBenefit": 41
+      "attributes": {
+        "type": "PermissionSet"
+      }
     }
   ]
 }

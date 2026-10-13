@@ -11,31 +11,11 @@ rather than merging. This tool reads the existing metadata first, applies your
 targeted changes, then writes back the complete record — preserving all existing
 permissions on other fields.
 
-Salesforce APIs Used (v66.0)
-Metadata API PermissionSet and Profile types.
-Underlying SOAP endpoint: /services/Soap/m/66.0
-jsforce: conn.metadata.read / conn.metadata.update (or readMetadata / updateMetadata)
+Salesforce API
+Metadata API (SOAP), v66.0.
 
-Corrections vs original documentation:
-- Original doc listed "POST /services/data/v66.0/metadata/deployRequest" as the
-  endpoint. The correct approach uses the Metadata SOAP API read/update pattern
-  (no ZIP assembly required).
-- The 'permissionSetGroups' parameter was listed in the original doc, but PSG
-  metadata cannot be updated directly — you update the underlying member
-  PermissionSets. Removed from this tool.
-- Field format must be "ObjectName.FieldName" (e.g. "Account.Tax_Id__c"), not
-  just the field API name. The tool handles this construction from the {object, field}
-  input.
-- 'grant' never downgrades: if a field already has edit access and you grant read,
-  the edit access is preserved.
-- Added 'checkOnly' parameter for previewing changes without API calls.
-- Profiles are read/written one at a time due to large metadata size.
-- PermissionSets are read in batches of up to 10 (Metadata API limit).
-
-Headers (managed by jsforce internally)
-Authorization: Bearer <access_token>
-Content-Type: text/xml; charset=utf-8
-SOAPAction: readMetadata | updateMetadata
+Endpoint
+POST /services/Soap/m/66.0  (updateMetadata PermissionSet)
 
 Input (parameters)
 operation (string, required) - "grant" | "revoke" | "set".
@@ -61,25 +41,15 @@ checkOnly (boolean, optional, default false) - Return planned changes without
   making any API calls.
 
 Result
-{
-  operation: string,
-  access: string,
-  fields: string[],           // Qualified field names e.g. "Account.Tax_Id__c"
-  permissionSets: [{
-    target: string,           // PermissionSet API name
-    readResponse: any,        // Raw Metadata API read response
-    updateResponse: any       // Raw Metadata API update response
-  }, ...],
-  profiles: [{
-    target: string,
-    readResponse: any,
-    updateResponse: any
-  }, ...]
-}
-
-updateResponse shape (success): SaveResult — { fullName, success: true, errors: [] }
-updateResponse shape (failure): SaveResult — { fullName, success: false, errors: [...] }
-  or { error: "error message" } if allOrNone=false and the call threw.
+{ operation, access, fields, permissionSets, profiles } with raw readResponse and
+updateResponse values per target.
+checkOnly (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+access (value) - included in the JSON returned by the tool.
+fields (value) - included in the JSON returned by the tool.
+permissionSets (value) - included in the JSON returned by the tool.
+profiles (value) - included in the JSON returned by the tool.
+note (value) - included in the JSON returned by the tool.
 
 Required permissions
 - Customize Application

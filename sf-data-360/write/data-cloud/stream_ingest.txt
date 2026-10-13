@@ -38,10 +38,7 @@ objectApiName (string, required) - Source-side object name.
 data (object[], required) - Up to 200 records per call.
 
 Result
-acceptedCount (number) - Records accepted for downstream async processing.
-rejectedCount (number) - Rejected at API boundary (schema / type).
-errors (array) - { index, code, message }.
-ingestId (string).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -66,8 +63,5 @@ stream_ingest({
 })
 
 Example result
-{
-  "acceptedCount": 1,
-  "rejectedCount": 0,
-  "ingestId": "ING_abc123"
-}
+
+{ }

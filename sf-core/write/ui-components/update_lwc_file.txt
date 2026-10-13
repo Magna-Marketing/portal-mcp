@@ -31,10 +31,7 @@ expectedFormat (string, optional) - Format assertion: "js" | "html" | "css"
   | "xml" | "svg" | "json". Returns an error if the inferred format differs.
 
 Result
-resourceId (string) - LightningComponentResource Id.
-filePath (string) - Full FilePath value.
-format (string) - Inferred format.
-updateResult (object) - Raw PATCH response (or { success: true } for 204).
+raw Tooling API PATCH response, which can be empty for 204 No Content.
 
 Required permissions
 - "Customize Application".

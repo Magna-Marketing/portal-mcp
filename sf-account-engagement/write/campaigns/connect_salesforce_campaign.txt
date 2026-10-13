@@ -19,16 +19,14 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{ "salesforceId": "7015800000xyz123" }
+POST: salesforceCampaignId
 
 Input (parameters)
 id (number, required) - Pardot campaign id.
 salesforceId (string, required) - 18-char SFDC Campaign id.
 
 Result
-success (boolean).
-campaign (object) - Updated campaign row, now with `salesforceId`
-  populated.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -48,8 +46,5 @@ Example request
 connect_salesforce_campaign({ "id": 1024, "salesforceId": "7015800000xyz123" })
 
 Example result
-{
-  "success": true,
-  "campaign": { "id": 1024, "name": "Welcome 2026",
-    "salesforceId": "7015800000xyz123" }
-}
+
+{ }

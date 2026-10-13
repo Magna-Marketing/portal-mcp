@@ -19,31 +19,23 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: multipart/form-data
 Accept: application/json
 
-Body (multipart)
-- engagementStudioProgram (string, JSON): metadata
-  { "name": "Onboarding 2026", "description": "...", "recipientListId": 301,
-    "suppressionListIds": [310], "businessHoursId": 1, "scheduleType": "Continuous",
-    "campaignId": 1024, "folderId": 33 }
-- file (file): program-structure.yaml (the step graph)
+Body
+POST multipart parts: engagementStudioProgram, file
 
 Input (parameters)
-name (string, required).
-description (string, optional).
-recipientListId (number, required) - The list of prospects entering
-  the program.
-suppressionListIds (number[], optional).
-businessHoursId (number, optional, default the BU's default hours).
-scheduleType (string, optional, default "Continuous") - "Continuous" |
-  "Schedule".
-campaignId (number, optional).
-folderId (number, optional).
-programStructureYaml (string, required) - Inline YAML; MCP server
-  packages it as the multipart `file` part.
-programStructureBase64 (string, optional) - Alternative to inline.
+name (string, required) - Program name. Required.
+description (string, optional) - Optional description of the program.
+recipientListId (number, required) - Id of the prospect list that feeds into this program. Required.
+suppressionListIds (number[], optional) - Lists whose members are excluded from the program.
+businessHoursId (number, optional) - Business hours schedule id. Defaults to the BU default.
+scheduleType ("Continuous" | "Schedule", optional) - "Continuous" enrolls new prospects automatically; "Schedule" uses a defined run window.
+campaignId (number, optional) - Campaign to attribute program activity to.
+folderId (number, optional) - Folder to organize the program in.
+programStructureYaml (string, required) - YAML definition of the step graph (rules, actions, triggers, email sends, branches).
+Required.
 
 Result
-engagementProgram (object) - Created in `Draft` status. Use the SFDC
-  Pardot UI (or a future v5 `do/publish` endpoint) to publish.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -59,13 +51,11 @@ Errors
 Example request
 
 upload_engagement_studio_program({
-  "name": "Onboarding 2026",
-  "recipientListId": 301,
-  "campaignId": 1024,
-  "programStructureYaml": "schedule: continuous\nsteps:\n  - id: 1\n    type: ActionEmail\n    ..."
+  "name": "",
+  "recipientListId": 1,
+  "programStructureYaml": ""
 })
 
 Example result
-{
-  "engagementProgram": { "id": 311, "name": "Onboarding 2026", "status": "Draft" }
-}
+
+{ }

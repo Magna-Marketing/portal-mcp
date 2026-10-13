@@ -6,10 +6,10 @@ Approve, reject, or recall an in-flight approval. Acts on a
 approver).
 
 Salesforce API
-REST API (Process Approvals), v66.0. Same `POST /process/approvals` endpoint with `actionType` "Approve" | "Reject" | "Removed".
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/process/approvals/
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -26,15 +26,30 @@ Body
 }
 
 Input (parameters)
-records (object[], required) - Each:
-  workitemId (string, optional) - ProcessInstanceWorkitem Id.
-  recordId (string, optional) - Record under approval; tool resolves to current workitem for running user.
-  action (string, required) - "approve" | "reject" | "recall".
-  comments (string, optional).
-  nextApproverIds (string[], optional) - For multi-step approvals where the next step needs explicit approver.
+records (object[], optional) - Approval work item actions; non-empty array posted in one
+Process Approvals call; no default; example:
+[{\"workitemId\":\"04ixx0000008abcAAA\",\"action\":\"approve\"}]; do not mix actions if
+partial failure handling is undesirable.
+  workitemId (string, optional) - Process request contextId; string
+  ProcessInstanceWorkitem Id preferred for approve, reject, or recall; no default;
+  example: '04ixx0000008abcAAA'; do not pass the target record Id here.
+  recordId (string, optional) - Target record Id under approval; string used only to
+  query the latest pending ProcessInstanceWorkitem when workitemId is omitted; no
+  default; example: '006xx000004TmiQAAS'; do not pass when multiple pending workitems
+  require a specific actor.
+  action ("approve" | "reject" | "recall", required) - Approval action; enum approve,
+  reject, or recall, mapped to REST actionType Approve, Reject, or Removed; no default;
+  example: 'approve'; do not pass submit here.
+  comments (string, optional) - Process request comments; string stored in approval
+  history; omitted sends no comment; example: 'Approved'; do not pass sensitive data not
+  intended for approval history.
+  nextApproverIds (string[], optional) - Process request nextApproverIds; array of
+  Salesforce User Ids for the next approval step; omitted lets Salesforce resolve
+  approvers; example: ['005xx000001Sv6dAAC']; do not pass usernames or queue names.
 
 Result
-results (array) - { workitemId, instanceId, action, instanceStatus, errors }.
+JSON containing the raw ProcessInstanceWorkitem query when lookup is needed and the raw
+POST /services/data/v66.0/process/approvals/ response.
 
 Required permissions
 - Be a permitted actor on the workitem (or have "Modify All Data" for recall).
@@ -48,5 +63,5 @@ Errors
 Example request
 
 process_approval_action({
-  "records": [{ "workitemId": "04iQg00000abcDE", "action": "approve", "comments": "Approved" }]
+  "records": "[{\\\"workitemId\\\":\\\"04ixx0000008abcAAA\\\",\\\"action\\\":\\\"approve\\\"}]"
 })

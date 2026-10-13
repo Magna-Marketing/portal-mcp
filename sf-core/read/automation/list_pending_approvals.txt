@@ -18,19 +18,51 @@ Body
 None.
 
 Input (parameters)
-approverId (string, optional) - Limit to records where this user has a pending workitem.
-approverUsername (string, optional).
-submitterId (string, optional).
-sObject (string, optional) - Restrict by TargetObjectId's sObject.
-processDefinitionName (string, optional).
-sinceHours (number, optional).
-includeSteps (boolean, optional, default false) - Include the audit trail per process instance.
-limit (number, optional, default 200).
+approverId (string, optional) - User or queue Id assigned to a pending
+ProcessInstanceWorkitem; Salesforce Id string; no default; example: 005xx0000012345AAA;
+do not pass usernames, names, or comma-separated values.
+approverUsername (string, optional) - Username used to resolve a User Id for pending
+workitem filtering; string username; no default; example: approver@example.com; ignored
+when approverId is supplied, and do not pass display names or SOQL.
+submitterId (string, optional) - SubmittedById exact filter for ProcessInstance;
+Salesforce User Id string; no default; example: 005xx0000012345AAA; do not pass
+usernames or names.
+sObject (string, optional) - TargetObject polymorphic type filter; object API name
+string; no default; example: Opportunity; do not pass labels, record Ids, relationship
+names, or SOQL fragments.
+processDefinitionName (string, optional) - ProcessDefinition.Name exact filter; string
+developer name; no default; example: Discount_Approval; do not pass labels unless they
+are the API Name.
+processDefinitionNamePattern (string, optional) - ProcessDefinition.Name wildcard filter
+using * and ?; string converted to SOQL LIKE; no default; example: Discount_*; do not
+combine with processDefinitionName unless both should apply.
+sinceHours (integer, optional) - Relative CreatedDate filter using LAST_N_HOURS;
+positive integer hours; no default; example: 24; do not pass 0, negatives, decimals, or
+date strings.
+includeSteps (boolean, optional) - Whether to query ProcessInstanceStep rows for
+returned instances; boolean; default false; example: true; pass false to avoid
+audit-history volume.
+whereClause (string, optional) - Additional SOQL WHERE condition for ProcessInstance;
+string without WHERE; no default; example: CreatedDate = LAST_N_DAYS:7; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for ProcessInstance; string without ORDER BY;
+default CreatedDate DESC; example: CreatedDate ASC; do not pass WHERE, LIMIT, SELECT, or
+FROM.
+limit (integer, optional) - Maximum ProcessInstance rows to query; positive integer
+clamped to 2000; default 200; example: 50; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-totalSize (number).
-pendingApprovals (array) - Each:
-  processInstanceId, status, processDefinitionName, sObject, recordId, recordName, submittedBy, submittedAt, currentApprovers (array of { userId, name, workitemId }), steps (array, optional).
+Returns a JSON object with processInstanceQuery, processInstanceResult, workitemsResult,
+and optional stepsResult.
+approverUserResult (value) - included in the JSON returned by the tool.
+approverWorkitemsResult (value) - included in the JSON returned by the tool.
+processInstanceQuery (value) - included in the JSON returned by the tool.
+processInstanceResult (value) - included in the JSON returned by the tool.
+workitemsQuery (value) - included in the JSON returned by the tool.
+workitemsResult (value) - included in the JSON returned by the tool.
+stepsQuery (value) - included in the JSON returned by the tool.
+stepsResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View All Data" or be an actor on the records.
@@ -43,4 +75,8 @@ Errors
 
 Example request
 
-list_pending_approvals({ "approverUsername": "jane.doe@magnatech.com" })
+list_pending_approvals({
+  "approverId": "005xx0000012345AAA",
+  "approverUsername": "approver@example.com",
+  "submitterId": "005xx0000012345AAA"
+})

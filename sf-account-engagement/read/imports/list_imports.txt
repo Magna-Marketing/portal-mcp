@@ -21,25 +21,19 @@ Body
 None.
 
 Input (parameters)
-state (string, optional) - "Open" | "Ready" | "Processing" |
-  "Complete" | "Error" | "Cancelled".
-operation (string, optional) - "Upsert" | "Create".
-createdAfter (string, optional) - ISO-8601.
-createdBefore (string, optional) - ISO-8601.
-fields (string[], optional, default: id,object,operation,state,
-  errorRef,batchProgress,createdAt,updatedAt,createdById,updatedById,
-  campaignId,restoreDeleted,isAllowFieldUpdates,visitorId,
-  isAllowUserToManageProspects,isMatchedOnEmailNotIdsAndCrmId,
-  visibilityListIds,trackerDomainId,visibility).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+state ("Open" | "Ready" | "Processing" | "Complete" | "Error" | "Cancelled", optional) - Filter by import state.
+operation ("Upsert" | "Create", optional) - Filter by import operation.
+createdAfter (string, optional) - ISO-8601 datetime. Filter to imports created after this time.
+createdBefore (string, optional) - ISO-8601 datetime. Filter to imports created before this time.
+fields (string[], optional) - Field projection. Defaults to id, object, operation, state, errorRef, batchProgress,
+createdAt, updatedAt, createdById, updatedById, campaignId, restoreDeleted,
+isAllowFieldUpdates, visitorId, isAllowUserToManageProspects,
+isMatchedOnEmailNotIdsAndCrmId, visibilityListIds, trackerDomainId, visibility.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-imports (array) - Each: { id, object, operation, state, errorRef,
-  batchProgress (object), campaignId, restoreDeleted, isAllowFieldUpdates,
-  visibility, visibilityListIds, isAllowUserToManageProspects,
-  isMatchedOnEmailNotIdsAndCrmId, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -52,13 +46,8 @@ Errors
 
 Example request
 
-list_imports({ "state": "Processing" })
+list_imports({})
 
 Example result
-{
-  "imports": [
-    { "id": 5512, "object": "Prospect", "operation": "Upsert",
-      "state": "Processing",
-      "batchProgress": { "totalBatches": 5, "completedBatches": 3 } }
-  ]
-}
+
+{ }

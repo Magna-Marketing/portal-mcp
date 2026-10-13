@@ -18,31 +18,61 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP envelope.
+SOAP request on TriggeredSendDefinition.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "start" | "pause" | "cancel" | "delete".
-customerKey (string, optional, required for non-create).
-name (string, required for create).
-description (string, optional).
-emailId (number, optional, required for create) - Or emailCustomerKey.
-emailCustomerKey (string, optional).
-sendClassificationCustomerKey (string, required for create).
-senderProfileCustomerKey (string, optional).
-deliveryProfileCustomerKey (string, optional).
-fromName (string, optional).
-fromAddress (string, optional).
-isMultipart (boolean, optional, default true).
-suppressTracking (boolean, optional, default false).
-batchInterval (number, optional, default 30) - Minutes between batches when AutoAddSubscribers is true.
-autoAddSubscribers (boolean, optional, default false).
-autoUpdateSubscribers (boolean, optional, default false).
-refreshContent (boolean, optional, default true).
-folderId (number, optional).
-keepExistingSubscribers (boolean, optional, default true) - Some operations.
+operation ("create" | "update" | "start" | "pause" | "cancel" | "delete", required) - create=SOAP Create TriggeredSendDefinition; update/start/pause/cancel=SOAP Update;
+delete=SOAP Delete.
+customer_key (string, optional) - TriggeredSendDefinition.CustomerKey external key. Required for non-create unless
+raw_triggered_send_definition_xml is supplied.
+object_id (string, optional) - TriggeredSendDefinition.ObjectID. Can identify update/delete instead of customer_key.
+name (string, optional) - TriggeredSendDefinition.Name. Required for create unless
+raw_triggered_send_definition_xml is supplied.
+description (string, optional) - TriggeredSendDefinition.Description.
+email_id (number, optional) - Classic Email.ID or Content Builder legacyData.legacyId used by the
+TriggeredSendDefinition.Email reference.
+email_customer_key (string, optional) - Email.CustomerKey used by the TriggeredSendDefinition.Email reference when ID is not
+supplied.
+email_subject (string, optional) - TriggeredSendDefinition.EmailSubject. Salesforce requires this when updating a TSD that
+includes Email.
+send_classification_customer_key (string, optional) - SendClassification.CustomerKey. Required for create unless
+raw_triggered_send_definition_xml is supplied.
+sender_profile_customer_key (string, optional) - Optional SenderProfile.CustomerKey override. Usually inherited from SendClassification.
+delivery_profile_customer_key (string, optional) - Optional DeliveryProfile.CustomerKey override. Usually inherited from
+SendClassification.
+list_id (number, optional) - Optional List.ID used as the triggered send subscriber list.
+list_customer_key (string, optional) - Optional List.CustomerKey used as the triggered send subscriber list.
+send_source_data_extension_customer_key (string, optional) - Optional sendable DataExtension.CustomerKey for
+TriggeredSendDefinition.SendSourceDataExtension.
+status ("New" | "Active" | "Inactive" | "Canceled" | "Deleted", optional) - Explicit TriggeredSendStatus for create/update. start maps to Active, pause maps to
+Inactive, cancel maps to Canceled.
+from_name (string, optional) - Deprecated TriggeredSendDefinition.FromName override. Prefer
+SenderProfile/SendClassification.
+from_address (string, optional) - Deprecated TriggeredSendDefinition.FromAddress override. Prefer
+SenderProfile/SendClassification.
+is_multipart (boolean, optional) - TriggeredSendDefinition.IsMultipart. Defaults to true on create.
+is_wrapped (boolean, optional) - TriggeredSendDefinition.IsWrapped. Enables click tracking when true.
+suppress_tracking (boolean, optional) - TriggeredSendDefinition.SuppressTracking when supported by the tenant.
+batch_interval (number, optional) - TriggeredSendDefinition.BatchInterval in minutes.
+auto_add_subscribers (boolean, optional) - TriggeredSendDefinition.AutoAddSubscribers.
+auto_update_subscribers (boolean, optional) - TriggeredSendDefinition.AutoUpdateSubscribers.
+refresh_content (boolean, optional) - TriggeredSendDefinition.RefreshContent. Use true to publish content changes when
+updating, pausing, or restarting.
+category_id (number, optional) - TriggeredSendDefinition.CategoryID folder identifier when supported.
+raw_triggered_send_definition_xml (string, optional) - Exact <Objects xsi:type="TriggeredSendDefinition">...</Objects> XML to send. Use for
+uncommon Salesforce fields not exposed by this schema.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID / REST
+Account-Context. Defaults to the authenticated session MID when present.
+client_business_unit_id (number, optional) - Optional SOAP object owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use when authenticating at parent level but writing into a
+child Business Unit.
 
 Result
-triggeredSend (object) - { id, customerKey, name, status ("New"|"Active"|"Paused"|"Inactive"|"Cancelled"), emailId }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_write`, `email_send`.

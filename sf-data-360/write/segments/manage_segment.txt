@@ -9,9 +9,15 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST   {instanceUrl}/services/data/v{ver}/ssot/segments                        (operation="create")
-PATCH  {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName         (operation="update")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName         (operation="delete")
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/segments
+Optional query: dataspace
+(operation=create). dataspace is omitted when empty.
+
+PATCH {salesforceInstanceUrl}/services/data/v65.0/ssot/segments/{segmentApiName}
+(operation=update)
+
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/segments/{segmentApiName}
+(operation=delete)
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,36 +25,47 @@ Content-Type: application/json
 Accept: application/json
 
 Body (create)
-{
-  "apiName": "EMEAHighValue",
-  "label": "EMEA High-value Customers",
-  "description": "Region=EMEA AND LTV >= 5000",
-  "dataSpace": "default",
-  "dmoApiName": "UnifiedIndividual__dlm",
-  "filter": {
-    "rootGroup": "AND",
-    "conditions": [
-      { "field": "Region__c",        "op": "eq",  "value": "EMEA" },
-      { "field": "LifetimeValue__c", "op": "gte", "value": 5000 }
-    ]
-  },
-  "schedule": { "scheduleType": "Cron", "cronExpression": "0 0 * * * ?" }
-}
+The POST body is the input object after these changes:
+- operation, segmentApiName, label, dmoApiName, dataspace, and apiName are not sent
+- developerName is set from apiName
+- displayName is set from displayName, or from label when displayName is omitted
+- segmentOnApiName is set from segmentOnApiName, or from dmoApiName when segmentOnApiName is omitted
+Remaining input fields are sent as given: description, dataSpace, segmentType, filter, includeDbt, schedule, publishScheduleStartDateTime, publishScheduleEndDateTime, publishScheduleInfo.
+
+Body (update)
+The PATCH body is the input object without operation and segmentApiName.
+
+Body (delete)
+None. When Salesforce returns an empty body, the tool returns deleted true and the segmentApiName.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-segmentApiName (string, required for update / delete).
-apiName (string, required for create).
-label (string, required for create).
-description (string, optional).
-dataSpace (string, optional, default "default").
-dmoApiName (string, required for create).
-filter (object, required for create) - Criteria graph.
-schedule (object, optional).
+operation ("create" | "update" | "delete", required) - The operation to perform: create, update, or delete
+segmentApiName (string, optional) - API name of the segment. Required for update and delete.
+apiName (string, optional) - Developer name for the new segment (maps to developerName in the Salesforce API POST
+body). Required for create.
+displayName (string, optional) - Display name of the segment shown in the UI. Required for create.
+label (string, optional) - Display label (alias for displayName).
+description (string, optional) - Human-readable description of the segment
+dataSpace (string, optional) - Data space to create the segment in (default: 'default')
+segmentOnApiName (string, optional) - API name of the DMO to segment on (e.g., ssot__Individual__dlm). Required for create.
+dmoApiName (string, optional) - API name of the DMO (alias for segmentOnApiName).
+segmentType ("Dbt" | "Dynamic" | "EinsteinGptSegmentsUI" | "Lookalike" | "Realtimez" | "Waterfall", optional) - Segment type per Data 360 Connect API: Dbt (SQL/dbt-based), Dynamic
+(runtime-parameterized via API), Waterfall (chained segments), Realtimez (real-time),
+Lookalike, or EinsteinGptSegmentsUI
+filter (object, optional) - Criteria graph defining segment membership for Waterfall segments
+includeDbt (string[], optional) - DBT model configuration for SQL-based segments
+schedule (object, optional) - Schedule configuration for automatic segment evaluation
+publishScheduleStartDateTime (string, optional) - Start date/time for publish schedule (ISO 8601)
+publishScheduleEndDateTime (string, optional) - End date/time for publish schedule (ISO 8601)
+publishScheduleInfo (object, optional) - Publish schedule configuration (interval, frequency, daysOfWeek)
+dataspace (string, optional) - Data space name as query parameter
 
 Result
-segment (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged. When delete returns an empty body, the tool returns deleted true and the segmentApiName.
+Note returned with the JSON: ⚠️ IMPORTANT NOTE: Vulcan cannot create or update UI-type segments built through the
+Data Cloud UI — the most common type used by Magna teams and clients, due to a
+Salesforce API limitation. Vulcan only supports Dbt, Dynamic, Waterfall, Realtimez,
+Lookalike, and EinsteinGptSegmentsUI segment types.
 
 Required scopes
 - `api`.
@@ -62,15 +79,9 @@ Errors
 Example request
 
 manage_segment({
-  "operation": "create",
-  "apiName": "EMEAHighValue",
-  "label": "EMEA High-value",
-  "dmoApiName": "UnifiedIndividual__dlm",
-  "filter": {
-    "rootGroup": "AND",
-    "conditions": [{ "field": "Region__c", "op": "eq", "value": "EMEA" }]
-  }
+  "operation": ""
 })
 
 Example result
-{ "segment": { "id": "0YS580000000001", "apiName": "EMEAHighValue", "publishStatus": "NotPublished" } }
+
+{ }

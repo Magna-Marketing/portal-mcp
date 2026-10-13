@@ -6,10 +6,10 @@ help content). They are referenced by name (e.g. `$ContentAsset.MyAsset`
 in Apex/Lightning).
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `ContentAsset`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT ContentDocumentId, DeveloperName, IsVisibleByExternalUsers, Language, MasterLabel, NamespacePrefix FROM ContentAsset
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, NamespacePrefix, ContentDocumentId, Language, IsVisibleByExternalUsers, CreatedDate, CreatedById, LastModifiedDate, LastModifiedById, SystemModstamp FROM ContentAsset
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,12 +19,36 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeManaged (boolean, optional, default false).
+pattern (string, optional) - Wildcard filter for MasterLabel or DeveloperName using *
+and ? converted to SOQL LIKE; string; no default; example: Brand_*; do not pass regex or
+raw LIKE syntax.
+namePattern (string, optional) - Legacy alias for pattern against MasterLabel or
+DeveloperName; string with * and ? wildcards; ignored when pattern is provided; example:
+Logo*; prefer pattern and do not pass regex.
+developerName (string, optional) - ContentAsset DeveloperName exact filter; string
+unique API name up to Salesforce limits; no default; example: CompanyLogo; do not pass
+labels, namespaces, or wildcard characters.
+contentDocumentId (string, optional) - Linked ContentDocumentId filter; string Id in 15-
+or 18-character format; no default; example: 069xx0000004C92AAE; do not pass
+ContentVersion Ids or multiple Ids.
+isVisibleByExternalUsers (boolean, optional) - Filters whether unauthenticated external
+users can see the asset file; boolean; no default; example: false; do not pass strings
+such as \"false\".
+whereClause (string, optional) - Additional ContentAsset SOQL WHERE conditions without
+the WHERE keyword; string appended with AND after built-in filters; no default; example:
+Language = 'en_US'; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user text.
+orderBy (string, optional) - ContentAsset ORDER BY clause without the ORDER BY keyword;
+string; default MasterLabel ASC; example: DeveloperName ASC; do not pass WHERE, LIMIT,
+or fields unavailable on ContentAsset.
+limit (integer, optional) - Maximum ContentAsset rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-contentAssets (array) - { id, developerName, masterLabel, namespacePrefix, fileExtension, contentDocumentId, isVisibleByExternalUsers }.
+Returns the raw ContentAsset query response as a JSON object.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -37,4 +61,8 @@ Errors
 
 Example request
 
-list_content_assets({})
+list_content_assets({
+  "pattern": "Brand_*",
+  "namePattern": "Logo*",
+  "developerName": "CompanyLogo"
+})

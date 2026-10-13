@@ -18,14 +18,10 @@ Body
 None.
 
 Input (parameters)
-dataKitDevName (string, required).
+None.
 
 Result
-manifest (object): dataKitDevName, version, components (array<{
-  componentName, componentType ("DataModelObject" | "DataLakeObject" |
-  "CalculatedInsight" | "DataStream" | "Mapping" | "Segment"),
-  isInstalled, dependencies (array<string>), conflictsWith (array)
-}>).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -38,15 +34,8 @@ Errors
 
 Example request
 
-get_data_kit_manifest({ "dataKitDevName": "B2C_Retail_Foundation" })
+get_data_kit_manifest({})
 
 Example result
-{
-  "manifest": {
-    "dataKitDevName": "B2C_Retail_Foundation", "version": "1.5.0",
-    "components": [
-      { "componentName": "Order__dlm", "componentType": "DataModelObject",
-        "isInstalled": true }
-    ]
-  }
-}
+
+{ }

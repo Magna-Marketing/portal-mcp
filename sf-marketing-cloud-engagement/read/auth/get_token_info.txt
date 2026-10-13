@@ -7,9 +7,10 @@ Package client id. Useful for debugging "why is this call returning
 401 / 403?".
 
 Marketing Cloud API
-OAuth 2.0 (introspection convenience over `/v2/userinfo`).
+REST API.
 
 Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/tokenContext
 GET https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
 
 Headers
@@ -20,15 +21,14 @@ Body
 None.
 
 Input (parameters)
-None.
+business_unit_id (string, optional) - Business Unit MID used to request a BU-scoped access token before inspecting token
+context.
+include_user_info (boolean, optional) - Also call /v2/userinfo and include that raw response. Defaults to false.
 
 Result
-token (object):
-  tenant (string), tenantSubdomain (string), accountId (number) - MID,
-  enterpriseId (number), userId (number), userName (string|null),
-  userEmail (string|null), preferred_username (string|null),
-  scopes (string[]), expiresAt (string), issuedAt (string),
-  installedPackageClientId (string).
+Raw Marketing Cloud response JSON, returned unchanged.
+tokenContext (value) - included in the JSON returned by the tool.
+userInfo (value) - included in the JSON returned by the tool.
 
 Required scopes
 - The Installed Package needs at least `offline` scope (issued by default).

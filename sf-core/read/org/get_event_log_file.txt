@@ -19,14 +19,14 @@ Body
 None.
 
 Input (parameters)
-id (string, required) - EventLogFile Id.
-parse (boolean, optional, default true) - When true, parse CSV to JSON rows.
-maxRows (number, optional) - Cap on returned rows when parse=true.
+id (string, required) - EventLogFile record Id whose LogFile field is retrieved;
+Salesforce Id string, usually 15 or 18 characters; required with no default; example:
+0AT5g00000ABCDeGAH; do not pass EventType, filenames, URLs, comma-separated Ids, or SOQL
+fragments.
 
 Result
-file (object) - { id, eventType, logDate, logFileLength, fieldNames, fieldTypes }.
-rows (array, when parse=true) - Each row is an object keyed by fieldName.
-csv (string, when parse=false) - Raw CSV.
+Returns the raw Salesforce LogFile response, typically CSV text for the event type
+schema.
 
 Required permissions
 - "View Event Log Files" + Event Monitoring license.
@@ -40,4 +40,6 @@ Errors
 
 Example request
 
-get_event_log_file({ "id": "0AT4Q00000abcDE", "parse": true, "maxRows": 5000 })
+get_event_log_file({
+  "id": "0AT5g00000ABCDeGAH"
+})

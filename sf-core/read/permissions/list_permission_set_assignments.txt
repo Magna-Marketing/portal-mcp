@@ -10,45 +10,52 @@ For permission set groups use `list_permission_set_group_assignments`.
 For "what does THIS user have?" use `analyze_user_permissions`.
 
 Salesforce API
-REST API (Data), v66.0. Backed by `PermissionSetAssignment` joined to `User`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, ExpirationDate, SystemModstamp FROM PermissionSetAssignment WHERE PermissionSetId = '{permsetId}' AND PermissionSetGroupId = NULL ORDER BY Assignee.Name
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, PermissionSetId, PermissionSet.Name, PermissionSet.Label, PermissionSet.IsOwnedByProfile, ExpirationDate, IsActive, SystemModstamp FROM PermissionSetAssignment
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-permissionSetName (string, optional) - PermissionSet.Name.
-permissionSetId (string, optional) - 18-char PermissionSet Id.
-  One of permissionSetName or permissionSetId is required.
-includeInactiveUsers (boolean, optional, default false) - When true,
-  include assignments to users where IsActive=false.
-includeExpired (boolean, optional, default false) - Include assignments
-  with ExpirationDate < today.
-limit (number, optional, default 2000, max 50000).
-sortBy (string, optional, default "Name") - "Name" | "Username" |
-  "Email" | "ProfileName" | "AssignedDate".
+permissionSetId (string, optional) - PermissionSet Id to filter direct assignments;
+Salesforce Id string; no default; example: 0PS5g000000ABCd; do not pass group Ids,
+names, multiple Ids, or SOQL fragments.
+permissionSetNamePattern (string, optional) - PermissionSet Name pattern; string with *
+and ? wildcards converted to SOQL LIKE; no default; example: Sales_*; do not pass
+labels, group names, regex, or raw LIKE syntax.
+assigneeNamePattern (string, optional) - Assigned user's Name pattern; string with * and
+? wildcards converted to SOQL LIKE; no default; example: Ada*; do not pass usernames,
+regex, raw LIKE syntax, or comma-separated names.
+includeProfileOwned (boolean, optional) - Whether profile-owned permission set
+assignments are included; boolean; default false; example: true; do not pass true when
+only explicit permission set assignments are needed.
+includeInactiveUsers (boolean, optional) - Whether inactive assigned users are included;
+boolean; default false; example: true; do not pass when only active users should be
+listed.
+includeExpiredAssignments (boolean, optional) - Whether expired assignments are
+included; boolean; default false filters ExpirationDate before today; example: true; do
+not pass for current assignments only.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+PermissionSetAssignment; string without WHERE; no default; example: SystemModstamp =
+LAST_N_DAYS:30; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for PermissionSetAssignment; string without
+ORDER BY; default Assignee.Name ASC; example: SystemModstamp DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum assignment rows to query; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-permissionSet (object) - { id, name, label }.
-totalSize (number) - Number of assignments returned (use with hasMore).
-assignments (array) - Each:
-  assignmentId (string) - PermissionSetAssignment Id (use to unassign).
-  userId (string).
-  name (string).
-  username (string).
-  email (string).
-  isActive (boolean).
-  profileName (string).
-  expirationDate (string|null) - ISO date.
-  assignedDate (string) - SystemModstamp.
-hasMore (boolean) - true when limit was hit.
-nextRecordsUrl (string, optional) - Pagination locator.
+Returns the raw Salesforce QueryResult for PermissionSetAssignment records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - API Enabled.
@@ -67,27 +74,21 @@ Errors
 Example request
 
 list_permission_set_assignments({
-  "permissionSetName": "MTG_Project_Manager",
-  "includeInactiveUsers": false
+  "permissionSetId": "0PS5g000000ABCd",
+  "permissionSetNamePattern": "Sales_*",
+  "assigneeNamePattern": "Ada*"
 })
 
 Example result
 
 {
-  "permissionSet": { "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager" },
-  "totalSize": 23,
-  "assignments": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "assignmentId": "0Pa4Q00000abcDEF",
-      "userId": "005Qg0000020aBcDE",
-      "name": "Jane Doe",
-      "username": "jane.doe@magnatech.com",
-      "email": "jane.doe@magnatech.com",
-      "isActive": true,
-      "profileName": "Standard User",
-      "expirationDate": null,
-      "assignedDate": "2026-02-14T18:23:09.000+0000"
+      "attributes": {
+        "type": "PermissionSetAssignment"
+      }
     }
-  ],
-  "hasMore": false
+  ]
 }

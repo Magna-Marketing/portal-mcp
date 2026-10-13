@@ -10,6 +10,12 @@ REST API (`/interaction/v1/eventDefinitions`) + journey definition.
 
 Endpoint
 GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
+Optional query: $page, $pageSize, name
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{journey_id}
+Optional query: extras
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/key:{journey_key}
+Optional query: extras
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{eventDefinitionKey}
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,15 +25,21 @@ Body
 None.
 
 Input (parameters)
-journeyId (string, optional).
-journeyKey (string, optional).
-type (string|string[], optional) - "DataExtension" | "APIEvent" | "AudienceBuilder" | "SalesforceObject" | "ContactEvent".
-namePattern (string, optional).
-limit (number, optional, default 200).
+journey_id (string, optional) - Optional journey ID. When supplied, the tool retrieves the journey with extras=all and
+then retrieves event definitions referenced by trigger eventDefinitionKey values.
+journey_key (string, optional) - Optional journey external key. Used when journey_id is omitted.
+event_definition_name (string, optional) - Optional official Salesforce name query parameter used when listing event definitions
+directly.
+page (number, optional) - Salesforce $page value for direct event definition collection requests. Defaults to 1.
+page_size (number, optional) - Salesforce $pageSize value for direct event definition collection requests. Defaults to
+50, maximum 50.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-totalCount (number).
-audiences (array) - { eventDefinitionKey, name, description, type, dataExtensionId, dataExtensionName, isPlatformObject, mode, sourceApplicationExtensionId, totalEntriesLast30Days (when retrievable) }.
+Raw Marketing Cloud response JSON, returned unchanged.
+journey (value) - included in the JSON returned by the tool.
+eventDefinitions (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `journeys_read`, `audiences_read`.
@@ -40,4 +52,4 @@ Errors
 
 Example request
 
-list_journey_audiences({ "type": "DataExtension" })
+list_journey_audiences({})

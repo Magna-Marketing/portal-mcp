@@ -7,7 +7,8 @@ records are deployable through the Metadata API. Use to understand
 config flags, feature toggles, and per-tenant overrides.
 
 Salesforce API
-Tooling API + REST API, v66.0. SOQL on `EntityDefinition` filtered to `IsCustomMetadataType=true`.
+Tooling API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, NamespacePrefix FROM EntityDefinition
@@ -22,18 +23,38 @@ Body
 None.
 
 Input (parameters)
-namespacePrefix (string, optional).
-namePattern (string, optional).
-includeFields (boolean, optional, default true).
-includeRecordCounts (boolean, optional, default true).
-managedOnly (boolean, optional, default false).
+namespacePrefix (string, optional) - Namespace prefix filter; string compared to
+EntityDefinition.NamespacePrefix, with empty string meaning unpackaged types; no
+default; example: mypkg; do not pass package labels or multiple namespaces.
+namePattern (string, optional) - Pattern for QualifiedApiName or Label; string using *
+and ? wildcards converted to SOQL LIKE; no default; example: Feature*; do not pass
+regex, raw LIKE syntax, or multiple patterns.
+includeFields (boolean, optional) - Whether to include raw sObject describe results for
+each type; boolean; default true; example: false; do not pass true when avoiding extra
+REST calls.
+includeRecordCounts (boolean, optional) - Whether to include raw SELECT COUNT()
+QueryResults for each type; boolean; default true; example: false; do not pass true when
+avoiding extra SOQL calls.
+managedOnly (boolean, optional) - Whether to include only namespaced managed-package
+types; boolean; default false; example: true; do not combine with namespacePrefix unless
+intentionally narrowing further.
+whereClause (string, optional) - Additional SOQL WHERE condition for EntityDefinition;
+string with or without WHERE; no default; example: Label LIKE 'Feature%'; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for EntityDefinition; string with or
+without ORDER BY; default QualifiedApiName ASC; example: Label ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum custom metadata type rows to return; integer from 1
+to 2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-customMetadataTypes (array) - Each:
-  qualifiedApiName (string), label (string), pluralLabel (string), namespacePrefix (string|null), manageableState (string).
-  fields (array, when includeFields=true) - { apiName, label, type, length, picklistValues }.
-  recordCount (number, when includeRecordCounts=true).
+object with raw EntityDefinition QueryResult plus optional raw describes and COUNT()
+QueryResults keyed by QualifiedApiName.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+queryResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -46,4 +67,8 @@ Errors
 
 Example request
 
-list_custom_metadata_types({ "includeRecordCounts": true })
+list_custom_metadata_types({
+  "namespacePrefix": "mypkg",
+  "namePattern": "Feature*",
+  "includeFields": false
+})

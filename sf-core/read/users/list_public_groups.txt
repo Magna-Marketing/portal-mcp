@@ -4,11 +4,10 @@ Description
 List Public Groups (Group with Type='Regular') with members, including nested groups, roles, and role+subordinates. Skip Type='Queue', Type='Role', Type='RoleAndSubordinates' synthetic rows; for those use `list_queues` or `list_user_roles`. Group members can be Users, other Groups, Roles, or Role+Subordinates — all surfaced in `members[]`.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `Group` and `GroupMember`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, Type, OwnerId, RelatedId, DoesIncludeBosses, DoesSendEmailToMembers FROM Group WHERE Type = 'Regular'
-GET /services/data/v66.0/query/?q=SELECT Id, GroupId, UserOrGroupId FROM GroupMember WHERE GroupId IN (...)
+GET /services/data/v66.0/query/?q=SELECT Id, Name, DeveloperName, Type, Description, OwnerId, DoesIncludeBosses, DoesSendEmailToMembers, RelatedId FROM Group
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,18 +17,28 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-ownerName (string, optional) - Group OwnerId.Name match.
-includeMembers (boolean, optional, default true) - Resolve UserOrGroupId into typed entries.
-includeNestedExpansion (boolean, optional, default false) - Expand nested groups one level for total user reach.
-limit (number, optional, default 200).
+pattern (string, optional) - Public group text pattern matched against Name or
+DeveloperName; string using * and ? wildcards converted to SOQL LIKE; no default;
+example: Sales*; do not pass regex, raw LIKE syntax, or role names.
+includeBosses (boolean, optional) - Hierarchy sharing filter; boolean matching
+DoesIncludeBosses for public groups; no default; example: true; do not pass strings such
+as 'true' or setup labels.
+whereClause (string, optional) - Additional SOQL WHERE condition for public Group
+records; string with or without WHERE and applied after Type = 'Regular'; no default;
+example: DoesSendEmailToMembers = true; do not pass SELECT, FROM, ORDER BY, LIMIT, Type
+filters that contradict Regular, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for public Group records; string with
+or without ORDER BY; default Name ASC; example: DeveloperName ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum public group rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-groups (array) - Each:
-  id, name, developerName, type "Regular", ownerId, ownerName, doesIncludeBosses, doesSendEmailToMembers.
-  members (array, when includeMembers=true) - Each: { id (GroupMember Id), entityId, entityType ("User"|"Group"|"Role"|"RoleAndSubordinates"|"Queue"|"PartnerUser"|"PortalRole"|...), name }.
-  effectiveUserCount (number, optional, when includeNestedExpansion=true).
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration".
@@ -42,4 +51,8 @@ Errors
 
 Example request
 
-list_public_groups({ "namePattern": "MTG_*", "includeMembers": true })
+list_public_groups({
+  "pattern": "Sales*",
+  "includeBosses": true,
+  "whereClause": "DoesSendEmailToMembers = true"
+})

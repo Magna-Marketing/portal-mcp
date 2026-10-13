@@ -7,12 +7,9 @@ selected by criteria. Mirrors `bulk_assign_permissions` but issues
 
 Salesforce API
 REST API (Data), v66.0.
-- Resolve assignments to delete via SOQL.
-- `DELETE /composite/sobjects?ids=...` in batches of ≤200.
 
 Endpoint
-GET    /services/data/v66.0/query/?q=SELECT Id, AssigneeId FROM PermissionSetAssignment WHERE PermissionSetId IN (...) OR PermissionSetGroupId IN (...)
-DELETE /services/data/v66.0/composite/sobjects?ids=...
+DELETE /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,13 +18,52 @@ Body
 None (DELETE).
 
 Input (parameters)
-selection (object, required) - Same as bulk_assign_permissions.
-permissionSetNames (string[], optional).
-permissionSetGroupNames (string[], optional).
-dryRun (boolean, optional, default false).
-batchSize (number, optional, default 200).
-allOrNone (boolean, optional, default false).
-skipIfNotAssigned (boolean, optional, default true).
+selection (object, required) - User selection criteria. At least one criterion is
+required.
+  userIds (string[], optional) - User record Ids to include; array of 15- or
+  18-character Salesforce Id strings; no default; example ['005xx0000012345']; do not
+  pass usernames here.
+  usernames (string[], optional) - User.Username values to include; array of exact
+  username strings; no default; example ['admin@example.com']; do not pass display
+  names.
+  profileNames (string[], optional) - Profile.Name values used to select users; array of
+  exact profile names; no default; example ['System Administrator']; do not pass profile
+  Ids.
+  roleNames (string[], optional) - UserRole.Name values used to select users; array of
+  exact role names; no default; example ['Sales Manager']; users without roles are
+  excluded when this is set.
+  department (string, optional) - Exact User.Department value used to select users;
+  string; no default; example 'Sales'; do not pass partial matches.
+  isActiveOnly (boolean, optional) - Whether to select only active users; boolean;
+  defaults to true; example false; do not set false unless inactive users must be
+  included.
+  customSoql (string, optional) - Additional User WHERE condition; SOQL condition text
+  without SELECT, FROM, WHERE, ORDER BY, or LIMIT; no default; example \"UserType =
+  'Standard'\"; do not pass untrusted text.
+  limit (integer, optional) - Maximum users to select; integer from 1 to 50000; defaults
+  to 50000; example 1000; do not pass 0 or values above 50000.
+permissionSetNames (string[], optional) - PermissionSet Name/API names to remove; string
+array; at least one target field is required; example ['MTG_Project_Manager']; do not
+pass labels.
+permissionSetIds (string[], optional) - PermissionSet Ids to remove; Salesforce Id
+array; at least one target field is required; example ['0PSxx000000001A']; do not pass
+group Ids.
+permissionSetGroupNames (string[], optional) - PermissionSetGroup DeveloperNames to
+remove; string array; at least one target field is required; example
+['Finance_Access_Group']; do not pass MasterLabel.
+permissionSetGroupIds (string[], optional) - PermissionSetGroup Ids to remove;
+Salesforce Id array; at least one target field is required; example ['0PGxx000000001A'];
+do not pass PermissionSet Ids.
+dryRun (boolean, optional) - Whether to compute deletes without DELETE
+/composite/sobjects; boolean; defaults to false; example true; do not use when
+assignments must be removed.
+batchSize (integer, optional) - Composite sObject collection batch size; integer 1-200;
+defaults to 200; example 100; do not pass values above the REST API limit.
+allOrNone (boolean, optional) - Composite sObject Collections allOrNone flag; boolean;
+defaults to false; example true; when true one failed delete can roll back the batch.
+skipIfNotAssigned (boolean, optional) - Whether missing assignments are reported as
+notAssigned; boolean; defaults to true; example true; do not set false for broad
+cleanups.
 
 Result
 selection (object).
@@ -50,6 +86,5 @@ Errors
 Example request
 
 bulk_remove_permissions({
-  "selection": { "profileNames": ["MTG_Project_Manager_Profile"] },
-  "permissionSetNames": ["Old_VPN_Access"]
+  "selection": {}
 })

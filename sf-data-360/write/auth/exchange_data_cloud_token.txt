@@ -14,32 +14,24 @@ Salesforce API
 Salesforce CDP Auth Exchange.
 
 Endpoint
-POST {core_instance_url}/services/a360/token
+None. This tool does not call Salesforce. It reads the Data Cloud token already cached on the MCP session.
 
 Headers
 Authorization: Bearer <core_access_token>
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-Body (form-urlencoded)
-grant_type=urn:salesforce:grant-type:external:cdp
-&subject_token=<core_access_token>
-&subject_token_type=urn:ietf:params:oauth:token-type:access_token
+Body
+None.
 
 Input (parameters)
-coreAccessToken (string, optional) - Override the configured Connected
-  App's cached SFDC access token.
-forceRefresh (boolean, optional, default false) - Skip the cached
-  CDP token and exchange a fresh one.
+forceRefresh (boolean, optional) - If true, forces a new token exchange even if a cached Data Cloud token exists.
 
 Result
-accessToken (string) - The Data Cloud-scoped token.
-instanceUrl (string) - The CDP tenant URL (e.g.
-  "https://magnatech.c360a.salesforce.com"). Use as base for runtime
-  calls.
-issuedTokenType (string) - "urn:ietf:params:oauth:token-type:access_token".
-tokenType (string) - "Bearer".
-expiresIn (number) - Token lifetime (typically 7200).
+accessToken (value) - included in the JSON returned by the tool.
+instanceUrl (value) - included in the JSON returned by the tool.
+tokenType (value) - included in the JSON returned by the tool.
+issuedTokenType (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `cdp_api` (broad) or specific (`cdp_query_api_read`,
@@ -59,9 +51,10 @@ Example request
 exchange_data_cloud_token({})
 
 Example result
+
 {
-  "accessToken": "00D58000000IFx0!ARkAQE...",
-  "instanceUrl": "https://magnatech.c360a.salesforce.com",
-  "tokenType": "Bearer",
-  "expiresIn": 7200
+  "accessToken": null,
+  "instanceUrl": null,
+  "tokenType": null,
+  "issuedTokenType": null
 }

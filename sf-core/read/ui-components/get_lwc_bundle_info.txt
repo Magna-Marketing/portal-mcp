@@ -26,18 +26,7 @@ Input (parameters)
 id (string, required) - LightningComponentBundle Id.
 
 Result
-attributes (object) - { type, url }.
-Id (string).
-DeveloperName (string).
-MasterLabel (string).
-ApiVersion (number).
-IsExposed (boolean).
-NamespacePrefix (string|null).
-ManageableState (string|null).
-Description (string|null).
-CreatedDate (string).
-LastModifiedDate (string).
-LastModifiedById (string).
+raw LightningComponentBundle JSON object.
 
 Required permissions
 - "Customize Application" / "View Setup and Configuration".

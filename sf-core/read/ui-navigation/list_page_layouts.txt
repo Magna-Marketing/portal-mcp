@@ -18,19 +18,17 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required).
-includeAssignments (boolean, optional, default false) - Include per-profile + per-record-type assignment.
-includeStructure (boolean, optional, default true) - Sections, fields, related lists, buttons.
+sObject (string, required) - Object API name whose layouts are requested; non-empty
+Salesforce sObject API name; required; example: Account; do not pass labels, record IDs,
+field API names, or multiple objects.
+recordTypeId (string, optional) - RecordType ID used by the REST layouts endpoint; 15-
+or 18-character Salesforce ID; no default means all layouts for the object; example:
+012xx0000001234AAA; do not pass record type developer names, labels, object IDs, or
+multiple IDs.
 
 Result
-totalSize (number).
-layouts (array) - Each:
-  id, name, sObject.
-  sections (array, when includeStructure=true) - [{ label, columns, style ("OneColumn"|"TwoColumn"|"CustomLinks"), layoutItems: [{ field, behavior ("Edit"|"Required"|"Readonly"), emptySpace }] }].
-  relatedLists (array) - [{ relatedList, fields, sortField, sortOrder, customButtons }].
-  quickActions (array) - Action names included on the layout.
-  customButtons, multilineLayoutFields (array, optional).
-assignments (array, when includeAssignments=true) - [{ layoutName, profileName, recordType }].
+raw sObject Layouts response with layouts, recordTypeMappings, and
+recordTypeSelectorRequired when returned by Salesforce.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -43,4 +41,6 @@ Errors
 
 Example request
 
-list_page_layouts({ "sObject": "Project__c", "includeAssignments": true })
+list_page_layouts({
+  "sObject": "Account"
+})

@@ -19,12 +19,25 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeMembers (boolean, optional, default true).
+testSuiteNamePattern (string, optional) - ApexTestSuite TestSuiteName pattern to match;
+string with * and ? wildcards converted to SOQL LIKE; no default; example: Regression*;
+do not pass regex, raw LIKE syntax, Ids, or comma-separated names.
+whereClause (string, optional) - Additional SOQL WHERE condition for ApexTestSuite;
+string with or without WHERE; no default; example: TestSuiteName = 'Regression'; do not
+pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ApexTestSuite; string with or
+without ORDER BY; default TestSuiteName ASC; example: TestSuiteName DESC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ApexTestSuite rows to return; integer from 1 to
+2000; default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-testSuites (array) - { id, testSuiteName, members (array, when includeMembers=true): [{ classId, className }] }.
+Returns the raw Salesforce QueryResult with totalSize, done, and records containing Id
+and TestSuiteName.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "Author Apex".
@@ -37,4 +50,8 @@ Errors
 
 Example request
 
-list_apex_test_suites({ "includeMembers": true })
+list_apex_test_suites({
+  "testSuiteNamePattern": "Regression*",
+  "whereClause": "TestSuiteName = 'Regression'",
+  "orderBy": "TestSuiteName DESC"
+})

@@ -9,7 +9,8 @@ Marketing Cloud API
 REST API (`/contacts/v1/attributeSetDefinitions/...` and `/contacts/v1/attributeGroups`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/attributeGroups
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/schemas/{schema_id}/attributeGroups
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/schema
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,12 +20,16 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeSets (boolean, optional, default true).
+schema_id (string, optional) - Contact schema ID. When provided, the tool calls GET
+/contacts/v1/schemas/{schemaId}/attributeGroups. When omitted, it calls GET
+/contacts/v1/schema so you can discover schema IDs first.
+attribute_group_id (string, optional) - Optional attribute group ID, key:{key}, or name:{name} under the selected schema.
+Requires schema_id.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-totalCount (number).
-attributeGroups (array) - { name, label, description, isPublishGroup, mid, attributeSets (array, when includeSets=true): [{ name, label, isPrimary }] }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read`.

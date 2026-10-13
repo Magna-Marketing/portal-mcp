@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/templates
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/templates
+Optional query: filters, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,13 +19,17 @@ Body
 None.
 
 Input (parameters)
-providerIdOrName (string, optional).
-nameContains (string, optional).
-limit (number, optional, default 100).
+filters (string, optional) - Salesforce filter expression as a comma-separated list of equality expressions, such as
+'developerName eq MyCleanRoom'. No filter is applied when omitted.
+limit (number, optional) - Maximum number of records to return, from 1 through 20. Salesforce defaults to 20 when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
+orderBy (string, optional) - Sort order for the result set. Specify a field and ASC or DESC, such as 'createdDate
+DESC'. Salesforce returns items in retrieval order when omitted.
 
 Result
-templates (array) - Each: { id, apiName, label, providerIdOrName,
-  description, parameters, approvalStatus, createdDate }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,9 +45,5 @@ Example request
 list_templates({})
 
 Example result
-{
-  "templates": [
-    { "id": "tpl_001", "apiName": "OverlapAudience",
-      "providerIdOrName": "MTG_Snowflake_DCR" }
-  ]
-}
+
+{ }

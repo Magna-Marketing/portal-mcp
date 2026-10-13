@@ -26,10 +26,7 @@ operationType (string, optional) - "Full" | "Incremental".
 runIdempotencyKey (string, optional).
 
 Result
-runId (string).
-dataStreamId (string), developerName (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -47,9 +44,5 @@ run_data_stream({ "recordIdOrDeveloperName": "mc_sends",
   "operationType": "Incremental" })
 
 Example result
-{
-  "runId": "RUN_DS_2026-04-29T13",
-  "dataStreamId": "0bcxx0000000001",
-  "status": "Queued",
-  "submittedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

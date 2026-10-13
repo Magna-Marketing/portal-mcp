@@ -16,19 +16,18 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "ContactKeyList": ["MEM-100023"],
-  "DefinitionIds": ["abc-journey-id-1", "abc-journey-id-2"]
-}
+POST: ContactKey, DefinitionKey
 
 Input (parameters)
-contactKeys (string[], required) - Up to 1000 per call.
-journeyIds (string[], optional) - Limit exit to specific journeys; omit to exit ALL journeys the contact is in.
+contact_keys (string[], required) - ContactKey values to remove. Salesforce documents a maximum of 50 contacts per
+contactexit request.
+journey_key (string, required) - Journey DefinitionKey/customer key. Salesforce requires this key for contact exit.
+versions (value[], optional) - Optional journey versions to remove the contact from. Omit to remove from all versions
+of the journey.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header.
 
 Result
-operationId (string) - Use `get_contact_exit_status` to track.
-status (string) - "Queued" | "Processing".
-contactsQueued (number).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_execute`.
@@ -43,6 +42,6 @@ Errors
 Example request
 
 remove_contact_from_journey({
-  "contactKeys": ["MEM-100023"],
-  "journeyIds": ["abc-journey-id-1"]
+  "contact_keys": [],
+  "journey_key": ""
 })

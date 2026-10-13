@@ -9,8 +9,8 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/sobjects/AuraDefinitionBundle/{id}
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DefType, Format, Source FROM AuraDefinition WHERE AuraDefinitionBundleId = '{id}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, AuraDefinitionBundleId, CreatedById, CreatedDate, DefType, Format, IsDeleted, LastModifiedById, LastModifiedDate, Source, SystemModstamp FROM AuraDefinitionBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, AuraDefinitionBundleId, CreatedById, CreatedDate, DefType, Format, IsDeleted, LastModifiedById, LastModifiedDate, Source, SystemModstamp FROM AuraDefinition
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,12 +20,14 @@ Body
 None.
 
 Input (parameters)
-name (string, required) - Bundle DeveloperName.
-includeBinarySource (boolean, optional, default false) - Return SVG as text.
+name (string, required) - AuraDefinitionBundle DeveloperName; string API name with
+letters, numbers, or underscores; no default; example: forceRecordLayout; do not pass
+namespace prefix, wildcards, SOQL, or file extensions.
 
 Result
-bundle (object) - { id, developerName, masterLabel, apiVersion, description, manageableState, namespacePrefix }.
-definitions (array) - { id, defType ("COMPONENT"|"APPLICATION"|"CONTROLLER"|"HELPER"|"STYLE"|"DESIGN"|"SVG"|"DOCUMENTATION"|"RENDERER"|"EVENT"|"INTERFACE"), format ("JS"|"CSS"|"XML"|"SVG"), source (string|null), sizeBytes }.
+Returns a JSON object with raw bundle and definitions query results.
+bundleResult (value) - included in the JSON returned by the tool.
+definitionsResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -38,4 +40,6 @@ Errors
 
 Example request
 
-read_aura_bundle({ "name": "AccountCard" })
+read_aura_bundle({
+  "name": "forceRecordLayout"
+})

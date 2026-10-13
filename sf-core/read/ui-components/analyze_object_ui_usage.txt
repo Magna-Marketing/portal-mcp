@@ -9,11 +9,9 @@ components on that object page.
 
 Salesforce API
 Tooling API, v66.0.
-- `FlexiPage WHERE Type = 'RecordPage' AND EntityDefinition.QualifiedApiName = '{sObject}'`.
-- For each FlexiPage, parse `Metadata.flexiPageRegions[].itemInstances`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId FROM FlexiPage WHERE Type = 'RecordPage' AND EntityDefinition.QualifiedApiName = '{sObject}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, Type, EntityDefinitionId, EntityDefinition.QualifiedApiName, NamespacePrefix, ManageableState, Description, ParentFlexiPage, LastModifiedDate FROM FlexiPage
 
 Headers
 Authorization: Bearer <access_token>
@@ -23,23 +21,26 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required) - sObject API name.
-includeStandardComponents (boolean, optional, default true).
-includeRelatedListsAsRefs (boolean, optional, default true).
+sObject (string, optional) - Object API name for record pages; string matching
+EntityDefinition.QualifiedApiName; required unless objectName is set; example: Account;
+do not pass labels, key prefixes, or multiple objects.
+objectName (string, optional) - Alias for sObject; string object API name; ignored when
+sObject is present; example: CustomObject__c; do not pass relationship names.
+whereClause (string, optional) - Additional SOQL WHERE condition for FlexiPage; string
+with or without WHERE; no default; example: LastModifiedDate = LAST_N_DAYS:90; do not
+pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for FlexiPage; string with or without ORDER
+BY; default DeveloperName ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum FlexiPage rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass offsets, decimals,.
 
 Result
-size (number).
-totalSize (number).
-done (boolean).
-queryLocator (string|null).
-entityTypeName (string) - "FlexiPage".
-records (array) - Each FlexiPage record:
-  attributes (object) - { type, url }.
-  Id (string).
-  DeveloperName (string).
-  MasterLabel (string).
-  Type (string) - "RecordPage".
-  EntityDefinitionId (string|null).
+raw Salesforce QueryResult with FlexiPage records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -52,4 +53,8 @@ Errors
 
 Example request
 
-analyze_object_ui_usage({ "sObject": "Project__c" })
+analyze_object_ui_usage({
+  "sObject": "Account",
+  "objectName": "CustomObject__c",
+  "whereClause": "LastModifiedDate = LAST_N_DAYS:90"
+})

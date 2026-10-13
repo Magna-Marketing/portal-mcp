@@ -27,36 +27,33 @@ Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET requests).
+None.
 
 Input (parameters)
-userId (string, optional) - 18-char User Id.
-username (string, optional) - User.Username (e.g. user@example.com).
-  One of userId or username is required.
-includeFieldPermissions (boolean, optional, default false) - Heavy in
-  big orgs; off by default.
-includeObjectPermissions (boolean, optional, default true).
-onlyTrueSystemPerms (boolean, optional, default true) - When true, omit
-  Permissions* flags that are false.
+userId (string, optional) - Salesforce User Id whose group assignments are inspected;
+15- or 18-character Id string; required when username is omitted; example:
+0055g00000ABCDe; do not pass names, emails, multiple Ids, or SOQL fragments.
+username (string, optional) - Salesforce Username whose group assignments are inspected;
+exact username string; required when userId is omitted and ignored when userId is
+present; example: user@example.com; do not pass display names, wildcards, or
+comma-separated usernames.
+includeInactiveUser (boolean, optional) - Whether an inactive user may be matched;
+boolean; default false; example: true; do not pass when only active users should be
+considered.
+includeExpiredAssignments (boolean, optional) - Whether expired group assignments are
+included; boolean; default false filters ExpirationDate before today; example: true; do
+not pass to focus on active assignments.
 
 Result
-user (object) - { id, name, username, profileName }.
-groupCount (number).
-totalEffectiveSystemPermissions (number) - Distinct system perms set
-  to true across all groups.
-groups (array) - Each:
-  groupId (string).
-  developerName (string).
-  label (string).
-  status (string).
-  permissionSets (array) - Each: { id, name, label, isCustom }.
-  systemPermissions (object) - Map of perm name -> true (only).
-  objectPermissions (array, optional) - Per sObject row union (read,
-    create, edit, delete, viewAll, modifyAll all OR-ed across members).
-  fieldPermissions (array, optional) - Per { sObject, field } row union.
-unionAcrossGroups (object) - Same fields as a single group's union but
-  across all groups: systemPermissions, objectPermissions,
-  fieldPermissions.
+Returns raw Salesforce QueryResult objects for the user, group assignments, and group
+components.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+user (value) - included in the JSON returned by the tool.
+groupAssignments (value) - included in the JSON returned by the tool.
+groupComponents (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" or "Manage Users".
@@ -71,35 +68,21 @@ Errors
 Example request
 
 analyze_user_permissions_from_groups({
-  "username": "jane.doe@magnatech.com",
-  "includeFieldPermissions": false
+  "userId": "0055g00000ABCDe",
+  "username": "user@example.com",
+  "includeInactiveUser": true
 })
 
-Example result (truncated)
+Example result
 
 {
-  "user": { "id": "005Qg0000020aBcDE", "name": "Jane Doe", "username": "jane.doe@magnatech.com", "profileName": "Standard User" },
-  "groupCount": 1,
-  "totalEffectiveSystemPermissions": 14,
-  "groups": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "groupId": "0PGQg00000004abAB",
-      "developerName": "MTG_Delivery_Bundle",
-      "label": "MTG Delivery Bundle",
-      "status": "Updated",
-      "permissionSets": [
-        { "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager", "isCustom": true }
-      ],
-      "systemPermissions": { "ApiEnabled": true, "RunReports": true },
-      "objectPermissions": [
-        { "sObject": "Project__c", "read": true, "create": true, "edit": true, "delete": false, "viewAll": false, "modifyAll": false }
-      ]
+      "attributes": {
+        "type": "User"
+      }
     }
-  ],
-  "unionAcrossGroups": {
-    "systemPermissions": { "ApiEnabled": true, "RunReports": true },
-    "objectPermissions": [
-      { "sObject": "Project__c", "read": true, "create": true, "edit": true, "delete": false, "viewAll": false, "modifyAll": false }
-    ]
-  }
+  ]
 }

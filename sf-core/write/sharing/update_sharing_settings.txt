@@ -9,35 +9,73 @@ affected records — Salesforce queues this and may take hours on big
 orgs.
 
 Salesforce API
-Metadata API (`SharingSettings`) per sObject, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
 POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (readMetadata CustomObject)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "sObjects": [
-    { "sObject": "Account", "internalSharingModel": "Private", "externalSharingModel": "Private", "grantAccessUsingHierarchies": true }
-  ]
-}
+JSON fields: allowMissingFiles, autoUpdatePackage, checkOnly, ignoreWarnings, performRetrieve, purgeOnDelete, rollbackOnError, runTests, singlePackage, testLevel.
 
 Input (parameters)
-sObjects (object[], required) - Each:
-  sObject (string, required).
-  internalSharingModel (string, required) - "Private"|"Read"|"ReadWrite"|"ReadWriteTransfer"|"FullAccess"|"ControlledByParent".
-  externalSharingModel (string, optional) - Same enum; defaults to internal when external sharing not enabled org-wide.
-  grantAccessUsingHierarchies (boolean, optional, default true).
-checkOnly (boolean, optional, default false).
-waitForRecalc (boolean, optional, default false) - Poll for recalc completion (can be hours).
+sObjects (unknown[], required) - Represents objects whose sharing metadata is deployed;
+non-empty array of CustomObject sharing entries; no default; example
+[{\"sObject\":\"Account\",\"sharingModel\":\"Private\"}]; do not pass empty entries.
+checkOnly (boolean, optional) - Represents Metadata API validation-only deployment;
+boolean; defaults to false; example true; do not use when changes must be saved.
+rollbackOnError (boolean, optional) - Represents deploy rollback behavior on component
+failure; boolean; defaults to true; example true; do not set false unless partial
+success is acceptable.
+ignoreWarnings (boolean, optional) - Represents whether deploy warnings are ignored;
+boolean; defaults to false; example true; do not use to bypass errors.
+allowMissingFiles (boolean, optional) - Represents the deploy option for package members
+missing from the zip; boolean; defaults to false; example false; do not set true for
+normal OWD updates.
+autoUpdatePackage (boolean, optional) - Represents the deploy option to update package
+contents automatically; boolean; defaults to false; example false; do not set true
+unless Salesforce deployment semantics require it.
+performRetrieve (boolean, optional) - Represents the deploy option to retrieve after
+deployment; boolean; defaults to false; example false; do not set true unless the raw
+deploy response is insufficient.
+purgeOnDelete (boolean, optional) - Represents destructive deployment purge behavior;
+boolean; defaults to false; example false; do not set true because this tool does not
+send destructiveChanges.
+runTests (string[], optional) - Represents Apex test class names; array of class names;
+required when testLevel is RunSpecifiedTests; example ['SharingSettingsTest']; do not
+pass method names.
+testLevel (string, optional) - Represents Salesforce deploy test level; Metadata API
+enum string; omitted uses platform behavior; example 'NoTestRun'; do not pass
+unsupported values.
+waitForCompletion (boolean, optional) - Represents whether to poll deployRequest until
+terminal status; boolean; defaults to true; example false; do not disable when status
+details are needed.
+waitForRecalc (boolean, optional) - Represents compatibility request to wait for sharing
+recalculation; boolean; defaults to false and only waits for deploy completion; example
+true; do not expect a separate recalc API poll.
+includeDetails (boolean, optional) - Represents whether deploy status polling includes
+details; boolean; defaults to true; example true; do not disable if component errors
+must be inspected.
+pollIntervalMs (number, optional) - Represents polling interval in milliseconds;
+positive number; defaults to 5000; example 10000; do not pass very small intervals.
+maxWaitMs (number, optional) - Represents maximum deploy polling time in milliseconds;
+positive number; defaults to 1800000; example 600000; do not pass zero when waiting is
+enabled.
 
 Result
-deploy (object) - Standard Metadata deploy result.
-sObjects (array) - Updated rows.
-recalcStatus (object|null, when waitForRecalc=true) - { status, percentComplete }.
+JSON object with deploy, optional status, readResponses, deployOptions, files, and
+waitForRecalcSupported.
+deploy (value) - included in the JSON returned by the tool.
+readResponses (value) - included in the JSON returned by the tool.
+deployOptions (value) - included in the JSON returned by the tool.
+files (value) - included in the JSON returned by the tool.
+waitForRecalcSupported (value) - included in the JSON returned by the tool.
+status (value) - included in the JSON returned by the tool.
+waitForRecalcRequested (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application" + "Manage Sharing".
@@ -53,5 +91,5 @@ Errors
 Example request
 
 update_sharing_settings({
-  "sObjects": [{ "sObject": "Project__c", "internalSharingModel": "Private" }]
+  "sObjects": []
 })

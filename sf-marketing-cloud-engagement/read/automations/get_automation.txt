@@ -9,7 +9,9 @@ Marketing Cloud API
 REST API (`/automation/v1/automations/{id}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{automation_id}
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{automationId}/instances
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,11 +21,17 @@ Body
 None.
 
 Input (parameters)
-automationId (string, optional).
-automationKey (string, optional).
-  One required.
-includeActivities (boolean, optional, default true).
-includeRunHistory (boolean, optional, default false).
+automation_id (string, optional) - Automation ID/ObjectID to retrieve with GET /automation/v1/automations/{id}. Required
+when automation_key is omitted.
+automation_key (string, optional) - Automation external key/customer key. When supplied, the tool first resolves the
+automation ID in the selected Business Unit and then retrieves the automation.
+include_query_text (boolean, optional) - When true, enriches Query activities with SQL text by retrieving their SOAP
+QueryDefinition records.
+include_run_history (boolean, optional) - When true, also calls the automation instances endpoint and returns both raw response
+bodies in a JSON wrapper.
+run_history_limit (number, optional) - Maximum page size for the optional run history request.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for REST
+requests.
 
 Result
 automation (object) - { id, key, name, description, statusId, status, schedule (object|null), scheduledTime, lastRunTime, lastRunStatus, categoryId, steps (array, when includeActivities=true): [{ stepNumber, name, activities: [{ id, key, name, activityObjectId, displayOrder, type ("DataExtract"|"Import"|"FileTransfer"|"Filter"|"Query"|"SendEmail"|"Verification"|"Wait"|"Refresh"|"ScriptActivity"|"Transfer") }] }], runHistory (array, optional) }.
@@ -39,4 +47,4 @@ Errors
 
 Example request
 
-get_automation({ "automationKey": "MTG_Nightly_Member_Sync" })
+get_automation({})

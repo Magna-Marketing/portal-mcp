@@ -20,13 +20,24 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includePolicies (boolean, optional, default true) - IP relaxation, IP allowlist, refresh token policy, mobile session timeout.
-includeOAuthSettings (boolean, optional, default true) - Scopes, callback URL, consumer key.
+namePattern (string, optional) - ConnectedApplication.Name filter; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: Mobile_*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+ConnectedApplication; string with or without WHERE; no default; example: CreatedDate =
+LAST_N_DAYS:30; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ConnectedApplication; string with
+or without ORDER BY; default Name ASC; example: CreatedDate DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum connected app rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-connectedApps (array) - Each: { id, name, namespacePrefix, label, contactEmail, description, infoUrl, iconUrl, isAdminApprovedUsersOnly, oauth (object|null): { scopes, callbackUrl, consumerKey, isPkceRequired, isSecretRequiredForRefreshToken, idTokenConfig }, policies (object|null): { ipRelaxation, ipAllowlist, refreshTokenPolicy, sessionTimeout, requireUsersToInstallApp } }.
+raw Salesforce Tooling QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Connected Apps" / "View Setup and Configuration".
@@ -39,4 +50,8 @@ Errors
 
 Example request
 
-list_connected_apps({ "includePolicies": true })
+list_connected_apps({
+  "namePattern": "Mobile_*",
+  "whereClause": "CreatedDate = LAST_N_DAYS:30",
+  "orderBy": "CreatedDate DESC"
+})

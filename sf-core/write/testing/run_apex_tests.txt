@@ -11,8 +11,7 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-POST /services/data/v66.0/tooling/runTestsSynchronous
-POST /services/data/v66.0/tooling/runTestsAsynchronous
+POST /services/data/v66.0/tooling/{path}
 
 Headers
 Authorization: Bearer <access_token>
@@ -33,25 +32,33 @@ Body (async)
 }
 
 Input (parameters)
-mode (string, required) - "sync" | "async".
-classNames (string[], optional).
-classIds (string[], optional).
-suiteNames (string[], optional).
-testMethods (object[], optional) - [{ className, methodName }].
-testLevel (string, optional, default "RunSpecifiedTests" sync, "RunLocalTests" async) - "RunSpecifiedTests" | "RunLocalTests" | "RunAllTestsInOrg".
-maxFailedTests (number, optional) - For sync; abort after N failures (-1 = unlimited).
-skipCodeCoverage (boolean, optional, default false) - For async.
+mode ("sync" | "async", required) - Execution mode. Sync is limited by Salesforce to one
+Apex class; async supports multiple classes and suites.
+classNames (string[], optional) - Apex test class names. In async mode these are sent as
+the Tooling API classNames comma-list unless testMethods is supplied.
+classIds (string[], optional) - ApexClass Ids. In async mode these are sent as the
+Tooling API classids comma-list unless testMethods is supplied.
+suiteNames (string[], optional) - Apex test suite names for async runs, sent as the
+Tooling API suiteNames comma-list.
+suiteIds (string[], optional) - ApexTestSuite Ids for async runs, sent as the Tooling
+API suiteids comma-list.
+testMethods (object[], optional) - Individual test method selections. Sent in the
+Tooling API tests array.
+  className (string, optional) - Apex class name containing the test method.
+  classId (string, optional) - ApexClass Id containing the test method.
+  namespace (string, optional) - Namespace prefix for managed-package test classes.
+  methodName (string, optional) - Single test method name.
+  testMethods (string[], optional) - Multiple test method names in the same class.
+testLevel (string, optional) - Salesforce test level. Defaults to RunSpecifiedTests when
+selecting classes/suites/methods, otherwise RunLocalTests for async.
+maxFailedTests (integer, optional) - Maximum failed tests before Salesforce stops the
+run. Use -1 for no limit where supported.
+skipCodeCoverage (boolean, optional) - For async runs, true opts out of code coverage
+collection. Included for sync only when supplied.
 
-Result (sync)
-results (array) - { id, methodName, outcome, runTime, message, stackTrace }.
-codeCoverage (array) - Per-class coverage.
-codeCoverageWarnings (array) - { name, message }.
-totalTime (number).
-numTestsRun (number), numFailures (number).
-
-Result (async)
-jobId (string) - Use `get_apex_test_run_status` to poll.
-testRunId (string).
+Result
+the raw Salesforce Tooling API response, usually a sync result object or async test run
+ID.
 
 Required permissions
 - "Author Apex".
@@ -66,10 +73,8 @@ Errors
 - INVALID_TYPE on bad class/suite name.
 - TEST_RUN_FAILED with details.
 
-Example request (sync, single class)
+Example request
 
-run_apex_tests({ "mode": "sync", "classNames": ["ProjectServiceTest"] })
-
-Example request (async, all local)
-
-run_apex_tests({ "mode": "async", "testLevel": "RunLocalTests" })
+run_apex_tests({
+  "mode": "example"
+})

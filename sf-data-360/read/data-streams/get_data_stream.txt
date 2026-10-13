@@ -22,11 +22,10 @@ Input (parameters)
 recordIdOrDeveloperName (string, required).
 
 Result
-dataStream (object): id, developerName, label, connectionId,
-  sourceObject, refreshMode, schedule, status, dataLakeObjectName,
-  filter (object), mappingRules (array<{ sourceField, targetField,
-  dataType, transformExpression }>), recordCount, lastRunStatus,
-  lastRunDate, lastFailureMessage, createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
+Note returned with the JSON: Note: It is not possible to retrieve details about a data stream's run history. Whereas
+Data Transforms do have a dedicated /run-history API, the Data Stream API does not
+provide an endpoint to retrieve Data Stream run history.
 
 Required scopes
 - `api`.
@@ -42,14 +41,5 @@ Example request
 get_data_stream({ "recordIdOrDeveloperName": "mc_sends" })
 
 Example result
-{
-  "dataStream": {
-    "developerName": "mc_sends",
-    "label": "MCE Sends",
-    "refreshMode": "Incremental",
-    "dataLakeObjectName": "mc_sends__dll",
-    "mappingRules": [
-      { "sourceField": "ID", "targetField": "Id__c", "dataType": "TEXT" }
-    ]
-  }
-}
+
+{ }

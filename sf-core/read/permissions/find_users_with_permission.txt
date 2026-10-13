@@ -13,15 +13,10 @@ Use this for security audits like "who can ModifyAllData?" or "who can
 delete Opportunities?".
 
 Salesforce API
-REST API + Tooling, v66.0. The MCP server runs the appropriate query:
-- System: query `PermissionSet WHERE PermissionsXxx = true` and
-  `Profile WHERE PermissionsXxx = true`, then resolve assignees.
-- Object: query `ObjectPermissions WHERE SObjectType = '<sObject>' AND
-  PermissionsXxx = true` joined to `Parent.Profile` /
-  `Parent.PermissionSet` and follow assignments.
+REST API (Data), v66.0.
 
 Endpoint
-N/A (composite).
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -31,23 +26,50 @@ Body
 None.
 
 Input (parameters)
-permission (string, optional) - System permission name without the
-  "Permissions" prefix (e.g. "ModifyAllData").
-sObject (string, optional) - sObject API name (use with accessType).
-accessType (string, optional) - "read" | "create" | "edit" | "delete" |
-  "viewall" | "modifyall". Required when sObject is set.
-  Exactly one of (permission) or (sObject + accessType) is required.
-includeInactiveUsers (boolean, optional, default false).
-limit (number, optional, default 1000, max 50000).
+category ("system" | "object" | "field" | "apex" | "vf", required) -
+Permission source category to search; enum string; required with no default; example:
+object; do not pass labels, plural values, or arbitrary setup entity types.
+systemPermissionField (string, optional) -
+PermissionSet boolean field for category system; API field name with or without the
+Permissions prefix; required only for system; example: PermissionsModifyAllData; do not
+pass labels like Modify All Data, multiple fields, or SOQL fragments.
+sObjectType (string, optional) -
+Object API name for category object or field; Salesforce SObjectType string; required
+for object and optional when field is fully qualified; example: Account; do not pass
+labels, relationship names, or comma-separated objects.
+objectAccess ("read" | "create" | "edit" | "delete" | "viewAllRecords" | "modifyAllRecords" | "viewAllFields", optional) -
+Object permission flag for category object; enum string mapped to ObjectPermissions
+fields; default read; example: viewAllRecords; do not pass CRUD abbreviations, labels,
+or multiple access types.
+field (string, optional) -
+Fully qualified field API name for category field; string in Object.Field format;
+required for field; example: Account.AnnualRevenue; do not pass unqualified names,
+labels, wildcards, or comma-separated fields.
+setupEntityId (string, optional) -
+Setup entity Id for category apex or vf; Salesforce Id of ApexClass or ApexPage;
+required for apex and vf; example: 01p5g00000ABCDe; do not pass names or Tooling API
+URLs.
+includeInactiveUsers (boolean, optional) -
+Whether inactive assigned users are included; boolean; default false; example: true; do
+not pass when only active users should be returned.
+includeExpiredAssignments (boolean, optional) -
+Whether expired assignments are included; boolean; default false filters ExpirationDate
+before today; example: true; do not pass to focus on active assignments.
+limit (integer, optional) -
+Maximum assignment rows per assignment query; integer from 1 to 2000; default 200;
+example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-permissionLabel (string) - Human label of what was searched.
-totalUsers (number).
-users (array) - Each:
-  userId, name, username, email, isActive, profileName.
-  source (string[]) - One entry per origin: "Profile: <name>",
-    "PermissionSet: <name>", "PermissionSetGroup: <name>".
-hasMore (boolean).
+Returns raw Salesforce QueryResult objects for matching permission sets, components, and
+assignments.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+matchingPermissionSets (value) - included in the JSON returned by the tool.
+directAssignments (value) - included in the JSON returned by the tool.
+groupComponents (value) - included in the JSON returned by the tool.
+groupAssignments (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration".
@@ -63,30 +85,20 @@ Errors
 
 Example request
 
-find_users_with_permission({ "permission": "ModifyAllData", "includeInactiveUsers": false })
+find_users_with_permission({
+  "category": "object"
+})
 
 Example result
 
 {
-  "permissionLabel": "ModifyAllData",
-  "totalUsers": 4,
-  "users": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "userId": "005Qg0000020aBcAA", "name": "Admin One",
-      "username": "admin.one@magnatech.com", "email": "admin.one@magnatech.com",
-      "isActive": true, "profileName": "System Administrator",
-      "source": ["Profile: System Administrator"]
-    },
-    {
-      "userId": "005Qg0000020aBcBB", "name": "Sec Eng",
-      "username": "sec.eng@magnatech.com", "email": "sec.eng@magnatech.com",
-      "isActive": true, "profileName": "Standard User",
-      "source": ["PermissionSetGroup: MTG_Security_Admin"]
+      "attributes": {
+        "type": "PermissionSet"
+      }
     }
-  ],
-  "hasMore": false
+  ]
 }
-
-Example request (object access)
-
-find_users_with_permission({ "sObject": "Opportunity", "accessType": "delete" })

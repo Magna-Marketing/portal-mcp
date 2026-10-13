@@ -8,8 +8,10 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, Description, ManageableState, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, AuraDefinitionBundleId, DefType FROM AuraDefinition WHERE AuraDefinitionBundleId IN (...)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, Description, ManageableState, Language, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, Description, ManageableState, Language, CreatedDate, LastModifiedDate FROM AuraDefinition
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, AuraDefinitionBundleId, CreatedById, CreatedDate, DefType, Format, IsDeleted, LastModifiedById, LastModifiedDate, SystemModstamp FROM AuraDefinitionBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, AuraDefinitionBundleId, CreatedById, CreatedDate, DefType, Format, IsDeleted, LastModifiedById, LastModifiedDate, SystemModstamp FROM AuraDefinition
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,15 +21,32 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-namespacePrefix (string, optional).
-includeManaged (boolean, optional, default false).
-includeDefinitionCounts (boolean, optional, default true).
-limit (number, optional, default 200).
+namePattern (string, optional) - Glob-style filter for DeveloperName using * and ?;
+string; no default; example: force*; do not pass SOQL LIKE syntax, labels, namespaces,
+or file suffixes.
+namespacePrefix (string, optional) - NamespacePrefix exact match; string up to 15
+characters; no default; example: c; do not pass empty string, wildcards, or
+namespace-qualified component names.
+includeManaged (boolean, optional) - Whether to include managed package bundles;
+boolean; default false filters to unmanaged/null ManageableState; example: true; do not
+use this as a namespace filter.
+includeDefinitions (boolean, optional) - Whether to query related AuraDefinition summary
+records for returned bundles; boolean; default true; example: false; pass false for a
+faster bundle-only inventory.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+AuraDefinitionBundle; string without WHERE; no default; example: ApiVersion >= 60.0; do
+not pass ORDER BY, LIMIT, SELECT, FROM, or untrusted user text.
+orderBy (string, optional) - SOQL ORDER BY fields for AuraDefinitionBundle; string
+without ORDER BY; default DeveloperName; example: LastModifiedDate DESC NULLS LAST; do
+not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum bundles to return; positive integer, clamped to
+2000; default 200; example: 50; do not pass 0, negative values, or offsets.
 
 Result
-totalSize (number).
-bundles (array) - { id, developerName, masterLabel, apiVersion, namespacePrefix, description, manageableState, lastModifiedDate, definitionCounts (object): { COMPONENT, APPLICATION, EVENT, INTERFACE, STYLE, CONTROLLER, HELPER, RENDERER, DOCUMENTATION, DESIGN, SVG } }.
+Returns a JSON object containing raw bundlesResult and optional definitionsResult query
+responses.
+bundlesResult (value) - included in the JSON returned by the tool.
+definitionsResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -40,4 +59,8 @@ Errors
 
 Example request
 
-list_aura_bundles({ "namePattern": "*Card" })
+list_aura_bundles({
+  "namePattern": "force*",
+  "namespacePrefix": "c",
+  "includeManaged": true
+})

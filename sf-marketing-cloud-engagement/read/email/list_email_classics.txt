@@ -19,15 +19,22 @@ Body
 SOAP retrieve on Email.
 
 Input (parameters)
-folderId (number, optional) - Category Id.
-namePattern (string, optional).
-modifiedSince (string, optional).
-emailType (string, optional) - "Standard" | "Triggered" | "Welcome".
-limit (number, optional, default 200).
+folderId (number, optional) - Classic Email Studio folder/category ID. Sent as an Email.CategoryID SOAP filter.
+namePattern (string, optional) - SOAP like filter for Email.Name. Include Marketing Cloud wildcards if needed.
+modifiedSince (string, optional) - ISO date-time filter for Email.ModifiedDate greater than this value.
+emailType ("Standard" | "Triggered" | "Welcome", optional) - Classic Email Studio email type filter. Content Builder emails should be queried with
+list_assets.
+limit (number, optional) - SOAP retrieve batch size. Defaults to 200, maximum 2500.
+business_unit_id (string, optional) - Business Unit MID used to scope the Marketing Cloud token and SOAP ClientID context.
+Defaults to the authenticated Business Unit.
 
 Result
-totalSize (number).
-emails (array) - { id, customerKey, name, subject, fromName, fromEmail, contentAreas (count), htmlBody (excerpt), textBody (excerpt), categoryId, isHTMLPaste, emailType, dateCreated, dateModified }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_read`.
@@ -40,4 +47,4 @@ Errors
 
 Example request
 
-list_email_classics({ "folderId": 12345 })
+list_email_classics({})

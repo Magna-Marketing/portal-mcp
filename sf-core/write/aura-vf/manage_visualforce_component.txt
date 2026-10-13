@@ -7,31 +7,44 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-POST /services/data/v66.0/tooling/sobjects/MetadataContainer
-POST /services/data/v66.0/tooling/sobjects/ApexComponentMember
-POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
-DELETE /services/data/v66.0/tooling/sobjects/ApexComponent/{id}
+POST /services/data/v66.0/tooling/sobjects/ApexComponent
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: Name, MasterLabel, ApiVersion, Markup, ControllerType, ControllerKey, Description.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-name (string, required) - Component Name.
-masterLabel (string, required for create).
-apiVersion (number, optional).
-markup (string, required for create/update).
-controllerType (string, optional).
-description (string, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Requested
+ApexComponent operation; enum create, update, upsert, or delete; no default; example:
+'upsert'; do not use update for a component that does not exist.
+name (string, required) - ApexComponent Name field; string API name unique in the org
+namespace; no default; example: 'InvoiceBadge'; do not include .component, namespace
+prefixes unless part of the API name, or folder paths.
+masterLabel (string, optional) - ApexComponent MasterLabel; string setup label required
+for create and for upsert when creating; no default; example: 'Invoice Badge'; do not
+pass an empty label.
+apiVersion (number | string, optional) - ApexComponent ApiVersion field; number or
+numeric string supported by Tooling API, default 66.0 on create/upsert create; example:
+66.0; do not pass REST path strings like 'v66.0'.
+markup (string, optional) - ApexComponent Markup field; string containing full
+Visualforce component markup; required for create/upsert create; example:
+'<apex:component></apex:component>'; do not pass base64 or metadata XML.
+controllerType (string, optional) - ApexComponent ControllerType; enum Not Specified or
+Custom; omitted leaves Salesforce default or existing value; example: 'Custom'; do not
+pass Apex class names here.
+controllerKey (string, optional) - ApexComponent ControllerKey; string Apex class name
+when ControllerType is Custom; omitted leaves it unset or unchanged; example:
+'InvoiceBadgeController'; do not pass a record Id.
+description (string, optional) - ApexComponent Description; string setup description;
+omitted leaves existing value unchanged; example: 'Reusable invoice badge'; do not pass
+markup source here.
 
 Result
-deploy (object).
-component (object) - { id, name, masterLabel, apiVersion }.
+JSON containing the raw ApexComponent lookup plus the raw create, update, or delete
+Tooling API response.
 
 Required permissions
 - "Customize Application" / "Author Apex".
@@ -45,9 +58,6 @@ Errors
 Example request
 
 manage_visualforce_component({
-  "operation": "create",
-  "name": "AccountHeader",
-  "masterLabel": "Account Header",
-  "apiVersion": 62.0,
-  "markup": "<apex:component>...</apex:component>"
+  "operation": "upsert",
+  "name": "InvoiceBadge"
 })

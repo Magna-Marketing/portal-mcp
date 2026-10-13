@@ -8,15 +8,10 @@ DML on custom metadata records is NOT allowed in the REST or SOAP Data APIs.
 The Metadata API (conn.metadata.create / update / upsert / delete) is the correct approach.
 
 Salesforce API
-Metadata API, v66.0. Type: CustomMetadata.
-CRUD-based calls via conn.metadata.create / update / upsert / delete.
+Metadata API (SOAP), v66.0.
 
-Endpoints (internal — called by jsforce Metadata client)
-POST   /services/data/v66.0/metadata/    (create/update/upsert/delete)
-
-NOTE: The original doc listed "POST /services/data/v66.0/metadata/deployRequest".
-That is the deploy-based endpoint and is NOT used here. The Metadata API CRUD
-operations are the correct approach for CustomMetadata records.
+Endpoint
+POST /services/Soap/m/66.0  (deleteMetadata CustomMetadata)
 
 Headers
 Authorization: Bearer <access_token>
@@ -45,17 +40,16 @@ record directly. The actual Metadata API structure uses a "values" array of
 { field, value } objects. The tool accepts the flat map and converts it automatically.
 
 Input (parameters)
-operation    (string, required) – "create" | "update" | "upsert" | "delete".
-typeName     (string, required) – Custom Metadata Type API name. The __mdt suffix is
-             optional — the tool appends it automatically if missing.
-records      (object[], required, min 1, max 10) – Metadata API supports up to 10 per call.
-  developerName  (string, required) – Developer name of the record. Unique within the type.
-                 Do not include the type prefix.
-  label          (string, required for create/upsert).
-  description    (string, optional).
-  protected      (boolean, optional, default false).
-  fields         (object, optional) – Flat map of fieldApiName (with __c) -> value.
-                 Converted internally to CustomMetadataValue[].
+operation ("create" | "update" | "upsert" | "delete", required) - Requested
+CustomMetadata operation; enum create, update, upsert, or delete; no default; example:
+'upsert'; do not use delete unless records should be removed from metadata.
+typeName (string, required) - Custom Metadata Type API name; string with optional __mdt
+suffix and namespace when applicable; normalized internally for API calls; example:
+'Feature_Flag__mdt'; do not pass a record fullName.
+records (unknown[], required) - Custom metadata records to process; array with 1 to 10
+record objects because Metadata API CRUD supports up to 10 components per call; no
+default; example: [{ developerName: 'Enable_New_UI', label: 'Enable New UI' }]; do not
+include record Ids.
 
 Result
 Returns a JSON object with:
@@ -91,11 +85,5 @@ Example request
 manage_custom_metadata_record({
   "operation": "upsert",
   "typeName": "Feature_Flag__mdt",
-  "records": [
-    {
-      "developerName": "MTG_Use_New_Form",
-      "label": "Use new form",
-      "fields": { "Enabled__c": true, "Description__c": "Enable Lightning form on Project" }
-    }
-  ]
+  "records": "[{ developerName: 'Enable_New_UI', label: 'Enable New UI' }]"
 })

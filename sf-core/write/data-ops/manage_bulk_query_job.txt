@@ -45,19 +45,45 @@ Body (create)
 { "operation": "query", "query": "SELECT Id FROM Account", "contentType": "CSV", "lineEnding": "LF", "columnDelimiter": "COMMA" }
 
 Input (parameters)
-operation (string, required) - "create" | "status" | "results" | "abort" | "delete" | "listAll".
-jobId (string, required for all except create and listAll).
-soql (string, required for create) - SOQL query string. Avoid LIMIT and ORDER BY on large datasets to preserve PK chunking.
-queryOperation (string, optional, default "query") - "query" | "queryAll".
-  "queryAll" includes records deleted via merge/delete and archived Task/Event records.
-columnDelimiter (string, optional, default "COMMA") - "BACKQUOTE"|"CARET"|"COMMA"|"PIPE"|"SEMICOLON"|"TAB".
-lineEnding (string, optional, default "LF") - "LF" | "CRLF".
-enablePkChunking (boolean, optional) - Adds Sforce-Enable-PKChunking header.
-pkChunkSize (number, optional, default 100000) - Chunk size (used with enablePkChunking).
-locator (string, optional, for results) - Pagination locator from Sforce-Locator response header of previous page. Omit for first page.
-maxRecords (number, optional, for results) - Max records to return per page.
-parseResultsAs (string, optional, default "csv") - "csv" | "rows".
-queryLocator (string, optional, for listAll) - Pagination locator from previous listAll response.
+operation ("create" | "status" | "results" | "abort" | "delete" | "listAll", required) -
+Requested Bulk API 2.0 query operation; enum create, status, results, abort, delete, or
+listAll; no default; example: 'results'; do not pass ingest job operations here.
+jobId (string, optional) -
+Bulk query job Id; Salesforce 750-prefixed job Id string; required for all operations
+except create and listAll; example: '750xx000000001aAAA'; do not pass an ingest-only job
+Id.
+soql (string, optional) -
+SOQL query for create; string SELECT statement; required for create; example: 'SELECT
+Id, Name FROM Account'; do not pass SOSL, GraphQL, or DML.
+queryOperation ("query" | "queryAll", optional, default query) -
+Bulk query operation for create; enum query or queryAll; defaults to query; example:
+'queryAll'; do not use queryAll unless deleted and archived records are required.
+columnDelimiter ("BACKQUOTE" | "CARET" | "COMMA" | "PIPE" | "SEMICOLON" | "TAB", optional) -
+CSV results column delimiter for create; enum BACKQUOTE, CARET, COMMA, PIPE, SEMICOLON,
+or TAB; Salesforce defaults to COMMA when omitted; example: 'COMMA'; do not pass the
+literal delimiter character.
+lineEnding ("LF" | "CRLF", optional) -
+CSV results line ending for create; enum LF or CRLF; Salesforce defaults to LF when
+omitted; example: 'LF'; do not pass platform names such as Windows or Unix.
+enablePkChunking (boolean, optional) -
+PK chunking flag for create; boolean adding Sforce-Enable-PKChunking when true; defaults
+to omitted; example: true; do not combine with SOQL patterns that prevent chunking such
+as LIMIT or ORDER BY.
+pkChunkSize (integer, optional) -
+PK chunk size for create; positive integer used only when enablePkChunking is true;
+defaults to Salesforce behavior when omitted; example: 100000; do not pass zero,
+decimals, or values unsupported by Bulk API.
+locator (string, optional) -
+Results pagination locator; string from the Sforce-Locator response header; omitted
+starts the first result page; example: '01gxx000000abc'; do not pass the literal 'null'
+unless intentionally treated as omitted.
+maxRecords (integer, optional) -
+Maximum result records per page; positive integer sent as maxRecords; omitted uses
+Salesforce default page sizing; example: 50000; do not pass strings or negative values.
+queryLocator (string, optional) -
+Bulk query list pagination locator; string from a previous listAll response when
+Salesforce provides one; omitted starts the first page; example: '01gxx000000abc'; do
+not pass a full nextRecordsUrl.
 
 Result (per operation)
 create:   { id, operation, object, createdById, createdDate, systemModstamp, state: "UploadComplete", concurrencyMode, contentType, apiVersion, lineEnding, columnDelimiter }
@@ -84,10 +110,6 @@ Errors
 
 Example request
 
-manage_bulk_query_job({ "operation": "create", "soql": "SELECT Id, Name, Industry FROM Account" })
-  -> { "id": "<jobId>", "state": "UploadComplete", ... }
-manage_bulk_query_job({ "operation": "status", "jobId": "<jobId>" })    // poll until state = JobComplete
-manage_bulk_query_job({ "operation": "results", "jobId": "<jobId>", "maxRecords": 100000, "parseResultsAs": "rows" })
-  -> { "jobId": "...", "locator": "<next>" | null, "numberOfRecords": 50000, "rows": [...] }
-manage_bulk_query_job({ "operation": "results", "jobId": "<jobId>", "locator": "<next>", "maxRecords": 100000 })
-manage_bulk_query_job({ "operation": "delete", "jobId": "<jobId>" })
+manage_bulk_query_job({
+  "operation": "results"
+})

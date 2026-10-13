@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/list-emails?fields={fields}&filter[campaignId]=eq,1024
+GET https://{pi-domain}/api/v5/objects/list-emails
+Optional query: fields, filter[campaignId], filter[listIds], filter[sentAt], filter[status], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,30 +22,20 @@ Body
 None.
 
 Input (parameters)
-campaignId (number, optional).
-listIds (number[], optional) - Filter where `lists` contains any.
-sentAfter (string, optional) - ISO-8601 on `sentAt`.
-sentBefore (string, optional) - ISO-8601.
-status (string, optional) - "Draft" | "Scheduled" | "Sent" | "Sending" | "Cancelled".
-fields (string[], optional, default: id,name,subject,sentAt,
-  scheduledTime,status,campaignId,senderOptions,replyToOptions,
-  trackerDomainId,emailTemplateId,operationalEmail,createdAt,updatedAt,
-  createdById,updatedById,sentCount,deliveredCount,uniqueOpenCount,
-  totalOpenCount,uniqueClickCount,totalClickCount,bounceCount,
-  unsubscribeCount,spamComplaintCount,optOutCount,deliveryRate,
-  openRate,clickRate).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+campaignId (number, optional) - Filter by campaign id.
+listIds (number[], optional) - Filter to list emails targeting any of these list ids.
+sentAfter (string, optional) - ISO-8601 datetime. Filter to emails sent after this time.
+sentBefore (string, optional) - ISO-8601 datetime. Filter to emails sent before this time.
+status ("Draft" | "Scheduled" | "Sent" | "Sending" | "Cancelled", optional) - Filter by send status.
+fields (string[], optional) - Field projection. Defaults to id, name, subject, sentAt, scheduledTime, status,
+campaignId, senderOptions, replyToOptions, trackerDomainId, emailTemplateId,
+operationalEmail, createdAt, updatedAt, createdById, updatedById, plus all aggregate
+stats.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-listEmails (array) - Each: { id, name, subject, status, sentAt,
-  scheduledTime, campaignId, senderOptions, replyToOptions,
-  trackerDomainId, emailTemplateId, operationalEmail (boolean),
-  sentCount, deliveredCount, uniqueOpenCount, totalOpenCount,
-  uniqueClickCount, totalClickCount, bounceCount, unsubscribeCount,
-  spamComplaintCount, optOutCount, deliveryRate, openRate, clickRate,
-  createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -57,13 +48,8 @@ Errors
 
 Example request
 
-list_list_emails({ "status": "Sent", "limit": 10 })
+list_list_emails({})
 
 Example result
-{
-  "listEmails": [
-    { "id": 8821, "name": "Spring Promo Send", "status": "Sent",
-      "sentAt": "2026-04-21T15:00:00Z", "sentCount": 12450,
-      "deliveredCount": 12300, "uniqueOpenCount": 4521, "openRate": 36.7 }
-  ]
-}
+
+{ }

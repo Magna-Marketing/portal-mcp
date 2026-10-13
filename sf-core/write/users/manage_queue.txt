@@ -5,34 +5,83 @@ Manage Queues: create, update name, set supported sObjects (`QueueSObject`),
 add/remove members (users + groups), delete.
 
 Salesforce API
-Metadata API (`Queue` type) + REST API for member management, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest        (create / update / delete via Metadata)
-POST /services/data/v66.0/sobjects/GroupMember          (add member)
-DELETE /services/data/v66.0/sobjects/GroupMember/{id}   (remove member)
+POST /services/data/v66.0/sobjects/Group
+PATCH /services/data/v66.0/sobjects/Group/{Id}
+DELETE /services/data/v66.0/sobjects/Group/{Id}
+POST /services/data/v66.0/composite/sobjects
+DELETE /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: Name, DeveloperName, Type, DoesSendEmailToMembers, Email, QueueRoutingConfigId.
+JSON fields: Name, DeveloperName, DoesSendEmailToMembers, Email, QueueRoutingConfigId.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addMembers" | "removeMembers" | "addSObjects" | "removeSObjects".
-fullName (string, required for non-create) - Queue DeveloperName.
-name (string, required for create) - Master label.
-developerName (string, optional).
-sObjects (string[], optional) - sObject API names to support (Case, Lead, Project__c, etc.).
-doesSendEmailToMembers (boolean, optional, default false).
-members (object[], optional) - Same shape as `manage_public_group.members`.
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "delete" | "addMembers" | "removeMembers" | "setMembers" | "addSObjects" | "removeSObjects" | "setSObjects", required) -
+Represents the queue operation; enum value; no default; example 'setMembers'; do not
+pass multiple operations.
+fullName (string, optional) -
+Represents existing queue DeveloperName or Name for lookup; exact string; required for
+non-create when groupId is omitted; example 'Case_Support'; do not pass labels from list
+views.
+groupId (string, optional) -
+Represents existing queue Group Id; Salesforce Id string; used before fullName; example
+'00Gxx0000001234'; do not pass QueueSobject Ids.
+name (string, optional) -
+Represents queue display name stored in Group.Name; string; required for create; example
+'Case Support'; do not pass the developer name unless intended as label.
+developerName (string, optional) -
+Represents queue DeveloperName; API name string; defaults from name on create; example
+'Case_Support'; do not include spaces.
+doesSendEmailToMembers (boolean, optional) -
+Represents Group.DoesSendEmailToMembers; boolean; defaults to false on create and
+omitted on update; example true; do not pass email addresses here.
+email (string, optional) -
+Represents optional queue email; email address string; omitted by default; example
+'case-queue@example.com'; do not pass multiple addresses.
+queueRoutingConfigId (string, optional) -
+Represents QueueRoutingConfigId; Salesforce Id string; omitted by default; example
+'0JRxx0000001234'; do not pass routing names.
+sObjects (string[], optional) -
+Represents sObject API names supported by the queue; array of object names; omitted by
+default; example ['Case','Lead']; do not pass labels.
+members (object[], optional) -
+Represents queue members to add, remove, or set; array of member references; omitted by
+default; example [{\"type\":\"User\",\"username\":\"agent@example.com\"}]; do not pass
+raw GroupMember rows.
+  type ("User" | "Group" | "Role" | "RoleAndSubordinates" | "RoleAndSubordinatesInternal", required) -
+  Represents the member kind; enum User, Group, Role, RoleAndSubordinates, or
+  RoleAndSubordinatesInternal; no default; example 'User'; do not pass Queue.
+  id (string, optional) -
+  Represents the member Id; User, Group, or UserRole Salesforce Id depending on type;
+  required when username or groupName is omitted; example '005xx0000012345'; do not pass
+  role Ids for Group type.
+  username (string, optional) -
+  Represents User.Username for User members; exact username string; used when type is
+  User and id is omitted; example 'admin@example.com'; do not pass display names.
+  groupName (string, optional) -
+  Represents Group or UserRole DeveloperName/Name; exact string; used for Group and
+  role-derived members when id is omitted; example 'Sales_Role'; do not pass profile
+  names.
+checkOnly (boolean, optional) -
+Represents whether to build payloads without write APIs; boolean; defaults to false;
+example true; do not use when changes must be saved.
+batchSize (integer, optional) -
+Represents records per sObject Collections call; integer 1-200; defaults to 200; example
+100; do not exceed the REST collection limit.
+allOrNone (boolean, optional) -
+Represents sObject Collections rollback behavior; boolean; defaults to false; example
+true; do not set true unless one failure should roll back a batch.
 
 Result
-queue (object) - { id, name, developerName, type "Queue", supportedSObjects (string[]), memberCount }.
-sObjectChanges (object) - { added, removed, unchanged }.
-memberChanges (object) - { added, removed, unchanged }.
+JSON object with operation, checkOnly, lookup responses, request records or Ids, and raw
+create, update, or delete responses.
 
 Required permissions
 - "Customize Application" + "Manage Public List Views" (for supported sObjects).
@@ -46,9 +95,5 @@ Errors
 Example request
 
 manage_queue({
-  "operation": "create",
-  "fullName": "MTG_Triage",
-  "name": "MTG Triage Queue",
-  "sObjects": ["Case", "Lead"],
-  "members": [{ "type": "Group", "groupName": "MTG_Sales_NA" }]
+  "operation": "example"
 })

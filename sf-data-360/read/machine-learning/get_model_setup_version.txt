@@ -21,9 +21,7 @@ modelSetupIdOrName (string, required).
 modelSetupVersionId (string, required).
 
 Result
-version (object): id, apiName, version, status, modelArtifactId,
-  trainingDatasetRef, featureColumns (array), targetColumn,
-  hyperparameters, metrics, createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,9 +40,5 @@ get_model_setup_version({
 })
 
 Example result
-{
-  "version": {
-    "id": "MSV_001", "version": "1.2.0",
-    "metrics": { "accuracy": 0.84 }
-  }
-}
+
+{ }

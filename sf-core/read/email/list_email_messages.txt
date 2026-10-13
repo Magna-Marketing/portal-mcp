@@ -7,10 +7,10 @@ sending. Each row includes from/to/cc/bcc, subject, body (when
 requested), parent record, status, attachments count.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `EmailMessage`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, ParentId, Parent.Name, FromAddress, FromName, ToAddress, CcAddress, BccAddress, Subject, Status, Incoming, MessageDate, HasAttachment, ThreadIdentifier FROM EmailMessage WHERE ...
+GET /services/data/v66.0/query/?q=SELECT Id, ParentId, RelatedToId, ActivityId, EmailTemplateId, FromAddress, FromName, ToAddress, CcAddress, BccAddress, Subject, Status, Incoming, MessageDate, HasAttachment, ThreadIdentifier, ReplyToEmailMessageId, TextBody, HtmlBody FROM EmailMessage
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,17 +20,43 @@ Body
 None.
 
 Input (parameters)
-parentId (string, optional) - Restrict to one record (Case Id, etc.).
-fromAddress (string, optional).
-toAddress (string, optional).
-sinceHours (number, optional).
-includeBody (boolean, optional, default false) - Include `TextBody` and `HtmlBody`.
-incoming (boolean, optional) - Filter inbound vs outbound.
-limit (number, optional, default 200).
+parentId (string, optional) - EmailMessage.ParentId filter; Salesforce record Id string,
+commonly a Case Id; no default; example: 5005g000000abcAAA; do not pass object names or
+multiple Ids.
+relatedToId (string, optional) - EmailMessage.RelatedToId filter; Salesforce record Id
+string for the related record; no default; example: 0015g000000abcAAA; do not pass
+ParentId values unless they are actually stored in RelatedToId.
+fromAddress (string, optional) - FromAddress substring filter; string converted to SOQL
+LIKE contains; no default; example: support@example.com; do not pass wildcards unless
+intentional.
+toAddress (string, optional) - ToAddress substring filter; string converted to SOQL LIKE
+contains; no default; example: customer@example.com; do not pass comma-separated
+recipient lists for exact matching.
+subjectPattern (string, optional) - Pattern for Subject; string using * and ? wildcards
+converted to SOQL LIKE; no default; example: Case*Closed; do not pass regex or raw LIKE
+syntax.
+sinceHours (number, optional) - Relative lower bound for MessageDate; positive number of
+hours before now; no default; example: 24; do not pass 0, negatives, or a date string.
+includeBody (boolean, optional) - Whether to include TextBody and HtmlBody fields;
+boolean; default false; example: true; do not pass true when avoiding large message
+bodies.
+incoming (boolean, optional) - Inbound/outbound filter; boolean compared to
+EmailMessage.Incoming; no default; example: true; omit when both directions are needed.
+whereClause (string, optional) - Additional SOQL WHERE condition for EmailMessage;
+string with or without WHERE; no default; example: HasAttachment = true; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for EmailMessage; string with or
+without ORDER BY; default MessageDate DESC; example: CreatedDate DESC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum EmailMessage rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-emails (array) - { id, parentId, parentName, fromAddress, fromName, toAddress, ccAddress, bccAddress, subject, status, incoming (boolean), messageDate, hasAttachment, threadIdentifier, textBody (optional), htmlBody (optional) }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "API Enabled" + read on the parent sObject.
@@ -43,4 +69,8 @@ Errors
 
 Example request
 
-list_email_messages({ "parentId": "500Qg0000004ZyAA", "includeBody": true })
+list_email_messages({
+  "parentId": "5005g000000abcAAA",
+  "relatedToId": "0015g000000abcAAA",
+  "fromAddress": "support@example.com"
+})

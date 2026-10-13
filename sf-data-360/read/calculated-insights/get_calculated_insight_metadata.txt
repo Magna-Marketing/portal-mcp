@@ -9,10 +9,10 @@ Salesforce API
 Connect plane (default) or runtime plane (`plane="runtime"`).
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/insight/metadata                       (connect, all)
-GET {instanceUrl}/services/data/v{ver}/ssot/insight/metadata/:ciName               (connect, one)
-GET {cdpTenantUrl}/api/v1/insight/metadata                                         (runtime, all)
-GET {cdpTenantUrl}/api/v1/insight/metadata/:ci_name                                (runtime, one)
+GET {salesforceInstanceUrl}/services/data/v65.0/api/v1/insight/metadata/{ciName}
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/insight/metadata/{ciName}
+GET {instanceUrl}/api/v1/insight/metadata/{ciName}
+GET {instanceUrl}/api/v1/ssot/insight/metadata/{ciName}
 
 Headers
 Authorization: Bearer <core_access_token>     (connect)

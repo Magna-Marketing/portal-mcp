@@ -18,8 +18,8 @@ Body
 None.
 
 Input (parameters)
-apiName (string, required).
-dataSpace (string, optional, default "default").
+apiName (string, required) - Calculated insight API name, for example 'CustomerLTV__cio'.
+dataspace (string, optional) - Data space name to scope the lookup. Omit to use the org default data space.
 
 Result
 calculatedInsight (object): id, apiName, label, dataSpace, status,
@@ -37,7 +37,9 @@ Errors
 
 Example request
 
-get_calculated_insight({ "apiName": "CustomerLTV__cio" })
+get_calculated_insight({
+  "apiName": ""
+})
 
 Example result
 {

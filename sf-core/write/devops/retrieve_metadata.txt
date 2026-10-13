@@ -18,35 +18,37 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "apiVersion": 66.0,
-  "singlePackage": true,
-  "unpackaged": {
-    "types": [
-      { "name": "ApexClass", "members": ["*"] },
-      { "name": "Profile",   "members": ["*"] },
-      { "name": "FlexiPage", "members": ["Project__c_Record_Page"] }
-    ]
-  }
-}
+JSON fields: apiVersion, singlePackage, unpackaged, packageNames, specificFiles, rootTypesWithDependencies.
 
 Input (parameters)
-apiVersion (number, optional, default 66.0).
-manifest (object, required) - The unpackaged structure: { types: [{ name, members: [string] }] }.
-packageNames (string[], optional) - Managed package names to include separately.
-singlePackage (boolean, optional, default true).
-waitForCompletion (boolean, optional, default true) - Poll until done; up to 30 minutes.
-asBase64 (boolean, optional, default true) - Return inline zip in response.
+manifest (object, optional) - Unpackaged manifest shaped like package.xml; object with
+types array; required unless packageNames or specificFiles is passed; example
+{\"types\":[{\"name\":\"ApexClass\",\"members\":[\"*\"]}]}; do not use unsupported
+metadata type names.
+  types (unknown[], required) - Package.xml-shaped types and members to retrieve.
+packageNames (string[], optional) - Managed package names to retrieve; string array;
+optional; example [\"MyPackage\"]; omit for unpackaged-only retrieves.
+singlePackage (boolean, optional) - Whether one package is retrieved; boolean; defaults
+to true; example true; specificFiles requires true and no packageNames.
+specificFiles (string[], optional) - Specific metadata file paths; string array;
+optional; example [\"classes/MyClass.cls\"]; do not combine with packageNames.
+rootTypesWithDependencies ("Bot"[], optional) - Root metadata types whose dependencies
+Salesforce retrieves; enum array; currently only Bot; example [\"Bot\"]; do not pass
+arbitrary metadata types.
+waitForCompletion (boolean, optional) - Whether to poll until retrieve completes;
+boolean; defaults to true; example false; pass false to return async id only.
+includeZip (boolean, optional) - Whether final status includes the base64 zip; boolean;
+defaults to true; example false; set false for smaller responses.
+pollIntervalMs (number, optional) - Polling interval in milliseconds; positive number;
+defaults to 5000; example 10000; avoid very low values.
+maxWaitMs (number, optional) - Maximum polling duration in milliseconds; positive
+number; defaults to 1800000; example 600000; use waitForCompletion false for long
+retrieves.
 
 Result
-retrieveId (string) - Async job Id.
-status (string) - "Queued"|"InProgress"|"Pending"|"Succeeded"|"Failed".
-done (boolean).
-fileProperties (array) - { fullName, fileName, type, lastModifiedDate, lastModifiedById, lastModifiedByName, manageableState }.
-zipBase64 (string|null) - When asBase64 = true and done.
-zipFileSize (number).
-elapsedMs (number).
-errors (string|null).
+raw retrieve response, or { retrieve, status } when polling is enabled.
+retrieve (value) - included in the JSON returned by the tool.
+status (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Modify Metadata Through Metadata API Functions".
@@ -61,5 +63,7 @@ Errors
 Example request
 
 retrieve_metadata({
-  "manifest": { "types": [{ "name": "ApexClass", "members": ["*"] }] }
+  "manifest": {},
+  "packageNames": [],
+  "singlePackage": false
 })

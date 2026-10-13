@@ -37,7 +37,7 @@ hyperparameters (object, optional).
 status (string, optional) - "Active" | "Archived".
 
 Result
-version (object) - Created / updated row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -60,4 +60,5 @@ manage_model_setup_version({
 })
 
 Example result
-{ "version": { "id": "MSV_002", "version": "1.3.0", "status": "Training" } }
+
+{ }

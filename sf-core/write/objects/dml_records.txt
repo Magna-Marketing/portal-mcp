@@ -67,28 +67,9 @@ batchSize (number, optional, default 200) - Collections chunk size; ≤200.
 disableAssignmentRules (boolean, optional, default false) - Suppress Lead/Case
   assignment rules via Sforce-Auto-Assign: false header.
 
-Result (single record)
-{ results: [{ id, success, errors[], created? }] }
-- insert: created=true always.
-- update/delete: no 'created' field.
-- upsert single: created=true if new record, false if existing.
-
-Result (collections)
-{ chunks: [ [SaveResult | DeleteResult, ...], ... ] }
-- One sub-array per chunk. Each entry: { id, success, errors[], created? }.
-- Errors array is empty on success.
-
-Result (bulk)
-{
-  job: {
-    id, state, object, operation, contentType, apiVersion,
-    numberRecordsProcessed, numberRecordsFailed, ...
-  },
-  successfulResults: "/services/data/v66.0/jobs/ingest/{jobId}/successfulResults/",
-  failedResults:     "/services/data/v66.0/jobs/ingest/{jobId}/failedResults/"
-}
-- Bulk results URLs return CSV; fetch them with a separate GET request.
-- state will be "JobComplete" or "Failed".
+Result
+single calls return the raw Salesforce response; collection calls return { chunks: [...]
+}; bulk calls return { job, successfulResults, failedResults }.
 
 Required permissions
 - API Enabled.

@@ -8,7 +8,7 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId/actions/publish
+POST {salesforceInstanceUrl}/services/data/v66.0/ssot/activations/{activationId}/actions/publish
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -16,20 +16,16 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{ "publishType": "FULL" }
+POST: fullRefresh
 
 Input (parameters)
-activationId (string, required).
-publishType (string, optional, default "FULL") - "FULL" | "INCREMENTAL".
-runIdempotencyKey (string, optional).
-forceSegmentRepublish (boolean, optional, default false).
+activationId (string, required) - Unique identifier of the activation to publish (market segment activation ID or
+developer name). Required.
+fullRefresh (boolean, optional) - true = full refresh (re-sends all records); false = incremental (only new/changed).
+Defaults to false.
 
 Result
-runId (string).
-activationId (string), segmentId (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
-segmentRunId (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -44,14 +40,9 @@ Errors
 Example request
 
 publish_activation({
-  "activationId": "0YA580000000001",
-  "publishType": "INCREMENTAL"
+  "activationId": ""
 })
 
 Example result
-{
-  "runId": "RUN_ACT_2026-04-29T13",
-  "activationId": "0YA580000000001",
-  "status": "Queued",
-  "submittedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

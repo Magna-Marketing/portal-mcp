@@ -19,17 +19,18 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Active" | "Draft" | "Failed".
-documentType (string, optional) - "Invoice" | "Contract" |
-  "PurchaseOrder" | "Receipt" | "Custom".
-nameContains (string, optional).
-limit (number, optional, default 100).
+status (string, optional) - Optional configuration status filter. Known values include Active, Draft, and Failed;
+Salesforce may return or accept org-specific values.
+documentType (string, optional) - Optional document type filter, such as Invoice, Contract, PurchaseOrder, Receipt,
+Resume, or Custom.
+nameContains (string, optional) - Optional case-sensitive or case-insensitive name substring filter, depending on
+Salesforce endpoint behavior.
+limit (number, optional) - Maximum number of configurations to return. Salesforce applies its endpoint default when
+omitted.
+dataspace (unknown, required)
 
 Result
-configurations (array) - Each: { id, apiName, label, documentType,
-  status, schema (object), targetDmoApiName, extractionRules (array),
-  createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,13 +43,10 @@ Errors
 
 Example request
 
-list_document_ai_configurations({ "documentType": "Invoice" })
+list_document_ai_configurations({
+  "dataspace": ""
+})
 
 Example result
-{
-  "configurations": [
-    { "id": "0YE580000000001", "apiName": "Invoice_Default",
-      "documentType": "Invoice", "status": "Active",
-      "targetDmoApiName": "Invoice__dlm" }
-  ]
-}
+
+{ }

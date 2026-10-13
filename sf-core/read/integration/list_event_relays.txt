@@ -6,10 +6,10 @@ AWS EventBridge) with their state, target ARN, and feedback (success
 counts, last error).
 
 Salesforce API
-Tooling API, v66.0. `EventRelayConfig`.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, EventChannel, DestinationResourceName, State FROM EventRelayConfig
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, EventChannel, DestinationResourceName, State, RelayOption, UsageType, NamespacePrefix FROM EventRelayConfig
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,12 +19,31 @@ Body
 None.
 
 Input (parameters)
-state (string, optional) - "Run" | "Stop" | "Failed".
-includeFeedback (boolean, optional, default true).
+state (string, optional) - EventRelayConfig.State filter; string matching Salesforce
+state values from the org, commonly RUN, STOP, or PAUSE; no default; example: RUN; do
+not pass UI labels or multiple states.
+channelPattern (string, optional) - EventRelayConfig.EventChannel filter; string using *
+and ? wildcards converted to SOQL LIKE; no default; example: Orders_*__chn; do not pass
+regex, raw LIKE syntax, or multiple patterns.
+namePattern (string, optional) - DeveloperName or MasterLabel filter; string using * and
+? wildcards converted to SOQL LIKE; no default; example: AWS_*; do not pass labels
+separated by commas or untrusted user input.
+whereClause (string, optional) - Additional SOQL WHERE condition for EventRelayConfig;
+string with or without WHERE; no default; example: DestinationResourceName =
+'callout:AWS_Account'; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user
+input.
+orderBy (string, optional) - SOQL ORDER BY clause for EventRelayConfig; string with or
+without ORDER BY; default DeveloperName ASC; example: State ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum event relay rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-eventRelays (array) - Each: { id, developerName, masterLabel, eventChannel, destinationResourceName (AWS ARN), state, feedback (object): { relayedEventCount, failedEventCount, lastError, lastEventReplayId, lastEventTimestamp } }.
+raw Salesforce Tooling QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Modify All Data".
@@ -37,4 +56,8 @@ Errors
 
 Example request
 
-list_event_relays({})
+list_event_relays({
+  "state": "RUN",
+  "channelPattern": "Orders_*__chn",
+  "namePattern": "AWS_*"
+})

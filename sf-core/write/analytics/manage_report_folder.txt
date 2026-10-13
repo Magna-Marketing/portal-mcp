@@ -42,27 +42,50 @@ Body (create example)
 }
 
 Input (parameters)
-operation (string, required) - "list" | "describe" | "create" | "update" | "delete"
-  | "children" | "shares" | "addShares" | "replaceShares".
-folderId (string, optional) - Required for describe / update / delete / children /
-  shares / addShares / replaceShares.
-type (string, optional) - "report" | "dashboard" (lowercase). Required for create;
-  used as query filter for list.
-name (string, required for create; optional for update).
-developerName (string, optional) - Auto-derived from name when omitted.
-accessType (string, optional, default "Public") - "Public" | "Hidden" | "PublicInternal".
-shares (array, required for addShares / replaceShares) - Each entry:
-  { sharedTo (string, user/role/group ID), shareType ("User"|"Role"|"RoleAndSubordinates"|"Group"|"AllInternalUsers"),
-    accessLevel ("View"|"Edit"|"Manage") }.
-confirm (boolean, required for delete) - Must be true.
+operation ("list" | "describe" | "create" | "update" | "delete" | "children" | "shares" | "addShares" | "replaceShares", required) -
+Folder operation; enum value; no default; example: 'create'; do not pass unsupported
+folder actions.
+folderId (string, optional) -
+Folder ID; Salesforce folder ID required for operations targeting one folder; no
+default; example: '00l5g000000ABCd'; do not pass the folder name.
+type ("report" | "dashboard", optional) -
+Folder content type; enum report or dashboard; required for create and optional list
+filter; example: 'report'; do not pass capitalized values.
+name (string, optional) -
+Folder display label; string required for create and optional for update; maps to
+Salesforce label; no default; example: 'Sales Reports'; do not pass the API unique name
+here.
+developerName (string, optional) -
+Folder unique API name; maps to Salesforce name; auto-derived from name when omitted;
+example: 'Sales_Reports'; do not include spaces.
+parentId (string, optional) -
+Parent folder ID; Salesforce folder ID for subfolder create/update; no default; example:
+'00l5g000000ABCd'; only valid for subfolders.
+accessType ("Public" | "Hidden" | "PublicInternal", optional) -
+Folder visibility; applied via folder shares after create/update, not in the folder
+body; Public and PublicInternal grant organization view access; Hidden leaves the folder
+private; example: 'Hidden'.
+shares (object[], optional) -
+Folder share entries; array required for addShares and replaceShares; applied after
+create when provided; no default; example: [{ sharedTo: '0055g000000ABCd', shareType:
+'User', accessLevel: 'View' }]; replaceShares overwrites existing shares.
+  sharedTo (string, optional) -
+  Share target ID; user, role, or group ID; omit for AllInternalUsers; no default;
+  example: '0055g000000ABCd'; do not pass names.
+  shareType ("User" | "Role" | "RoleAndSubordinates" | "Group" | "AllInternalUsers", required) -
+  Share target type; enum value mapped to Salesforce shareType; no default; example:
+  'User'; do not pass object API names.
+  accessLevel ("View" | "Edit" | "Manage", required) -
+  Folder access level; enum View, Edit, or Manage; no default; example: 'Edit'; do not
+  pass CRUD words like read/write.
+confirm (boolean, optional) -
+Deletion confirmation flag; boolean; defaults to false; example: true; only pass true
+when permanent folder deletion is intended.
 
 Result
-For list: array of folder objects { id, name, type, accessType, developerName, ... }.
-For describe: full folder object.
-For create / update: resulting folder object.
-For delete: null / empty response (204) on success.
-For children: array of child folder objects.
-For shares / addShares / replaceShares: array of share objects.
+raw Salesforce folder, folder collection, child collection, share collection, or delete
+response from the selected endpoint.
+warning (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage All Reports and Dashboards" (or "Manage Reports/Dashboards in Public Folders").
@@ -75,16 +98,8 @@ Idempotency & limits
 Errors
 - INVALID_FOLDER_ID, FOLDER_NOT_EMPTY, INSUFFICIENT_ACCESS_OR_READONLY.
 
-Example request (list report folders)
-
-manage_report_folder({ "operation": "list", "type": "report" })
-
-Example request (create folder with shares)
+Example request
 
 manage_report_folder({
-  "operation": "create",
-  "name": "MTG Sales",
-  "type": "report",
-  "accessType": "Hidden",
-  "shares": [{ "sharedTo": "005...", "shareType": "User", "accessLevel": "Edit" }]
+  "operation": "create"
 })

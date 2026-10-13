@@ -8,7 +8,8 @@ Salesforce API
 Runtime plane.
 
 Endpoint
-GET {cdpTenantUrl}/api/v1/ingest/jobs
+GET {instanceUrl}/api/v1/ingest/jobs
+Optional query: states, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <data_cloud_token>
@@ -18,21 +19,14 @@ Body
 None.
 
 Input (parameters)
-state (string, optional) - "Open" | "UploadComplete" |
-  "InProgress" | "JobComplete" | "Aborted" | "Failed".
-sourceApiName (string, optional).
-objectApiName (string, optional).
-operation (string, optional) - "upsert" | "insert" | "delete".
-createdAfter (string, optional) - ISO-8601.
-limit (number, optional, default 50, max 1000).
-nextPageToken (string, optional).
+limit (number, optional) - Maximum number of jobs to return, from 1 through 100. Salesforce defaults to 20 when
+omitted.
+offset (number, optional) - Number of jobs to skip before returning results.
+orderBy (string, optional) - Field used by Salesforce to order job results. Salesforce defaults to systemModstamp
+when omitted.
 
 Result
-jobs (array) - Each: { id, sourceApiName, objectApiName, operation,
-  state, contentType, columnDelimiter, lineEnding, jobType,
-  recordsProcessed, recordsRejected, errorMessage, createdById,
-  createdDate, systemModstamp }.
-nextPageToken (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -45,13 +39,8 @@ Errors
 
 Example request
 
-list_ingest_jobs({ "state": "JobComplete" })
+list_ingest_jobs({})
 
 Example result
-{
-  "jobs": [
-    { "id": "JOB_001", "sourceApiName": "ecommerce",
-      "objectApiName": "Order", "operation": "upsert",
-      "state": "JobComplete", "recordsProcessed": 12450 }
-  ]
-}
+
+{ }

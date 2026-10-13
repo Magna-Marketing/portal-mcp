@@ -19,39 +19,28 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "name": "Spring Promo Send",
-  "subject": "Save 30% this week",
-  "campaignId": 1024,
-  "listIds": [301, 302],
-  "suppressionListIds": [310],
-  "emailTemplateId": 451,
-  "trackerDomainId": 7,
-  "operationalEmail": false,
-  "senderOptions": { "type": "GENERAL_USER", "address": "marketing@magnatech.com", "name": "Magna" },
-  "replyToOptions": { "type": "GENERAL_USER", "address": "marketing@magnatech.com" }
-}
+POST: campaignId, emailTemplateId, folderId, htmlMessage, name, recipientListIds, replyToOptions, scheduledTime, senderOptions, subject, suppressionListIds, textMessage, trackerDomainId
 
 Input (parameters)
-name (string, required).
-subject (string, required if no template).
-campaignId (number, required).
-listIds (number[], required) - At least one target list.
-suppressionListIds (number[], optional) - Recipients on these lists
-  are excluded.
-emailTemplateId (number, optional) - Reuse a template's content.
-htmlMessage (string, optional), textMessage (string, optional).
-trackerDomainId (number, optional).
-folderId (number, optional).
-senderOptions (object, optional).
-replyToOptions (object, optional).
-operationalEmail (boolean, optional, default false) - Mark as
-  operational (ignores list-level opt-outs; use sparingly).
-scheduledTime (string, optional) - ISO-8601; if omitted the email
-  stays Draft until `send_list_email` is called.
+name (string, required) - Internal name for the list email draft. Required.
+subject (string, optional) - Email subject line. Required when emailTemplateId is not provided.
+campaignId (number, required) - Campaign to attribute the send to. Required.
+listIds (number[], required) - Array of list ids to send to. At least one required.
+suppressionListIds (number[], optional) - Lists whose members are excluded from the send.
+emailTemplateId (number, optional) - Email template id to use for content. Omit if providing inline htmlMessage/textMessage.
+htmlMessage (string, optional) - Inline HTML body. Used when emailTemplateId is not set.
+textMessage (string, optional) - Inline plain-text body. Used when emailTemplateId is not set.
+trackerDomainId (number, optional) - Tracker domain for click/open tracking links.
+folderId (number, optional) - Folder to store the draft in.
+senderOptions (value[], optional) - Who the email appears to come from. Must be an array.
+replyToOptions (value[], optional) - Reply-To address configuration. Must be an array.
+operationalEmail (boolean, optional) - When true, the email is sent regardless of list-level opt-out status. Use only for
+transactional notifications.
+scheduledTime (string, optional) - ISO-8601 datetime to schedule the send. If omitted, the draft stays in Draft status
+until send_list_email is called.
 
 Result
-listEmail (object) - Created row in `Draft` status.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -65,12 +54,11 @@ Errors
 Example request
 
 create_list_email_draft({
-  "name": "Spring Promo Send",
-  "campaignId": 1024,
-  "listIds": [301],
-  "emailTemplateId": 451,
-  "subject": "Save 30% this week"
+  "name": "",
+  "campaignId": 1,
+  "listIds": []
 })
 
 Example result
-{ "listEmail": { "id": 8821, "name": "Spring Promo Send", "status": "Draft" } }
+
+{ }

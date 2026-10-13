@@ -8,7 +8,8 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ChannelType FROM PlatformEventChannel WHERE ChannelType = 'data'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ChannelType, NamespacePrefix FROM PlatformEventChannel
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, EventChannel, SelectedEntity, FilterExpression, NamespacePrefix FROM PlatformEventChannelMember
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,12 +19,38 @@ Body
 None.
 
 Input (parameters)
-includeDefaultChannel (boolean, optional, default true).
-includeMembers (boolean, optional, default true).
+includeDefaultChannel (boolean, optional) - Whether the default ChangeEvents channel is
+included in member lookup; boolean; default true; example: false; do not pass true if
+you only want custom CDC channels.
+includeMembers (boolean, optional) - Whether to also query PlatformEventChannelMember
+rows for CDC channels; boolean; default true; example: false; do not pass true when you
+only need channel definitions.
+namePattern (string, optional) - PlatformEventChannel.DeveloperName or MasterLabel
+filter for custom CDC channels; string using * and ? wildcards converted to SOQL LIKE;
+no default; example: Account_*; do not pass regex, raw LIKE syntax, or multiple
+patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+PlatformEventChannel; string with or without WHERE; no default; example: NamespacePrefix
+= null; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+memberWhereClause (string, optional) - Additional SOQL WHERE condition for
+PlatformEventChannelMember when includeMembers is true; string with or without WHERE; no
+default; example: SelectedEntity = 'AccountChangeEvent'; do not pass SELECT, FROM, ORDER
+BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for PlatformEventChannel; string with
+or without ORDER BY; default DeveloperName ASC; example: MasterLabel ASC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum custom CDC channel rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-defaultChannel (object|null) - sObjects enabled on the org's `ChangeEvents` channel.
-customChannels (array) - { id, developerName, masterLabel, channelType "data", members: [{ selectedEntity, enrichedFields }] }.
+raw Salesforce Tooling QueryResult for channels, or an object containing raw channels
+and raw members QueryResults when includeMembers is true.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+channels (value) - included in the JSON returned by the tool.
+members (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -36,4 +63,8 @@ Errors
 
 Example request
 
-list_change_data_capture_channels({ "includeMembers": true })
+list_change_data_capture_channels({
+  "includeDefaultChannel": false,
+  "includeMembers": false,
+  "namePattern": "Account_*"
+})

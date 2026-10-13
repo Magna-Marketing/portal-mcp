@@ -18,12 +18,40 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], required).
-reasonNames (string[], optional) - Restrict by SharingReason DeveloperName (without `__c`).
-includeRowCounts (boolean, optional, default true).
+sObject (string, required) - Custom parent object API name for Apex-managed sharing;
+string ending in __c; no default; example: Invoice__c; do not pass standard objects,
+share object names, labels, SOQL, or relationship paths.
+recordId (string, optional) - Parent record Id to filter Apex-managed shares; Salesforce
+15- or 18-character Id; no default; example: a015g00000ABCDe; do not pass multiple Ids,
+names, or SOQL fragments.
+userOrGroupId (string, optional) - User or group Id granted access by the share row;
+Salesforce Id string; no default; example: 0055g0000012345; do not pass names, multiple
+Ids, or SOQL fragments.
+rowCause (string, optional) - Apex sharing reason exact API value; string usually ending
+in __c; default is no exact RowCause filter and rowCausePattern applies; example:
+Partner_Access__c; do not pass Manual, labels, wildcards, or SOQL operators.
+rowCausePattern (string, optional) - Apex sharing reason pattern; string with * and ?
+wildcards converted to SOQL LIKE; default *__c; example: Partner_*; do not pass regex,
+raw LIKE syntax, or multiple patterns.
+fields (string, optional) - Share object fields to select; comma-separated SOQL field
+API names; default Id, ParentId, UserOrGroupId, AccessLevel, RowCause, deletion, and
+audit fields; example: Id, ParentId, UserOrGroupId, AccessLevel, RowCause; do not pass
+SELECT, FROM, subqueries, or untrusted input.
+whereClause (string, optional) - Additional SOQL WHERE condition for the custom share
+object; string without WHERE; no default; example: IsDeleted = false; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for the custom share object; string without
+ORDER BY; default LastModifiedDate DESC; example: RowCause ASC, LastModifiedDate DESC;
+do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum Apex-managed share rows to query; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-sharingReasons (array) - Each: { sObject, fullName (e.g. "Project__c.Manager_Sharing__c"), label, rowCount (when includeRowCounts=true) }.
+Returns the raw Salesforce QueryResult from the custom object share table.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" + "View Setup and Configuration" (read on `*Share`).
@@ -36,4 +64,6 @@ Errors
 
 Example request
 
-list_apex_managed_sharing({ "sObjects": ["Project__c"] })
+list_apex_managed_sharing({
+  "sObject": "Invoice__c"
+})

@@ -8,6 +8,7 @@ Marketing Cloud API
 REST API (`/push/v1/message`).
 
 Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/push/v1/message/{message_id}
 GET https://{tenant}.rest.marketingcloudapis.com/push/v1/message
 
 Headers
@@ -18,15 +19,23 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "Draft" | "Scheduled" | "Sending" | "Sent".
-applicationId (string, optional).
-namePattern (string, optional).
-limit (number, optional, default 200).
+message_id (string, optional) - Optional push message ID. When provided, the tool calls GET /push/v1/message/{messageId}
+and ignores list filters.
+status (string, optional) - Optional Salesforce status filter, sent as status eq {value}. Salesforce also accepts a
+raw_filter for advanced filtering.
+message_type (value, optional) - Optional messageType filter, sent as messageType eq {value}.
+content_type (value, optional) - Optional contentType filter, sent as contentType eq {value}.
+name_pattern (string, optional) - Optional message name pattern, sent as name like {value}.
+raw_filter (string, optional) - Optional raw Salesforce $filter expression. If supplied, it is combined with generated
+filters. Salesforce supports messageType, contentType, and status filters.
+order_by (string, optional) - Optional Salesforce $orderBy value, for example "lastUpdated DESC" or "name ASC".
+page (number, optional) - Salesforce $page value. Defaults to 1.
+page_size (number, optional) - Salesforce $pageSize value. Defaults to 25.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile REST request.
 
 Result
-totalCount (number).
-messages (array) - { id, messageId, name, description, status, applicationId, applicationName, messageType ("Outbound"|"Silent"|"Geofence"|"InApp"), alert (string), title, badge, sound, customKeys, audience, scheduledTime, sentTime, dateCreated, dateModified }.
-hasMore (boolean).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `push_read`.
@@ -39,4 +48,4 @@ Errors
 
 Example request
 
-list_push_messages({ "status": "Sent" })
+list_push_messages({})

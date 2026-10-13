@@ -4,10 +4,10 @@ Description
 List users in the org with profile, role, manager, license, and active state. Filterable by IsActive, Profile, UserRole, Department, Title, ManagerId, custom SOQL. Returns the same shape used by other user-centric tools so callers can pipe results into `assign_permission_set`, `bulk_assign_permissions`, `unassign_permission_set_group`, etc. For a single user with full effective access detail use `analyze_user_permissions`.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `User`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, Email, Alias, IsActive, ProfileId, Profile.Name, UserRoleId, UserRole.Name, ManagerId, Manager.Name, UserType, Department, Title, Phone, MobilePhone, TimeZoneSidKey, LocaleSidKey, EmailEncodingKey, LanguageLocaleKey, FederationIdentifier, IsPortalEnabled, UserPermissionsMarketingUser, UserPermissionsSupportUser, LastLoginDate, CreatedDate FROM User WHERE ...
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, Email, Alias, IsActive, ProfileId, Profile.Name, Profile.UserLicense.Name, UserRoleId, UserRole.Name, ManagerId, Manager.Name, Manager.Username, UserType, Department, Title, Phone, MobilePhone, TimeZoneSidKey, LocaleSidKey, EmailEncodingKey, LanguageLocaleKey, FederationIdentifier, IsPortalEnabled, UserPermissionsMarketingUser, UserPermissionsSupportUser, LastLoginDate, CreatedDate, LastModifiedDate FROM User
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,25 +17,36 @@ Body
 None.
 
 Input (parameters)
-isActive (boolean, optional, default true).
-profileNames (string[], optional).
-roleNames (string[], optional).
-department (string, optional).
-title (string, optional).
-managerUsername (string, optional).
-userType (string, optional) - "Standard" | "PowerPartner" | "PowerCustomerSuccess" | "CSPLitePortal" | "Guest" | "CustomerSuccess" | "CsnOnly".
-namePattern (string, optional) - Glob on Name or Username.
-modifiedSince (string, optional) - ISO timestamp.
-includeInactive (boolean, optional, default false).
-customWhere (string, optional) - Extra WHERE clause appended.
-limit (number, optional, default 200, max 50000).
-sortBy (string, optional, default "Name") - "Name" | "Username" | "LastLoginDate" | "CreatedDate".
+pattern (string, optional) - User text pattern matched against Name, Username, Email, or
+Alias; string using * and ? wildcards converted to SOQL LIKE; no default; example:
+jane*@example.com; do not pass regex, raw LIKE syntax, or untrusted user input.
+isActive (boolean, optional) - User activation filter; boolean matching User.IsActive;
+no default returns active and inactive users; example: true; do not pass strings such as
+'true' or 'active'.
+userType (string, optional) - UserType filter value; string matching Salesforce
+User.UserType picklist values; no default; example: Standard; do not pass multiple
+values or labels from a license name.
+profileId (string, optional) - Profile lookup filter; 15- or 18-character Salesforce
+Profile Id; no default; example: 00e5g000000ABCdAAO; do not pass profile names or
+comma-separated Ids.
+userRoleId (string, optional) - UserRole lookup filter; 15- or 18-character Salesforce
+UserRole Id; no default; example: 00E5g000000ABCdEAO; do not pass role names or Group
+Ids.
+whereClause (string, optional) - Additional SOQL WHERE condition for User; string with
+or without WHERE; no default; example: LastLoginDate = LAST_N_DAYS:30; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for User; string with or without ORDER
+BY; default Name ASC; example: LastLoginDate DESC NULLS LAST; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum User rows to return; integer from 1 to 2000; default
+200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-users (array) - Each: id, name, username, email, alias, isActive, profileId, profileName, userRoleId, userRoleName, managerId, managerName, userType, department, title, phone, mobilePhone, timeZone, locale, language, federationIdentifier, lastLoginDate, createdDate.
-hasMore (boolean).
-nextRecordsUrl (string, optional).
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Users" or "Manage Users" for full visibility.
@@ -49,4 +60,8 @@ Errors
 
 Example request
 
-list_users({ "profileNames": ["Standard User"], "department": "Engineering", "isActive": true })
+list_users({
+  "pattern": "jane*@example.com",
+  "isActive": true,
+  "userType": "Standard"
+})

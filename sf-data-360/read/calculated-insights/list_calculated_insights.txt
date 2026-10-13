@@ -18,10 +18,14 @@ Body
 None.
 
 Input (parameters)
-dataSpace (string, optional, default "default").
-status (string, optional) - "Active" | "Inactive" | "Failed" | "Draft".
-nameContains (string, optional).
-limit (number, optional, default 100).
+definitionType ("CALCULATED_METRIC" | "EXTERNAL_METRIC" | "STREAMING_METRIC", optional) - Calculated insight definition type to list. Defaults to CALCULATED_METRIC for standard
+calculated insights.
+batchSize (number, optional) - Maximum number of definitions to return, from 1 through 200. Salesforce defaults to 25
+when omitted.
+offset (number, optional) - Number of definitions to skip before returning results.
+dataspace (string, optional) - Data space name to filter by. Omit to use the org default data space.
+orderby (string, optional) - Sort order for the result set, such as 'Name ASC' or 'LastModifiedDate DESC'.
+pageToken (string, optional) - Page token returned by Salesforce for fetching a subsequent page.
 
 Result
 calculatedInsights (array) - Each: { id, apiName, label, dataSpace,
@@ -41,7 +45,7 @@ Errors
 
 Example request
 
-list_calculated_insights({ "status": "Active" })
+list_calculated_insights({})
 
 Example result
 {

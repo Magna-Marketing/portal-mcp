@@ -7,11 +7,10 @@ inside. Pair with `run_apex_tests` to execute, or `get_code_coverage`
 to see what they cover.
 
 Salesforce API
-Tooling API, v66.0. SOQL on `ApexClass WHERE Body LIKE '%@isTest%'`,
-or use the symbol-table approach for accuracy.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ApiVersion, Status, IsValid, SymbolTable FROM ApexClass WHERE Body LIKE '%@isTest%' OR Body LIKE '%testMethod%'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, Status, ApiVersion, IsValid, Body FROM ApexClass
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,15 +20,31 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-namespacePrefix (string, optional).
-managedOnly (boolean, optional, default false).
-includeMethodCounts (boolean, optional, default true) - Use SymbolTable to count test methods per class.
-limit (number, optional, default 500).
+classNamePattern (string, optional) - ApexClass Name pattern to match; string with * and
+? wildcards converted to SOQL LIKE; no default; example: *Test; do not pass regex, raw
+LIKE syntax, fully qualified names, or comma-separated names.
+namespacePrefix (string, optional) - NamespacePrefix to filter managed-package classes;
+string up to 15 characters or empty only when omitted; no default; example: mypkg; do
+not pass namespace__ClassName, labels, or multiple prefixes.
+status ("Active" | "Deleted" | "Inactive", optional) - ApexClass Status to filter by;
+one Salesforce picklist value; default Active; example: Active; do not pass lowercase
+values, multiple statuses, or trigger-only assumptions.
+whereClause (string, optional) - Additional SOQL WHERE condition for ApexClass; string
+with or without WHERE; no default; example: ApiVersion >= 60.0; do not pass SELECT,
+FROM, ORDER BY, LIMIT, Body filters, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ApexClass; string with or without
+ORDER BY; default Name ASC; example: ApiVersion DESC; do not pass WHERE, LIMIT, SELECT,
+or FROM.
+limit (integer, optional) - Maximum ApexClass rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-testClasses (array) - { id, name, namespacePrefix, apiVersion, isValid, status, testMethodCount (when includeMethodCounts) }.
+Returns the raw Salesforce QueryResult with totalSize, done, and ApexClass records
+including Body.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "Author Apex".
@@ -42,4 +57,8 @@ Errors
 
 Example request
 
-list_apex_test_classes({ "namePattern": "*Test", "includeMethodCounts": true })
+list_apex_test_classes({
+  "classNamePattern": "*Test",
+  "namespacePrefix": "mypkg",
+  "status": "Active"
+})

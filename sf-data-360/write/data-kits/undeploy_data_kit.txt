@@ -26,9 +26,7 @@ forceUndeploy (boolean, optional, default false) - When true, also
   removes dependents.
 
 Result
-success (boolean).
-componentName (string).
-removedDependents (array, when forceUndeploy=true).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -49,8 +47,5 @@ undeploy_data_kit({
 })
 
 Example result
-{
-  "success": true,
-  "componentName": "Order__dlm",
-  "removedDependents": ["OrderToIndividual_mapping"]
-}
+
+{ }

@@ -11,7 +11,7 @@ Salesforce API
 Runtime plane.
 
 Endpoint
-GET {cdpTenantUrl}/api/v1/insight/calculated-insights/:ci_name
+GET {instanceUrl}/api/v1/insight/calculated-insights/{ciName}
 
 Headers
 Authorization: Bearer <data_cloud_token>
@@ -21,12 +21,14 @@ Body
 None.
 
 Input (parameters)
-ciName (string, required) - e.g. "CustomerLTV__cio".
-dimensions (string[], optional) - Group-by columns.
-measures (string[], optional) - Measure columns to return.
-filter (object, optional) - { field, operator, value }; multi-AND.
-limit (number, optional, default 100, max 5000).
-offset (number, optional).
+ciName (string, required) - Calculated insight API name to query, for example 'CustomerLTV__cio'.
+filters (string, optional) - Salesforce filter expression, for example '[CustomerId__c=A003]' or
+'[GenderId__c=Male,FirstName__c=Angel]'.
+orderby (string, optional) - Comma-separated sort order, for example 'GenderId__c ASC,Occupation__c DESC'.
+limit (number, optional) - Maximum rows to return. Salesforce documents a maximum of 4,999 rows per request.
+batchSize (number, optional) - Compatibility alias for limit. If both limit and batchSize are provided, limit is used.
+offset (number, optional) - Number of rows to skip before returning results.
+timeGranularity ("HOUR" | "DAY" | "MONTH" | "QUARTER" | "YEAR", optional) - Time aggregation level for time-based calculated insight measures.
 
 Result
 data (array<object>) - Each row keyed by selected dimensions /
@@ -47,10 +49,7 @@ Errors
 Example request
 
 query_calculated_insight({
-  "ciName": "CustomerLTV__cio",
-  "dimensions": ["IndividualId__c"],
-  "measures": ["LifetimeValue__c"],
-  "limit": 5
+  "ciName": ""
 })
 
 Example result

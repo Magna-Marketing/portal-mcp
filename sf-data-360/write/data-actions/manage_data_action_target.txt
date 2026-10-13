@@ -37,8 +37,7 @@ authType (string, optional) - "HMAC_SIGNED" | "OAuth2" |
 configuration (object, optional) - Type-specific.
 
 Result
-dataActionTarget (object) - Created row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -61,4 +60,5 @@ manage_data_action_target({
 })
 
 Example result
-{ "dataActionTarget": { "apiName": "WebhookTarget__dat", "status": "Active" } }
+
+{ }

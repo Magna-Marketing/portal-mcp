@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms/{dataTransformNameOrId}
+Optional query: filterGroup
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -21,9 +22,7 @@ Input (parameters)
 dataTransformNameOrId (string, required).
 
 Result
-dataTransform (object): id, developerName, label, type, targetObject,
-  sourceObjects, sql, schedule, status, lastRunStatus, lastRunDate,
-  formula (object|null), createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,10 +38,5 @@ Example request
 get_data_transform({ "dataTransformNameOrId": "build_unified_individual" })
 
 Example result
-{
-  "dataTransform": {
-    "developerName": "build_unified_individual",
-    "type": "Batch",
-    "sql": "SELECT * FROM Contact__dlm UNION ALL SELECT * FROM Lead__dlm"
-  }
-}
+
+{ }

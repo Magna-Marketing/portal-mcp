@@ -6,12 +6,10 @@ first in the global search dropdown") plus org-level search settings
 (`SearchSettings`).
 
 Salesforce API
-REST API, v66.0. `/search/scopeOrder` (per-user) and Metadata API
-`SearchSettings` (org-level).
+Metadata API (SOAP), v66.0.
 
 Endpoint
-GET /services/data/v66.0/search/scopeOrder
-POST /services/Soap/m/66.0   (readMetadata SearchSettings)
+POST /services/Soap/m/66.0  (readMetadata SearchSettings)
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,15 +19,19 @@ Body
 None.
 
 Input (parameters)
-includeOrgSettings (boolean, optional, default true).
+None.
 
 Result
-scopeOrder (array) - Per-user pinned objects: [{ name, label, type ("Default"|"User") }].
-orgSettings (object, when includeOrgSettings=true):
-  documentContentSearchEnabled (boolean).
-  optimizeSearchForCJKEnabled (boolean).
-  recentlyViewedUsersForBlankLookupEnabled (boolean).
-  searchSettingsByObject (array) - [{ sObject, enhancedLookupEnabled, lookupAutoCompleteEnabled, resultsPerPageCount }].
+object containing raw searchScopeOrder, searchSettings, organization QueryResult, and
+organizationSObject responses.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+searchScopeOrder (value) - included in the JSON returned by the tool.
+searchSettings (value) - included in the JSON returned by the tool.
+organization (value) - included in the JSON returned by the tool.
+organizationSObject (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "API Enabled".

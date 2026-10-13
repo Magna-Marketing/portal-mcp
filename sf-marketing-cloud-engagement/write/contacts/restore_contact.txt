@@ -19,9 +19,14 @@ Body
 { "values": ["MEM-100023"] }
 
 Input (parameters)
-contactKeys (string[], optional).
-contactIds (number[], optional).
-  One required.
+contact_keys (string[], optional) - ContactKey values that the portal documentation claimed could be restored. Salesforce
+public REST docs do not document a restore-by-key endpoint.
+contact_ids (value[], optional) - ContactID values that the portal documentation claimed could be restored. Salesforce
+public REST docs do not document a restore-by-id endpoint.
+operation_id (value, optional) - Contact Delete operationID. Salesforce documents status/list/retry endpoints for delete
+operations, but no public restore endpoint.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Contacts REST request.
 
 Result
 operationId (string).
@@ -40,4 +45,4 @@ Errors
 
 Example request
 
-restore_contact({ "contactKeys": ["MEM-100023"] })
+restore_contact({})

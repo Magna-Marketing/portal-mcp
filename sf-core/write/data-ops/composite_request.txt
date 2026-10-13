@@ -60,26 +60,28 @@ Body (batch mode)
 }
 
 Input (parameters)
-mode (string, optional, default "composite") - "composite" | "batch".
-
-[composite mode]
-allOrNone (boolean, optional, default false) - If true, rolls back all sub-requests on any failure.
-collateSubrequests (boolean, optional, default true in API v49.0+) - If true, allows the API to
-  reorder and bulkify unrelated sub-requests of the same method/type. Set false for strict order.
-subrequests (object[], required for composite mode) - Each:
-  method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
-  url (string, required) - Must start with /services/data/vXX.X/.
-  referenceId (string, required) - Unique ID; used in @{referenceId.fieldPath} cross-references.
-  body (object, optional) - JSON body for POST/PATCH/PUT.
-  httpHeaders (object, optional) - Sub-request-specific headers (disables collation for that sub-request).
-
-[batch mode]
-haltOnError (boolean, optional, default false) - If true, halts remaining sub-requests on first
-  4xx/5xx error, returning HTTP 412 BATCH_PROCESSING_HALTED for them.
-batchSubrequests (object[], required for batch mode) - Each:
-  method (string, required) - "GET" | "POST" | "PATCH" | "PUT" | "DELETE".
-  url (string, required) - Resource path.
-  richInput (object, optional) - Request body for POST/PATCH/PUT (NOT called 'body').
+mode ("composite" | "batch", optional, default composite) - Composite execution mode;
+enum composite or batch; defaults to composite; example: 'composite'; do not pass graph
+here because Composite Graph has a separate tool.
+allOrNone (boolean, optional) - Composite allOrNone flag; boolean used only in composite
+mode to roll back all subrequests on failure when true; omitted uses Salesforce default
+false; example: true; do not pass for batch mode.
+collateSubrequests (boolean, optional) - Composite collateSubrequests flag; boolean used
+only in composite mode to allow Salesforce to collate unrelated subrequests; omitted
+uses Salesforce default; example: false; do not rely on unrelated execution order when
+true.
+subrequests (unknown[], optional) - Composite subrequests; array required in composite
+mode with method, url, referenceId, and optional body/httpHeaders; no default; example:
+[{ method: 'GET', referenceId: 'acct', url:
+'/services/data/v66.0/sobjects/Account/001...' }]; do not exceed 25 subrequests or 5
+query/collection subrequests.
+haltOnError (boolean, optional) - Batch haltOnError flag; boolean used only in batch
+mode to stop after a subrequest error; omitted uses Salesforce default false; example:
+true; do not pass expecting rollback of completed batch subrequests.
+batchSubrequests (unknown[], optional) - Batch subrequests; array required in batch mode
+with method, url, and optional richInput; no default; example: [{ method: 'GET', url:
+'/services/data/v66.0/sobjects/Account/001...' }]; do not include referenceId or
+cross-request references.
 
 Result (composite mode)
 { "compositeResponse": [{ "referenceId": "...", "httpStatusCode": 201, "body": {...}, "httpHeaders": {...} }] }
@@ -95,28 +97,10 @@ Idempotency & limits
 - Composite mode: up to 5 sub-requests may be sObject Collections or query operations.
 - Entire request counts as a single API call toward limits.
 
-Example request (composite)
+Example request
 
 composite_request({
   "mode": "composite",
   "allOrNone": true,
-  "subrequests": [
-    { "method": "POST", "referenceId": "acc",
-      "url": "/services/data/v66.0/sobjects/Account",
-      "body": { "Name": "ACME", "Industry": "Tech" } },
-    { "method": "POST", "referenceId": "con",
-      "url": "/services/data/v66.0/sobjects/Contact",
-      "body": { "LastName": "Doe", "AccountId": "@{acc.id}", "Email": "doe@acme.com" } }
-  ]
-})
-
-Example request (batch)
-
-composite_request({
-  "mode": "batch",
-  "haltOnError": false,
-  "batchSubrequests": [
-    { "method": "PATCH", "url": "/services/data/v66.0/sobjects/Account/001xx", "richInput": { "Name": "Updated" } },
-    { "method": "GET", "url": "/services/data/v66.0/sobjects/Contact/003xx" }
-  ]
+  "collateSubrequests": false
 })

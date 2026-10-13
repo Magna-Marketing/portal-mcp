@@ -17,8 +17,7 @@ identifier (string, required) - Unique identifier of the component instance
   to remove.
 
 Result
-updateResult (object) - Raw Metadata API update response.
-removed (object) - { flexiPageName, region, identifier }.
+raw Metadata API SaveResult.
 
 Required permissions
 - "Customize Application".

@@ -8,7 +8,7 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/identity-resolutions/:identityResolution
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/identity-resolutions/{identityResolutionId}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,17 +18,14 @@ Body
 None.
 
 Input (parameters)
-identityResolution (string, required) - Id or api name.
+identityResolutionId (string, required) - Unique Salesforce ID of the Identity Resolution ruleset, such as '1ir1Q0000004CKHQA2'.
 
 Result
-identityResolution (object): id, apiName, label, status,
-  unifiedDmoApiName, sourceDmos, schedule,
-  matchRules (array<{ apiName, sourceField, normalization, fuzzy,
-    weight, threshold }>),
-  reconciliationRules (array<{ targetField, strategy ("Recency" |
-    "SourcePriority" | "Frequency"), sourcePriority (array) }>),
-  lastRunStatus, lastRunDate, unifiedRecordCount, createdDate,
-  lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
+Note returned with the JSON: Note: It is not possible to retrieve details about an identity resolution ruleset’s
+processing history. Whereas Data Transforms do have a dedicated /run-history API, the
+Identity Resolution API does not provide an endpoint to retrieve Identity Resolution
+Ruleset’s Processing History.
 
 Required scopes
 - `api`.
@@ -41,16 +38,10 @@ Errors
 
 Example request
 
-get_identity_resolution({ "identityResolution": "UnifiedIndividual_default" })
+get_identity_resolution({
+  "identityResolutionId": ""
+})
 
 Example result
-{
-  "identityResolution": {
-    "apiName": "UnifiedIndividual_default",
-    "unifiedDmoApiName": "UnifiedIndividual__dlm",
-    "matchRules": [
-      { "apiName": "match_email", "sourceField": "EmailAddress__c",
-        "normalization": "EMAIL", "fuzzy": false, "weight": 0.6 }
-    ]
-  }
-}
+
+{ }

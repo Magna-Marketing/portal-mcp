@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/emails?fields={fields}&filter[prospectId]=eq,:prospectId
+GET https://{pi-domain}/api/v5/objects/emails
+Optional query: fields, filter[campaignId], filter[emailTemplateId], filter[listEmailId], filter[prospectId], filter[sentAt], filter[type], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,26 +21,21 @@ Body
 None.
 
 Input (parameters)
-prospectId (number, optional) - Filter to one recipient.
-listEmailId (number, optional) - All sends for one List Email.
-campaignId (number, optional).
-emailTemplateId (number, optional).
-type (string, optional) - "ListEmail" | "OneToOneEmail" |
-  "TestEmail" | "AutoresponderEmail" | "DripEmail".
-sentAfter (string, optional) - ISO-8601 (filter on `sentAt`).
-sentBefore (string, optional) - ISO-8601.
-fields (string[], optional, default: id,name,subject,type,userId,
-  campaignId,listId,clientType,sentAt,prospectId,listEmailId,
-  emailTemplateId,isOperational,senderOptions.address,senderOptions.name,
-  replyToOptions.address).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+prospectId (number, optional) - Filter to emails sent to a specific prospect.
+listEmailId (number, optional) - Filter to all individual sends for a specific list email blast.
+campaignId (number, optional) - Filter by campaign id.
+emailTemplateId (number, optional) - Filter by email template id.
+type ("ListEmail" | "OneToOneEmail" | "TestEmail" | "AutoresponderEmail" | "DripEmail", optional) - Filter by email send type.
+sentAfter (string, optional) - ISO-8601 datetime. Filter to emails sent after this time.
+sentBefore (string, optional) - ISO-8601 datetime. Filter to emails sent before this time.
+fields (string[], optional) - Field projection. Defaults to id, name, subject, type, userId, campaignId, listId,
+clientType, sentAt, prospectId, listEmailId, emailTemplateId, isOperational,
+senderOptions.address, senderOptions.name, replyToOptions.address.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-emails (array) - Each: { id, name, subject, type, userId, campaignId,
-  listId, clientType, sentAt, prospectId, listEmailId, emailTemplateId,
-  isOperational, senderOptions, replyToOptions }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -52,13 +48,8 @@ Errors
 
 Example request
 
-list_sent_emails({ "prospectId": 7745, "limit": 20 })
+list_sent_emails({})
 
 Example result
-{
-  "emails": [
-    { "id": 99821, "name": "Welcome", "subject": "Welcome, Jane",
-      "type": "AutoresponderEmail", "sentAt": "2026-04-29T13:02:11Z",
-      "prospectId": 7745, "campaignId": 1024 }
-  ]
-}
+
+{ }

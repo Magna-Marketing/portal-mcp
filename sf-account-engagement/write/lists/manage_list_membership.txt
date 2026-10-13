@@ -33,8 +33,8 @@ prospectId (number, required for create).
 optedOut (boolean, optional, default false).
 
 Result
-listMembership (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -58,6 +58,5 @@ manage_list_membership({
 })
 
 Example result
-{
-  "listMembership": { "id": 4421001, "listId": 301, "prospectId": 7745, "optedOut": false }
-}
+
+{ }

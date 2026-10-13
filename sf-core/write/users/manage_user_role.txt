@@ -6,34 +6,66 @@ change opportunity/case/contact access settings), delete (only when no
 users assigned), or move within hierarchy.
 
 Salesforce API
-Metadata API (`Role` type) + REST `UserRole` sObject, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest          (create/update/delete roles via Metadata)
-PATCH /services/data/v66.0/sobjects/UserRole/{id}          (rename, parent move via direct sObject)
+POST /services/data/v66.0/sobjects/UserRole
+DELETE /services/data/v66.0/sobjects/UserRole/{Id}
+PATCH /services/data/v66.0/sobjects/UserRole/{Id}
+GET /services/data/v66.0/query/?q=SELECT None, Read, Edit, create, update, delete, move FROM UserRole
+GET /services/data/v66.0/query/?q=SELECT None, Read, Edit, create, update, delete, move FROM User
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A (varies by operation).
+JSON fields: Name, DeveloperName, ParentRoleId, OpportunityAccessForAccountOwner, CaseAccessForAccountOwner, ContactAccessForAccountOwner, MayForecastManagerShare, RollupDescription.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "move".
-fullName (string, required) - Role DeveloperName.
-name (string, required for create) - UI label.
-parentRoleName (string, optional) - DeveloperName of parent (for create / move).
-opportunityAccessForAccountOwner (string, optional) - "None" | "Read" | "Edit".
-caseAccessForAccountOwner (string, optional).
-contactAccessForAccountOwner (string, optional).
-mayForecastManagerShare (boolean, optional).
-description (string, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "delete" | "move", required) - Represents the role
+operation; enum create, update, delete, or move; no default; example 'move'; do not pass
+assign.
+fullName (string, optional) - Represents UserRole DeveloperName or Name for lookup;
+exact string; required for non-create when roleId is omitted; example 'Sales_Manager';
+do not pass labels from profiles.
+roleId (string, optional) - Represents UserRole Id; Salesforce Id string; used before
+fullName; example '00Exx0000001234'; do not pass Group Ids.
+name (string, optional) - Represents UserRole.Name label; string; required for create
+and optional for update; example 'Sales Manager'; do not pass the developer name unless
+intended as label.
+developerName (string, optional) - Represents UserRole.DeveloperName; API name string;
+defaults from fullName or name on create; example 'Sales_Manager'; do not include
+spaces.
+parentRoleId (string, optional) - Represents parent UserRole Id; Salesforce Id string;
+used before parentRoleName; example '00Exx0000009999'; do not pass Group Ids.
+parentRoleName (string, optional) - Represents parent UserRole DeveloperName or Name;
+exact string; used when parentRoleId is omitted; example 'Sales_VP'; do not pass profile
+names.
+opportunityAccessForAccountOwner (string, optional) - Represents
+UserRole.OpportunityAccessForAccountOwner; enum None, Read, or Edit; omitted leaves
+unchanged on update; example 'Read'; do not pass All.
+caseAccessForAccountOwner (string, optional) - Represents
+UserRole.CaseAccessForAccountOwner; enum None, Read, or Edit; omitted leaves unchanged
+on update; example 'Edit'; do not pass All.
+contactAccessForAccountOwner (string, optional) - Represents
+UserRole.ContactAccessForAccountOwner; enum None, Read, or Edit; omitted leaves
+unchanged on update; example 'Read'; do not pass All.
+mayForecastManagerShare (boolean, optional) - Represents
+UserRole.MayForecastManagerShare; boolean; omitted leaves unchanged; example true; do
+not pass forecasting profile settings.
+description (string, optional) - Represents role description stored in
+RollupDescription; string; omitted leaves unchanged; example 'Western sales managers';
+do not pass HTML scripts.
+allowDeleteWithUsers (boolean, optional) - Represents whether delete proceeds when
+assigned users exist; boolean; defaults to false; example true; do not enable unless
+reassignment impact is understood.
+checkOnly (boolean, optional) - Represents whether to build payloads without write APIs;
+boolean; defaults to false; example true; do not use when changes must be saved.
 
 Result
-deploy (object) - Standard Metadata deploy result for create/update/delete.
-role (object, on success) - { id, name, developerName, parentRoleId, parentRoleName, opportunityAccess, caseAccess, contactAccess, userCount }.
+JSON object with operation, checkOnly, lookup responses, payloads, and raw write
+responses.
 
 Required permissions
 - "Manage Roles" / "Customize Application".
@@ -46,17 +78,8 @@ Idempotency & limits
 Errors
 - DUPLICATE_DEVELOPER_NAME (create), CIRCULAR_DEPENDENCY (move), CANNOT_DELETE_ROLE (users assigned).
 
-Example request (create)
+Example request
 
 manage_user_role({
-  "operation": "create",
-  "fullName": "MTG_Engineering",
-  "name": "MTG Engineering",
-  "parentRoleName": "MTG_Delivery",
-  "opportunityAccessForAccountOwner": "Read",
-  "caseAccessForAccountOwner": "Read"
+  "operation": "example"
 })
-
-Example request (delete)
-
-manage_user_role({ "operation": "delete", "fullName": "MTG_Old_Team" })

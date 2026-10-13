@@ -9,30 +9,34 @@ Marketing Cloud API
 REST API (`/messaging/v1/sms/messages/{messageKey}`).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages/{messageKey}      (single)
-POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages                   (batch)
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages/{message_key}
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/messages
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "definitionKey": "MTG_OrderConfirmation_SMS",
-  "recipient": {
-    "contactKey": "MEM-100023",
-    "to": "+15551234567",
-    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345" }
-  }
-}
+POST: content, definitionKey
 
 Input (parameters)
-definitionKey (string, required).
-recipients (object[], required) - Each: { contactKey, to (E.164 phone), attributes (object), messageKey (string, optional) }.
+definition_key (string, required) - Transactional Messaging SMS send definition key. Salesforce sends the message using this
+definition.
+recipients (object[], required) - Recipients to send to. Use one recipient with message_key for the single-recipient
+endpoint, or multiple recipients for the batch endpoint.
+message_key (string, optional) - Required for the single-recipient endpoint. When provided, recipients must contain
+exactly one recipient and the tool calls POST /messaging/v1/sms/messages/{messageKey}.
+message_content (string, optional) - Optional SMS body override. Passed as content.message, which Salesforce documents for
+transactional SMS sends.
+content (object, optional) - Optional Salesforce content object. Use this for advanced documented overrides. If
+message_content is also supplied, it is written to content.message.
+request_body_overrides (object, optional) - Optional advanced Salesforce request body fields to merge into the final request body.
+Values here override generated fields.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Transactional Messaging REST request.
 
 Result
-results (array) - { messageKey, contactKey, status, errors }.
-summary (object) - { queued, failed, total }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_send`.
@@ -47,11 +51,6 @@ Errors
 Example request
 
 send_transactional_sms({
-  "definitionKey": "MTG_OrderConfirmation_SMS",
-  "recipients": [{
-    "contactKey": "MEM-100023",
-    "to": "+15551234567",
-    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345" },
-    "messageKey": "ORD-12345-SMS"
-  }]
+  "definition_key": "",
+  "recipients": []
 })

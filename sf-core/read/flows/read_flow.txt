@@ -12,11 +12,12 @@ Use `list_flows` (or another discovery path) to obtain a
 `flowVersionId` before calling this tool.
 
 Salesforce API
-Tooling REST and Metadata API (SOAP), v66.0 only.
+Tooling API, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/sobjects/Flow/{flowVersionId}
-POST /services/Soap/m/66.0   (Metadata API readMetadata for raw XML)
+POST /services/Soap/m/66.0  (readMetadata Flow)
+GET /services/data/v66.0/tooling/sobjects/{type}/{id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -29,31 +30,23 @@ None for the GET. SOAP envelope for readMetadata when `includeXml` is
 true (handled by MCP).
 
 Input (parameters)
-flowVersionId (string, required) - 18-character Id of the Tooling
-  `Flow` row (a specific version), not the FlowDefinition Id.
-includeXml (boolean, optional, default false) - When true, also return
-  raw Flow XML from Metadata `readMetadata` (SOAP). Heavier; off by
-  default.
+flowVersionId (string, required) -
+Tooling API Flow version Id; string Id in 15- or 18-character format; required with no
+default; example: 301xx0000008abcAAA; do not pass FlowDefinition Ids, flow API names,
+labels, or version numbers.
+includeMetadata (boolean, optional) -
+Whether to also call Metadata API readMetadata('Flow', FullName); boolean; default
+false; example: true; do not pass true for managed-package flows whose metadata is
+protected or when FullName is unavailable.
+includeXml (boolean, optional) -
+Legacy alias for includeMetadata; boolean; default false and ignored when
+includeMetadata is provided; example: true; returns the raw Metadata API result, not an
+XML conversion; do not pass strings such as \"true\".
 
 Result
-flowVersion (object) - Body of GET .../tooling/sobjects/Flow/{id}
-  (same shape Salesforce returns). Typical top-level fields include:
-  - attributes: { type: "Flow", url: "<.../Flow/{Id}>" }
-  - Id, DefinitionId, MasterLabel, ManageableState, VersionNumber,
-    Status, Description, ProcessType
-  - CreatedDate, CreatedById, LastModifiedDate, LastModifiedById
-  - Metadata: nested flow definition (apiVersion, label, processType,
-    status, start { object, triggerType, recordTriggerType, connector,
-    ... }, recordCreates, recordLookups, recordUpdates, decisions,
-    screens, actionCalls, variables, formulas, loops, subflows, etc.;
-    many arrays are empty on simple flows)
-  - FullName: DeveloperName (used for readMetadata when includeXml)
-  - IsTemplate, IsOverridable, SourceTemplate, OverriddenFlow,
-    TriggerOrder, RunInMode, ApiVersion, Environments, TimeZoneSidKey,
-    ProgressStatus, IsPaused, AreMetricsLoggedToDataCloud
-  Exact fields depend on API version and flow type.
-xml (string|null) - When `includeXml` is true: raw `<Flow>` XML from
-  readMetadata; otherwise null or omitted.
+Returns a JSON object with the raw Tooling Flow record and optional raw Metadata API
+read result.
+flowVersion (value) - included in the JSON returned by the tool.
 
 Required permissions
 - API Enabled.
@@ -70,80 +63,12 @@ Errors
 
 Example request
 
-read_flow({ "flowVersionId": "3013u000000NDkvAAG", "includeXml": false })
+read_flow({
+  "flowVersionId": "301xx0000008abcAAA"
+})
 
-Example result (Metadata truncated; real responses include full element
-graphs)
+Example result
 
 {
-  "flowVersion": {
-    "attributes": {
-      "type": "Flow",
-      "url": "/services/data/v66.0/tooling/sobjects/Flow/3013u000000NDkvAAG"
-    },
-    "Id": "3013u000000NDkvAAG",
-    "DefinitionId": "3003u0000000TGQAA2",
-    "MasterLabel": "Mavenlink Template ID Populate Flow",
-    "ManageableState": "unmanaged",
-    "VersionNumber": 1,
-    "Status": "Active",
-    "Description": null,
-    "ProcessType": "AutoLaunchedFlow",
-    "CreatedDate": "2022-11-28T22:01:21.000+0000",
-    "CreatedById": "0051I000000V696QAC",
-    "LastModifiedDate": "2022-11-28T22:01:25.000+0000",
-    "LastModifiedById": "0051I000000V696QAC",
-    "Metadata": {
-      "apiVersion": 56.0,
-      "label": "Mavenlink Template ID Populate Flow",
-      "processType": "AutoLaunchedFlow",
-      "status": "Active",
-      "start": {
-        "object": "OpportunityLineItem",
-        "triggerType": "RecordAfterSave",
-        "recordTriggerType": "CreateAndUpdate",
-        "connector": { "targetReference": "Get_Product_Records" }
-      },
-      "recordLookups": [
-        {
-          "name": "Get_Product_Records",
-          "label": "Get Product Records",
-          "object": "Product2",
-          "getFirstRecordOnly": true,
-          "storeOutputAutomatically": true,
-          "connector": { "targetReference": "Update_Product_Line_Item" }
-        }
-      ],
-      "recordUpdates": [
-        {
-          "name": "Update_Product_Line_Item",
-          "label": "Update Product Line Item",
-          "inputReference": "$Record"
-        }
-      ],
-      "variables": [
-        {
-          "name": "recordId",
-          "dataType": "SObject",
-          "isInput": true,
-          "isOutput": true,
-          "objectType": "Product2",
-          "isCollection": false
-        }
-      ]
-    },
-    "FullName": "Mavenlink_Template_ID_Populate_Flow",
-    "IsTemplate": false,
-    "IsOverridable": false,
-    "SourceTemplate": null,
-    "OverriddenFlow": null,
-    "TriggerOrder": null,
-    "RunInMode": null,
-    "ApiVersion": 56.0,
-    "Environments": "1",
-    "TimeZoneSidKey": null,
-    "ProgressStatus": null,
-    "IsPaused": false,
-    "AreMetricsLoggedToDataCloud": false
-  }
+  "flowVersion": null
 }

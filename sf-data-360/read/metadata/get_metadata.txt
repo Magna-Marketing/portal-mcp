@@ -9,8 +9,14 @@ Salesforce API
 Connect plane (default) or runtime plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/metadata           (plane="connect", default)
-GET {cdpTenantUrl}/api/v1/metadata                             (plane="runtime")
+GET {salesforceInstanceUrl}/services/data/v65.0/api/v1/metadata/
+Optional query: dataspace
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/metadata
+Optional query: dataspace
+GET {instanceUrl}/api/v1/metadata/
+Optional query: dataspace
+GET {instanceUrl}/api/v1/ssot/metadata
+Optional query: dataspace
 
 Headers
 Authorization: Bearer <core_access_token>      (connect)
@@ -21,24 +27,19 @@ Body
 None.
 
 Input (parameters)
-plane (string, optional, default "connect").
-mode (string, optional, default "global") - "global" | "byType" |
-  "byEntity" | "byCategory".
-entityType (string, optional, mode="byType") - "DataStream" |
-  "DataLakeObject" | "DataModelObject" | "Segment" | "Activation" |
-  "DataTransform" | "CalculatedInsight" | "DataGraph" | "DataSpace" |
-  "Connection" | "DataKit" | "IdentityResolution".
-entityName (string, optional, mode="byEntity").
-category (string, optional, mode="byCategory") - "Profile" |
-  "Engagement" | "Other" | "Account" | "Contact".
-limit (number, optional).
-dataSpace (string, optional).
+plane ("connect" | "runtime", optional) - API plane to call. `connect` uses `/ssot/metadata`; `runtime` uses `/api/v1/metadata/`.
+Defaults to connect.
+entityType (unknown, optional) - Metadata entity type filter. Salesforce supports `DataLakeObject`, `DataModelObject`,
+and `CalculatedInsight`.
+entityCategory (unknown, optional) - Metadata entity category filter. Salesforce supports `Profile`, `Engagement`, and
+`Related`; the filter is not applicable to Calculated Insight entities.
+entityName (string, optional) - Metadata entity API name, for example `UnifiedIndividual__dlm`. Omit to return all
+matching entities.
+dataspace (string, optional) - Data space name for the Connect REST endpoint. Salesforce uses the default data space
+when omitted.
 
 Result
-metadata (array) - Each: { entityType, entityName, label, category,
-  dataSpace, status, recordCount, createdDate, lastModifiedDate,
-  additionalProperties (object) }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (connect) or `cdp_api` (runtime).
@@ -51,14 +52,8 @@ Errors
 
 Example request
 
-get_metadata({ "mode": "byType", "entityType": "DataModelObject", "limit": 5 })
+get_metadata({})
 
 Example result
-{
-  "metadata": [
-    { "entityType": "DataModelObject",
-      "entityName": "UnifiedIndividual__dlm",
-      "category": "Profile",
-      "recordCount": 482000 }
-  ]
-}
+
+{ }

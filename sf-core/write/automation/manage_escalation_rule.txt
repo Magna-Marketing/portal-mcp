@@ -5,29 +5,63 @@ Manage Case escalation rules (rule entries with criteria + escalation
 actions that fire after a record ages without expected progress).
 
 Salesforce API
-Metadata API (`EscalationRules`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (writeMetadata EscalationRules)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: minutesToEscalation, ageOverFromField, assignedTo, assignedToType, assignedToTemplate, notifyTo, notifyToTemplate, notifyCaseOwner.
+JSON fields: businessHoursSource, escalationAction.
+JSON fields: fullName, active, ruleEntry.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
-fullName (string, required for non-create).
-label (string, required for create).
-active (boolean, optional, default false).
-ruleEntries (array, optional) - [{ sortOrder, criteriaItems, formula, booleanFilter, businessHours, escalationActions: [{ ageOver, ageOverFromField, assignTo, assignToTemplate, notifyTo, notifyTemplate, notifyAssignee }] }].
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "activate" | "deactivate" | "delete", required) -
+Requested EscalationRule operation; enum create, update, upsert, activate, deactivate,
+or delete; no default; example: 'deactivate'; do not use update/activate/deactivate for
+a rule that is not already in the Case container.
+fullName (string, required) -
+EscalationRule fullName within the Case container; string DeveloperName without object
+prefix; no default; example: 'Priority_Case_Escalation'; do not pass a label or Id.
+label (string, optional) -
+Human-readable label context; string not written directly unless supplied through
+metadata; omitted has no effect; example: 'Priority Case Escalation'; do not rely on it
+as the metadata identity.
+active (boolean, optional) -
+EscalationRule active flag; boolean; defaults to false when creating unless activate is
+used; example: true; do not set conflicting active rules.
+ruleEntries (object[], optional) -
+EscalationRule ruleEntry values; array of criteria and escalation action objects;
+omitted changes rule-level fields only; example:
+[{\"criteriaItems\":[{\"field\":\"Case.Priority\",\"operation\":\"equals\",\"value\":\"High\"}],\"escalationActions\":[{\"minutesToEscalation\":60,\"notifyCaseOwner\":true,\"notifyToTemplate\":\"Case_Escalation_Notice\"}]}];
+do not pass entries without criteria unless that is intentional.
+  criteriaItems (object, required).
+  formula (string, optional) -
+  RuleEntry formula criteria; string formula evaluated by Salesforce; omitted when using
+  criteriaItems; example: 'Priority = \"High\"'; do not include leading '='.
+  booleanFilter (string, optional) -
+  RuleEntry booleanFilter; string combining criteria item indexes; omitted means
+  Salesforce default criteria behavior; example: '1 AND 2'; do not reference indexes
+  that are not present.
+  businessHoursSource (string, optional) -
+  RuleEntry businessHoursSource; Metadata API BusinessHoursSourceType enum value;
+  omitted uses default business hours; valid values are object API names such as 'Case'
+  or 'Account' that have business hours configured; do not pass 'Default' or a
+  BusinessHours record Id.
+  escalationActions (object[], optional) -
+  Escalation actions for the rule entry; array ordered by minutesToEscalation; omitted
+  creates criteria without timed actions; example:
+  [{\"minutesToEscalation\":60,\"notifyCaseOwner\":true,\"notifyToTemplate\":\"Case_Escalation_Notice\"}];
+  notifyCaseOwner and notifyToTemplate are mutually required — always set both together.
+metadata (unknown, required).
 
 Result
-deploy (object).
-rule (object).
+JSON containing the raw Metadata API read response and raw create or update response for
+the Case container.
 
 Required permissions
 - "Customize Application".
@@ -41,9 +75,7 @@ Errors
 Example request
 
 manage_escalation_rule({
-  "operation": "create",
-  "fullName": "Case_Age_Escalation",
-  "label": "Case Age Escalation",
-  "active": true,
-  "ruleEntries": [{ "sortOrder": 1, "criteriaItems": [{ "field": "Case.Status", "operation": "notEqual", "value": "Closed" }], "escalationActions": [{ "ageOver": 1440, "assignTo": "MTG_Tier2_Queue" }] }]
+  "operation": "deactivate",
+  "fullName": "Priority_Case_Escalation",
+  "metadata": "example"
 })

@@ -20,18 +20,26 @@ Body
 { "name": "MTG HQ", "description": "MTG corporate HQ geofence", "latitude": 40.7128, "longitude": -74.0060, "radiusInMeters": 500, "address": "...", "city": "New York", "state": "NY", "country": "US", "postalCode": "10005" }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-locationId (string, optional, required for non-create).
-name (string, required for create).
-description (string, optional).
-latitude (number, required for create) - WGS-84 decimal degrees.
-longitude (number, required for create).
-radiusInMeters (number, required for create).
-address, city, state, country, postalCode (string, optional).
-isActive (boolean, optional).
+operation ("create" | "update" | "delete", required) - Create, update, or delete a MobilePush geofence or beacon location.
+location_id (string, optional) - MobilePush location ID. Required for update and delete.
+name (string, optional) - Location object name. Required for create.
+location (string, optional) - Text defining the location, usually a physical or mailing address.
+description (string, optional) - Description or notes for the location.
+latitude (number, optional) - Center latitude for a geofence location. Required for geofence create.
+longitude (number, optional) - Center longitude for a geofence location. Required for geofence create.
+radius (number, optional) - Salesforce radius value for the location circle. Pass the value expected by your
+tenant/docs for /push/v1/location.
+attributes (object[], optional) - Additional Salesforce location attributes.
+location_type (value, optional) - Salesforce locationType. Use 1 for geofence and 3 for beacon. Defaults to Salesforce
+behavior when omitted.
+proximity_uuid (string, optional) - Beacon UUID. Required by Salesforce when location_type is 3.
+major (number, optional) - Beacon major number. Required by Salesforce when location_type is 3.
+minor (number, optional) - Beacon minor number. Required by Salesforce when location_type is 3.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-location (object) - { id, name, latitude, longitude, radiusInMeters, isActive }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `push_write`.
@@ -45,9 +53,5 @@ Errors
 Example request
 
 manage_push_location({
-  "operation": "create",
-  "name": "MTG HQ",
-  "latitude": 40.7128,
-  "longitude": -74.0060,
-  "radiusInMeters": 500
+  "operation": "create"
 })

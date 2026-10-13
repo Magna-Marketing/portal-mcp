@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/providers/:providerIdOrName/templates
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/providers/{providerIdOrName}/templates
+Optional query: filters, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,12 +20,18 @@ Body
 None.
 
 Input (parameters)
-providerIdOrName (string, required).
+providerIdOrName (string, required) - Data Clean Room provider ID or developer name whose templates should be listed.
+filters (string, optional) - Salesforce filter expression as a comma-separated list of equality expressions, such as
+'developerName eq MyCleanRoom'. No filter is applied when omitted.
+limit (number, optional) - Maximum number of records to return, from 1 through 20. Salesforce defaults to 20 when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
+orderBy (string, optional) - Sort order for the result set. Specify a field and ASC or DESC, such as 'createdDate
+DESC'. Salesforce returns items in retrieval order when omitted.
 
 Result
-templates (array) - Each: { id, apiName, label, description,
-  parameters (array<{ name, dataType, isRequired }>),
-  approvalStatus, createdDate }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -37,15 +44,10 @@ Errors
 
 Example request
 
-list_provider_templates({ "providerIdOrName": "MTG_Snowflake_DCR" })
+list_provider_templates({
+  "providerIdOrName": ""
+})
 
 Example result
-{
-  "templates": [
-    { "id": "tpl_001", "apiName": "OverlapAudience",
-      "label": "Audience overlap",
-      "parameters": [
-        { "name": "minOverlapCount", "dataType": "INTEGER", "isRequired": true }
-      ] }
-  ]
-}
+
+{ }

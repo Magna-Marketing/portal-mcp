@@ -23,9 +23,7 @@ fields (string[], optional) - Default expands parent folder,
   `createdBy.*`, `updatedBy.*`.
 
 Result
-folder (object): id, name, parentFolderId, path, createdAt,
-  updatedAt, createdBy, updatedBy.
-parentFolder (object|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -41,7 +39,5 @@ Example request
 get_folder({ "id": 33 })
 
 Example result
-{
-  "folder": { "id": 33, "name": "Spring 2026", "parentFolderId": 1,
-    "path": "/Marketing/Spring 2026" }
-}
+
+{ }

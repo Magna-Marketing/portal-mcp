@@ -6,7 +6,7 @@ user the Installed Package authenticates as). Returns identity claims
 similar to OpenID Connect.
 
 Marketing Cloud API
-OAuth 2.0 `/v2/userinfo`.
+REST API.
 
 Endpoint
 GET https://{tenant}.auth.marketingcloudapis.com/v2/userinfo
@@ -19,18 +19,10 @@ Body
 None.
 
 Input (parameters)
-None.
+business_unit_id (string, optional) - Business Unit MID used to request a BU-scoped access token before calling /v2/userinfo.
 
 Result
-user (object):
-  sub (string) - User Id (subject).
-  preferred_username (string|null).
-  email (string|null).
-  given_name, family_name (string|null).
-  zoneinfo (string|null), locale (string|null).
-  organization (object) - { enterpriseId, accountId, accountType, accountName }.
-  permissions (string[]).
-  rest (object) - { rest_instance_url, soap_instance_url, auth_url }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - N/A (issued automatically with most package tokens).

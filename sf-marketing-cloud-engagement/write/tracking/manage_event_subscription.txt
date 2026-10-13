@@ -11,10 +11,9 @@ Marketing Cloud API
 REST API (`/platform/v1/ens-subscriptions`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions
-PUT    https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions
-DELETE https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscriptionId}
-GET    https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscriptionId}
+POST https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions/{subscription_id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions
+PUT https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-subscriptions
 
 Headers
 Authorization: Bearer <access_token>
@@ -31,17 +30,34 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
-subscriptionId (string, optional, required for non-create).
-subscriptionName (string, required for create).
-callbackId (string, required for create) - Existing callback Id; create with `manage_event_callback`.
-subscribedEventCategories (string[], required for create) - e.g. "EngagementEvents.OpenEvent" | "EngagementEvents.ClickEvent" | "EngagementEvents.BounceEvent" | "EngagementEvents.UnsubEvent" | "TransactionalSendEvents.Email.Sent" | "TransactionalSendEvents.SMS.Sent" | "JourneyEvents.JourneyComplete".
-filters (object[], optional) - [{ filterCondition (string), values (string[]) }].
-status (string, optional, default "Active") - "Active" | "Inactive".
-description (string, optional).
+operation ("create" | "update" | "delete" | "activate" | "deactivate" | "pause" | "unpause", required) - create=POST /platform/v1/ens-subscriptions, update=PUT /platform/v1/ens-subscriptions,
+delete=DELETE /platform/v1/ens-subscriptions/{subscriptionId}. activate/unpause and
+deactivate/pause are update shortcuts that set status to active or paused.
+subscription_id (string, optional) - ENS subscriptionId. Required for update, delete, activate, deactivate, pause, and
+unpause. Sent as subscriptionId for update operations.
+subscription_name (string, optional) - Subscription name. Required for create unless supplied in raw_request. Sent as
+subscriptionName.
+callback_id (string, optional) - Verified ENS callbackId that receives events. Required for create unless supplied in
+raw_request. Sent as callbackId.
+event_category_types (string[], optional) - Fully qualified ENS event types, such as TransactionalSendEvents.EmailSent,
+EngagementEvents.OpenEvent, EngagementEvents.ClickEvent, EngagementEvents.BounceEvent,
+EngagementEvents.UnsubEvent, or JourneyEvents.JourneyComplete. Sent as
+eventCategoryTypes.
+subscribed_event_categories (string[], optional) - Compatibility alias for older docs. Mapped to Salesforce eventCategoryTypes when
+event_category_types is omitted.
+filters (string[], optional) - Optional Salesforce ENS filter strings in key=value format, such as
+definitionKey=abc123. All filters must evaluate true for an event to be delivered.
+status ("active" | "paused" | "Active" | "Paused", optional) - Subscription status for update: active or paused. Salesforce uses paused to pause
+delivery.
+status_reason (string, optional) - Required by Salesforce when changing status. Sent as statusReason.
+raw_request (value, optional) - Exact Salesforce request body. When provided, convenience fields are ignored except
+subscription_id for delete endpoint selection.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+ENS REST request. Defaults to the authenticated Business Unit when the session is
+already scoped to one.
 
 Result
-subscription (object) - { subscriptionId, subscriptionName, callbackId, subscribedEventCategories, filters, status, createdDate, lastModifiedDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `webhooks_write` (or `event_notifications_write` on newer packages).
@@ -55,8 +71,5 @@ Errors
 Example request
 
 manage_event_subscription({
-  "operation": "create",
-  "subscriptionName": "MTG-Engagement",
-  "callbackId": "abc-1234",
-  "subscribedEventCategories": ["EngagementEvents.OpenEvent","EngagementEvents.ClickEvent","EngagementEvents.UnsubEvent"]
+  "operation": "create"
 })

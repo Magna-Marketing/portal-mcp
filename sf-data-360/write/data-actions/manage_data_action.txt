@@ -31,19 +31,17 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" only.
-apiName (string, required).
-label (string, required).
-sourceDmo (string, required).
-eventType (string, required) - "DmoInsert" | "DmoUpdate" |
-  "DmoDelete" | "Calculated".
-condition (object, optional) - Standard criteria graph.
-targetApiName (string, required).
-payloadTemplate (string, required) - Mustache template for the
-  payload.
+apiName (string, required) - API name for the data action
+label (string, required) - Display label for the data action
+sourceDmo (string, required) - API name of the source Data Model Object that triggers this action
+eventType ("DmoInsert" | "DmoUpdate" | "DmoDelete" | "Calculated", required) - Type of event that triggers the action: DmoInsert, DmoUpdate, DmoDelete, or Calculated
+targetApiName (string, required) - API name of the data action target to send the payload to
+payloadTemplate (string, required) - Template defining the payload structure sent to the target. Supports merge fields from
+the source DMO
+condition (string, optional) - Optional condition expression that must be met for the action to fire
 
 Result
-dataAction (object) - Created row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -57,14 +55,14 @@ Errors
 Example request
 
 manage_data_action({
-  "operation": "create",
-  "apiName": "ltv_threshold_alert",
-  "label": "LTV Threshold Alert",
-  "sourceDmo": "UnifiedIndividual__dlm",
-  "eventType": "DmoUpdate",
-  "targetApiName": "WebhookTarget__dat",
-  "payloadTemplate": "{\"id\":\"{{Id__c}}\"}"
+  "apiName": "",
+  "label": "",
+  "sourceDmo": "",
+  "eventType": "",
+  "targetApiName": "",
+  "payloadTemplate": ""
 })
 
 Example result
-{ "dataAction": { "id": "0YD580000000001", "apiName": "ltv_threshold_alert", "status": "Active" } }
+
+{ }

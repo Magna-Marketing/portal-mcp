@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-model-object-mappings
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-object-mappings
+Optional query: dataspace, dloDeveloperName, dmoDeveloperName
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,18 +20,14 @@ Body
 None.
 
 Input (parameters)
-sourceObject (string, optional) - Filter to mappings from one DLO
-  (the DLO's developer name).
-targetObject (string, optional) - Filter to mappings into one DMO.
-limit (number, optional, default 200).
-offset (number, optional).
+dataspace (string, optional) - Data space name. Salesforce uses the default data space when omitted.
+dloDeveloperName (string, optional) - Optional Data Lake Object (DLO) source developer name filter, for example
+`mc_sends__dll`.
+dmoDeveloperName (string, optional) - Optional Data Model Object (DMO) target developer name filter, for example
+`ssot__Individual__dlm`.
 
 Result
-mappings (array) - Each: { developerName, label, sourceObject,
-  targetObject, fieldMappings (array<{ developerName, sourceField,
-  targetField, dataType, transformExpression, isPrimaryKey,
-  isExternalId }>), createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -43,16 +40,8 @@ Errors
 
 Example request
 
-list_dmo_mappings({ "sourceObject": "mc_sends__dll" })
+list_dmo_mappings({})
 
 Example result
-{
-  "mappings": [
-    { "developerName": "mc_sends_to_send",
-      "sourceObject": "mc_sends__dll",
-      "targetObject": "Send__dlm",
-      "fieldMappings": [
-        { "sourceField": "Id__c", "targetField": "Id__c", "isPrimaryKey": true }
-      ] }
-  ]
-}
+
+{ }

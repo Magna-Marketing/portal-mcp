@@ -9,8 +9,8 @@ Marketing Cloud API
 REST API (`/platform/v1/ens-callbacks`).
 
 Endpoint
+GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks/{callback_id}
 GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks
-GET https://{tenant}.rest.marketingcloudapis.com/platform/v1/ens-callbacks/{callbackId}
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,7 +20,10 @@ Body
 None.
 
 Input (parameters)
-callbackId (string, optional) - Get a single callback.
+callback_id (string, optional) - Optional ENS callbackId. When omitted, retrieves all callbacks registered in the
+Business Unit.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID context or REST
+Account-Context. Defaults to the authenticated Business Unit.
 
 Result
 callbacks (array) - { callbackId, callbackName, url, signatureKey (masked), maxBatchSize, status ("Active"|"Verified"|"Unverified"|"Disabled"), verifyMethod, createdDate, lastModifiedDate }.

@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/activations/:activationId/data
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/activations/{activationId}/data
+Optional query: batchSize, offset, fields, filters, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,16 +20,16 @@ Body
 None.
 
 Input (parameters)
-activationId (string, required).
-limit (number, optional, default 100, max 1000).
-offset (number, optional).
-fields (string[], optional).
+activationId (string, required) - Unique identifier of the activation, such as the activation ID or developer name.
+batchSize (number, optional) - Maximum number of activation records to return. Omit to use the Salesforce default.
+offset (number, optional) - Number of activation records to skip before returning results.
+fields (string[], optional) - Field API names to include in returned activation records. Sent as a comma-separated
+fields query parameter.
+filters (string, optional) - Filter expression for the activation records, when supported by the Salesforce endpoint.
+orderBy (string, optional) - Sort order for returned activation records, for example 'Timestamp__c desc'.
 
 Result
-records (array<object>) - Each: contact-point fields as projected
-  by the activation.
-totalSize (number).
-nextPageUrl (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -41,12 +42,10 @@ Errors
 
 Example request
 
-get_activation_data({ "activationId": "0YA580000000001", "limit": 5 })
+get_activation_data({
+  "activationId": ""
+})
 
 Example result
-{
-  "records": [
-    { "EmailAddress__c": "jane@example.com", "FirstName__c": "Jane" }
-  ],
-  "totalSize": 18420
-}
+
+{ }

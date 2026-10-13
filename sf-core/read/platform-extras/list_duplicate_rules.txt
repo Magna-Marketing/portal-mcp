@@ -6,11 +6,12 @@ List `DuplicateRule` records and their matching rules
 / update, alert text.
 
 Salesforce API
-Tooling API + Metadata API, v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, IsActive, Language, LastViewedDate, NamespacePrefix, SobjectSubtype, sObjectType FROM DuplicateRule
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, SobjectType, RuleStatus, MatchEngine FROM MatchingRule
+POST /services/Soap/m/66.0  (readMetadata MatchingRules)
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, IsActive, Language, LastViewedDate, NamespacePrefix, SobjectSubtype, SobjectType FROM DuplicateRule
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,14 +21,36 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional).
-isActive (boolean, optional).
-includeMatchingRules (boolean, optional, default true).
+sObjects (string[], optional) - SObject API names to match DuplicateRule.SobjectType;
+array of strings; no default; example: [\"Account\", \"Lead\"]; do not pass labels,
+comma-separated strings, wildcards, or empty entries.
+isActive (boolean, optional) - DuplicateRule active-state filter; boolean; no default so
+both active and inactive rules are returned; example: true; do not pass strings or
+expect this to filter MatchingRule.RuleStatus.
+includeMatchingRules (boolean, optional) - Whether to also read MatchingRules metadata
+through Metadata API; boolean; default false; example: true; do not pass true when only
+DuplicateRule rows are needed.
+pattern (string, optional) - DuplicateRule developer name or label pattern; string using
+* and ? wildcards converted to SOQL LIKE; no default; example: Account*; do not pass
+regex or raw LIKE syntax.
+whereClause (string, optional) - Additional DuplicateRule SOQL WHERE condition; string
+with or without WHERE; no default; example: NamespacePrefix = null; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - DuplicateRule SOQL ORDER BY clause; string with or without
+ORDER BY; default SobjectType ASC, DeveloperName ASC; example: LastViewedDate DESC NULLS
+LAST; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum rows per query to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-duplicateRules (array) - { id, developerName, masterLabel, sObject, isActive, operationsOnInsert (string[]), operationsOnUpdate (string[]) }.
-matchingRules (array, when includeMatchingRules=true) - { id, developerName, masterLabel, sObject, ruleStatus, matchEngine ("Standard"|"Fuzzy") }.
+raw Salesforce QueryResult for DuplicateRule and, when requested, raw Metadata API
+MatchingRules metadata grouped by object.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+duplicateRules (value) - included in the JSON returned by the tool.
+matchingRules (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -40,4 +63,8 @@ Errors
 
 Example request
 
-list_duplicate_rules({ "sObjects": ["Account", "Lead", "Contact"], "isActive": true })
+list_duplicate_rules({
+  "sObjects": "[\\\"Account\\\", \\\"Lead\\\"]",
+  "isActive": true,
+  "includeMatchingRules": true
+})

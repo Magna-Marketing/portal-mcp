@@ -23,10 +23,7 @@ apiName (string, required).
 runIdempotencyKey (string, optional).
 
 Result
-runId (string).
-apiName (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -43,9 +40,5 @@ Example request
 run_calculated_insight({ "apiName": "CustomerLTV__cio" })
 
 Example result
-{
-  "runId": "RUN_CI_2026-04-29T13",
-  "apiName": "CustomerLTV__cio",
-  "status": "Queued",
-  "submittedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

@@ -24,13 +24,41 @@ Body
 None.
 
 Input (parameters)
-slice (string, required) - "toggle" | "byPage" | "byBrowser" | "byAppType" | "byFlexiPage" | "exitByPage".
-startDate (string, required) - YYYY-MM-DD.
-endDate (string, required) - YYYY-MM-DD.
+slice (unknown, required) - Metric slice to query; enum toggle, byPage, byBrowser,
+byAppType, byFlexiPage, or exitByPage; required; example: byPage; do not pass sObject
+API names directly.
+startDate (string, required) - Inclusive MetricsDate lower bound; date string in
+YYYY-MM-DD format; required; example: 2026-05-01; do not pass datetimes, relative dates,
+or locale-formatted dates.
+endDate (string, required) - Inclusive MetricsDate upper bound; date string in
+YYYY-MM-DD format; required; example: 2026-05-15; do not pass datetimes, relative dates,
+or a date earlier than startDate.
+pageNamePattern (string, optional) - PageName pattern for slices with PageName; string
+using * and ? wildcards converted to SOQL LIKE; no default; example: Account*; do not
+pass regex, raw LIKE syntax, or use with slices without PageName.
+userId (string, optional) - UserId filter for slices that include UserId; Salesforce 15-
+or 18-character user ID string; no default; example: 005xx0000012345AAA; do not pass
+usernames, emails, or multiple IDs.
+whereClause (string, optional) - Additional SOQL WHERE condition for the selected metric
+object; string with or without WHERE; no default; example: TotalCount > 0; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for the selected metric object; string
+with or without ORDER BY; default MetricsDate DESC; example: MetricsDate DESC, PageName
+ASC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum metric rows to return; integer from 1 to 2000;
+default 200; example: 200; do not pass 0, negatives, decimals, or offsets.
 
 Result
-slice (string).
-metrics (array) - Shape varies per slice. Common keys: { date, pageName, browser, appType, viewCount, uniqueUserCount, exitCount }.
+raw Salesforce QueryResult with totalSize, done, records; byAppType returns grouped
+MetricsDate/AppExperience rows with TotalCount.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+warning (value) - included in the JSON returned by the tool.
+objectName (value) - included in the JSON returned by the tool.
+soql (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" + "Modify All Data" (for some slices).
@@ -44,4 +72,8 @@ Errors
 
 Example request
 
-list_lightning_usage({ "slice": "byFlexiPage", "startDate": "2026-04-01", "endDate": "2026-04-29" })
+list_lightning_usage({
+  "slice": "byPage",
+  "startDate": "2026-05-01",
+  "endDate": "2026-05-15"
+})

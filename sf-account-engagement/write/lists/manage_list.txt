@@ -19,24 +19,9 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (create static list)
-{
-  "name": "New customers",
-  "description": "Closed-won in last 30 days",
-  "isPublic": true,
-  "isDynamic": false,
-  "isCrmVisible": true,
-  "folderId": 33,
-  "campaignId": 1024,
-  "title": "New customers"
-}
-
-Body (create dynamic list)
-{
-  "name": "MQL EMEA",
-  "isDynamic": true,
-  "criteria": "prospectField.score >= 50 AND prospectField.region__c == 'EMEA'"
-}
+Body
+POST: campaignId, criteria, description, folderId, isCrmVisible, isPublic, name, title
+PATCH: campaignId, criteria, description, folderId, isCrmVisible, isPublic, name, title
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
@@ -54,8 +39,8 @@ criteria (string, optional) - Required for dynamic lists; Pardot's
   segmentation DSL.
 
 Result
-list (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -77,4 +62,5 @@ manage_list({
 })
 
 Example result
-{ "list": { "id": 301, "name": "New customers", "isDynamic": false } }
+
+{ }

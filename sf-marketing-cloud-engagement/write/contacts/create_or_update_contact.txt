@@ -32,17 +32,15 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert".
-contacts (object[], required) - Each:
-  contactKey (string, required).
-  contactId (number, optional).
-  attributeSets (array, optional) - [{ name, items: [{ values: [{ name, value }] }] }].
-  channelAddresses (array, optional) - [{ channelAddress, addressType ("Email"|"MobileNumber"|"PushTag"|"Line"), isPrimary }].
-allOrNone (boolean, optional, default false).
+operation ("create" | "update" | "upsert", required) - create calls POST /contacts/v1/contacts. update and upsert call PATCH
+/contacts/v1/contacts. Salesforce can return operationStatus=FAIL in a 200 response.
+contacts (object[], required) - Contacts to create or update. This tool sends one Salesforce Contacts API request per
+contact and returns the raw response for each call.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Contacts REST request.
 
 Result
-results (array) - { contactKey, contactId, status ("created"|"updated"|"failed"), errors }.
-summary (object) - { created, updated, failed, total }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_write`.
@@ -57,13 +55,6 @@ Errors
 Example request
 
 create_or_update_contact({
-  "operation": "upsert",
-  "contacts": [{
-    "contactKey": "MEM-100023",
-    "channelAddresses": [{ "channelAddress": "jane.doe@example.com", "addressType": "Email", "isPrimary": true }],
-    "attributeSets": [{
-      "name": "Email Addresses",
-      "items": [{ "values": [{ "name": "Email Address", "value": "jane.doe@example.com" }] }]
-    }]
-  }]
+  "operation": "create",
+  "contacts": []
 })

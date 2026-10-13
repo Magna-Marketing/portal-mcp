@@ -20,10 +20,7 @@ Input (parameters)
 jobId (string, required).
 
 Result
-job (object): id, sourceApiName, objectApiName, operation, state,
-  contentType, columnDelimiter, lineEnding, jobType,
-  recordsProcessed, recordsRejected, errorMessage,
-  failedRecordsRef, apiVersion, createdDate, systemModstamp.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -39,10 +36,5 @@ Example request
 get_ingest_job({ "jobId": "JOB_001" })
 
 Example result
-{
-  "job": {
-    "id": "JOB_001", "operation": "upsert",
-    "state": "JobComplete", "recordsProcessed": 12450,
-    "recordsRejected": 0
-  }
-}
+
+{ }

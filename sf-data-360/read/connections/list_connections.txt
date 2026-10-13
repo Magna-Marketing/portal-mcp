@@ -10,7 +10,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/connections
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/connections
+Optional query: connectorType, devName, label, organizationId, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -20,20 +21,18 @@ Body
 None.
 
 Input (parameters)
-connectorType (string, optional) - "S3" | "SFTP" | "Snowflake" |
-  "MarketingCloud" | "MarketingCloudEngagement" | "Salesforce" |
-  "GA4" | "GoogleBigQuery" | "AmazonRedshift" | "DatabricksDelta" |
-  "GenericREST" | etc.
-status (string, optional) - "Active" | "Disabled" | "Failed".
-nameContains (string, optional).
-limit (number, optional, default 100).
-offset (number, optional).
+connectorType (string, required) - Required connector type, such as SalesforceMarketingCloud, SalesforceDotCom,
+AwsRdsPostgres, AzureBlob, Databricks, Gcs, IngestApi, Sftp, or StreamingApp.
+devName (string, optional) - Developer name of the connection to filter on.
+label (string, optional) - Label or public-facing name of the connection to filter on.
+organizationId (string, optional) - Organization ID to filter on.
+limit (number, optional) - Maximum number of connections to return.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort by supported fields label, createdDate, or lastModifiedDate, optionally with ASC or
+DESC.
 
 Result
-connections (array) - Each: { id, name, label, connectorType,
-  description, status, isDefaultConnection, createdById, createdDate,
-  lastModifiedById, lastModifiedDate, additionalProperties (object) }.
-nextPageUrl (string|null), totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -46,14 +45,10 @@ Errors
 
 Example request
 
-list_connections({ "connectorType": "MarketingCloudEngagement" })
+list_connections({
+  "connectorType": ""
+})
 
 Example result
-{
-  "connections": [
-    { "id": "0Z65800000000ABCAA", "name": "MTG_MCE",
-      "label": "MTG Marketing Cloud Engagement",
-      "connectorType": "MarketingCloudEngagement", "status": "Active" }
-  ],
-  "totalSize": 1
-}
+
+{ }

@@ -22,18 +22,7 @@ Input (parameters)
 None.
 
 Result
-limits (object) - Map of limit name -> { Max (number), Remaining (number) }.
-  Notable Data 360 keys:
-    DataCloudCalculatedInsightApiCalls,
-    DataCloudCalculatedInsightObjects,
-    DataCloudComputeUnits,
-    DataCloudIngestApiCalls,
-    DataCloudIngestRows,
-    DataCloudProfileApiCalls,
-    DataCloudQueryApiCalls,
-    DataCloudQueryRowsRetrieved,
-    DataCloudSegmentApiCalls,
-    DataStorageMB, FileStorageMB, DailyApiRequests, etc.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -49,11 +38,5 @@ Example request
 get_limits({})
 
 Example result
-{
-  "limits": {
-    "DataCloudIngestRows": { "Max": 100000000, "Remaining": 84500000 },
-    "DataCloudQueryRowsRetrieved": { "Max": 1000000000, "Remaining": 974500000 },
-    "DataCloudComputeUnits": { "Max": 1500, "Remaining": 1124 },
-    "DailyApiRequests": { "Max": 1000000, "Remaining": 962412 }
-  }
-}
+
+{ }

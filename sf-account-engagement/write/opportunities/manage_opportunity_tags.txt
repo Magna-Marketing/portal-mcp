@@ -18,7 +18,8 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 
 Body
-{ "tag": "Renewal" }
+POST: name
+POST: tagId
 
 Input (parameters)
 id (number, required) - Pardot opportunity id (not the SFDC id).
@@ -26,8 +27,7 @@ operation (string, required) - "add" | "remove".
 tag (string, required).
 
 Result
-success (boolean), opportunityId (number), tag (string),
-operation (string).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -43,4 +43,5 @@ Example request
 manage_opportunity_tags({ "id": 1101, "operation": "add", "tag": "Renewal" })
 
 Example result
-{ "success": true, "opportunityId": 1101, "tag": "Renewal", "operation": "add" }
+
+{ }

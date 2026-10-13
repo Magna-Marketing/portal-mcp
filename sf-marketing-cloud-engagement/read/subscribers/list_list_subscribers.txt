@@ -15,18 +15,41 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP retrieve filtered by ListID.
+SOAP request on List, Subscriber, ListSubscriber.
 
 Input (parameters)
-listId (number, optional).
-listName (string, optional).
-status (string|string[], optional) - "Active" | "Unsubscribed" | "Bounced" | "Held".
-limit (number, optional, default 1000).
+list_id (number, optional) - Numeric Marketing Cloud List.ID/ListSubscriber.ListID. Preferred when known because the
+ListSubscriber retrieve can filter directly on ListID. Omit all list fields to use the
+Master/All Subscribers list.
+list_name (string, optional) - Exact List.ListName to resolve through a preliminary SOAP List retrieve when list_id is
+not provided. Omit all list fields to use the Master/All Subscribers list.
+list_customer_key (string, optional) - Exact List.CustomerKey to resolve through a preliminary SOAP List retrieve when list_id
+is not provided. Omit all list fields to use the Master/All Subscribers list.
+status (value, optional) - Optional ListSubscriber.Status filter. Use one or more of Active, Unsubscribed, Bounced,
+Held, or Deleted.
+subscriber_key (string, optional) - Optional exact ListSubscriber.SubscriberKey filter. Useful for checking one subscriber
+on a list.
+email_address (string, optional) - Optional exact Subscriber.EmailAddress. The tool first retrieves the SubscriberKey via
+SOAP Subscriber retrieve, then filters ListSubscriber by that key.
+continue_request_id (string, optional) - SOAP RequestID returned by a prior retrieve with MoreDataAvailable. When set, the tool
+calls ContinueRequest and ignores new filters.
+limit (number, optional) - SOAP retrieve batch size. Defaults to 1000, maximum 2500.
+query_all_accounts (boolean, optional) - Sets SOAP QueryAllAccounts=true. Defaults to false so business_unit_id scoping remains
+precise.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP ClientID context. Defaults to the
+authenticated Business Unit.
 
 Result
-totalSize (number).
-listSubscribers (array) - { id, listId, subscriberKey, subscriberId, emailAddress, status, dateUnsubscribed (string|null), dateJoined, source }.
-hasMore (boolean), continueRequestId (string|null).
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+continueRequestId (value) - included in the JSON returned by the tool.
+queryAllAccounts (value) - included in the JSON returned by the tool.
+listLookupResponse (value) - included in the JSON returned by the tool.
+subscriberLookupResponse (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_read`.
@@ -40,4 +63,4 @@ Errors
 
 Example request
 
-list_list_subscribers({ "listName": "Q3_Newsletter", "status": "Active" })
+list_list_subscribers({})

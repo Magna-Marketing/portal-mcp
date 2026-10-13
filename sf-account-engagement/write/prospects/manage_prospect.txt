@@ -22,46 +22,51 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (create)
-{
-  "email": "jane@example.com",
-  "firstName": "Jane",
-  "lastName": "Doe",
-  "company": "Acme",
-  "campaignId": 1024,
-  "assignedToUserId": 421,
-  "customFields": { "region__c": "EMEA" }
-}
+Body
+POST: address1, address2, annualRevenue, assignedToUserId, campaignId, city, company, country, department, email, employees, fax, firstName, grade, industry, isDoNotCall, isDoNotEmail, isOptedOut, isReviewed, isStarred, jobTitle, lastName, mobilePhone, notes, phone, prospectAccountId, salesforceId, salutation, score, state, website, zip
+Custom field values from customFields are copied onto the top level of this body.
+PATCH: address1, address2, annualRevenue, assignedToUserId, campaignId, city, company, country, department, employees, fax, firstName, grade, industry, isDoNotCall, isDoNotEmail, isOptedOut, isReviewed, isStarred, jobTitle, lastName, mobilePhone, notes, phone, prospectAccountId, salesforceId, salutation, score, state, website, zip
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-id (number, required for update / delete).
-email (string, required for create).
-firstName, lastName, salutation (string, optional).
-company, jobTitle, department, industry (string, optional).
-phone, mobilePhone, fax (string, optional).
-website (string, optional).
-address1, address2, city, state, zip, country (string, optional).
-annualRevenue, employees, years_in_business (string|number, optional).
-notes (string, optional).
-campaignId (number, optional).
-assignedToUserId (number, optional) - See `assign_prospect` for
-  legacy v4 assignment options (group / role).
-prospectAccountId (number, optional).
-isDoNotEmail (boolean, optional).
-isDoNotCall (boolean, optional).
-isOptedOut (boolean, optional) - Global opt-out (different from
-  per-list opt-out via `manage_list_membership`).
-isReviewed (boolean, optional).
-isStarred (boolean, optional).
-score (number, optional).
-grade (string, optional) - Letter grade ("A" .. "F").
-salesforceId (string, optional) - Cross-reference SFDC Lead/Contact.
-customFields (object, optional) - { apiFieldId: value }.
+operation ("create" | "update" | "delete", required) - "create" creates a new prospect; "update" modifies it; "delete" soft-deletes it.
+id (number, optional) - Prospect id. Required for update and delete.
+email (string, optional) - Prospect email address. Required for create.
+firstName (string, optional) - Prospect first name.
+lastName (string, optional) - Prospect last name.
+salutation (string, optional) - Salutation (e.g. "Mr.", "Dr.").
+company (string, optional) - Company name.
+jobTitle (string, optional) - Job title.
+department (string, optional) - Department.
+industry (string, optional) - Industry.
+phone (string, optional) - Phone number.
+mobilePhone (string, optional) - Mobile phone number.
+fax (string, optional) - Fax number.
+website (string, optional) - Website URL.
+address1 (string, optional) - Address line 1.
+address2 (string, optional) - Address line 2.
+city (string, optional) - City.
+state (string, optional) - State or province.
+zip (string, optional) - Postal code.
+country (string, optional) - Country.
+annualRevenue (string|number, optional) - Annual revenue.
+employees (string|number, optional) - Number of employees.
+notes (string, optional) - Internal notes.
+campaignId (number, optional) - Campaign to attribute the prospect to.
+assignedToUserId (number, optional) - Pardot user id to assign the prospect to.
+prospectAccountId (number, optional) - Prospect account id to link the prospect to.
+isDoNotEmail (boolean, optional) - Do not send email to this prospect.
+isDoNotCall (boolean, optional) - Do not call this prospect.
+isOptedOut (boolean, optional) - Global email opt-out (different from per-list opt-out).
+isReviewed (boolean, optional) - Mark the prospect as reviewed.
+isStarred (boolean, optional) - Star the prospect for visibility.
+score (number, optional) - Prospect score (0–100 typical range, or custom).
+grade (string, optional) - Letter grade ("A+" through "F").
+salesforceId (string, optional) - Salesforce Lead/Contact id cross-reference.
+customFields (object, optional) - Custom field values keyed by apiFieldId (e.g. { "region__c": "EMEA" }).
 
 Result
-prospect (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -79,19 +84,9 @@ Errors
 Example request
 
 manage_prospect({
-  "operation": "create",
-  "email": "jane@example.com",
-  "firstName": "Jane",
-  "company": "Acme",
-  "campaignId": 1024,
-  "customFields": { "region__c": "EMEA" }
+  "operation": ""
 })
 
 Example result
-{
-  "prospect": {
-    "id": 7745, "email": "jane@example.com",
-    "firstName": "Jane", "company": "Acme",
-    "customFields": { "region__c": "EMEA" }
-  }
-}
+
+{ }

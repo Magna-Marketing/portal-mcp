@@ -21,25 +21,15 @@ Body
 None.
 
 Input (parameters)
-nameA (string, required) - First FlexiPage DeveloperName.
-nameB (string, required) - Second FlexiPage DeveloperName.
-ignoreOrder (boolean, optional, default false) - Ignore component order
-  inside a region when comparing.
-includeXmlDiff (boolean, optional, default false) - Add a unified XML diff.
+page1 (string, required) - First FlexiPage DeveloperName; string exact API name; no
+default; example: Account_Record_Page; do not pass labels, URLs, or multiple names.
+page2 (string, required) - Second FlexiPage DeveloperName; string exact API name; no
+default; example: Account_Record_Page_v2; do not pass labels, URLs, or multiple names.
 
 Result
-pageA, pageB (objects) - { id, name, label, type, sObject }.
-metadataDiff (array) - Each: { field, a, b }.
-regionDiff (array) - Each:
-  region (string) - Region API name.
-  inA (boolean), inB (boolean).
-  components (object):
-    onlyInA (string[]) - identifiers.
-    onlyInB (string[]).
-    common (array) - { identifier, propertyDiff: [{ name, a, b }] }.
-componentCounts (object) - { a, b, common, addedInB, removedInB }.
-similarity (number) - 0..1 across regions/components/properties.
-xmlDiff (string|null) - Unified diff when includeXmlDiff=true.
+raw FlexiPage rows and metadata for both pages plus derived difference flags.
+pages (value) - included in the JSON returned by the tool.
+differences (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -53,7 +43,6 @@ Errors
 Example request
 
 compare_lightning_pages({
-  "nameA": "Project__c_Record_Page",
-  "nameB": "Project__c_Record_Page_Sales",
-  "ignoreOrder": true
+  "page1": "Account_Record_Page",
+  "page2": "Account_Record_Page_v2"
 })

@@ -38,13 +38,7 @@ documentRef (string, optional) - URI to fetch the document from.
 language (string, optional, default "en").
 
 Result
-For "extract":
-  extracted (object) - Field values extracted, keyed by DMO api names.
-  confidence (object) - Per-field confidence scores (0-1).
-  pageCount (number), durationMs (number).
-For "generateSchema":
-  schema (object) - Inferred field list; usable with
-    `manage_document_ai_configuration operation="create"`.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -66,12 +60,5 @@ process_document_ai_data({
 })
 
 Example result
-{
-  "extracted": {
-    "InvoiceNumber__c": "INV-2026-001",
-    "Amount__c": 199.99,
-    "InvoiceDate__c": "2026-04-29"
-  },
-  "confidence": { "InvoiceNumber__c": 0.99, "Amount__c": 0.97 },
-  "pageCount": 1, "durationMs": 412
-}
+
+{ }

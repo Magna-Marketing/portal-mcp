@@ -25,10 +25,7 @@ dataGraphName (string, required).
 runIdempotencyKey (string, optional).
 
 Result
-runId (string).
-dataGraphName (string).
-status (string) - "Queued".
-submittedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -45,9 +42,5 @@ Example request
 refresh_data_graph({ "dataGraphName": "UnifiedIndividualGraph" })
 
 Example result
-{
-  "runId": "RUN_DG_2026-04-29T13",
-  "dataGraphName": "UnifiedIndividualGraph",
-  "status": "Queued",
-  "submittedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

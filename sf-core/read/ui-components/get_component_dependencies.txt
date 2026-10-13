@@ -15,13 +15,10 @@ Resolve the component's Tooling Id first, then query dependencies by Id;
 Use this before refactoring or deleting components.
 
 Salesforce API
-Tooling API, v66.0. `MetadataComponentDependency` (read-only Tooling
-sObject; introduced for dependency tracing).
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel FROM {type} WHERE DeveloperName = '{name}'
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency WHERE MetadataComponentId = '{componentId}'
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency WHERE RefMetadataComponentId = '{componentId}'
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType, RefMetadataComponentNamespace FROM MetadataComponentDependency
 
 Headers
 Authorization: Bearer <access_token>
@@ -31,32 +28,36 @@ Body
 None.
 
 Input (parameters)
-name (string, required) - Component DeveloperName or Name.
-type (string, required) - Tooling component type ("LightningComponentBundle",
-  "AuraDefinitionBundle", "ApexPage", "FlexiPage", "ApexClass", etc.).
-direction (string, optional, default "both") - "outgoing" (this component
-  references X), "incoming" (X references this component), or "both".
-includeStandardRefs (boolean, optional, default false) - Include refs to
-  standard Lightning components (`lightning-record-form`, etc.).
-includeFlexiPages (boolean, optional, default true) - When this is an
-  LWC/Aura, also enumerate `FlexiPage` placements (region info).
+name (string, optional) - Metadata component name to resolve; string exact DeveloperName
+or Name for the selected type; required unless componentId is set; example:
+accountSummary; do not pass file paths or labels.
+componentName (string, optional) - Alias for name; string exact component name; ignored
+when name is present; example: Account_Record_Page; do not pass multiple names.
+type (string, optional) - Metadata component type to resolve; string such as lwc, aura,
+visualforce, flexipage, LightningComponentBundle, AuraDefinitionBundle, ApexPage, or
+FlexiPage; default LightningComponentBundle; example: flexipage; do not pass labels.
+componentType (string, optional) - Alias for type; string metadata component type;
+ignored when type is present; example: aura; do not pass multiple values.
+componentId (string, optional) - Tooling API component Id to use directly; Salesforce Id
+string; no default; example: 0Rb5g0000001234CAA; do not pass record URLs or names.
+direction ("outgoing" | "incoming" | "both", optional) - Dependency direction; enum
+outgoing, incoming, or both; default both; example: incoming; do not pass arbitrary
+relationship names.
+whereClause (string, optional) - Additional SOQL WHERE condition added to dependency
+queries; string with or without WHERE; no default; example: RefMetadataComponentType =
+'FlexiPage'; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for MetadataComponentDependency; string with
+or without ORDER BY; no default; example: RefMetadataComponentType ASC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum dependency rows per query; integer from 1 to 2000;
+default 200; example: 200; do not pass offsets, decimals,.
 
 Result
-size (number).
-totalSize (number).
-done (boolean).
-queryLocator (string|null).
-entityTypeName (string) - "MetadataComponentDependency".
-records (array) - Each MetadataComponentDependency record:
-  attributes (object) - { type, url }.
-  Id (string).
-  MetadataComponentId (string).
-  MetadataComponentName (string).
-  MetadataComponentType (string).
-  RefMetadataComponentId (string).
-  RefMetadataComponentName (string).
-  RefMetadataComponentType (string).
-  RefMetadataComponentNamespace (string|null).
+raw Salesforce QueryResult or grouped raw QueryResults by direction.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Setup", "Modify All Data", or "Customize Application".
@@ -73,24 +74,21 @@ Errors
 Example request
 
 get_component_dependencies({
-  "name": "projectCard",
-  "type": "LightningComponentBundle",
-  "direction": "both"
+  "name": "accountSummary",
+  "componentName": "Account_Record_Page",
+  "type": "flexipage"
 })
 
 Example result
 
 {
-  "component": { "id": "0Rb4Q00000abcDE", "name": "projectCard", "type": "LightningComponentBundle" },
-  "outgoing": [
-    { "refName": "ProjectController", "refType": "ApexClass" },
-    { "refName": "Project_Status_Label", "refType": "CustomLabel" }
-  ],
-  "incoming": [
-    { "refName": "projectDashboard", "refType": "LightningComponentBundle" }
-  ],
-  "flexiPages": [
-    { "flexiPageName": "Project_Record_Page", "flexiPageLabel": "Project Record Page", "type": "RecordPage", "region": "main", "sObject": "Project__c" }
-  ],
-  "summary": { "outgoingCount": 2, "incomingCount": 1, "flexiPageCount": 1 }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "MetadataComponentDependency"
+      }
+    }
+  ]
 }

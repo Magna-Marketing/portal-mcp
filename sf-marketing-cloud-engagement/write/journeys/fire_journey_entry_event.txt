@@ -17,21 +17,17 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "ContactKey": "MEM-100023",
-  "EventDefinitionKey": "APIEvent-Order-Confirmed",
-  "Data": { "OrderId": "ORD-12345", "OrderTotal": 250.50 }
-}
+POST: ContactKey, Data, EventDefinitionKey
 
 Input (parameters)
-eventDefinitionKey (string, required).
-contactKey (string, required).
-data (object, optional) - Per-event payload that the journey can reference.
+event_definition_key (string, required) - EventDefinitionKey for the Journey Builder API entry event. Do not include periods in
+this key.
+contact_key (string, required) - ContactKey for the subscriber/contact entering the journey.
+data (object, optional) - Optional Data object containing event payload fields required by the event definition.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header.
 
 Result
-eventInstanceId (string).
-status (string) - "Queued" | "Processed" | "Failed".
-errors (array, optional).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_execute`.
@@ -45,7 +41,6 @@ Errors
 Example request
 
 fire_journey_entry_event({
-  "eventDefinitionKey": "APIEvent-Order-Confirmed",
-  "contactKey": "MEM-100023",
-  "data": { "OrderId": "ORD-12345", "OrderTotal": 250.50 }
+  "event_definition_key": "",
+  "contact_key": ""
 })

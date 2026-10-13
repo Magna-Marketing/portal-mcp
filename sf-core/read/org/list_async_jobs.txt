@@ -21,16 +21,32 @@ Body
 None.
 
 Input (parameters)
-status (string|string[], optional) - "Queued" | "Preparing" | "Processing" | "Aborted" | "Completed" | "Failed".
-jobType (string|string[], optional) - "Future" | "Queueable" | "BatchApex" | "BatchApexWorker" | "ScheduledApex" | "TestRequest" | "TestWorker" | "ApexToken".
-className (string, optional) - Restrict to one Apex class name.
-sinceHours (number, optional, default 24).
-limit (number, optional, default 200).
+status ("Aborted" | "Completed" | "Failed" | "Holding" | "Preparing" | "Processing" | "Queued", optional) -
+AsyncApexJob Status exact match; documented picklist string; no default; example:
+Failed; do not pass lowercase values, multiple statuses, or SOQL operators.
+jobType (string, optional) -
+AsyncApexJob JobType exact match; string picklist value from the org; no default;
+example: BatchApex; do not pass labels, comma-separated values, or SOQL fragments.
+apexClassId (string, optional) -
+ApexClassId reference filter; Salesforce Id string; no default; example:
+01p5g00000ABCDe; do not pass class names, multiple Ids, or relationship fields.
+whereClause (string, optional) -
+Additional SOQL WHERE condition for AsyncApexJob; string without WHERE; no default;
+example: CreatedDate = LAST_N_DAYS:7; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+untrusted user input.
+orderBy (string, optional) -
+SOQL ORDER BY for AsyncApexJob; string without ORDER BY; default CreatedDate DESC;
+example: CompletedDate DESC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) -
+Maximum AsyncApexJob rows to query; positive integer clamped to 2000; default 200;
+example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-asyncJobs (array) - { id, status, jobType, className, methodName, jobItemsProcessed, totalJobItems, numberOfErrors, extendedStatus, createdById, createdByName, createdDate, completedDate }.
-hasMore (boolean).
+Returns the raw Salesforce QueryResult for AsyncApexJob records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Data" / "View Setup and Configuration".
@@ -43,4 +59,8 @@ Errors
 
 Example request
 
-list_async_jobs({ "status": ["Failed", "Processing"], "sinceHours": 72 })
+list_async_jobs({
+  "status": "Failed",
+  "jobType": "BatchApex",
+  "apexClassId": "01p5g00000ABCDe"
+})

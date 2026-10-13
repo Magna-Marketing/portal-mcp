@@ -17,18 +17,28 @@ Body
 SOAP Create / Update / Delete on List.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-listId (number, optional, required for non-create).
-customerKey (string, optional).
-listName (string, required for create).
-description (string, optional).
-type (string, optional, default "Public") - "Public" | "Private" | "Salesforce" | "GlobalUnsubscribe".
-listClassification (string, optional, default "ExactTargetList") - "ExactTargetList" | "PublicationList" | "SuppressionList".
-folderId (number, optional).
-sendClassification (string, optional) - For PublicationList.
+operation ("create" | "update" | "delete", required) - List operation to perform. create uses SOAP Create, update uses SOAP Update, and delete
+uses SOAP Delete.
+list_id (number, optional) - Numeric List.ID. Required for update/delete when customer_key is not supplied.
+customer_key (string, optional) - External key for the list. Useful as the update/delete identifier and recommended for
+created lists.
+list_name (string, optional) - List name. Required for create. Optional for update.
+description (string, optional) - List description.
+type ("Public" | "Private" | "Salesforce" | "GlobalUnsubscribe", optional) - SOAP List.Type. Defaults to Public.
+list_classification ("ExactTargetList" | "PublicationList" | "SuppressionList", optional) - SOAP List.ListClassification. Use PublicationList for subscription preference lists or
+SuppressionList for suppression lists.
+folder_id (number, optional) - Email Studio folder/category ID for the list. Sent as SOAP List.Category.
+send_classification_customer_key (string, optional) - Optional SendClassification.CustomerKey for a PublicationList.
+send_classification_id (number, optional) - Optional SendClassification.ID for a PublicationList.
+confirm_delete (boolean, optional) - Must be true when operation is delete.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP Client context. Defaults to the
+authenticated Business Unit.
 
 Result
-list (object) - { id, customerKey, listName, type, listClassification, folderId }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_write`.
@@ -42,8 +52,5 @@ Errors
 Example request
 
 manage_list({
-  "operation": "create",
-  "listName": "Q3_Newsletter",
-  "type": "Public",
-  "listClassification": "ExactTargetList"
+  "operation": "create"
 })

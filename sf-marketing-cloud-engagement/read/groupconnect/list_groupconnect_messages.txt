@@ -7,7 +7,7 @@ Marketing Cloud API
 REST API (`/legacy/v1/beta/groupconnect/messages`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/messages
+GET https://{tenant}.rest.marketingcloudapis.com/ott/v1/send/{message_id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,14 +17,13 @@ Body
 None.
 
 Input (parameters)
-appId (string, optional).
-status (string, optional) - "Draft" | "Scheduled" | "Sent" | "Failed".
-sinceDays (number, optional, default 30).
-limit (number, optional, default 200).
+message_id (string, required) - Required message identifier to retrieve. Salesforce accepts either the user-defined
+messageKey or the ottRequestId returned from POST /ott/v1/send.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+GroupConnect REST request.
 
 Result
-messages (array) - { id, appId, name, messageType ("Text"|"Image"|"Video"|"Sticker"|"Audio"|"Location"|"Carousel"), content, status, scheduledTime, sentTime, recipientCount, dateCreated }.
-hasMore (boolean).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `messaging_api_app_read`.
@@ -37,4 +36,6 @@ Errors
 
 Example request
 
-list_groupconnect_messages({ "status": "Sent" })
+list_groupconnect_messages({
+  "message_id": ""
+})

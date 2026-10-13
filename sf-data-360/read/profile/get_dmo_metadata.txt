@@ -6,27 +6,23 @@ queryable fields, the primary key, the searchable keys, and the
 related-object relationship list.
 
 Salesforce API
-Connect plane (default) or runtime plane.
+Runtime plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/profile/metadata/:dataModelName  (plane="connect")
-GET {cdpTenantUrl}/api/v1/profile/metadata/:dmoApiName                       (plane="runtime")
+GET {instanceUrl}/api/v1/profile/metadata/{dmoApiName}
 
 Headers
-Authorization: Bearer <core_access_token>     (connect)
-Authorization: Bearer <data_cloud_token>      (runtime)
+Authorization: Bearer <data_cloud_token>
 Accept: application/json
 
 Body
 None.
 
 Input (parameters)
-dmoApiName (string, required).
-plane (string, optional, default "connect").
+dmoApiName (string, required) - Profile DMO API name, for example `ssot__Individual__dlm` or `Individual__dlm`.
 
 Result
-dmoMetadata (object): dmoApiName, label, primaryKeyField,
-  searchableFields, fields (array), relationships (array).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` or `cdp_profile_api_read`.
@@ -39,15 +35,10 @@ Errors
 
 Example request
 
-get_dmo_metadata({ "dmoApiName": "UnifiedIndividual__dlm" })
+get_dmo_metadata({
+  "dmoApiName": ""
+})
 
 Example result
-{
-  "dmoMetadata": {
-    "dmoApiName": "UnifiedIndividual__dlm",
-    "primaryKeyField": "Id__c",
-    "fields": [
-      { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true }
-    ]
-  }
-}
+
+{ }

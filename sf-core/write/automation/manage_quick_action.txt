@@ -6,35 +6,77 @@ Supports Create, Update, LogACall, SendEmail, VisualforcePage,
 LightningComponent, Flow, and InvocableAction types.
 
 Salesforce API
-Metadata API (`QuickAction`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (writeMetadata QuickAction)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: fullName, label, type, targetObject, targetRecordType, flowDefinition, flowAction, page, lightningComponent, height, description, icon, optionsCreateFeedItem, fieldOverrides, quickActionLayout.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-object (string, optional, default "Global") - sObject API name or "Global".
-fullName (string, required) - DeveloperName (e.g. "Project__c.New_Status_Update").
-label (string, required for create).
-type (string, required for create) - "Create" | "Update" | "LogACall" | "SendEmail" | "VisualforcePage" | "LightningComponent" | "Flow" | "InvocableAction" | "CustomVisualforce".
-targetObject (string, optional) - For type=Create the target sObject; for global Quick Actions of type=Create.
-recordTypeId (string, optional).
-flowDefinition (string, optional) - For type=Flow.
-flowAction (string, optional).
-visualforcePage (string, optional).
-lightningComponent (string, optional) - LWC or Aura name.
-height (number, optional, default 250) - For VF / Lightning.
-fields (array, optional) - For Create / Update / LogACall: [{ field, isRequired, defaultValue }].
-description (string, optional).
-iconName (string, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Requested QuickAction
+metadata operation; enum create, update, upsert, or delete; no default; example:
+'upsert'; do not use update for an action that does not exist.
+object (string, optional) - QuickAction parent object; string sObject API name for
+object-specific actions or Global/omitted for global actions; default is global;
+example: 'Account'; do not pass labels or record Ids.
+fullName (string, required) - QuickAction fullName; string DeveloperName, optionally
+already qualified as Object.ActionName; no default; example: 'Create_Followup_Task'; do
+not include file extensions.
+label (string, optional) - QuickAction label; string user-facing action label required
+for create/upsert; no default; example: 'Create Follow-up Task'; do not pass an empty
+string.
+type (string, optional) - QuickAction type; enum Canvas, Create, Flow,
+LightningComponent, LogACall, Post, SendEmail, SocialPost, Update, or VisualforcePage;
+required for create/upsert; example: 'Create'; do not pass action subtypes.
+targetObject (string, optional) - QuickAction targetObject; string target sObject API
+name for Create actions; omitted for non-create actions; example: 'Task'; do not pass
+object labels.
+recordType (string, optional) - QuickAction targetRecordType; string record type
+developer name for Create actions; omitted uses default record type behavior; example:
+'Business_Task'; do not pass record type Ids.
+flowDefinition (string, optional) - QuickAction flowDefinition; string Flow API name for
+Flow actions; omitted for non-flow actions; example: 'Create_Followup_Flow'; do not pass
+flow interview Ids.
+flowAction (string, optional) - QuickAction flowAction metadata value; string used when
+the org supports this field; omitted normally; example: 'Create_Followup_Flow'; do not
+pass arbitrary REST action names.
+visualforcePage (string, optional) - QuickAction page field; string Visualforce page API
+name for VisualforcePage actions; omitted for other action types; example:
+'QuickTaskPage'; do not pass .page extensions.
+lightningComponent (string, optional) - QuickAction lightningComponent; string Aura or
+Lightning component name for LightningComponent actions; omitted for other action types;
+example: 'c:quickTask'; do not pass LWC bundle file paths.
+height (number, optional) - QuickAction height; number of pixels for custom action UI;
+omitted uses Salesforce default; example: 400; do not pass negative values.
+fields (object[], optional) - Quick action layout fields; array used for Create, Update,
+and LogACall layouts; omitted creates no quickActionLayout; example:
+[{\"field\":\"Subject\",\"isRequired\":true}]; do not pass fields unsupported by the
+action target.
+  field (string, required) - Quick action layout field API name; string field name on
+  the target object; no default; example: 'Subject'; do not pass labels or relationship
+  paths.
+  isRequired (boolean, optional) - Quick action layout uiBehavior flag; boolean true
+  maps to Required and false/omitted maps to Edit; example: true; do not pass string
+  booleans.
+  defaultValue (string | number | boolean, optional) - QuickAction field override
+  formula value; string, number, or boolean converted to formula text; omitted creates
+  no override; example: '\"High\"'; do not pass objects or arrays.
+description (string, optional) - QuickAction description; string metadata description;
+omitted leaves existing value unchanged; example: 'Creates a follow-up task'; do not
+pass layout notes here.
+iconName (string, optional) - QuickAction icon metadata value; string icon reference
+accepted by Metadata API; omitted uses Salesforce default; example: 'standard:task'; do
+not pass image binary data.
+optionsCreateFeedItem (boolean, optional) - QuickAction optionsCreateFeedItem flag;
+boolean controlling feed item creation for supported actions; omitted uses Salesforce
+default; example: false; do not pass string booleans.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -52,10 +94,7 @@ Errors
 Example request
 
 manage_quick_action({
-  "operation": "create",
-  "object": "Project__c",
-  "fullName": "Project__c.Update_Status",
-  "label": "Update Status",
-  "type": "Update",
-  "fields": [{ "field": "Status__c", "isRequired": true }]
+  "operation": "upsert",
+  "fullName": "Create_Followup_Task",
+  "metadata": "example"
 })

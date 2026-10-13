@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/lifecycle-histories?fields={fields}&filter[prospectId]=eq,:prospectId
+GET https://{pi-domain}/api/v5/objects/lifecycle-histories
+Optional query: fields, filter[createdAt], filter[lifecycleStageId], filter[prospectId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,20 +22,17 @@ Body
 None.
 
 Input (parameters)
-prospectId (number, optional).
-lifecycleStageId (number, optional).
-createdAfter (string, optional) - ISO-8601.
-createdBefore (string, optional) - ISO-8601.
-fields (string[], optional, default: id,prospectId,lifecycleStageId,
-  previousLifecycleStageId,secondsElapsedInPreviousStage,createdAt).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+prospectId (number, optional) - Filter to lifecycle transitions for a specific prospect.
+lifecycleStageId (number, optional) - Filter to entries for a specific lifecycle stage.
+createdAfter (string, optional) - ISO-8601 datetime. Filter to transitions after this time.
+createdBefore (string, optional) - ISO-8601 datetime. Filter to transitions before this time.
+fields (string[], optional) - Field projection. Defaults to id, prospectId, lifecycleStageId,
+previousLifecycleStageId, secondsElapsedInPreviousStage, createdAt.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-lifecycleHistories (array) - Each: { id, prospectId, lifecycleStageId,
-  previousLifecycleStageId (number|null),
-  secondsElapsedInPreviousStage (number), createdAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -47,13 +45,8 @@ Errors
 
 Example request
 
-list_lifecycle_history({ "prospectId": 7745 })
+list_lifecycle_history({})
 
 Example result
-{
-  "lifecycleHistories": [
-    { "id": 1801, "prospectId": 7745, "lifecycleStageId": 2,
-      "previousLifecycleStageId": 1, "secondsElapsedInPreviousStage": 86400,
-      "createdAt": "2026-04-22T15:00:00Z" }
-  ]
-}
+
+{ }

@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/lifecycle-stages?fields={fields}
+GET https://{pi-domain}/api/v5/objects/lifecycle-stages
+Optional query: fields, filter[isLocked], filter[matchType], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,17 +21,15 @@ Body
 None.
 
 Input (parameters)
-matchType (string, optional) - "all" | "any".
-isLocked (boolean, optional).
-fields (string[], optional, default: id,name,position,matchType,
-  isLocked,isDeleted,createdAt,updatedAt,createdById,updatedById).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+matchType ("all" | "any", optional) - Filter by entry criteria match logic (all = AND, any = OR).
+isLocked (boolean, optional) - Filter by locked/unlocked status.
+fields (string[], optional) - Field projection. Defaults to id, name, position, matchType, isLocked, isDeleted,
+createdAt, updatedAt, createdById, updatedById.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-lifecycleStages (array) - Each: { id, name, position (number),
-  matchType, isLocked, isDeleted, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -46,10 +45,5 @@ Example request
 list_lifecycle_stages({})
 
 Example result
-{
-  "lifecycleStages": [
-    { "id": 1, "name": "Lead",        "position": 0 },
-    { "id": 2, "name": "MQL",         "position": 1 },
-    { "id": 3, "name": "Opportunity", "position": 2 }
-  ]
-}
+
+{ }

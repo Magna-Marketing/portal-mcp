@@ -27,7 +27,7 @@ PATCH https://{pi-domain}/api/v5/imports/:id    (operation="finalize" or "update
 Headers
 Authorization: Bearer <salesforce-access-token>
 Pardot-Business-Unit-Id: <buId>
-Content-Type: application/json
+Content-Type: multipart/form-data
 Accept: application/json
 
 Body (create)
@@ -66,8 +66,7 @@ csv (string, optional, create-only) - Inline CSV; when supplied,
 csvBase64 (string, optional, create-only) - Alternative to `csv`.
 
 Result
-import (object) - Created or updated row. After "finalize", state
-  transitions from `Open` to `Ready` (and shortly to `Processing`).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -92,7 +91,5 @@ manage_import({
 })
 
 Example result
-{
-  "import": { "id": 5512, "object": "Prospect", "operation": "Upsert",
-    "state": "Open" }
-}
+
+{ }

@@ -5,29 +5,41 @@ List the run instances of one or all automations: status, start /
 end times, duration, step-level errors. Use to debug nightly jobs.
 
 Marketing Cloud API
-REST API (`/automation/v1/automations/{id}/instances`) and SOAP
-`AutomationInstance.Retrieve`.
+SOAP API.
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}/instances
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+SOAP object: AutomationInstance
 
 Headers
 Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
 Accept: application/json
 
 Body
-None.
+SOAP request on AutomationInstance.
 
 Input (parameters)
-automationId (string, optional).
-automationKey (string, optional).
-status (string|string[], optional) - "Completed" | "Error" | "Running" | "Stopped" | "Cancelled" | "Skipped".
-sinceDays (number, optional, default 7).
-limit (number, optional, default 100).
+automation_id (string, optional) - Automation ProgramID/ObjectID used to filter SOAP AutomationInstance records.
+automation_key (string, optional) - Automation external key/customer key used to filter SOAP AutomationInstance records.
+status (value, optional) - Accepted for compatibility. SOAP AutomationInstance status values are returned as
+Salesforce codes, so this tool reports the supplied status but does not filter by it.
+since_days (number, optional) - Optional lookback window applied to SOAP AutomationInstance CreatedDate. Defaults to 7
+days.
+limit (number, optional) - Accepted for compatibility. SOAP AutomationInstance Retrieve does not use the REST page
+size parameter.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and SOAP ClientID for this request.
+query_all_accounts (boolean, optional) - Retrieves AutomationInstance objects across accessible accounts with SOAP
+QueryAllAccounts=true. Defaults to false for named automation lookups and true when no
+automation filter is provided.
 
 Result
-count (number).
-runs (array) - { instanceId, automationId, automationName, status, startTime, endTime, durationSec, completedSteps, totalSteps, errorMessage (string|null) }.
+objectType (value) - included in the JSON returned by the tool.
+filters (value) - included in the JSON returned by the tool.
+count (value) - included in the JSON returned by the tool.
+runs (value) - included in the JSON returned by the tool.
+note (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `automations_read`.
@@ -40,4 +52,4 @@ Errors
 
 Example request
 
-list_automation_runs({ "automationKey": "MTG_Nightly_Member_Sync", "sinceDays": 7 })
+list_automation_runs({})

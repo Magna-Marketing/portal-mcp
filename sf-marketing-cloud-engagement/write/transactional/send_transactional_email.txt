@@ -9,34 +9,32 @@ Marketing Cloud API
 REST API (`/messaging/v1/email/messages/{messageKey}` and bulk variants).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages/{messageKey}        (single)
-POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages                     (batch)
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages/{message_key}
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/messages
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "definitionKey": "MTG_OrderConfirmation",
-  "recipient": {
-    "contactKey": "MEM-100023",
-    "to": "jane.doe@example.com",
-    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345", "OrderTotal": "250.50" }
-  }
-}
+POST: content, definitionKey
 
 Input (parameters)
-definitionKey (string, required).
-recipients (object[], required) - Each:
-  contactKey (string, required).
-  to (string, required) - Email address.
-  attributes (object, optional) - Personalization values.
-  messageKey (string, optional, recommended) - Stable Id for idempotency.
+definition_key (string, required) - Transactional Messaging email send definition key. Salesforce sends the message using
+this definition.
+recipients (object[], required) - Recipients to send to. Use one recipient with message_key for the single-recipient
+endpoint, or multiple recipients for the batch endpoint.
+message_key (string, optional) - Required for the single-recipient endpoint. When provided, recipients must contain
+exactly one recipient and the tool calls POST /messaging/v1/email/messages/{messageKey}.
+content (object, optional) - Optional Salesforce content override object for the send request. Passed as the
+top-level content property, for documented channel-specific overrides.
+request_body_overrides (object, optional) - Optional advanced Salesforce request body fields to merge into the final request body.
+Values here override generated fields.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Transactional Messaging REST request.
 
 Result
-results (array) - Per recipient: { messageKey, contactKey, status ("Queued"|"Sent"|"Failed"), errors }.
-summary (object) - { queued, failed, total }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_send`.
@@ -51,11 +49,6 @@ Errors
 Example request
 
 send_transactional_email({
-  "definitionKey": "MTG_OrderConfirmation",
-  "recipients": [{
-    "contactKey": "MEM-100023",
-    "to": "jane.doe@example.com",
-    "attributes": { "FirstName": "Jane", "OrderId": "ORD-12345" },
-    "messageKey": "ORD-12345-MTG_OrderConfirmation"
-  }]
+  "definition_key": "",
+  "recipients": []
 })

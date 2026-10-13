@@ -21,9 +21,7 @@ Input (parameters)
 None.
 
 Result
-globalConfig (object): defaultModel, ocrLanguages (array),
-  storageBucket, retentionDays, extractionConcurrency,
-  alertEmail, lastUpdatedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,10 +37,5 @@ Example request
 get_global_config({})
 
 Example result
-{
-  "globalConfig": {
-    "defaultModel": "einstein.docai.v3",
-    "ocrLanguages": ["en","fr","de"],
-    "retentionDays": 90
-  }
-}
+
+{ }

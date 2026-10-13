@@ -19,16 +19,14 @@ Body
 None.
 
 Input (parameters)
-id (number, required).
-fields (string[], optional) - Default expands `prospect.*`.
-includeRecentActivities (boolean, optional, default false).
+id (number, required) - Visitor id (internal Pardot id, not visitorId cookie value).
+fields (string[], optional) - Field projection. Defaults to id, visitorId, prospectId, firstName, lastName, email,
+company, city, state, country, hostName, ipAddress, iprospect, pageViewCount, source,
+medium, campaign, referrerType, createdAt, updatedAt, referrer, browser, browserVersion,
+platform, screenHeight, screenWidth, with prospect.* expanded.
 
 Result
-visitor (object): id, prospectId, piVID, companyName, companyDomain,
-  city, state, country, visitCount, pageViewCount, isIdentified,
-  createdAt, updatedAt, etc.
-prospect (object|null).
-recentActivities (array, when includeRecentActivities=true).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -41,7 +39,10 @@ Errors
 
 Example request
 
-get_visitor({ "id": 5512001 })
+get_visitor({
+  "id": 1
+})
 
 Example result
-{ "visitor": { "id": 5512001, "piVID": "abc-12345", "isIdentified": false } }
+
+{ }

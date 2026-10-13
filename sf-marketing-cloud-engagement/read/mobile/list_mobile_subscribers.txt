@@ -9,6 +9,7 @@ REST API (`/legacy/v1/beta/mobile/subscription/`).
 
 Endpoint
 GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/mobile/subscription
+Optional query: $page, $pageSize, codeId, keywordId, mobileNumber, status
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,16 +19,17 @@ Body
 None.
 
 Input (parameters)
-mobileNumber (string, optional).
-status (string, optional) - "Active" | "Pending" | "Unsubscribed".
-keywordId (number, optional).
-codeId (number, optional).
-limit (number, optional, default 1000).
+mobile_number (string, optional) - Optional mobile number filter for the legacy MobileConnect subscription endpoint.
+status ("Active" | "Pending" | "Unsubscribed", optional) - Optional subscription status filter.
+keyword_id (number, optional) - Optional MobileConnect keyword ID filter for the legacy endpoint.
+code_id (number, optional) - Optional short code/long code ID filter for the legacy endpoint.
+page (number, optional) - Legacy endpoint page number. Defaults to 1.
+page_size (number, optional) - Legacy endpoint page size. Defaults to 1000.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile REST request.
 
 Result
-totalCount (number).
-subscribers (array) - { id, mobileNumber, contactKey, codeId, codeShortCode, keywordId, keyword, subscriptionStatus, subscribedDate, unsubscribedDate, optInSource, locale }.
-hasMore (boolean).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `mobile_connect_read`.
@@ -40,4 +42,4 @@ Errors
 
 Example request
 
-list_mobile_subscribers({ "status": "Active", "codeId": 12345 })
+list_mobile_subscribers({})

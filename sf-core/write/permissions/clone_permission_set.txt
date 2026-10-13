@@ -7,11 +7,12 @@ description. Useful for "regional" variants or staging changes
 new fullName and starts with no assignments.
 
 Salesforce API
-Metadata API (`PermissionSet` readMetadata + create), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0    (readMetadata)
-POST /services/data/v66.0/metadata/deployRequest
+GET /services/data/v66.0/query/
+POST /services/Soap/m/66.0  (createMetadata PermissionSet)
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,21 +23,67 @@ The MCP server first reads the source permset, copies its config,
 applies overrides, and submits a `create` deploy.
 
 Input (parameters)
-sourceFullName (string, required) - Source PermissionSet DeveloperName.
-newFullName (string, required) - New PermissionSet DeveloperName.
-newLabel (string, required).
-newDescription (string, optional).
-includeFieldPermissions (boolean, optional, default true).
-includeClassAccesses (boolean, optional, default true).
-includePageAccesses (boolean, optional, default true).
-includeTabSettings (boolean, optional, default true).
-license (string, optional) - Override license; default = source's license.
-checkOnly (boolean, optional, default false).
+sourceFullName (string, required) - Source PermissionSet metadata fullName; string API
+name; no default; example 'Support_Agent'; do not pass Id or label.
+newFullName (string, required) - New PermissionSet metadata fullName; string API name;
+no default; example 'Support_Agent_Copy'; do not reuse an existing PermissionSet name.
+newLabel (string, required) - New PermissionSet label; string up to 80 characters; no
+default; example 'Support Agent Copy'; do not pass an API name unless intended.
+newDescription (string, optional) - New PermissionSet description; string up to 255
+characters; omitted keeps the source description; example 'Copied for pilot'; pass empty
+string only to clear it.
+license (string, optional) - Override PermissionSet license metadata value; string
+license name; omitted keeps source license; example 'Salesforce'; do not pass LicenseId.
+includeFieldPermissions (boolean, optional) - Whether to copy fieldPermissions; boolean;
+defaults to true; example false; do not set false if field access must match source.
+includeClassAccesses (boolean, optional) - Whether to copy Apex class access; boolean;
+defaults to true; example true; do not set false if Apex execution must match source.
+includePageAccesses (boolean, optional) - Whether to copy Visualforce page access;
+boolean; defaults to true; example true; do not set false if Visualforce access must
+match source.
+includeTabSettings (boolean, optional) - Whether to copy tabSettings; boolean; defaults
+to true; example false; do not set false if tab visibility must match source.
+includeObjectPermissions (boolean, optional) - Whether to copy objectPermissions;
+boolean; defaults to true; example true; do not set false if object access must match
+source.
+includeUserPermissions (boolean, optional) - Whether to copy userPermissions; boolean;
+defaults to true; example true; do not set false if system permissions must match
+source.
+includeApplicationVisibilities (boolean, optional) - Whether to copy
+applicationVisibilities; boolean; defaults to true; example true; do not set false if
+app visibility must match source.
+includeCustomPermissions (boolean, optional) - Whether to copy customPermissions;
+boolean; defaults to true; example true; do not set false if custom permission grants
+must match source.
+includeRecordTypeVisibilities (boolean, optional) - Whether to copy
+recordTypeVisibilities; boolean; defaults to true; example true; do not set false if
+record type visibility must match source.
+includeExternalCredentialPrincipalAccesses (boolean, optional) - Whether to copy
+externalCredentialPrincipalAccesses; boolean; defaults to true; example true; do not set
+false if callout principal access must match source.
+includeAgentAccesses (boolean, optional) - Whether to copy agentAccesses; boolean;
+defaults to true; example true; do not set false if Agentforce access must match source.
+includeEmailRoutingAddressAccesses (boolean, optional) - Whether to copy
+emailRoutingAddressAccesses; boolean; defaults to true; example true; do not set false
+if Email-to-Case routing access must match source.
+includeGenComputingSummaryDefAccess (boolean, optional) - Whether to copy
+genComputingSummaryDefAccess; boolean; defaults to true; example true; do not set false
+if enhanced summary access must match source.
+includeServicePresenceStatusAccesses (boolean, optional) - Whether to copy
+servicePresenceStatusAccesses; boolean; defaults to true; example true; do not set false
+if service presence access must match source.
+dryRun (boolean, optional) - Whether to read and build clone metadata without
+createMetadata; boolean; defaults to false; example true; do not use when the clone must
+be created.
 
 Result
-Standard deploy result, plus `clonedPermissionSet`: { id, fullName,
-  label, sourceFullName, license, copiedComponents: { systemPermissions,
-  objectPermissions, fieldPermissions, ... } }.
+JSON object with sourceReadResponse, clonedMetadata, createResponse,
+createdPermissionSetLookup, and clonedPermissionSet.
+sourceReadResponse (value) - included in the JSON returned by the tool.
+clonedMetadata (value) - included in the JSON returned by the tool.
+createResponse (value) - included in the JSON returned by the tool.
+createdPermissionSetLookup (value) - included in the JSON returned by the tool.
+clonedPermissionSet (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -52,8 +99,7 @@ Errors
 Example request
 
 clone_permission_set({
-  "sourceFullName": "MTG_Project_Manager",
-  "newFullName": "MTG_Project_Manager_EU",
-  "newLabel": "MTG Project Manager (EU)",
-  "newDescription": "EU regional variant - excludes ManageDataIntegrations"
+  "sourceFullName": "example",
+  "newFullName": "example",
+  "newLabel": "example"
 })

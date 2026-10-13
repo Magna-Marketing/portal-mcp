@@ -41,8 +41,8 @@ siteSearchContent (string, optional).
 css (string, optional).
 
 Result
-layoutTemplate (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -64,4 +64,5 @@ manage_layout_template({
 })
 
 Example result
-{ "layoutTemplate": { "id": 71, "name": "Default LP shell", "isIncludeDefaultCss": true } }
+
+{ }

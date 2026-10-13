@@ -12,7 +12,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/custom-fields?fields={fields}&filter[isRequired]=eq,true
+GET https://{pi-domain}/api/v5/objects/custom-fields
+Optional query: fields, filter[isAnalyticsSynced], filter[isRequired], filter[name], filter[type], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -23,23 +24,18 @@ Body
 None.
 
 Input (parameters)
-type (string, optional) - "TEXT" | "DROPDOWN" | "RADIO_BUTTON" |
-  "CHECKBOX" | "MULTI_SELECT" | "TEXTAREA" | "DATE" | "NUMBER" |
-  "CRM_USER" | "HIDDEN".
-isRequired (boolean, optional).
-isAnalyticsSynced (boolean, optional) - Mirrored to B2B Marketing Analytics.
-nameContains (string, optional).
-fields (string[], optional, default: id,name,fieldId,apiFieldId,type,
-  isRecordMultipleResponses,salesforceId,isUseValues,isAnalyticsSynced,
-  isRequired,createdAt,updatedAt,createdById,updatedById).
-limit (number, optional, default 200).
-nextPageToken (string, optional).
+type ("TEXT" | "DROPDOWN" | "RADIO_BUTTON" | "CHECKBOX" | "MULTI_SELECT" | "TEXTAREA" | "DATE" | "NUMBER" | "CRM_USER" | "HIDDEN", optional) - Filter by field type.
+isRequired (boolean, optional) - Filter to required or non-required fields.
+isAnalyticsSynced (boolean, optional) - Filter to fields mirrored to B2B Marketing Analytics.
+nameContains (string, optional) - Filter fields whose name contains this string (case-insensitive like match).
+fields (string[], optional) - Field projection. Defaults to id, name, fieldId, apiFieldId, type, isRequired,
+isUseValues, isRecordMultipleResponses, isAnalyticsSynced, salesforceId, createdAt,
+updatedAt, createdById, updatedById.
+limit (number, optional) - Page size. Default 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-customFields (array) - Each: { id, name, fieldId, apiFieldId, type,
-  isRequired, isUseValues, isRecordMultipleResponses, isAnalyticsSynced,
-  salesforceId, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -52,13 +48,8 @@ Errors
 
 Example request
 
-list_custom_fields({ "isRequired": true })
+list_custom_fields({})
 
 Example result
-{
-  "customFields": [
-    { "id": 71, "name": "Region", "fieldId": "region",
-      "apiFieldId": "region__c", "type": "DROPDOWN", "isRequired": true,
-      "isUseValues": true }
-  ]
-}
+
+{ }

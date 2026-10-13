@@ -9,7 +9,10 @@ Marketing Cloud API
 REST API (`/sms/v1/keyword`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/sms/v1/keyword
+GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/mobile/keyword/{keyword_id}
+Optional query: $page, $pageSize, codeId, isInherited, keywordType, name
+GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/mobile/keyword
+Optional query: $page, $pageSize, codeId, isInherited, keywordType, name
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,15 +22,19 @@ Body
 None.
 
 Input (parameters)
-codeId (number, optional).
-isInherited (boolean, optional).
-keywordType (string, optional) - "MO" | "MT" | "Information" | "Help" | "Stop".
-namePattern (string, optional).
-limit (number, optional, default 200).
+keyword_id (number, optional) - Optional keyword ID. When provided, the tool calls
+/legacy/v1/beta/mobile/keyword/{keywordId}.
+code_id (number, optional) - Optional short code/long code ID filter for the legacy keyword list endpoint.
+keyword_type ("MO" | "MT" | "Information" | "Help" | "Stop", optional) - Optional keyword type filter for tenants whose legacy endpoint supports it.
+is_inherited (boolean, optional) - Optional inherited-keyword filter for tenants whose legacy endpoint supports it.
+name_pattern (string, optional) - Optional keyword/name search filter for tenants whose legacy endpoint supports it.
+page (number, optional) - Legacy endpoint page number. Defaults to 1.
+page_size (number, optional) - Legacy endpoint page size. Defaults to 200.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile REST request.
 
 Result
-totalCount (number).
-keywords (array) - { id, keyword, codeId, codeShortCode, keywordType, isInherited, restriction, dateCreated, dateModified }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `mobile_connect_read` (or relevant mobile scope).
@@ -40,4 +47,4 @@ Errors
 
 Example request
 
-list_mobile_keywords({ "codeId": 12345 })
+list_mobile_keywords({})

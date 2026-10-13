@@ -9,7 +9,7 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions/publishStatus/{statusId}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishStatus/{statusId}
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishStatus/{status_id}
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,10 +19,12 @@ Body
 None.
 
 Input (parameters)
-statusId (string, required) - Returned by `publish_journey`.
+status_id (string, required) - statusId returned by a Journey Builder publishAsync request.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-publish (object) - { statusId, journeyId, version, status ("Pending"|"InProgress"|"Published"|"Failed"|"Cancelled"), startedAt, completedAt, errors (array): [{ key, message, severity }] }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -35,4 +37,6 @@ Errors
 
 Example request
 
-get_journey_publish_status({ "statusId": "abc-publish-status-id" })
+get_journey_publish_status({
+  "status_id": ""
+})

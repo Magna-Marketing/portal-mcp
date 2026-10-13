@@ -11,7 +11,7 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST https://{pi-domain}/api/v5/objects/visitors/:id/do/identifyCompany
+POST https://{pi-domain}/api/v5/objects/visitors/{visitorId}/do/identifyCompany
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,27 +20,16 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "companyName": "Acme",
-  "companyDomain": "acme.com",
-  "city": "Boston",
-  "state": "MA",
-  "country": "US"
-}
+POST: companyId, companyName
 
 Input (parameters)
-id (number, required) - Visitor id.
-companyName (string, required).
-companyDomain (string, optional).
-city (string, optional).
-state (string, optional).
-country (string, optional).
-latitude (number, optional).
-longitude (number, optional).
+visitorId (number, required) - Pardot visitor id to update.
+companyName (string, optional) - Company name to associate with the visitor.
+companyId (number, optional) - Pardot Prospect Account id to link the visitor to. Takes precedence over companyName
+when both are supplied.
 
 Result
-success (boolean).
-visitor (object) - Refreshed row with `companyName` etc. populated.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -55,15 +44,9 @@ Errors
 Example request
 
 identify_visitor_company({
-  "id": 5512001,
-  "companyName": "Acme",
-  "companyDomain": "acme.com",
-  "country": "US"
+  "visitorId": 1
 })
 
 Example result
-{
-  "success": true,
-  "visitor": { "id": 5512001, "companyName": "Acme",
-    "companyDomain": "acme.com", "country": "US" }
-}
+
+{ }

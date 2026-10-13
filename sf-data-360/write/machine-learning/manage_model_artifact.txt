@@ -9,8 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-PATCH  {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-artifacts/:modelArtifactIdOrName    (operation="update")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-artifacts/:modelArtifactIdOrName    (operation="delete")
+PATCH {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/{modelArtifactIdOrName}
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/{modelArtifactIdOrName}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -30,8 +30,7 @@ label (string, optional).
 status (string, optional) - "Active" | "Archived" | "Failed".
 
 Result
-modelArtifact (object) - Updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -51,4 +50,5 @@ manage_model_artifact({
 })
 
 Example result
-{ "modelArtifact": { "apiName": "ChurnArtifact_v12", "status": "Archived" } }
+
+{ }

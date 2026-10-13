@@ -8,38 +8,43 @@ Marketing Cloud API
 REST API (`/messaging/v1/sms/definitions`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions
-PATCH  https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}
-DELETE https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{key}
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions
+DELETE https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{definition_key}
+PATCH https://{tenant}.rest.marketingcloudapis.com/messaging/v1/sms/definitions/{definition_key}
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "definitionKey": "MTG_OrderConfirmation_SMS",
-  "name": "MTG Order Confirmation SMS",
-  "classification": "Default Transactional",
-  "status": "Active",
-  "content": { "message": "Hi %%FirstName%%, your order %%OrderId%% has shipped." },
-  "subscriptions": { "shortCode": "12345", "countryCode": "US" }
-}
+POST: status
+DELETE: status
+PATCH: status
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
-definitionKey (string, required).
-name (string, required for create).
-description (string, optional).
-classification (string, optional, default "Default Transactional").
-status (string, optional).
-messageContent (string, optional, required for create) - SMS body with AMPscript / merge.
-shortCode (string, required for create).
-countryCode (string, optional, default "US").
-keyword (string, optional).
+operation ("create" | "update" | "activate" | "deactivate" | "delete", required) - create calls POST, update calls PATCH, activate/deactivate PATCH only status, and delete
+calls DELETE for the send definition.
+definition_key (string, required) - Unique Transactional Messaging SMS send definition key.
+name (string, optional) - Unique name for the SMS send definition. Required by Salesforce when creating a
+definition.
+description (string, optional) - Optional description for the send definition.
+status ("active" | "inactive" | "Active" | "Inactive", optional) - Optional definition status. create/update sends Active or Inactive when provided.
+activate/deactivate set this automatically.
+message_content (string, optional) - SMS message body for the definition, sent as content.message. Required by Salesforce
+when creating an SMS definition.
+subscriptions (object, optional) - Salesforce subscriptions object. short_code and keyword are required by Salesforce when
+creating an SMS definition.
+url_shortener_options (object, optional) - Optional Salesforce options.urlShortenerOptions values.
+regulatory_authority_template_id (string, optional) - Optional India DLT template ID, sent as options.SmsMessageRegulatoryAuthorityTemplateId.
+options (object, optional) - Optional additional Salesforce options fields.
+additional_fields (object, optional) - Optional advanced Salesforce definition fields to merge into the request body. Values
+here override generated fields.
+confirm_deletion (boolean, optional) - Must be true when operation is delete.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Transactional Messaging REST request.
 
 Result
-definition (object) - { definitionKey, definitionId, name, status, classification, content, subscriptions }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_send`.
@@ -54,8 +59,5 @@ Example request
 
 manage_transactional_sms_definition({
   "operation": "create",
-  "definitionKey": "MTG_OrderConfirmation_SMS",
-  "name": "MTG Order Confirmation SMS",
-  "messageContent": "Hi %%FirstName%%, your order %%OrderId%% has shipped.",
-  "shortCode": "12345"
+  "definition_key": ""
 })

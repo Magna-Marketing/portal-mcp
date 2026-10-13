@@ -40,8 +40,7 @@ region (string, optional).
 configuration (object, required for create) - Network-type-specific.
 
 Result
-route (object) - Created row in `Pending` status.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -64,4 +63,5 @@ manage_private_network_route({
 })
 
 Example result
-{ "route": { "id": "0YN580000000001", "name": "MTG_Snowflake_PL", "status": "Pending" } }
+
+{ }

@@ -22,12 +22,7 @@ bundleName (string, required) - DeveloperName of the bundle.
 fileName (string, required) - File name including extension, e.g. projectCard.svg.
 
 Result
-deleted (boolean) - true if deleted; absent when alreadyDeleted=true.
-alreadyDeleted (boolean, optional) - true when file did not exist.
-resourceId (string, when deleted) - Id of the deleted resource.
-filePath (string).
-format (string).
-deleteResult (object, when deleted) - Raw DELETE response.
+raw Tooling API DELETE response, which can be empty for 204 No Content.
 
 Required permissions
 - "Customize Application".

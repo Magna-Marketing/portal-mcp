@@ -9,9 +9,12 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
-PUT    https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
-DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/{id}/version/{versionNumber}
+DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+Optional query: createDraftVersion
+PUT https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+Optional query: createDraftVersion
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+Optional query: createDraftVersion
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,14 +24,26 @@ Body
 Full journey definition (`{ id, key, name, version, workflowApiVersion: 1.0, triggers: [...], activities: [...], goals: [...] }`).
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "createDraftVersion".
-journeyId (string, optional).
-journeyKey (string, optional).
-versionNumber (number, optional).
-definition (object, required for create / update / createDraftVersion) - Full canvas JSON.
+operation ("create" | "update" | "delete" | "create_draft_version" | "createDraftVersion", required) - Journey write operation. create and create_draft_version call POST
+/interaction/v1/interactions. update calls PUT, and delete calls DELETE by journey ID or
+key.
+journey_id (string, optional) - Journey definition ID. Required for delete when journey_key is omitted. Optional for
+update when the definition body contains the ID.
+journey_key (string, optional) - Journey external key. Required for delete when journey_id is omitted. Optional for
+update when the definition body contains the key.
+version_number (number, optional) - Journey version number. For delete, omit to delete all versions. For update, this is
+sent as Salesforce versionNumber when provided.
+definition (object, optional) - Full Journey Builder journey definition JSON. Required for create, update, and
+create_draft_version. Per Salesforce Journey Spec: (1) outcomes[].next must be a plain
+STRING containing the next activity key — never an object like { activityRef: { id } };
+(2) triggers[].eventDefinitionKey is a top-level string on the trigger, not inside
+configurationArguments; (3) defaults.email must be an array of expression strings like
+["{{Event.key.EmailAddress}}", "{{Contact.Default.Email}}"]. Activities must be
+non-empty and wire via outcomes[].next = "next-activity-key", null means exit.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header.
 
 Result
-journey (object) - { id, key, name, version, status, createdDate, modifiedDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_write`.

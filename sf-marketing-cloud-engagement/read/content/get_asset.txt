@@ -9,7 +9,7 @@ Marketing Cloud API
 REST API (`/asset/v1/content/assets/{id}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/{id}
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/query
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,15 +19,19 @@ Body
 None.
 
 Input (parameters)
-assetId (number, optional).
-customerKey (string, optional).
-  One required.
-includeVersions (boolean, optional, default false).
-includeContent (boolean, optional, default true).
+asset_id (number, optional) - Content Builder asset ID. When provided, the tool calls GET
+/asset/v1/content/assets/{id}.
+customer_key (string, optional) - Content Builder customerKey. When asset_id is omitted, the tool first queries by
+customerKey and then retrieves the matching asset by ID.
+fields (string[], optional) - Optional fields used only for the customerKey lookup query. The final asset GET response
+is returned without client-side field trimming.
+include_lookup_response (boolean, optional) - When resolving by customer_key, include the raw lookup query response next to the raw
+asset GET response.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and Account-Context header for Content Builder
+REST requests.
 
 Result
-asset (object) - { id, customerKey, name, description, assetType, category, createdDate, modifiedDate, owner, status, version, content (string|null) - HTML/Text/Markup body, contentType, fileProperties (when file), data (object|null) - asset-type-specific block data, slots (object|null) - for templates }.
-versions (array, optional) - [{ version, modifiedDate, modifiedBy }].
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_read` or `documents_and_images_read` depending on assetType.
@@ -40,4 +44,4 @@ Errors
 
 Example request
 
-get_asset({ "customerKey": "MTG_Welcome_Email" })
+get_asset({})

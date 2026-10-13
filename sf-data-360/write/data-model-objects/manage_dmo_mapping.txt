@@ -40,22 +40,19 @@ Body (updateField)
 { "transformExpression": "UPPER(sourceField)" }
 
 Input (parameters)
-subOperation (string, required) - "create" | "delete" |
-  "clearFields" | "updateField".
-objectSourceTargetMapDeveloperName (string, required for delete /
-  clearFields / updateField).
-fieldSourceTargetMapDeveloperName (string, required for updateField).
-developerName (string, required for create).
-sourceObject (string, required for create).
-targetObject (string, required for create).
-fieldMappings (array, required for create) - [{ developerName,
-  sourceField, targetField, dataType, transformExpression?,
-  isPrimaryKey?, isExternalId? }].
-transformExpression (string, optional, updateField-only).
+subOperation ("create" | "delete" | "clearFields" | "updateField", required) - The sub-operation to perform: create a mapping, delete a mapping, clearFields to remove
+all field mappings, or updateField to patch a single field mapping
+objectSourceTargetMapDeveloperName (string, optional) - Developer name of the object-level source-to-target mapping. Required for delete,
+clearFields, and updateField.
+fieldSourceTargetMapDeveloperName (string, optional) - Developer name of the field-level source-to-target mapping. Required for updateField.
+developerName (string, optional) - Developer name for the new mapping. Required for create.
+sourceObject (string, optional) - API name of the source data stream object. Required for create.
+targetObject (string, optional) - API name of the target DMO. Required for create.
+fieldMappings (object[], optional) - Array of field-level mappings between source and target. Required for create.
+transformExpression (string, optional) - Transform expression to apply to the field mapping. Used with updateField only.
 
 Result
-mapping (object, for create / updateField).
-deleted (boolean, for delete / clearFields).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -71,16 +68,9 @@ Errors
 Example request
 
 manage_dmo_mapping({
-  "subOperation": "create",
-  "developerName": "mc_sends_to_send",
-  "sourceObject": "mc_sends__dll",
-  "targetObject": "Send__dlm",
-  "fieldMappings": [
-    { "developerName": "id_to_id",
-      "sourceField": "Id__c", "targetField": "Id__c",
-      "isPrimaryKey": true }
-  ]
+  "subOperation": ""
 })
 
 Example result
-{ "mapping": { "developerName": "mc_sends_to_send" } }
+
+{ }

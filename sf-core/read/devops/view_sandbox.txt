@@ -21,14 +21,14 @@ Body
 None.
 
 Input (parameters)
-sandboxId (string, optional).
-sandboxName (string, optional).
-  One required.
-includeRefreshHistory (boolean, optional, default true).
+sandboxName (string, required) - SandboxInfo SandboxName to match exactly; string with
+the sandbox name only; required; example: DEV01; do not pass wildcards, production org
+names, domains, or empty strings.
 
 Result
-sandbox (object) - { id, sandboxName, licenseType, description, status, autoActivate, copyChatter, historyDays, apexClassId (post-copy), sourceId, templateId, createdBy, createdDate }.
-refreshHistory (array, when includeRefreshHistory=true) - { id, status, activatedDate, endDate, licenseType }.
+Returns a JSON object with query and raw Tooling API result.
+query (value) - included in the JSON returned by the tool.
+result (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Sandboxes".
@@ -41,4 +41,6 @@ Errors
 
 Example request
 
-view_sandbox({ "sandboxName": "DEV1" })
+view_sandbox({
+  "sandboxName": "DEV01"
+})

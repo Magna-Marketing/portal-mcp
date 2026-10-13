@@ -24,18 +24,28 @@ Body
 }
 
 Input (parameters)
-dataTransformNameOrId (string, required).
-scheduleType (string, required) - "Cron" | "Interval" |
-  "EventDriven" | "Manual".
-cronExpression (string, optional) - Required when scheduleType=Cron.
-intervalMinutes (number, optional) - Required when scheduleType=Interval.
-startDate (string, optional) - ISO-8601.
-endDate (string, optional).
-timeZone (string, optional, default "UTC").
-isActive (boolean, optional, default true).
+dataTransformNameOrId (string, required) - Developer name or 18-character Salesforce ID of the data transform
+frequency ("Daily" | "Hourly" | "Minutely" | "Monthly" | "MonthlyRelative" | "Weekly" | "None" | "Transform", required) - Schedule frequency — the Jackson type discriminator for the schedule payload. " +
+"'None' removes the existing schedule (no time required). " + "'Transform' triggers this
+transform when another transform completes (no time required). " + "All other values
+require a time object.
+hour (number, optional) - Hour of the day to run (0–23, UTC unless timeZone is specified). Required when frequency
+is not 'None' or 'Transform'.
+minute (number, optional) - Minute of the hour to run (0–59). Required when frequency is not 'None' or 'Transform'.
+timeZone (string, optional) - IANA time zone string (e.g., 'America/Los_Angeles', 'UTC'). REQUIRED for all time-based
+frequencies — omitting causes INVALID_INPUT: 'Time zone is required'.
+daysOfWeek (object[], optional) - Days of the week to run. REQUIRED (at least one) for 'Hourly', 'Daily', and 'Weekly' —
+omitting causes INVALID_INPUT: 'Days of week required at least one day'.
+interval (number, optional) - Repetition interval in hours (for Hourly) or days (for Daily). For example, interval=3
+with Hourly runs every 3 hours.
+runFrom (number, optional) - Earliest time of day to start runs (used with interval-based schedules).
+runTo (number, optional) - Latest time of day to stop queuing runs (used with interval-based schedules).
+definitionName (string, optional) - Name of the schedule definition. Required for multi-definition transforms (API v63.0+).
+shouldForceSpecifiedMinutes (boolean, optional) - Only for data transforms. If true, runs at the exact specified minute. " + "If false
+(default), the run is distributed over the hour to avoid hourly hotspots.
 
 Result
-schedule (object) - Updated schedule.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -49,14 +59,10 @@ Errors
 Example request
 
 manage_data_transform_schedule({
-  "dataTransformNameOrId": "build_unified_individual",
-  "scheduleType": "Cron",
-  "cronExpression": "0 0 */6 * * ?",
-  "isActive": true
+  "dataTransformNameOrId": "",
+  "frequency": ""
 })
 
 Example result
-{
-  "schedule": { "scheduleType": "Cron",
-    "cronExpression": "0 0 */6 * * ?", "isActive": true }
-}
+
+{ }

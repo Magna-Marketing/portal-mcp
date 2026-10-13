@@ -37,10 +37,10 @@ includeFileTypes (string[], optional, default all) - Subset of formats to
 rewriteReferences (boolean, optional, default true) - Replaces the JS class
   name and <c-source-name> HTML tag references with the new name.
 
-Result (raw Tooling API responses)
-bundle (object) - { id, success, errors } from POST LightningComponentBundle.
-resources (object) - Map of fileName → { id, success, errors }.
-filesCopied (number) - Count of files copied.
+Result
+object with raw bundleResult and resourceResults Tooling API responses.
+bundleResult (value) - included in the JSON returned by the tool.
+resourceResults (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".

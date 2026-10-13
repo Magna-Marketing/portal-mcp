@@ -18,15 +18,16 @@ Body
 SOAP RetrieveRequest on `AccountUser`.
 
 Input (parameters)
-isActive (boolean, optional, default true).
-emailPattern (string, optional) - Glob/substring on Email.
-namePattern (string, optional) - Glob on Name.
-mid (number, optional) - Filter by associated MID.
-limit (number, optional, default 200).
+is_active (boolean, optional) - Filter by AccountUser.ActiveFlag. Defaults to true.
+email_pattern (string, optional) - SOAP like filter for AccountUser.Email.
+name_pattern (string, optional) - SOAP like filter for AccountUser.Name.
+business_unit_id (string, optional) - Business Unit MID used for SOAP ClientID context.
+query_all_accounts (boolean, optional) - Query users across parent and child accounts. Defaults to true.
 
 Result
-totalSize (number).
-users (array) - { id (UserID), accountUserId, name, email, userId (Username), isApiUser, isActive, isLocked, isAdmin, isSendingUser, defaultApplicationId, lastSuccessfulLogin, lastFailedLogin, mustChangePassword, timezone, locale, roles (array of { id, name }) }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `users_read`.
@@ -39,4 +40,4 @@ Errors
 
 Example request
 
-list_users({ "isActive": true })
+list_users({})

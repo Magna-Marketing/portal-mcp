@@ -29,9 +29,7 @@ objectApiName (string, required).
 data (object[], required) - Up to 200 records.
 
 Result
-valid (boolean).
-recordCount (number).
-errors (array) - Per record: { index, field, code, message }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `cdp_ingest_api`.
@@ -54,11 +52,5 @@ validate_stream_record({
 })
 
 Example result
-{
-  "valid": false,
-  "recordCount": 1,
-  "errors": [
-    { "index": 0, "field": "Amount__c", "code": "INVALID_NUMBER",
-      "message": "Cannot parse 'not_a_number' as DECIMAL" }
-  ]
-}
+
+{ }

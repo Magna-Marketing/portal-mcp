@@ -7,14 +7,10 @@ sharing seems incorrect. Returns a job Id; poll status with the
 `SharingRecalcStatus` view.
 
 Salesforce API
-Metadata API + Tooling, v66.0. The Metadata API exposes
-`Database.executeSharingRulesRecalc` via a custom Apex action; the
-tool wraps `/tooling/sobjects/SharingRecalcRequest` (where available)
-and falls back to `execute_anonymous` Apex.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/tooling/sobjects/SharingRecalcRequest                 (preferred)
-or executes anonymous Apex `Database.executeBatch(new ...)`.
+POST /services/Soap/m/66.0  (updateMetadata SharingRules)
 
 Headers
 Authorization: Bearer <access_token>
@@ -24,12 +20,25 @@ Body
 { "SObjectType": "Account" }
 
 Input (parameters)
-sObject (string, required).
-ruleType (string, optional, default "all") - "criteria" | "owner" | "all".
-waitForCompletion (boolean, optional, default false) - Poll until status is terminal (can be minutes/hours).
+sObject (string, required) - Represents the sObject API name whose SharingRules metadata
+is re-saved; standard or custom object name; no default; example 'Account'; do not pass
+the .sharingRules file name.
+checkOnly (boolean, optional) - Represents whether to read and return metadata without
+calling updateMetadata; boolean; defaults to false; example true; do not use when
+recalculation must be triggered.
+waitForCompletion (boolean, optional) - Represents a compatibility flag for waiting;
+boolean; defaults to false and is reported as unsupported; example false; do not rely on
+it for polling recalculation.
 
 Result
-job (object) - { id, status ("Queued"|"InProgress"|"Completed"|"Failed"), startedAt, completedAt }.
+JSON object with checkOnly, waitForCompletionRequested, waitForCompletionSupported,
+readResponse, metadata, and updateResponse.
+checkOnly (value) - included in the JSON returned by the tool.
+waitForCompletionRequested (value) - included in the JSON returned by the tool.
+waitForCompletionSupported (value) - included in the JSON returned by the tool.
+readResponse (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+updateResponse (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Sharing" + "Modify All Data".
@@ -42,4 +51,6 @@ Errors
 
 Example request
 
-recalculate_sharing({ "sObject": "Project__c", "ruleType": "all" })
+recalculate_sharing({
+  "sObject": "example"
+})

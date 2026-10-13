@@ -7,7 +7,8 @@ Marketing Cloud API
 REST API (`/legacy/v1/beta/groupconnect/apps`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/legacy/v1/beta/groupconnect/apps
+GET https://{tenant}.rest.marketingcloudapis.com/ott/v1/registration/{platform}
+Optional query: $page, $pagesize
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,10 +18,17 @@ Body
 None.
 
 Input (parameters)
-None.
+platform ("line" | "messenger", optional) - Optional OTT platform to retrieve. Salesforce supports line and messenger. Omit to
+retrieve both platforms with separate API calls.
+page (number, optional) - Page number for Salesforce pagination. Defaults to 1.
+page_size (number, optional) - Number of registered properties per page. Defaults to 50.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+GroupConnect REST request.
 
 Result
-apps (array) - { id, name, lineAccountName, applicationType, accessToken (masked), webhookUrl, dateCreated }.
+Raw Marketing Cloud response JSON, returned unchanged.
+line (value) - included in the JSON returned by the tool.
+messenger (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `messaging_api_app_read`.

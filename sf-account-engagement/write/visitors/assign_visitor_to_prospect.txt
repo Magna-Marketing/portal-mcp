@@ -11,7 +11,7 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-POST https://{pi-domain}/api/v5/objects/visitors/:id/do/assignToProspect
+POST https://{pi-domain}/api/v5/objects/visitors/{visitorId}/do/assign
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -23,15 +23,11 @@ Body
 { "prospectId": 7745 }
 
 Input (parameters)
-id (number, required) - Visitor id.
-prospectId (number, required) - Pardot prospect id.
+visitorId (number, required) - Pardot visitor id to assign.
+prospectId (number, required) - Pardot prospect id to assign the visitor to.
 
 Result
-success (boolean).
-visitor (object) - Refreshed visitor with `prospectId` populated and
-  `isIdentified=true`.
-reattributedActivities (number) - How many existing visitor
-  activities were rewritten to point at the prospect.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -46,11 +42,11 @@ Errors
 
 Example request
 
-assign_visitor_to_prospect({ "id": 5512001, "prospectId": 7745 })
+assign_visitor_to_prospect({
+  "visitorId": 1,
+  "prospectId": 1
+})
 
 Example result
-{
-  "success": true,
-  "visitor": { "id": 5512001, "prospectId": 7745, "isIdentified": true },
-  "reattributedActivities": 18
-}
+
+{ }

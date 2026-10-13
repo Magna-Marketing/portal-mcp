@@ -7,11 +7,12 @@ in describe. Hierarchy custom settings have an implicit per-user /
 per-profile / org-default record selection.
 
 Salesforce API
-REST API (Data) + Tooling, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, NamespacePrefix FROM EntityDefinition WHERE IsCustomSetting = true
-GET /services/data/v66.0/sobjects/{name}/describe
+GET /services/data/v66.0/sobjects/
+GET /services/data/v66.0/sobjects/{apiName}/describe
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,19 +22,37 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-type (string, optional) - "list" | "hierarchy".
-includeFields (boolean, optional, default true).
-includeRecordCounts (boolean, optional, default true).
+namePattern (string, optional) - Pattern for QualifiedApiName or Label; string using *
+and ? wildcards converted to SOQL LIKE; no default; example: Integration*; do not pass
+regex, raw LIKE syntax, or multiple patterns.
+namespacePrefix (string, optional) - Namespace prefix filter; string compared to
+EntityDefinition.NamespacePrefix, with empty string meaning unpackaged settings; no
+default; example: mypkg; do not pass package labels or multiple namespaces.
+includeDescribe (boolean, optional) - Whether to include raw sObject describe results
+for each setting, including customSettingType when available; boolean; default true;
+example: false; do not pass true when avoiding extra REST calls.
+includeRecordCounts (boolean, optional) - Whether to include raw SELECT COUNT()
+QueryResults for each setting; boolean; default true; example: false; do not pass true
+when avoiding extra SOQL calls.
+includeManaged (boolean, optional) - Whether to include managed-package settings when
+namespacePrefix is not provided; boolean; default false; example: true; do not pass true
+when only local unpackaged settings are wanted.
+whereClause (string, optional) - Additional SOQL WHERE condition for EntityDefinition;
+string with or without WHERE; no default; example: Label LIKE 'Integration%'; do not
+pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for EntityDefinition; string with or
+without ORDER BY; default QualifiedApiName ASC; example: Label ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum custom setting rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-customSettings (array) - Each:
-  qualifiedApiName, label, pluralLabel, namespacePrefix.
-  type (string) - "list" | "hierarchy".
-  visibility (string) - "Public" | "Protected".
-  fields (array, when includeFields=true) - { apiName, label, type, length, defaultValue }.
-  recordCount (number, when includeRecordCounts=true).
+object with raw EntityDefinition QueryResult plus optional raw describes and COUNT()
+QueryResults keyed by QualifiedApiName.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -46,4 +65,8 @@ Errors
 
 Example request
 
-list_custom_settings({ "type": "hierarchy", "includeRecordCounts": true })
+list_custom_settings({
+  "namePattern": "Integration*",
+  "namespacePrefix": "mypkg",
+  "includeDescribe": false
+})

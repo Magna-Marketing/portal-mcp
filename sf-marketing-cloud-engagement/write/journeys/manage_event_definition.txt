@@ -9,11 +9,11 @@ Marketing Cloud API
 REST API (`/interaction/v1/eventDefinitions`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
-PUT    https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{key}
-PUT    https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{id}
-DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{key}
-DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{event_definition_id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{event_definition_key}
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions
+PUT https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/{event_definition_id}
+PUT https://{tenant}.rest.marketingcloudapis.com/interaction/v1/eventDefinitions/key:{event_definition_key}
 
 Headers
 Authorization: Bearer <access_token>
@@ -39,20 +39,32 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-eventDefinitionId (string, optional).
-eventDefinitionKey (string, optional, recommended).
-name (string, required for create).
-description (string, optional).
-type (string, required for create) - "APIEvent" | "DataExtension" | "SalesforceObject" | "ContactEvent".
-mode (string, optional, default "Production") - "Production" | "Test".
-schema (object, optional, required for create) - { fields: [{ key, name, dataType ("Text"|"Number"|"Decimal"|"Date"|"Boolean"), isRequired, defaultValue }] }.
-dataExtensionId (string, optional) - For DataExtension-type events.
-configurationArguments (object, optional).
-arguments (object, optional).
+operation ("create" | "update" | "delete", required) - Event definition operation. create calls POST /eventDefinitions, update calls PUT
+/eventDefinitions/{id|key}, and delete calls DELETE /eventDefinitions/{id|key}.
+event_definition_id (string, optional) - Event definition GUID. Required for update/delete when event_definition_key is omitted.
+event_definition_key (string, optional) - Event definition key. Required for update/delete when event_definition_id is omitted.
+Sent as eventDefinitionKey on create/update.
+name (string, optional) - Event definition name. Required by Salesforce for create unless provided in definition.
+description (string, optional) - Optional event definition description.
+type (string, optional) - Salesforce event type, such as Event, ContactEvent, DateEvent, APIEvent, DataExtension,
+or SalesforceObject. Required for create unless provided in definition.
+mode (string, optional) - Optional event mode when applicable, such as Production or Test.
+schema (object, optional) - Event schema object. Required by Salesforce when creating an event definition without
+data_extension_id.
+data_extension_id (string, optional) - ID of the data extension associated with the event. Required by Salesforce when schema
+is omitted.
+source_application_extension_id (string, optional) - Application extension ID that makes the event visible/configurable in Journey Builder
+picker contexts.
+is_visible_in_picker (boolean, optional) - Whether Journey Builder shows this Event Definition in the picker.
+arguments (object, optional) - Optional Salesforce arguments object to include in the request body.
+configuration_arguments (object, optional) - Optional Salesforce configurationArguments object to include in the request body.
+meta_data (object, optional) - Optional Salesforce metaData object to include in the request body.
+definition (object, optional) - Full raw event definition JSON. When provided, it is merged with explicit input fields,
+and explicit fields take precedence.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header.
 
 Result
-eventDefinition (object) - { id, key, name, type, mode, schema }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_write`.
@@ -66,14 +78,5 @@ Errors
 Example request
 
 manage_event_definition({
-  "operation": "create",
-  "eventDefinitionKey": "APIEvent-MTG-Order-Confirmed",
-  "name": "MTG_Order_Confirmed",
-  "type": "APIEvent",
-  "schema": {
-    "fields": [
-      { "key": "OrderId", "name": "OrderId", "dataType": "Text", "isRequired": true },
-      { "key": "OrderTotal", "name": "OrderTotal", "dataType": "Decimal", "isRequired": true }
-    ]
-  }
+  "operation": "create"
 })

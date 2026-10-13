@@ -51,19 +51,45 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "uploadData" | "close" | "abort" | "status" |
-  "successfulResults" | "failedResults" | "unprocessedRecords" | "delete" | "listAll".
-jobId (string, required for all except create and listAll).
-sObject (string, required for create) - Object API name, e.g. "Account", "Contact".
-ingestOperation (string, required for create) - "insert" | "update" | "upsert" | "delete" | "hardDelete".
-externalIdFieldName (string, required when ingestOperation="upsert") - External ID field API name.
-columnDelimiter (string, optional, default "COMMA") - "BACKQUOTE"|"CARET"|"COMMA"|"PIPE"|"SEMICOLON"|"TAB".
-lineEnding (string, optional, default "LF") - "LF" | "CRLF". Must match the actual CSV data.
-assignmentRuleId (string, optional) - Assignment rule ID for Case/Lead.
-isPkChunkingEnabled (boolean, optional) - Adds Sforce-Enable-PKChunking header for better performance.
-data (string, required for uploadData) - Raw CSV text. First row must be field API names.
-parseResultsAs (string, optional, default "csv") - "csv" | "rows" (for result operations).
-queryLocator (string, optional, for listAll) - Pagination locator from previous listAll response.
+operation ("create" | "uploadData" | "close" | "abort" | "status" | "successfulResults" | "failedResults" | "unprocessedRecords" | "delete" | "listAll", required) -
+Requested Bulk API 2.0 ingest operation; enum create, uploadData, close, abort, status,
+successfulResults, failedResults, unprocessedRecords, delete, or listAll; no default;
+example: 'create'; do not pass query job operations here.
+jobId (string, optional) -
+Bulk ingest job Id; Salesforce 750-prefixed job Id string; required for all operations
+except create and listAll; example: '750xx000000001aAAA'; do not pass a batch Id or
+query job Id.
+sObject (string, optional) -
+Target sObject API name for create; string standard or custom object name; required for
+create; example: 'Account'; do not pass an object label or SOQL query.
+ingestOperation ("insert" | "update" | "upsert" | "delete" | "hardDelete", optional) -
+Bulk ingest DML operation for create; enum insert, update, upsert, delete, or
+hardDelete; required for create; example: 'upsert'; do not use hardDelete without Bulk
+API Hard Delete permission.
+externalIdFieldName (string, optional) -
+External ID field API name for upsert jobs; string required when ingestOperation is
+upsert and must appear as a CSV column; example: 'External_Id__c'; do not pass a
+relationship field path.
+columnDelimiter ("BACKQUOTE" | "CARET" | "COMMA" | "PIPE" | "SEMICOLON" | "TAB", optional) -
+CSV column delimiter for create; enum BACKQUOTE, CARET, COMMA, PIPE, SEMICOLON, or TAB;
+Salesforce defaults to COMMA when omitted; example: 'COMMA'; do not pass the literal
+delimiter character.
+lineEnding ("LF" | "CRLF", optional) -
+CSV line ending for create; enum LF or CRLF and must match uploaded data; Salesforce
+defaults to LF when omitted; example: 'LF'; do not pass platform names such as Windows
+or Unix.
+assignmentRuleId (string, optional) -
+Assignment rule Id for create; Salesforce assignment rule Id applied to Case or Lead
+loads; omitted uses default assignment behavior; example: '01Qxx0000004ABC'; do not pass
+for unsupported objects.
+data (string, optional) -
+Raw CSV data for uploadData; string whose first row contains field API names and whose
+line endings match the job; required for uploadData; example:
+'Name,Industry\\nACME,Tech'; do not pass JSON, base64, or a file path.
+queryLocator (string, optional) -
+Bulk ingest list pagination locator; string from a previous listAll response when
+Salesforce provides one; omitted starts the first page; example: '01gxx000000abc'; do
+not pass a full nextRecordsUrl.
 
 Result (per operation)
 create:   Full job info including { id, state: "Open", contentUrl, object, operation, contentType, lineEnding, columnDelimiter, createdById, createdDate, systemModstamp, apiVersion, jobType, concurrencyMode, ... }
@@ -91,13 +117,8 @@ Errors
 - INVALID_JOB_STATE if attempting operations in wrong state.
 - DAILY_LIMIT_EXCEEDED for org-level Bulk API limits.
 
-Example request (full lifecycle)
+Example request
 
-manage_bulk_ingest_job({ "operation": "create", "sObject": "Account", "ingestOperation": "upsert", "externalIdFieldName": "External_Id__c" })
-  -> { "id": "<jobId>", "state": "Open", ... }
-manage_bulk_ingest_job({ "operation": "uploadData", "jobId": "<jobId>", "data": "External_Id__c,Name,Industry\nA1,ACME,Tech\n..." })
-manage_bulk_ingest_job({ "operation": "close", "jobId": "<jobId>" })
-  -> { "state": "UploadComplete", ... }
-manage_bulk_ingest_job({ "operation": "status", "jobId": "<jobId>" })   // poll until state = JobComplete or Failed
-manage_bulk_ingest_job({ "operation": "successfulResults", "jobId": "<jobId>", "parseResultsAs": "rows" })
-manage_bulk_ingest_job({ "operation": "delete", "jobId": "<jobId>" })
+manage_bulk_ingest_job({
+  "operation": "create"
+})

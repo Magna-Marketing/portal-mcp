@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/machine-learning/model-setups/:modelSetupIdOrName/setup-versions
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/machine-learning/model-setups/{modelSetupIdOrName}/setup-versions
+Optional query: active, limit, offset
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,16 +20,16 @@ Body
 None.
 
 Input (parameters)
-modelSetupIdOrName (string, required).
-status (string, optional) - "Active" | "Training" | "Failed" |
-  "Archived".
-limit (number, optional, default 100).
+modelSetupIdOrName (string, required) - ID or developer name of the Salesforce Data 360 model setup.
+active (boolean, optional) - Whether to filter to active setup versions. Salesforce returns both active and inactive
+versions when omitted.
+limit (number, optional) - Maximum number of records to return. Salesforce applies the endpoint default when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
 
 Result
-versions (array) - Each: { id, apiName, version, status,
-  modelArtifactId, trainingDatasetRef, hyperparameters (object),
-  metrics (object), createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -41,12 +42,10 @@ Errors
 
 Example request
 
-list_model_setup_versions({ "modelSetupIdOrName": "ChurnModel" })
+list_model_setup_versions({
+  "modelSetupIdOrName": ""
+})
 
 Example result
-{
-  "versions": [
-    { "id": "MSV_001", "version": "1.2.0", "status": "Active",
-      "metrics": { "accuracy": 0.84, "f1": 0.79 } }
-  ]
-}
+
+{ }

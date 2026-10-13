@@ -20,52 +20,27 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (use template)
-{
-  "prospectId": 7745,
-  "campaignId": 1024,
-  "emailTemplateId": 451,
-  "userId": 421
-}
-
-Body (inline content)
-{
-  "prospectId": 7745,
-  "campaignId": 1024,
-  "name": "Re: Demo follow-up",
-  "subject": "Following up on your demo",
-  "htmlMessage": "<html><body>...{{Recipient.FirstName}}...</body></html>",
-  "textMessage": "Hi ...",
-  "userId": 421,
-  "senderOptions": { "type": "USER", "userId": 421 },
-  "replyToOptions": { "type": "USER", "userId": 421 }
-}
+Body
+POST: campaignId, emailTemplateId, folderId, htmlMessage, isOperational, name, prospectId, replyToOptions, senderOptions, subject, textMessage, trackerDomainId, userId
 
 Input (parameters)
-prospectId (number, optional) - Prospect to send to (Pardot id).
-prospectEmail (string, optional) - Resolved server-side via
-  `upsert_prospect_by_email`-style lookup (cheaper than ID).
-campaignId (number, required).
-emailTemplateId (number, optional) - Use template content; omit
-  inline body fields.
-userId (number, optional) - Pardot user that the send is "from".
-name (string, required when no template) - Internal email name.
-subject (string, required when no template).
-htmlMessage (string, optional).
-textMessage (string, optional).
-senderOptions (object, optional) - { type: "USER" | "ASSIGNED_USER" |
-  "SPECIFIC_SENDER" | "ACCOUNT_OWNER" | "GENERAL_USER" |
-  "PROSPECT_CUSTOM_FIELD" | "ACCOUNT_CUSTOM_FIELD",
-  userId | address | name | prospectCustomFieldId | accountCustomFieldId }.
-replyToOptions (object, optional) - Same shape as senderOptions.
-trackerDomainId (number, optional).
-folderId (number, optional).
-isOperational (boolean, optional, default false) - Operational
-  emails ignore opt-out preferences (use sparingly; only for password
-  resets, transactional notifications).
+prospectId (number, required) - Pardot prospect id to send to. Required.
+campaignId (number, required) - Campaign to attribute the send to. Required.
+emailTemplateId (number, optional) - Email template id. Omit if providing inline name/subject/htmlMessage/textMessage.
+userId (number, optional) - Pardot user id that the email is sent "from". Required for one-to-one sends.
+name (string, optional) - Internal email name. Required when emailTemplateId is not provided.
+subject (string, optional) - Email subject line. Required when emailTemplateId is not provided.
+htmlMessage (string, optional) - HTML body. Use HML merge fields like {{Recipient.FirstName}}.
+textMessage (string, optional) - Plain-text fallback body.
+senderOptions (value[], optional) - Who the email appears to come from. Must be an array.
+replyToOptions (value[], optional) - Reply-To address configuration. Must be an array.
+trackerDomainId (number, optional) - Tracker domain for tracking links.
+folderId (number, optional) - Folder to store the email record in.
+isOperational (boolean, optional) - When true, send regardless of global opt-out. Use only for password resets or
+transactional alerts.
 
 Result
-email (object) - Created Email row with `id`, `sentAt`, etc.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -83,14 +58,10 @@ Errors
 Example request
 
 send_one_to_one_email({
-  "prospectId": 7745,
-  "campaignId": 1024,
-  "emailTemplateId": 451,
-  "userId": 421
+  "prospectId": 1,
+  "campaignId": 1
 })
 
 Example result
-{
-  "email": { "id": 99821, "name": "Welcome",
-    "type": "OneToOneEmail", "sentAt": "2026-04-29T13:02:11Z" }
-}
+
+{ }

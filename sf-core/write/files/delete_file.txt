@@ -6,10 +6,10 @@ and `ContentDocumentLink`s. Goes to Recycle Bin (15-day undelete
 window).
 
 Salesforce API
-REST API (Data), v66.0. `DELETE /sobjects/ContentDocument/{{contentDocumentId}}`.
+REST API (Data), v66.0.
 
 Endpoint
-DELETE /services/data/v66.0/sobjects/ContentDocument/{{contentDocumentId}}
+DELETE /services/data/v66.0/sobjects/ContentDocument/{contentDocumentId}
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,7 +22,9 @@ ContentDocumentId (string, required).
 hardDelete (boolean, optional, default false) - When true, permanently delete (admin only).
 
 Result
-deleted (boolean), id (string).
+raw REST delete response or raw Bulk hardDelete result.
+hardDeleteContentDocument (value) - included in the JSON returned by the tool.
+deleteContentDocument (value) - included in the JSON returned by the tool.
 
 Required permissions
 - File ownership or "Delete from Recycle Bin" for hardDelete.

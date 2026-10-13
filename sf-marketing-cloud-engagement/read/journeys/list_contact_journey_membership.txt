@@ -19,10 +19,12 @@ Body
 { "ContactKeyList": ["MEM-100023"] }
 
 Input (parameters)
-contactKeys (string[], required) - Up to 1000 per call.
+contact_keys (string[], required) - Contact keys to check. Salesforce documents a maximum of 50 contact keys per request.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-results (array) - Per contact: { contactKey, journeys: [{ journeyId, journeyName, journeyVersion, status ("Active"|"Completed"|"Stopped"), enteredAt, currentActivityKey, currentActivityName }] }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -35,4 +37,6 @@ Errors
 
 Example request
 
-list_contact_journey_membership({ "contactKeys": ["MEM-100023"] })
+list_contact_journey_membership({
+  "contact_keys": []
+})

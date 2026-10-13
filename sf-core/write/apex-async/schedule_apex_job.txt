@@ -42,19 +42,10 @@ jobName (string, required) - Unique display name for the job (CronJobDetail.Name
 cronExpression (string, required) - Salesforce cron expression.
 
 Result
-{
-  "job": {
-    "cronTriggerId": "08e...",
-    "jobName": "MTG Daily Recalc",
-    "className": "MTG_Daily_Recalc",
-    "cronExpression": "0 0 1 * * ?",
-    "nextFireTime": "2026-05-15T01:00:00.000Z",
-    "state": "WAITING",
-    "startTime": null,
-    "endTime": null
-  }
-}
-On execution failure: compile/exception details from the anonymous Apex response.
+raw executeAnonymous result and raw CronTrigger query result when the job can be queried
+by name.
+executeAnonymous (value) - included in the JSON returned by the tool.
+cronTrigger (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Author Apex".

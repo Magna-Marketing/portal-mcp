@@ -4,10 +4,10 @@ Description
 List successful and failed login attempts. Filter by user, source IP, country, application, browser, status, and date range. Use for audits ("did Jane log in from a new country yesterday?") and incident investigation. Pair with `list_identity_verification_history` for MFA challenges.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `LoginHistory`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, UserId, LoginTime, LoginType, SourceIp, LoginUrl, AuthenticationServiceId, LoginGeoId, Status, Browser, Platform, Application, ClientVersion, ApiType, ApiVersion, CountryIso, NetworkId, TlsProtocol, CipherSuite FROM LoginHistory WHERE LoginTime >= ... ORDER BY LoginTime DESC
+GET /services/data/v66.0/query/?q=SELECT Id, UserId, LoginTime, LoginType, LoginSubType, Status, SourceIp, ForwardedForIp, Application, Browser, Platform, ApiType, ApiVersion, LoginUrl, CountryIso, TlsProtocol, AuthenticationServiceId, NetworkId FROM LoginHistory
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,20 +17,38 @@ Body
 None.
 
 Input (parameters)
-userId (string, optional).
-username (string, optional).
-sinceHours (number, optional, default 24, max 24*180=4320 / 180 days).
-status (string, optional) - "Success" | "Failed: ...".
-sourceIp (string, optional) - Exact match.
-country (string, optional) - ISO 2-letter.
-application (string, optional) - "Browser" | "API" | "Mobile App" | etc.
-loginType (string, optional) - "Application", "Application Server", "OAuth", "SAML", etc.
-limit (number, optional, default 500, max 50000).
+userId (string, optional) - User filter for the login event owner; 15- or 18-character
+Salesforce User Id; no default; example: 0055g00000ABCdEAA1; do not pass usernames,
+emails, or multiple Ids.
+loginType (string, optional) - LoginType filter; string matching Salesforce
+LoginHistory.LoginType picklist values; no default; example: Oauth2, Remote Access 2.0;
+do not pass Status values or comma-separated values.
+startTime (string, optional) - Inclusive lower LoginTime bound; ISO-8601 UTC datetime
+accepted by SOQL; no default; example: 2026-05-01T00:00:00.000Z; do not pass local-only
+dates, relative text, or unquoted SOQL literals.
+endTime (string, optional) - Exclusive upper LoginTime bound; ISO-8601 UTC datetime
+accepted by SOQL; no default; example: 2026-05-16T00:00:00.000Z; do not pass a value
+earlier than startTime or local-only dates.
+sourceIp (string, optional) - Exact SourceIp filter; string IP address stored on
+LoginHistory; no default; example: 203.0.113.10; do not pass wildcard patterns because
+SourceIp does not support LIKE.
+whereClause (string, optional) - Additional SOQL WHERE condition for LoginHistory;
+string with or without WHERE and limited to filterable fields such as Id, LoginTime,
+LoginType, LoginUrl, NetworkId, SourceIp, TlsProtocol, or UserId; no default; example:
+TlsProtocol = 'TLS 1.3'; do not pass SELECT, FROM, ORDER BY, LIMIT, Status filters, or
+untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for LoginHistory; string with or
+without ORDER BY; default LoginTime DESC; example: LoginTime DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum LoginHistory rows to return; integer from 1 to 2000;
+default 200; example: 200; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-logins (array) - { id, userId, username, loginTime, loginType, sourceIp, status, browser, platform, application, clientVersion, country, apiType, apiVersion, tlsProtocol }.
-hasMore (boolean).
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Users" or "View Login Forensics" / "View Setup and Configuration".
@@ -44,4 +62,8 @@ Errors
 
 Example request
 
-list_login_history({ "username": "jane.doe@magnatech.com", "sinceHours": 168 })
+list_login_history({
+  "userId": "0055g00000ABCdEAA1",
+  "loginType": "Oauth2, Remote Access 2.0",
+  "startTime": "2026-05-01T00:00:00.000Z"
+})

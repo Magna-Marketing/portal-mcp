@@ -18,23 +18,35 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeNavigation (boolean, optional, default true) - Tabs and utility bar.
-includeProfileAccess (boolean, optional, default false) - Profiles with this app visible.
-includeManaged (boolean, optional, default false).
+type (unknown, optional) - AppMenuItem Type value; enum ConnectedApplication, Network,
+ServiceProvider, or TabSet; no default; example: TabSet; do not pass labels,
+comma-separated values, or custom app metadata names.
+namePattern (string, optional) - Pattern for AppMenuItem Name or Label; string using *
+and ? wildcards converted to SOQL LIKE; no default; example: Sales*; do not pass regex,
+raw LIKE syntax, or multiple patterns.
+onlyVisible (boolean, optional) - Visibility filter for IsVisible; boolean; default
+false means no IsVisible filter; example: true; do not pass string booleans.
+onlyAccessible (boolean, optional) - Accessibility filter for IsAccessible; boolean;
+default false means no IsAccessible filter; example: true; do not pass this to infer
+permission reasons.
+includeManaged (boolean, optional) - Managed package inclusion flag based on
+NamespacePrefix; boolean; default false excludes namespaced records; example: true; do
+not pass a namespace value here.
+whereClause (string, optional) - Additional SOQL WHERE condition for AppMenuItem; string
+with or without WHERE; no default; example: SortOrder > 0; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for AppMenuItem; string with or
+without ORDER BY; default SortOrder ASC, Label ASC; example: Label ASC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum AppMenuItem rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-customApps (array) - Each:
-  id, developerName, label, namespacePrefix, manageableState.
-  isLightning (boolean).
-  navType (string) - "Standard" | "Console".
-  formFactor (string) - "Large" | "Small".
-  defaultLandingTab (string|null).
-  tabs (string[], when includeNavigation=true) - Tab DeveloperNames.
-  utilityBar (object|null) - { label, items: [{ componentName, label, height, width, startAutomatically }] }.
-  brand (object|null) - { headerColor, logoImageUrl, secondaryColor }.
-  profileAccess (array, when includeProfileAccess=true) - [{ profileName, default, visible }].
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -47,4 +59,8 @@ Errors
 
 Example request
 
-list_custom_apps({ "includeNavigation": true })
+list_custom_apps({
+  "type": "TabSet",
+  "namePattern": "Sales*",
+  "onlyVisible": true
+})

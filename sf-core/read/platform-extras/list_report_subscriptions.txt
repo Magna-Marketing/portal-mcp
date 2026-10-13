@@ -19,12 +19,16 @@ Body
 None.
 
 Input (parameters)
-reportId (string, optional).
-ownerId (string, optional).
-includeInactive (boolean, optional, default false).
+reportId (string, optional) - Report record Id to pass as analytics notifications
+recordId; Salesforce report Id string; no default; example: 00O5g0000012345; do not pass
+report names, URLs, or multiple Ids.
+ownerId (string, optional) - Owner user Id for notifications when permitted; Salesforce
+user Id string; no default; example: 0055g0000012345; do not pass usernames, emails, or
+multiple Ids.
 
 Result
-subscriptions (array) - { id, name, source ("report"), reportId, recipients (array): [{ id, name, type ("user"|"group"|"role") }], schedule (object): { type ("hourly"|"daily"|"weekly"|"monthly"), startTime, frequency, daysOfWeek }, conditions (array): [{ aggregate, operator, value }], active (boolean), lastNotificationDate, nextNotificationDate }.
+raw Analytics Notifications JSON array with notification fields such as id, source,
+recordId, schedule, and thresholds.
 
 Required permissions
 - "API Enabled" + "Schedule Reports".
@@ -37,4 +41,7 @@ Errors
 
 Example request
 
-list_report_subscriptions({})
+list_report_subscriptions({
+  "reportId": "00O5g0000012345",
+  "ownerId": "0055g0000012345"
+})

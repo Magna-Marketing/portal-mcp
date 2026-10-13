@@ -9,7 +9,10 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/campaigns/:id?fields={fields}
+GET https://{pi-domain}/api/v5/objects/campaigns
+Optional query: fields, filter[parentCampaignId], limit
+GET https://{pi-domain}/api/v5/objects/campaigns/{id}
+Optional query: fields
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -28,11 +31,8 @@ includeChildCount (boolean, optional, default false) - When true,
   and returns `childCount`.
 
 Result
-campaign (object): id, name, folderId, cost, parentCampaignId,
-  salesforceId, isDeleted, createdAt, updatedAt.
-parentCampaign (object|null).
-createdBy (object), updatedBy (object).
-childCount (number, when includeChildCount=true).
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: childCount.
 
 Required scopes
 - `pardot_api`.
@@ -48,8 +48,5 @@ Example request
 get_campaign({ "id": 1024, "includeChildCount": true })
 
 Example result
-{
-  "campaign": { "id": 1024, "name": "Welcome 2026", "salesforceId": "7015800000xyz123" },
-  "parentCampaign": null,
-  "childCount": 4
-}
+
+{ }

@@ -1,4 +1,4 @@
-Tool: manage_specification
+Tool: manage_dcr_specification
 
 Description
 Create a Data Clean Room specification — a binding of a provider +
@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST {instanceUrl}/services/data/v{ver}/ssot/data-clean-room/specifications
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/specifications
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/data-clean-room/specifications/{specificationIdOrApiName}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -26,16 +27,19 @@ Body
 }
 
 Input (parameters)
-operation (string, required) - "create" only.
-apiName (string, required).
-label (string, required).
-providerIdOrName (string, required).
-templateApiName (string, required).
-parameters (object, required) - Default parameter map.
-outputDmoApiName (string, optional).
+operation ("create" | "delete", required) - The operation to perform: 'create' or 'delete'.
+specificationIdOrApiName (string, optional) - ID or API name of the specification. Required for delete.
+apiName (string, optional) - Unique developer/API name for the specification. Required for create.
+label (string, optional) - Human-readable label for the specification. Required for create.
+providerIdOrName (string, optional) - ID or developer name of the DCR provider. Required for create.
+templateApiName (string, optional) - API name of the query template to bind. Required for create.
+parameters (object, optional) - Default parameter map for the template (e.g., { minOverlapCount: 1000 }). Required for
+create.
+outputDmoApiName (string, optional) - API name of the DMO where query results will be materialized.
+description (string, optional) - Optional description of the specification.
 
 Result
-specification (object) - Created row.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -48,14 +52,10 @@ Errors
 
 Example request
 
-manage_specification({
-  "operation": "create",
-  "apiName": "PartnerX_OverlapSpec",
-  "label": "Partner X overlap",
-  "providerIdOrName": "MTG_Snowflake_DCR",
-  "templateApiName": "OverlapAudience",
-  "parameters": { "minOverlapCount": 1000 }
+manage_dcr_specification({
+  "operation": ""
 })
 
 Example result
-{ "specification": { "id": "spec_001", "apiName": "PartnerX_OverlapSpec" } }
+
+{ }

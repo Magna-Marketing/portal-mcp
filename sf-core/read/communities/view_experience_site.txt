@@ -5,10 +5,12 @@ Get a single Experience site's full configuration: navigation, branding
 sets, audiences, member profiles allowed, login flows, page snapshots.
 
 Salesforce API
-Connect API, v66.0. `/connect/communities/{communityId}`.
+Connect REST API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/connect/communities/{communityId}
+GET /services/data/v66.0/query/
+GET /services/data/v66.0/connect/communities/{resolvedSiteId}
 
 Headers
 Authorization: Bearer <access_token>
@@ -23,7 +25,11 @@ siteName (string, optional).
   One required.
 
 Result
-site (object) - { id, name, description, urlPathPrefix, status, siteUrl, template, allowMembersToFlag, contentVisibility }.
+raw Connect API Experience Cloud site JSON for /connect/communities/{communityId}.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Create and Set Up Experiences".

@@ -19,12 +19,20 @@ Body
 SOAP RetrieveRequest on `Account` filtered to `ParentID != 0`.
 
 Input (parameters)
-includeInactive (boolean, optional, default false).
-namePattern (string, optional) - Substring filter on name.
+include_inactive (boolean, optional) - Accepted for compatibility. The raw SOAP Account response is returned without
+client-side filtering.
+include_children (boolean, optional) - Accepted for compatibility with the old business-unit tool. QueryAllAccounts controls
+child account retrieval.
+name_pattern (string, optional) - Optional SOAP like filter for Account.Name. Omit for the safest full business-unit
+discovery call.
+business_unit_id (string, optional) - Business Unit MID used for SOAP ClientID context.
+query_all_accounts (boolean, optional) - Query all accessible parent and child accounts. Defaults to true.
 
 Result
-totalSize (number).
-businessUnits (array) - Each: { id (MID), name, accountType ("Enterprise2"|"BusinessUnit"|"EnterpriseLite"), parentId, isActive, dateCreated, dateModified, brandName, description }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+business_units (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `accounts_read`.

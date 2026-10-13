@@ -32,24 +32,30 @@ Body
 }
 
 Input (parameters)
-name (string, required).
-customerKey (string, optional).
-dataExtensionCustomerKey (string, required) - Target DE.
-fileLocationId (number, required) - File transfer location Id (FTP / Safehouse).
-fileName (string, required).
-delimiter (string, optional, default "Comma") - "Comma" | "Tab" | "Semicolon" | "Pipe" | "Other".
-qualifier (string, optional, default "DoubleQuote").
-dateFormatLocale (string, optional, default "en-US").
-fieldMappingType (string, optional, default "InferFromColumnHeadings") - "MapByOrdinal" | "MapByHeaderMatch" | "MapManually" | "InferFromColumnHeadings".
-fieldMappings (object[], optional) - Required when fieldMappingType="MapManually": [{ source, destination }].
-updateType (string, optional, default "AddAndUpdate") - "AddOnly" | "UpdateOnly" | "AddAndUpdate" | "Overwrite".
-notificationsEmail (string, optional).
-hasColumnHeader (boolean, optional, default true).
+name (string, required) - One-time import name.
+customer_key (string, optional) - Optional import customerKey/idempotency label supplied to Salesforce.
+data_extension_customer_key (string, required) - Target Data Extension external key.
+file_location_id (number, optional) - Salesforce file transfer location id for Enhanced FTP/Safehouse sources.
+file_name (string, optional) - File name in the selected file transfer location.
+delimiter ("Comma" | "Tab" | "Semicolon" | "Pipe" | "Other", optional) - File delimiter.
+qualifier ("DoubleQuote" | "SingleQuote" | "None", optional) - Text qualifier.
+date_format_locale (string, optional) - Date parsing locale.
+field_mapping_type ("InferFromColumnHeadings" | "MapByHeaderMatch" | "MapByOrdinal" | "MapManually", optional) - Salesforce import fieldMappingType.
+field_mappings (object[], optional) - Required when field_mapping_type=MapManually.
+update_type ("AddOnly" | "UpdateOnly" | "AddAndUpdate" | "Overwrite", optional) - How imported rows affect target rows.
+notifications_email (string, optional) - Optional email notification recipient.
+has_column_header (boolean, optional) - Whether the file contains column headers.
+source (value, optional) - Exact Salesforce source object. Use this for pre-signed cloud locations or advanced
+import sources. Overrides file_location_id/file_name.
+raw_request (value, optional) - Exact Salesforce /data/v1/async/import request body. Use for fields not covered by this
+schema.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus REST Account-Context or SOAP
+ClientID. Defaults to the session BU when available.
+client_business_unit_id (number, optional) - Optional SOAP object Client.ID owner/context MID. Defaults to business_unit_id/session
+MID when numeric. Use this when parent authentication writes into a child BU.
 
 Result
-operationId (string) - Pass to `get_file_import_status`.
-status (string) - "Pending" | "InProgress".
-queuedAt (string).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `data_extensions_write`.
@@ -64,9 +70,6 @@ Errors
 Example request
 
 queue_file_import({
-  "name": "MTG Members Nightly",
-  "dataExtensionCustomerKey": "Members_DE",
-  "fileLocationId": 12345,
-  "fileName": "members-2026-04-30.csv",
-  "updateType": "AddAndUpdate"
+  "name": "",
+  "data_extension_customer_key": ""
 })

@@ -11,59 +11,139 @@ Use `clone_permission_set` to copy an existing one. Use
 `update_permission_set` for incremental edits.
 
 Salesforce API
-Metadata API (`PermissionSet` type), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+GET /services/data/v66.0/query/
+POST /services/Soap/m/66.0  (createMetadata PermissionSet)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "fullName": "MTG_Project_Manager",
-  "label": "MTG Project Manager",
-  "description": "Project Manager core perms",
-  "license": "Salesforce",
-  "hasActivationRequired": false,
-  "userPermissions": [
-    { "name": "ApiEnabled", "enabled": true },
-    { "name": "RunReports", "enabled": true }
-  ],
-  "objectPermissions": [
-    { "object": "Project__c", "allowRead": true, "allowCreate": true, "allowEdit": true, "allowDelete": false, "viewAllRecords": false, "modifyAllRecords": false }
-  ],
-  "fieldPermissions": [
-    { "field": "Project__c.Status__c", "readable": true, "editable": true }
-  ],
-  "tabSettings": [
-    { "tab": "Project__c", "visibility": "Available" }
-  ]
-}
+JSON fields: fullName, label, description, license, hasActivationRequired, userPermissions, objectPermissions, fieldPermissions, classAccesses, pageAccesses, applicationVisibilities, tabSettings, recordTypeVisibilities, customMetadataTypeAccesses, customSettingAccesses, customPermissions, externalDataSourceAccesses, flowAccesses, externalCredentialPrincipalAccesses, agentAccesses, emailRoutingAddressAccesses, genComputingSummaryDefAccess, servicePresenceStatusAccesses.
 
 Input (parameters)
-fullName (string, required) - Permset DeveloperName (e.g. "MTG_Project_Manager").
-label (string, required).
-description (string, optional).
-license (string, optional) - "Salesforce" | "Salesforce Platform" |
-  "Chatter Free" | etc. Omit for "no license restriction".
-hasActivationRequired (boolean, optional, default false) - Session-based
-  activation (only effective in user sessions that activate it).
-userPermissions (array, optional) - System perms.
-objectPermissions (array, optional).
-fieldPermissions (array, optional).
-classAccesses (array, optional) - { apexClass, enabled }.
-pageAccesses (array, optional) - { apexPage, enabled }.
-applicationVisibilities (array, optional) - { application, visible }.
-tabSettings (array, optional) - { tab, visibility ("None"|"Available"|"Visible") }.
-recordTypeVisibilities (array, optional) - { recordType, visible }.
-customMetadataTypeAccesses, customSettingAccesses, externalDataSourceAccesses (array, optional).
-checkOnly (boolean, optional, default false).
+fullName (string, required) - PermissionSet metadata fullName and API name; string
+starting with a letter, using only letters, numbers, and underscores; no default;
+example MTG_Project_Manager; do not pass labels, spaces, trailing underscores, or double
+underscores.
+label (string, required) - Permission set label shown in Setup; string up to 80
+characters; no default; example 'Project Manager'; do not pass an API name unless that
+is the intended label.
+description (string, optional) - Permission set description; string up to 255
+characters; omitted means no description; example 'Grants project management access'; do
+not pass operational notes that should not appear in Setup.
+license (string, optional) - PermissionSet license metadata value; string matching a
+Salesforce user or permission set license name; omitted means no license restriction;
+example 'Salesforce'; do not pass LicenseId.
+hasActivationRequired (boolean, optional) - Whether session activation is required;
+boolean; defaults to false; example true; do not use for ordinary always-on assignments.
+userPermissions (object[], optional) - System permission entries; array of { name,
+enabled } where name is a permission API name and enabled defaults to true; example {
+name: 'ApiEnabled', enabled: true }; do not pass permission labels.
+  name (string, required).
+  enabled (boolean, optional).
+objectPermissions (unknown[], optional) - Object permission entries; array of object
+CRUD and all-record flags; omitted means no object permissions; example { object:
+'Account', allowRead: true }; do not pass child relationship names.
+fieldPermissions (unknown[], optional) - Field permission entries; array of qualified
+fields and readable/editable flags; omitted means no field permissions; example { field:
+'Account.Phone', readable: true }; do not pass required fields.
+classAccesses (object[], optional) - Apex class access entries; array of { apexClass,
+enabled } where enabled defaults to true; example { apexClass: 'InvoiceController',
+enabled: true }; do not include namespace labels.
+  apexClass (string, required).
+  enabled (boolean, optional).
+pageAccesses (object[], optional) - Visualforce page access entries; array of {
+apexPage, enabled } where enabled defaults to true; example { apexPage: 'InvoicePage',
+enabled: true }; do not pass page URLs.
+  apexPage (string, required).
+  enabled (boolean, optional).
+applicationVisibilities (object[], optional) - Application visibility entries; array
+with application API name, visible, and optional default; visible defaults to true;
+example { application: 'standard__Sales', visible: true }; only one default app should
+be true.
+  application (string, required).
+  visible (boolean, optional).
+  default (boolean, optional).
+tabSettings (object[], optional) - Tab visibility entries; visibility must be None,
+Available, or Visible and defaults to Available; example { tab: 'Account', visibility:
+'Visible' }; do not pass Profile tab values DefaultOn, DefaultOff, or Hidden.
+  tab (string, required).
+  visibility ("None" | "Available" | "Visible", optional).
+recordTypeVisibilities (object[], optional) - Record type visibility entries; recordType
+uses Object.RecordTypeDeveloperName and visible defaults to true; example { recordType:
+'Account.Business', visible: true }; do not pass inactive record types.
+  recordType (string, required).
+  visible (boolean, optional).
+  default (boolean, optional).
+  personAccountDefault (boolean, optional).
+customMetadataTypeAccesses (unknown[], optional) - Custom metadata type access entries;
+name is the custom metadata type API name and enabled defaults to true; example { name:
+'Feature_Flag__mdt' }; do not pass record names.
+customSettingAccesses (unknown[], optional) - Custom setting access entries; name is the
+custom setting API name and enabled defaults to true; example { name: 'App_Config__c' };
+do not pass individual setting rows.
+customPermissions (unknown[], optional) - Custom permission grants; name is the custom
+permission API name and enabled defaults to true; example { name:
+'Can_Approve_Discounts' }; do not pass permission set names.
+externalDataSourceAccesses (object[], optional) - External data source access entries;
+use externalDataSource and name only as an alias; enabled defaults to true; example {
+externalDataSource: 'ERP', enabled: true }; only applies to Per User identity data
+sources.
+  externalDataSource (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+flowAccesses (object[], optional) - Flow access entries; flow is the Flow API name and
+enabled defaults to true; example { flow: 'Submit_Order', enabled: true }; do not pass
+flow labels or inactive versions.
+  flow (string, required).
+  enabled (boolean, optional).
+externalCredentialPrincipalAccesses (object[], optional) - External credential principal
+access entries; use externalCredentialPrincipal as ExternalCredential-PrincipalName and
+name only as an alias; enabled defaults to true when omitted; example {
+externalCredentialPrincipal: 'Payments-Default', enabled: true }; do not pass Named
+Credential names.
+  externalCredentialPrincipal (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+agentAccesses (object[], optional) - Agentforce employee agent access entries; use
+agentName and name only as an alias; enabled defaults to true when omitted; example {
+agentName: 'Sales_Agent', enabled: true }; do not pass bot labels.
+  agentName (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+emailRoutingAddressAccesses (unknown[], optional) - Email-to-Case routing address access
+entries; name is the routing address API name; enabled defaults to true when omitted;
+example { name: 'Support_Address', enabled: true }; do not pass email addresses unless
+they are the API name.
+genComputingSummaryDefAccess (object[], optional) - Enhanced summary access entries
+available in API v66.0; use configName and name only as an alias; enabled defaults to
+true when omitted; example { configName: 'Sales_Summary', enabled: true }; do not pass
+labels.
+  configName (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+servicePresenceStatusAccesses (object[], optional) - Service Presence Status access
+entries; use servicePresenceStatus and name only as an alias; enabled defaults to true
+when omitted; example { servicePresenceStatus: 'Available', enabled: true }; do not pass
+translated labels.
+  servicePresenceStatus (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Whether to build the payload without calling
+createMetadata; boolean; defaults to false; example true; do not use when you expect
+Salesforce to create the permission set.
 
 Result
-Standard deploy result, plus `permissionSet` on success: { id, fullName,
-  label, license, isCustom: true }.
+checkOnly (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+createResponse (value) - included in the JSON returned by the tool.
+createdPermissionSetLookup (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -81,9 +161,7 @@ Errors
 Example request
 
 create_permission_set({
-  "fullName": "MTG_Time_Logger",
-  "label": "MTG Time Logger",
-  "description": "Allow time logging on Project__c",
-  "userPermissions": [{ "name": "ApiEnabled", "enabled": true }],
-  "objectPermissions": [{ "object": "Time_Entry__c", "allowRead": true, "allowCreate": true, "allowEdit": true }]
+  "fullName": "example",
+  "label": "example",
+  "metadataOverride": "example"
 })

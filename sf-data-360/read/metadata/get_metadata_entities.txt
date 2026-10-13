@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/metadata-entities
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/metadata-entities
+Optional query: dataspace, entityType, entityCategory
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,11 +20,16 @@ Body
 None.
 
 Input (parameters)
-None.
+dataspace (string, optional) - Data space name in which metadata entities are requested. Salesforce uses the default
+data space when omitted.
+entityType (unknown, optional) - Metadata entity type filter. Salesforce supports `DataLakeObject`, `DataModelObject`,
+and `CalculatedInsight`.
+entityCategory (unknown, optional) - Metadata entity category filter. Salesforce supports `Activation_Audience`,
+`CG_Audience`, `Content`, `Directory_Table`, `Engagement`, `Profile`, `Related`,
+`Segment_Membership`, and `Vector_Embedding`.
 
 Result
-entities (array) - Each: { entityType, label, supportsCRUD,
-  supportsActions, isVisibleInUI }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,10 +45,5 @@ Example request
 get_metadata_entities({})
 
 Example result
-{
-  "entities": [
-    { "entityType": "DataStream",         "label": "Data Stream",          "supportsCRUD": true },
-    { "entityType": "DataModelObject",    "label": "Data Model Object",    "supportsCRUD": true },
-    { "entityType": "CalculatedInsight",  "label": "Calculated Insight",   "supportsCRUD": true }
-  ]
-}
+
+{ }

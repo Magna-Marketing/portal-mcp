@@ -33,18 +33,22 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-recordIdOrDeveloperName (string, required for update / delete).
-developerName (string, required for create).
-label (string, required for create).
-category (string, optional, default "Other") - "Profile" |
-  "Engagement" | "Other".
-fields (array, required for create) - [{ apiName, dataType,
-  isPrimaryKey, isExternalId, isRequired }].
+operation ("create" | "update" | "delete", required) - The operation to perform: create, update, or delete.
+recordIdOrDeveloperName (string, optional) - Record ID or developer name (with __dll suffix) of the DLO. Required for update and
+delete.
+developerName (string, optional) - Developer name of the DLO (e.g., 'ext_orders__dll'). Required for create.
+label (string, optional) - Human-readable display label for the DLO. Required for create.
+category ("Profile" | "Engagement" | "Other", optional) - Category of the DLO: Profile, Engagement, or Other. Defaults to Other if not specified.
+eventDatetimeFieldName (string, optional) - API name of the DateTime field to use as the Event Date Time field. Required when
+category is 'Engagement' and the designated field is of type DateTime (e.g.,
+'OrderDate__c').
+eventDateFieldName (string, optional) - API name of the Date field to use as the Event Date field. Required when category is
+'Engagement' and the designated field is of type Date.
+fields (object[], optional) - Field definitions for the DLO. Required for create. Each field needs apiName, dataType,
+and isPrimaryKey.
 
 Result
-dataLakeObject (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -58,15 +62,9 @@ Errors
 Example request
 
 manage_data_lake_object({
-  "operation": "create",
-  "developerName": "ext_orders__dll",
-  "label": "External Orders",
-  "category": "Engagement",
-  "fields": [
-    { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true },
-    { "apiName": "Amount__c", "dataType": "DECIMAL" }
-  ]
+  "operation": ""
 })
 
 Example result
-{ "dataLakeObject": { "developerName": "ext_orders__dll", "category": "Engagement" } }
+
+{ }

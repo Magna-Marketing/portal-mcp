@@ -16,10 +16,14 @@ Salesforce API
 Connect plane or runtime plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/data/:dataGraphEntityName/:id     (connect, by id)
-GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/data/:dataGraphEntityName         (connect, by lookup)
-GET {cdpTenantUrl}/api/v1/dataGraph/:dataGraphName/:dataGraphRecordId                     (runtime, by id)
-GET {cdpTenantUrl}/api/v1/dataGraph/:dataGraphName                                        (runtime, by lookup)
+GET {salesforceInstanceUrl}/services/data/v65.0/api/v1/dataGraph/{dataGraphEntityName}/{id}
+GET {salesforceInstanceUrl}/services/data/v65.0/api/v1/dataGraph/{dataGraphEntityName}
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-graphs/data/{dataGraphEntityName}/{id}
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-graphs/data/{dataGraphEntityName}
+GET {instanceUrl}/api/v1/dataGraph/{dataGraphEntityName}/{id}
+GET {instanceUrl}/api/v1/dataGraph/{dataGraphEntityName}
+GET {instanceUrl}/api/v1/ssot/data-graphs/data/{dataGraphEntityName}/{id}
+GET {instanceUrl}/api/v1/ssot/data-graphs/data/{dataGraphEntityName}
 
 Headers
 Authorization: Bearer <core_access_token> (connect) or <data_cloud_token> (runtime)
@@ -29,19 +33,20 @@ Body
 None.
 
 Input (parameters)
-plane (string, optional, default "runtime") - "connect" | "runtime".
-dataGraphName (string, required for runtime) - Graph developer name.
-dataGraphEntityName (string, required for connect) - The primary
-  entity name (typically same as graph name).
-id (string, optional) - Primary-key value; required when looking up
-  by id.
-lookupKeys (object, optional) - Map of `{ field: value }` for
-  lookup-by-key access. Mutually exclusive with `id`.
-fields (string[], optional) - Subset of fields to return.
+plane ("connect" | "runtime", optional) - API plane to call. `runtime` uses `/api/v1/dataGraph/...`; `connect` uses
+`/ssot/data-graphs/data/...`. Defaults to runtime.
+dataGraphEntityName (string, optional) - API name of the data graph entity to query, for example `UnifiedIndividual_DG`.
+dataGraphName (string, optional) - Compatibility alias for dataGraphEntityName.
+id (string, optional) - Record ID to retrieve. Must be the primary key value of the primary DMO. Mutually
+exclusive with lookupKeys.
+live (boolean, optional) - Runtime or Connect ID lookup option to retrieve live data when supported. Salesforce
+retrieves precalculated data when omitted.
+dataspace (string, optional) - Data 360 data space to query. Salesforce uses the default data space when omitted.
+noCache (boolean, optional) - Connect lookup option for /ssot/data-graphs/data/{dataGraphEntityName}; true reads the
+standard, non-real-time data graph according to Salesforce's Connect reference.
 
 Result
-record (object|null) - The denormalized record matching the request
-  (with related DMOs nested as arrays).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (connect) or `cdp_api` / `cdp_profile_api_read` (runtime).
@@ -54,19 +59,8 @@ Errors
 
 Example request
 
-get_data_graph_record({
-  "plane": "runtime",
-  "dataGraphName": "UnifiedIndividualGraph",
-  "id": "IND_001"
-})
+get_data_graph_record({})
 
 Example result
-{
-  "record": {
-    "Id__c": "IND_001",
-    "FirstName__c": "Jane",
-    "EngagementHistory": [
-      { "EventType__c": "EmailOpen", "EventTimestamp__c": "2026-04-29T13:05:12Z" }
-    ]
-  }
-}
+
+{ }

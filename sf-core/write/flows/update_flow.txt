@@ -33,25 +33,25 @@ Multipart body parts
    - flows/<FlowApiName>.flow  (the updated Flow XML)
 
 Input (parameters)
-fullName (string, required) – Existing Flow API name (DeveloperName).
-xml (string, required) – Full <Flow> XML document for the new version. Must include
-  the root <Flow xmlns="http://soap.sforce.com/2006/04/metadata"> element.
-  To activate as part of the deploy, include <status>Active</status> in the XML.
-apiVersion (number, optional, default 66.0) – Version declared in package.xml.
-checkOnly (boolean, optional, default false) – Validate without saving.
-activateAfterDeploy (boolean, optional, default false) – After a successful deploy,
-  activate the new version using the Tooling API FlowDefinition PATCH.
-testLevel (string, optional, default "NoTestRun") – "NoTestRun" | "RunLocalTests" |
-  "RunAllTestsInOrg".
+fullName (string, required) - Existing Flow API name/DeveloperName; API name string;
+required; example \"Account_Trigger_Flow\"; do not include a version suffix.
+xml (string, required) - Complete Flow metadata XML for the new version; string;
+required; example \"<Flow xmlns=...>\"; do not pass partial XML or JSON.
+checkOnly (boolean, optional) - Validation-only flag; boolean; defaults to false;
+example true; true does not create a new saved version.
+activateAfterDeploy (boolean, optional) - Activation flag after successful deploy;
+boolean; defaults to false; example true; do not enable until the version is safe to
+run.
+testLevel ("NoTestRun" | "RunLocalTests" | "RunAllTestsInOrg", optional) - Deploy test
+level; enum string; defaults to NoTestRun; example \"RunLocalTests\"; production rules
+can require tests.
 
 Result
-deployResult (object) – Raw Salesforce deploy status, including:
-  deployResult.id, deployResult.done, deployResult.status,
-  deployResult.details.componentSuccesses[], deployResult.details.componentFailures[].
-flowDefinition (object|null, on success) – Tooling API FlowDefinition info:
-  { definitionId, masterLabel, latestVersionNumber, latestVersionId,
-    activeVersionNumber, activeVersionId }.
-activationResult (object|null) – Present when activateAfterDeploy=true.
+raw deploy status plus FlowDefinition query response and optional activation result.
+deployResult (value) - included in the JSON returned by the tool.
+flowDefinition (value) - included in the JSON returned by the tool.
+activationError (value) - included in the JSON returned by the tool.
+activationResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Flow" + "Customize Application"
@@ -68,7 +68,6 @@ Errors
 Example request
 
 update_flow({
-  "fullName": "Account_Trigger_Flow",
-  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Flow xmlns=\"http://soap.sforce.com/2006/04/metadata\">\n  <apiVersion>66.0</apiVersion>\n  <label>Account Trigger Flow</label>\n  <processType>AutoLaunchedFlow</processType>\n  <start>\n    <locationX>50</locationX><locationY>0</locationY>\n    <object>Account</object>\n    <recordTriggerType>Create</recordTriggerType>\n    <triggerType>RecordBeforeSave</triggerType>\n  </start>\n  <status>Draft</status>\n</Flow>",
-  "activateAfterDeploy": true
+  "fullName": "example",
+  "xml": "example"
 })

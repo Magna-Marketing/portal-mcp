@@ -12,11 +12,10 @@ Differs from `audit_permissions` in scope: this is a roster of
 assignments for specific users; `audit_permissions` is org-wide risk.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `PermissionSetAssignment` joined to
-`User`, `PermissionSet`, `PermissionSetGroup`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.IsActive, Assignee.Profile.Name, PermissionSetId, PermissionSet.Name, PermissionSet.Label, PermissionSetGroupId, PermissionSetGroup.DeveloperName, PermissionSetGroup.MasterLabel, ExpirationDate FROM PermissionSetAssignment WHERE AssigneeId IN ({userIds}) ORDER BY Assignee.Name
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, Assignee.Email, Assignee.IsActive, Assignee.Profile.Name, PermissionSetId, PermissionSet.Name, PermissionSet.Label, PermissionSet.IsOwnedByProfile, PermissionSetGroupId, PermissionSetGroup.DeveloperName, PermissionSetGroup.MasterLabel, PermissionSetGroup.Status, ExpirationDate, IsActive, SystemModstamp FROM PermissionSetAssignment
 
 Headers
 Authorization: Bearer <access_token>
@@ -26,28 +25,37 @@ Body
 None.
 
 Input (parameters)
-userIds (string[], optional) - User Ids to report on.
-usernames (string[], optional) - User.Username values.
-profileName (string, optional) - All active users with this profile.
-includeInactiveUsers (boolean, optional, default false).
-includeExpired (boolean, optional, default false).
-groupBy (string, optional) - "user" (default) | "permset" | "group" |
-  "profile". Groups the rows accordingly in the response.
-sortBy (string, optional, default "Name").
+assigneeNamePattern (string, optional) - Assigned user's Name pattern; string with * and
+? wildcards converted to SOQL LIKE; no default; example: Maria*; do not pass usernames,
+regex, raw LIKE syntax, or multiple names.
+permissionSetNamePattern (string, optional) - PermissionSet Name pattern for direct
+assignments; string with * and ? wildcards converted to SOQL LIKE; no default; example:
+Sales_*; do not pass labels, group names, regex, or raw LIKE syntax.
+permissionSetGroupNamePattern (string, optional) - PermissionSetGroup DeveloperName
+pattern for group assignments; string with * and ? wildcards converted to SOQL LIKE; no
+default; example: Revenue_*; do not pass labels, permission set names, regex, or raw
+LIKE syntax.
+includeInactiveUsers (boolean, optional) - Whether inactive assigned users are included;
+boolean; default false; example: true; do not pass when only active users should be
+reported.
+includeExpiredAssignments (boolean, optional) - Whether expired assignments are
+included; boolean; default false filters ExpirationDate before today; example: true; do
+not pass for active-only assignment reporting.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+PermissionSetAssignment; string without WHERE; no default; example: PermissionSetId !=
+null; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for PermissionSetAssignment; string without
+ORDER BY; default Assignee.Name ASC; example: SystemModstamp DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum assignment rows to query; integer from 1 to 2000;
+default 200; example: 500; do not pass 0, negatives, decimals, or offsets.
 
 Result
-generatedAt (string).
-totalUsers (number).
-totalAssignments (number).
-distinctPermsets (number).
-distinctGroups (number).
-rowsPerUser (object|null) - When groupBy=user.
-  Map of userId -> { user, permsets[], groups[], assignmentCount,
-    activePermsetCount, expiringSoon: bool, hasGroup: bool }.
-rowsPerPermset (object|null) - When groupBy=permset.
-rowsPerGroup (object|null) - When groupBy=group.
-rowsPerProfile (object|null) - When groupBy=profile.
-topUsersByAssignmentCount (array) - { userId, name, count }.
+Returns the raw Salesforce QueryResult for PermissionSetAssignment records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Manage Users".
@@ -61,27 +69,21 @@ Errors
 Example request
 
 generate_permission_assignment_report({
-  "profileName": "Standard User",
-  "groupBy": "user"
+  "assigneeNamePattern": "Maria*",
+  "permissionSetNamePattern": "Sales_*",
+  "permissionSetGroupNamePattern": "Revenue_*"
 })
 
-Example result (truncated)
+Example result
 
 {
-  "generatedAt": "2026-04-29T16:05:00Z",
-  "totalUsers": 38,
-  "totalAssignments": 142,
-  "distinctPermsets": 27,
-  "distinctGroups": 5,
-  "rowsPerUser": {
-    "005Qg0000020aBcDE": {
-      "user": { "id": "005Qg0000020aBcDE", "name": "Jane Doe", "username": "jane.doe@magnatech.com" },
-      "permsets": [{ "id": "0PSQg0000004ZyAA", "name": "MTG_Project_Manager", "label": "MTG Project Manager", "expirationDate": null }],
-      "groups": [{ "id": "0PGQg00000004abAB", "developerName": "MTG_Delivery_Bundle", "label": "MTG Delivery Bundle" }],
-      "assignmentCount": 2, "activePermsetCount": 2, "expiringSoon": false, "hasGroup": true
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "PermissionSetAssignment"
+      }
     }
-  },
-  "topUsersByAssignmentCount": [
-    { "userId": "005Qg0000020aBcDE", "name": "Jane Doe", "count": 2 }
   ]
 }

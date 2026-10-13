@@ -6,10 +6,10 @@ distribution Id, password protection, expiration, and the public URL
 the recipient uses.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `ContentDistribution`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, ContentDocumentId, ContentVersionId, Name, DistributionPublicUrl, ExpiryDate, FirstViewDate , LastViewDate,  OwnerId, PdfDownloadUrl, Password, PreferencesAllowOriginalDownload ,PreferencesAllowPDFDownload, PreferencesAllowViewInBrowser, PreferencesExpires, PreferencesLinkLatestVersion,PreferencesNotifyOnVisit,PreferencesNotifyRndtnComplete, PreferencesPasswordRequired,RelatedRecordId, ViewCount,ContentDownloadUrl FROM ContentDistribution
+GET /services/data/v66.0/query/?q=SELECT Id, Name, ContentDocumentId, ContentVersionId, RelatedRecordId, OwnerId, DistributionPublicUrl, ContentDownloadUrl, PdfDownloadUrl, PreferencesAllowViewInBrowser, PreferencesAllowOriginalDownload, PreferencesAllowPDFDownload, PreferencesExpires, PreferencesLinkLatestVersion, PreferencesPasswordRequired, PreferencesNotifyOnVisit, PreferencesNotifyRndtnComplete, CreatedDate, FirstViewDate, LastViewDate, ExpiryDate, ViewCount FROM ContentDistribution
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,14 +19,33 @@ Body
 None.
 
 Input (parameters)
-contentDocumentId (string, optional).
-relatedRecordId (string, optional).
-includeExpired (boolean, optional, default false).
-limit (number, optional, default 200).
+contentDocumentId (string, optional) - ContentDistribution ContentDocumentId filter;
+string Id in 15- or 18-character format; no default; example: 069xx0000004C92AAE; do not
+pass ContentVersion Ids or multiple Ids.
+contentVersionId (string, optional) - ContentDistribution ContentVersionId filter;
+string Id in 15- or 18-character format; no default; example: 068xx0000004D3FAAU; do not
+pass ContentDocument Ids or multiple Ids.
+relatedRecordId (string, optional) - RelatedRecordId filter for the record associated
+with the content delivery; string Id; no default; example: 001xx000003DGbYAAW; do not
+pass object names or ContentDocumentLink Ids.
+ownerId (string, optional) - OwnerId filter for the user who owns the shared document
+link; string User Id; no default; example: 005xx000001Sv6rAAC; do not pass usernames.
+whereClause (string, optional) - Additional ContentDistribution SOQL WHERE conditions
+without the WHERE keyword; string appended with AND after built-in filters; no default;
+example: PreferencesExpires = true; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+untrusted user text.
+orderBy (string, optional) - ContentDistribution ORDER BY clause without the ORDER BY
+keyword; string; default CreatedDate DESC; example: LastViewDate DESC NULLS LAST; do not
+pass WHERE, LIMIT, or fields unavailable on ContentDistribution.
+limit (integer, optional) - Maximum ContentDistribution rows to return; integer from 1
+to 2000; default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-contentDistributions (array) - { id, contentDocumentId, contentVersionId, name, distributionPublicUrl, expiryDate, relatedRecordId, passwordRequired, viewCount, createdDate, lastViewDate }.
+Returns the raw ContentDistribution query response as a JSON object.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "API Enabled" + file read.
@@ -39,4 +58,8 @@ Errors
 
 Example request
 
-list_content_distributions({ "contentDocumentId": "069Qg0000004ZyAA" })
+list_content_distributions({
+  "contentDocumentId": "069xx0000004C92AAE",
+  "contentVersionId": "068xx0000004D3FAAU",
+  "relatedRecordId": "001xx000003DGbYAAW"
+})

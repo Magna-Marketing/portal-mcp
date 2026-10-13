@@ -20,16 +20,12 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required).
-includeFieldDetails (boolean, optional, default true) - Include field labels and types.
-includeRecordTypePrimary (boolean, optional, default true).
+sObject (string, required) - Object API name whose compact layouts are requested;
+non-empty string using Salesforce sObject API name format; no default; example: Account;
+do not pass labels, record IDs, field API names, or multiple objects.
 
 Result
-totalSize (number).
-compactLayouts (array) - Each:
-  id, name, label, sObject, isPrimary (boolean).
-  fields (array) - Each: { fieldApiName, label, type, length }.
-  recordTypeAssignments (array, when includeRecordTypePrimary=true) - [{ recordTypeId, recordTypeName, isPrimary }].
+raw CompactLayouts response for the requested sObject.
 
 Required permissions
 - "View Setup and Configuration".
@@ -42,4 +38,6 @@ Errors
 
 Example request
 
-list_compact_layouts({ "sObject": "Account" })
+list_compact_layouts({
+  "sObject": "Account"
+})

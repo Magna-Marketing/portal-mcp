@@ -13,51 +13,58 @@ Use `write_apex_trigger` to create or update.
 
 Salesforce API
 Tooling API, v66.0.
-- `GET /tooling/query/?q=SELECT ... FROM ApexTrigger WHERE ...`
-- `GET /tooling/sobjects/ApexTrigger/{id}`.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=... (use knowledge base to pull up the fields for soql) use soql results to get ApexTrigger id and pass it into next api
-GET /services/data/v66.0/tooling/sobjects/ApexTrigger/{id}
+GET /services/data/v66.0/tooling/sobjects/{type}/{id}
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, NamespacePrefix, ApiVersion, TableEnumOrId, Status, IsValid, BodyCrc, LengthWithoutComments, ManageableState, UsageBeforeInsert, UsageAfterInsert, UsageBeforeUpdate, UsageAfterUpdate, UsageBeforeDelete, UsageAfterDelete, UsageAfterUndelete, UsageIsBulk, CreatedById, CreatedDate, LastModifiedById, LastModifiedDate, SystemModstamp FROM ApexTrigger
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (GET request).
+None.
 
 Input (parameters)
-name (string, optional) - Exact trigger API name. Mutually exclusive
-  with `pattern`.
-pattern (string, optional) - Glob to match (`Project*Trigger`, `*Trigger`).
-sObject (string, optional) - Filter by target sObject API name (matches
-  `TableEnumOrId`).
-includeBody (boolean, optional, default true with `name`, false with `pattern`).
-includeInactive (boolean, optional, default true) - Include triggers
-  with Status != "Active".
-namespacePrefix (string, optional).
-limit (number, optional, default 100, max 2000).
+id (string, optional) - ApexTrigger record Id to retrieve directly; 15- or 18-character
+Tooling API Id; no default; example: 01q5g000000ABCdAAO; do not pass trigger names,
+sObject names, or multiple Ids.
+name (string, optional) - Exact Apex trigger name; non-empty ApexTrigger.Name value; no
+default; example: AccountTrigger; do not pass wildcards, namespace prefixes, or file
+names ending in .trigger.
+pattern (string, optional) - Apex trigger name pattern for list mode; string using * and
+? wildcards converted to SOQL LIKE; no default; example: *Trigger; do not pass regex,
+raw LIKE syntax, or a pattern with name or id.
+sObject (string, optional) - Target object filter; string matched exactly against
+ApexTrigger.TableEnumOrId; no default; example: Account; do not pass object labels,
+record Ids, or multiple objects.
+includeBody (boolean, optional) - Body field inclusion flag; boolean controlling whether
+Body is selected in SOQL list/name mode, while direct id retrieval returns Salesforce's
+default sObject payload; default true for name reads and false for list reads; example:
+true; do not pass strings or expect SymbolTable because ApexTrigger does not expose it
+directly.
+includeInactive (boolean, optional) - Inactive/deleted status inclusion flag; boolean;
+default true includes all Status values; example: false; do not pass strings such as
+Active or Inactive.
+namespacePrefix (string, optional) - NamespacePrefix filter; string matched exactly, or
+an empty string for unmanaged/default namespace; no default; example: acme; do not pass
+namespace-qualified trigger names or package labels.
+whereClause (string, optional) - Additional SOQL WHERE condition for ApexTrigger; string
+with or without WHERE; no default; example: UsageBeforeUpdate = true; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ApexTrigger list mode; string with
+or without ORDER BY; default Name ASC; example: LastModifiedDate DESC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ApexTrigger rows in list mode; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-For `name`:
-  apexTrigger (object):
-    id, name, namespacePrefix, apiVersion (number),
-    tableEnumOrId (string) - Target sObject API name.
-    status ("Active"|"Inactive"|"Deleted"),
-    isValid (boolean),
-    body (string) - Full source.
-    bodyCrc (number),
-    lengthWithoutComments (number),
-    manageableState (string),
-    usageBeforeInsert, usageAfterInsert, usageBeforeUpdate, usageAfterUpdate,
-    usageBeforeDelete, usageAfterDelete, usageAfterUndelete (boolean) -
-      Which DML events the trigger handles.
-    usageIsBulk (boolean).
-    createdById, createdDate, lastModifiedById, lastModifiedDate.
-For `pattern`:
-  totalSize (number).
-  apexTriggers (array; no body unless includeBody=true).
+raw Tooling API sObject record for id reads, or raw Tooling API QueryResult with
+totalSize, done, and records for name/list reads.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - API Enabled.
@@ -73,39 +80,22 @@ Errors
 
 Example request
 
-read_apex_trigger({ "sObject": "Project__c", "includeBody": false })
+read_apex_trigger({
+  "id": "01q5g000000ABCdAAO",
+  "name": "AccountTrigger",
+  "pattern": "*Trigger"
+})
 
 Example result
 
 {
-  "totalSize": 2,
-  "apexTriggers": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "id": "01q4Q00000Xy12abc",
-      "name": "ProjectTrigger",
-      "tableEnumOrId": "Project__c",
-      "apiVersion": 62.0,
-      "status": "Active",
-      "isValid": true,
-      "usageBeforeInsert": true,
-      "usageAfterInsert": true,
-      "usageBeforeUpdate": true,
-      "usageAfterUpdate": true,
-      "usageBeforeDelete": false,
-      "usageAfterDelete": false,
-      "usageAfterUndelete": false,
-      "usageIsBulk": true
-    },
-    {
-      "id": "01q4Q00000Xy12def",
-      "name": "ProjectAssignmentTrigger",
-      "tableEnumOrId": "Project_Assignment__c",
-      "status": "Active",
-      "isValid": true,
-      "usageBeforeInsert": true,
-      "usageAfterInsert": false,
-      "usageBeforeUpdate": false,
-      "usageAfterUpdate": true
+      "attributes": {
+        "type": "ApexTrigger"
+      }
     }
   ]
 }

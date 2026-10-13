@@ -9,7 +9,7 @@ Salesforce API
 Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, EndpointUrl, IsActive, NamespacePrefix, Description FROM RemoteProxy
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, SiteName, EndpointUrl, IsActive, ProtocolMismatch, NamespacePrefix, Description FROM RemoteProxy
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,12 +19,30 @@ Body
 None.
 
 Input (parameters)
-includeInactive (boolean, optional, default true).
-namePattern (string, optional).
+includeInactive (boolean, optional) - Whether inactive RemoteProxy rows are included;
+boolean; default true; example: false; do not pass false unless you only want active
+remote sites.
+namePattern (string, optional) - RemoteProxy.SiteName filter; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: Billing_*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+endpointPattern (string, optional) - RemoteProxy.EndpointUrl filter; string using * and
+? wildcards converted to SOQL LIKE; no default; example: https://api.example.com*; do
+not pass regex, raw LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for RemoteProxy; string
+with or without WHERE; no default; example: ProtocolMismatch = false; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for RemoteProxy; string with or
+without ORDER BY; default SiteName ASC; example: EndpointUrl ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum remote site rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-records (array) - { id, name, endpointUrl, isActive, namespacePrefix, description }.
+raw Salesforce Tooling QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -37,4 +55,8 @@ Errors
 
 Example request
 
-list_remote_site_settings({ "includeInactive": false })
+list_remote_site_settings({
+  "includeInactive": false,
+  "namePattern": "Billing_*",
+  "endpointPattern": "https://api.example.com*"
+})

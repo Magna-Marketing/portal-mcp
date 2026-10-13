@@ -33,14 +33,16 @@ SetupOwnerId  – string. For Hierarchy-type settings only. Accepts:
 <field>__c    – any custom fields on the Custom Setting sObject.
 
 Input (parameters)
-operation      (string, required) – "create" | "update" | "upsert" | "delete".
-customSetting  (string, required) – Custom Setting API name including __c, e.g. "MyConfig__c".
-records        (object[], required, min 1) – Each record:
-  id           (string, optional) – Salesforce record Id. Highest-priority lookup key.
-  name         (string, optional) – Name field. Required for list-type create.
-                Used as upsert/update/delete key when id is absent.
-  setupOwnerId (string, optional) – Hierarchy level owner. Used when id and name absent.
-  fields       (object, required for create/update/upsert) – { fieldApiName: value }.
+operation ("create" | "update" | "upsert" | "delete", required) - Requested custom
+setting operation; enum create, update, upsert, or delete; no default; example:
+'upsert'; do not pass undelete or metadata operations.
+customSetting (string, required) - Custom setting sObject API name; string including __c
+suffix; required for all operations; example: 'MyConfig__c'; do not pass the Setup label
+or a custom metadata type.
+records (unknown[], required) - Custom setting records to process; non-empty array where
+each record identifies the row by id, setupOwnerId, or name and supplies fields for
+write operations; no default; example: [{ name: 'Payments', fields: { Enabled__c: true }
+}]; do not mix unrelated setting objects in one call.
 
 Result
 Returns a JSON object with:
@@ -60,13 +62,10 @@ Errors
 - DUPLICATE_VALUE if creating a record with a Name/SetupOwnerId that already exists.
 - INVALID_FIELD if a field API name is incorrect.
 
-Example request (hierarchy)
+Example request
 
 manage_custom_setting_record({
   "operation": "upsert",
-  "customSetting": "MTG_Feature_Defaults__c",
-  "records": [
-    { "setupOwnerId": "Organization", "fields": { "Use_New_Form__c": true } },
-    { "setupOwnerId": "00eQg0000008abcAB", "fields": { "Use_New_Form__c": false } }
-  ]
+  "customSetting": "MyConfig__c",
+  "records": "[{ name: 'Payments', fields: { Enabled__c: true } }]"
 })

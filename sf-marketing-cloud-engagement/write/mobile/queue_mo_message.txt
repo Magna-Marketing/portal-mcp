@@ -19,15 +19,15 @@ Body
 { "mobileNumber": "+15551234567", "shortCode": "12345", "countryCode": "US", "message": "MTG", "receivedDate": "2026-04-30T15:00:00Z" }
 
 Input (parameters)
-mobileNumber (string, required) - E.164.
-shortCode (string, required).
-countryCode (string, optional, default "US").
-message (string, required) - Text the user "sent" inbound.
-receivedDate (string, optional, default now).
-keyword (string, optional) - Override the parsed keyword.
+mobile_numbers (string[], optional) - Mobile numbers to queue. Provide this or subscribers, not both.
+subscribers (string[], optional) - Subscriber keys to queue. Provide this or mobile_numbers, not both.
+short_code (string, required) - Short or long code for the MobileConnect opt-in or routing flow.
+message_text (string, required) - Inbound MO text to queue, usually the opt-in or opt-out keyword.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-result (object) - { queued (boolean), tokenId, routedToKeyword, routedToMessageId, errors }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_send`.
@@ -41,7 +41,6 @@ Errors
 Example request
 
 queue_mo_message({
-  "mobileNumber": "+15551234567",
-  "shortCode": "12345",
-  "message": "MTG"
+  "short_code": "",
+  "message_text": ""
 })

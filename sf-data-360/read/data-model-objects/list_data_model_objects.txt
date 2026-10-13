@@ -9,7 +9,10 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-model-objects
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-objects
+Optional query: dataspace, category, creationType, nameContains, sortBy, limit, offset, orderBy
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-objects/{encodedName}
+Optional query: dataspace, category, creationType, nameContains, sortBy, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,21 +22,22 @@ Body
 None.
 
 Input (parameters)
-dataSpace (string, optional, default "default").
-category (string, optional) - "Profile" | "Engagement" | "Other" |
-  "Account" | "Contact" | "Lead".
-type (string, optional) - "Standard" | "Custom".
-nameContains (string, optional).
-limit (number, optional, default 200).
-offset (number, optional).
+dataspace (string, optional) - Data space name. Salesforce uses the default data space when omitted.
+category (string, optional) - Optional DMO category filter, for example `PROFILE`, `ENGAGEMENT`, or the category value
+returned by Salesforce.
+creationType (string, optional) - Optional creation type filter, such as `Standard` or `Custom`, when supported by the org
+API version.
+nameContains (string, optional) - Optional server-side name substring filter when supported by the Salesforce endpoint.
+sortBy (string, optional) - Field on which to sort results when supported by the Salesforce endpoint.
+limit (number, optional) - Maximum number of records to return. Salesforce applies its endpoint default when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
+orderBy (string, optional) - Sort order for the result set, such as `ASC` or `DESC`, when supported by the Salesforce
+endpoint.
 
 Result
-dataModelObjects (array) - Each: { id, developerName, label,
-  category, type, primaryKeyField, recordCount,
-  fields (array<{ apiName, label, dataType, isPrimaryKey,
-    isExternalId, isRequired, defaultValue, length }>),
-  createdDate, lastModifiedDate }.
-totalSize (number), nextPageUrl (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -46,14 +50,8 @@ Errors
 
 Example request
 
-list_data_model_objects({ "category": "Profile" })
+list_data_model_objects({})
 
 Example result
-{
-  "dataModelObjects": [
-    { "developerName": "UnifiedIndividual__dlm",
-      "label": "Unified Individual",
-      "category": "Profile", "type": "Standard",
-      "primaryKeyField": "Id__c", "recordCount": 482000 }
-  ]
-}
+
+{ }

@@ -24,34 +24,36 @@ Body
 None (GET request).
 
 Input (parameters)
-pattern (string, required) - Glob-like pattern. Supports `*` (any chars)
-  and case-insensitive substring match. Examples: "Project*", "*Order*",
-  "Account".
-includeCustomOnly (boolean, optional, default false) - Restrict to custom
-  objects (API names ending `__c` or with namespace prefix).
-includeStandardOnly (boolean, optional, default false) - Restrict to
-  standard objects.
-queryableOnly (boolean, optional, default false) - Only objects where
-  queryable=true.
-limit (number, optional, default 50, max 200) - Cap on returned objects.
+pattern (string, optional) - The sObject API-name or label match pattern; string using *
+as any characters and ? as one character; default "*" returns all matching objects;
+example: "Account*" or "*Invoice*"; do not pass regex, SOQL LIKE syntax, or a
+comma-separated list.
+includeCustomOnly (boolean, optional) - Whether to return only custom objects where
+Salesforce marks custom as true; boolean; default false; example: true; do not combine
+with includeStandardOnly.
+includeStandardOnly (boolean, optional) - Whether to return only standard objects where
+Salesforce marks custom as false; boolean; default false; example: true; do not combine
+with includeCustomOnly.
+queryableOnly (boolean, optional) - Whether to return only objects Salesforce marks
+queryable; boolean; default false; example: true; do not use when you need non-queryable
+metadata objects.
+limit (integer, optional) - The maximum matching sObject entries to return for this page
+after filtering; integer from 1 to 200; default 50; example: 25; do not pass 0,
+decimals, negative values, offsets or values greater than 200.
+offset (integer, optional) - The zero-based filtered result offset for pagination;
+integer 0 or greater; default 0; example: 200; pass the previous response nextOffset
+with the same filters to retrieve the next page; do not pass decimals, negative values,
+or Salesforce nextRecordsUrl values.
 
 Result
-results (array) - Each entry:
-  name (string) - sObject API name (e.g. "Opportunity", "Project__c").
-  label (string) - UI label.
-  labelPlural (string).
-  custom (boolean) - true for __c objects.
-  customSetting (boolean).
-  keyPrefix (string|null) - 3-char ID prefix (e.g. "001" = Account).
-  queryable (boolean).
-  createable (boolean).
-  updateable (boolean).
-  deletable (boolean).
-  layoutable (boolean).
-  searchable (boolean).
-  feedEnabled (boolean).
-  triggerable (boolean).
-  urls (object) - Standard URLs (sobject, describe, rowTemplate, etc.).
+global describe-style JSON with totalMatches, offset, limit, nextOffset, hasMore, and
+raw sobjects entries for the current page.
+totalMatches (value) - included in the JSON returned by the tool.
+offset (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+nextOffset (value) - included in the JSON returned by the tool.
+hasMore (value) - included in the JSON returned by the tool.
+sobjects (value) - included in the JSON returned by the tool.
 
 Required permissions
 - API Enabled.
@@ -66,37 +68,19 @@ Errors
 
 Example request
 
-search_objects({ "pattern": "Project*", "includeCustomOnly": true })
+search_objects({
+  "pattern": "Account*\" or \"*Invoice*",
+  "includeCustomOnly": true,
+  "includeStandardOnly": true
+})
 
 Example result
 
 {
-  "results": [
-    {
-      "name": "Project__c",
-      "label": "Project",
-      "labelPlural": "Projects",
-      "custom": true,
-      "keyPrefix": "a01",
-      "queryable": true,
-      "createable": true,
-      "updateable": true,
-      "deletable": true,
-      "searchable": true,
-      "triggerable": true
-    },
-    {
-      "name": "Project_Phase__c",
-      "label": "Project Phase",
-      "labelPlural": "Project Phases",
-      "custom": true,
-      "keyPrefix": "a02",
-      "queryable": true,
-      "createable": true,
-      "updateable": true,
-      "deletable": true,
-      "searchable": true,
-      "triggerable": false
-    }
-  ]
+  "totalMatches": null,
+  "offset": null,
+  "limit": null,
+  "nextOffset": null,
+  "hasMore": null,
+  "sobjects": null
 }

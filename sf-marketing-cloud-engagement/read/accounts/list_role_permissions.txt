@@ -18,14 +18,15 @@ Body
 SOAP retrieve on RolePermission filtered by RoleID.
 
 Input (parameters)
-roleId (number, optional).
-roleName (string, optional).
-  One required.
-allowedOnly (boolean, optional, default false) - Only return permissions where IsAllowed=true.
+role_id (number, optional) - Role.ID to retrieve.
+role_name (string, optional) - Role.Name to retrieve.
+role_customer_key (string, optional) - Role.CustomerKey to retrieve.
+business_unit_id (string, optional) - Business Unit MID used for SOAP ClientID context.
 
 Result
-role (object) - { id, name }.
-permissions (array) - { permissionId, name, description, isAllowed }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `users_read`.
@@ -38,4 +39,4 @@ Errors
 
 Example request
 
-list_role_permissions({ "roleName": "Marketing Cloud Administrator" })
+list_role_permissions({})

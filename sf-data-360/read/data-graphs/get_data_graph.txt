@@ -9,8 +9,10 @@ Salesforce API
 Connect plane (default) or runtime plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-graphs/:dataGraphName        (plane="connect")
-GET {cdpTenantUrl}/api/v1/dataGraph/metadata?dataGraphName=:name              (plane="runtime")
+GET {salesforceInstanceUrl}/services/data/v65.0/api/v1/dataGraph/metadata
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-graphs/{dataGraphName}
+GET {instanceUrl}/api/v1/dataGraph/metadata
+GET {instanceUrl}/api/v1/ssot/data-graphs/{dataGraphName}
 
 Headers
 Authorization: Bearer <core_access_token>      (connect)
@@ -21,15 +23,15 @@ Body
 None.
 
 Input (parameters)
-dataGraphName (string, required).
-plane (string, optional, default "connect").
-dataSpace (string, optional, default "default").
+dataGraphName (string, required) - API name of the data graph, for example `UnifiedIndividual_DG`.
+plane ("connect" | "runtime", optional) - API plane to call. `connect` returns the graph definition from
+`/ssot/data-graphs/{dataGraphName}`; `runtime` returns metadata from
+`/api/v1/dataGraph/metadata`. Defaults to connect.
+dataspace (string, optional) - Data 360 data space to query when using the runtime metadata endpoint. Salesforce uses
+the default data space when omitted.
 
 Result
-dataGraph (object): developerName, label, dataSpace, primaryDmo,
-  includedDmos (array<{ dmoApiName, relationshipName, cardinality,
-    fields (array) }>), refreshFrequency, status, recordCount,
-  lastRefreshDate, createdDate, lastModifiedDate, schema (object).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (connect) or `cdp_api` (runtime).
@@ -42,17 +44,10 @@ Errors
 
 Example request
 
-get_data_graph({ "dataGraphName": "UnifiedIndividualGraph" })
+get_data_graph({
+  "dataGraphName": ""
+})
 
 Example result
-{
-  "dataGraph": {
-    "developerName": "UnifiedIndividualGraph",
-    "primaryDmo": "UnifiedIndividual__dlm",
-    "includedDmos": [
-      { "dmoApiName": "EngagementHistory__dlm",
-        "relationshipName": "EngagementHistory",
-        "cardinality": "OneToMany" }
-    ]
-  }
-}
+
+{ }

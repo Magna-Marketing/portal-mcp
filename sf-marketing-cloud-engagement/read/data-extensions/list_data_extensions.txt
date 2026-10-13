@@ -19,16 +19,22 @@ Body
 SOAP RetrieveRequest on `DataExtension`.
 
 Input (parameters)
-folderId (number, optional).
-namePattern (string, optional).
-isSendable (boolean, optional).
-isTestable (boolean, optional).
-modifiedSince (string, optional) - ISO timestamp.
-limit (number, optional, default 200).
+folder_id (number, optional) - Optional Data Extension folder/category ID. Maps to DataExtension.CategoryID.
+name_pattern (string, optional) - Optional SOAP like filter against DataExtension.Name.
+customer_key (string, optional) - Optional exact DataExtension CustomerKey filter.
+is_sendable (boolean, optional) - Optional exact filter for sendable Data Extensions.
+is_testable (boolean, optional) - Optional exact filter for testable Data Extensions.
+modified_since (string, optional) - Optional ISO date-time filter for Data Extensions modified after this value.
+properties (string[], optional) - Optional SOAP property projection. Defaults to common DataExtension metadata, retention,
+sendability, and Client.ID fields.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context.
+query_all_accounts (boolean, optional) - Set true to add QueryAllAccounts to the SOAP retrieve when the installed package can
+access child Business Units.
 
 Result
-totalSize (number).
-dataExtensions (array) - { id, customerKey (External Key), name, description, isSendable, isTestable, sendableDataExtensionField, sendableSubscriberField, categoryId, dataRetentionPeriodLength, dataRetentionPeriod, isDataRetentionEnabled, rowDeletionType, dateCreated, dateModified, rowCount (number, when retrievable) }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_read`.
@@ -41,4 +47,4 @@ Errors
 
 Example request
 
-list_data_extensions({ "folderId": 12345, "isSendable": true })
+list_data_extensions({})

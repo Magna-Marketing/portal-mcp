@@ -19,39 +19,26 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "formId": 4421,
-  "prospectApiFieldId": "first_name",
-  "name": "FirstName",
-  "label": "First name",
-  "type": "Text",
-  "isRequired": true,
-  "sortOrder": 1,
-  "errorMessage": "First name is required"
-}
+POST: cssClasses, dataFormat, description, errorMessage, formId, isAlwaysDisplay, isDoNotPrefill, isMaintainInitialValue, isRequired, label, prospectApiFieldId, type
 
 Input (parameters)
-operation (string, required) - "create" only.
-formId (number, required).
-prospectApiFieldId (string, required) - Built-in or custom-field
-  apiFieldId.
-name (string, required) - Field's UI name.
-label (string, required).
-type (string, required) - "Text" | "TextArea" | "Email" | "Number" |
-  "RadioButton" | "Checkbox" | "Dropdown" | "MultiSelect" | "Hidden" |
-  "Date" | "CrmUser".
-isRequired (boolean, optional, default false).
-isAlwaysDisplay (boolean, optional, default false).
-isMaintainInitialValue (boolean, optional, default false).
-isUseValuesPreFromField (boolean, optional, default false).
-sortOrder (number, optional, default appended).
-errorMessage (string, optional).
-cssClasses (string, optional).
-hasValues (boolean, optional, default false) - Add picklist values
-  via `manage_form_field_options`.
+operation ("create", required) - Only "create" is supported by the v5 API for form fields.
+formId (number, required) - Id of the parent form. Required.
+prospectApiFieldId (string, required) - Prospect field apiFieldId to map this form field to. Standard fields use the field name
+(e.g. "firstName", "email"). Custom fields append __c (e.g. "region__c"). Required.
+type ("text" | "textarea" | "email" | "number" | "radio button" | "checkbox" | "dropdown" | "multiselect" | "hidden" | "date" | "crm user", required) - Data type / input type of the form field. Required.
+dataFormat ("text" | "email" | "number" | "phone" | "date" | "url", optional) - Validation format to apply to the input. Defaults to "text". Required.
+label (string, optional) - Display label shown to form visitors.
+description (string, optional) - Internal description for the field (not queryable via API).
+errorMessage (string, optional) - Error message shown when the field fails validation or is required but empty.
+cssClasses (string, optional) - CSS class names applied to the paragraph element wrapping the form input and label.
+isRequired (boolean, optional) - Whether the field is required for form submission. Default false.
+isAlwaysDisplay (boolean, optional) - Show the field even to prospects who already have a value. Default false.
+isMaintainInitialValue (boolean, optional) - Do not overwrite the prospect field if it already has a value. Default false.
+isDoNotPrefill (boolean, optional) - Prevent prospect data from being pre-filled into the field. Default false.
 
 Result
-formField (object) - Created row.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -65,14 +52,12 @@ Errors
 Example request
 
 manage_form_field({
-  "operation": "create",
-  "formId": 4421,
-  "prospectApiFieldId": "first_name",
-  "name": "FirstName",
-  "label": "First name",
-  "type": "Text",
-  "isRequired": true
+  "operation": "",
+  "formId": 1,
+  "prospectApiFieldId": "",
+  "type": ""
 })
 
 Example result
-{ "formField": { "id": 52, "formId": 4421, "name": "FirstName", "type": "Text" } }
+
+{ }

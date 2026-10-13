@@ -16,23 +16,53 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{ "ContentVersionId": "...", "Name": "...", "PreferencesAllowOriginalDownload": true, "PreferencesPasswordRequired": false, "PreferencesExpires": true, "ExpiryDate": "2026-12-31T23:59:59Z" }
+JSON fields: ContentVersionId, Name, PreferencesAllowOriginalDownload, PreferencesAllowPDFDownload, PreferencesAllowViewInBrowser, PreferencesPasswordRequired, PreferencesNotifyOnVisit, PreferencesNotifyRndtnComplete, PreferencesExpires, PreferencesLinkLatestVersion, ExpiryDate, RelatedRecordId, OwnerId.
 
 Input (parameters)
-operation (string, required) - "create" | "delete".
-distributionId (string, optional, required for delete).
-ContentVersionId (string, optional, required for create) - Or ContentDocumentId (tool resolves to latest version).
-ContentDocumentId (string, optional).
-Name (string, required for create).
-PreferencesAllowOriginalDownload (boolean, optional, default true).
-PreferencesAllowPDFDownload (boolean, optional, default true).
-PreferencesPasswordRequired (boolean, optional, default false).
-PreferencesNotifyOnVisit (boolean, optional, default false).
-PreferencesExpires (boolean, optional, default false) - Enables expiration using ExpiryDate.
-ExpiryDate (string, optional) - ISO 8601.
+operation ("create" | "delete", required) - ContentDistribution action; enum create or
+delete; required; example \"create\"; create can expose files externally.
+distributionId (string, optional) - ContentDistribution Id; Salesforce Id string;
+required for delete; example \"05D...\"; do not pass ContentDocumentId.
+ContentVersionId (string, optional) - ContentVersion Id to distribute; Salesforce Id
+string; required for create unless ContentDocumentId is supplied; example \"068...\"; do
+not pass ContentDocumentLinkId.
+ContentDocumentId (string, optional) - ContentDocument Id; Salesforce Id string;
+optional for create; example \"069...\"; resolves LatestPublishedVersionId when
+ContentVersionId is omitted.
+Name (string, optional) - Distribution name; string; required for create; example
+\"Customer Proposal\"; avoid sensitive public-facing names.
+PreferencesAllowOriginalDownload (boolean, optional, default true) - Allow original
+download; boolean; defaults to true; example false; disable to limit direct file
+download.
+PreferencesAllowPDFDownload (boolean, optional, default true) - Allow PDF download;
+boolean; defaults to true; example true; only works when PDF rendition is available.
+PreferencesAllowViewInBrowser (boolean, optional, default true) - Allow browser preview;
+boolean; defaults to true; example true; disable for download-only access.
+PreferencesPasswordRequired (boolean, optional, default false) - Require generated
+password; boolean; defaults to false; example true; use for externally shared sensitive
+files.
+PreferencesNotifyOnVisit (boolean, optional, default false) - Notify owner on first
+visit/download; boolean; defaults to false; example true; can produce user
+notifications.
+PreferencesNotifyRndtnComplete (boolean, optional) - Notify owner when renditions
+complete; boolean; optional; example true; omit when not needed.
+PreferencesExpires (boolean, optional, default false) - Expiration flag; boolean;
+defaults to false; example true; requires ExpiryDate for meaningful expiration.
+PreferencesLinkLatestVersion (boolean, optional, default true) - Latest-version flag;
+boolean; defaults to true; example false; false pins the shared version.
+ExpiryDate (string, optional) - Expiration datetime; ISO 8601 string; optional; example
+\"2026-06-01T00:00:00Z\"; do not pass date-only strings when time matters.
+RelatedRecordId (string, optional) - Related record Id; Salesforce Id string for
+supported objects; optional; example \"001...\"; do not pass unsupported object Ids.
+OwnerId (string, optional) - Owner User Id; Salesforce Id string; optional; example
+\"005...\"; do not pass usernames.
 
 Result
-distribution (object) - { id, name, distributionPublicUrl, expiryDate, passwordRequired, viewCount }.
+raw lookup, ContentDistribution create/delete, and post-create query responses.
+deleteContentDistribution (value) - included in the JSON returned by the tool.
+contentDocumentLookup (value) - included in the JSON returned by the tool.
+createContentDistribution (value) - included in the JSON returned by the tool.
+contentDistributionLookup (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Create Public Links" on the file.
@@ -46,8 +76,5 @@ Errors
 Example request
 
 create_content_distribution({
-  "operation": "create",
-  "ContentDocumentId": "069Qg0000004ZyAA",
-  "Name": "Project Brief Public Link",
-  "ExpiryDate": "2026-08-31T23:59:59Z"
+  "operation": "example"
 })

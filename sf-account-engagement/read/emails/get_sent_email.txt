@@ -25,11 +25,7 @@ fields (string[], optional) - Default expands `htmlMessage`,
   `textMessage`, `user.*`, `createdBy.*`.
 
 Result
-email (object): id, name, subject, htmlMessage, textMessage, type,
-  userId, campaignId, listId, clientType, sentAt, prospectId,
-  listEmailId, emailTemplateId, salesforceCmsId, isOperational,
-  senderOptions, replyToOptions, trackerDomainId, folderId.
-user (object|null), createdBy (object|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -45,11 +41,5 @@ Example request
 get_sent_email({ "id": 99821 })
 
 Example result
-{
-  "email": {
-    "id": 99821, "name": "Welcome", "subject": "Welcome, Jane",
-    "htmlMessage": "<html>...</html>",
-    "sentAt": "2026-04-29T13:02:11Z",
-    "type": "AutoresponderEmail"
-  }
-}
+
+{ }

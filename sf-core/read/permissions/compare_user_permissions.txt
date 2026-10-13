@@ -7,11 +7,11 @@ where users disagree. Useful when onboarding a new user against an
 established peer, or auditing "two PMs but only one can delete".
 
 Salesforce API
-REST API + Tooling, v66.0. Internally calls the same logic as
-`analyze_user_permissions` for each user, then produces a column-wise diff.
+REST API (Data), v66.0.
 
 Endpoint
-N/A (composite).
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, Email, IsActive, ProfileId, Profile.Name, Profile.UserLicense.Name, UserType, Department, UserRole.Name FROM User
+GET /services/data/v66.0/query/?q=SELECT Id, AssigneeId, Assignee.Name, Assignee.Username, PermissionSetId, PermissionSet.Name, PermissionSet.Label, PermissionSet.IsOwnedByProfile, PermissionSetGroupId, PermissionSetGroup.DeveloperName, PermissionSetGroup.MasterLabel, PermissionSetGroup.Status, ExpirationDate, IsActive, SystemModstamp FROM PermissionSetAssignment
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,24 +21,32 @@ Body
 None.
 
 Input (parameters)
-userIds (string[], optional) - List of User Ids (mix-ins with usernames).
-usernames (string[], optional) - User.Username values.
-  Must supply 2..10 users in total.
-includeFieldPermissions (boolean, optional, default false).
-diffOnly (boolean, optional, default true) - When true, omit perms held
-  by every compared user (only show divergence).
-includeSystemPermissions (boolean, optional, default true).
-includeObjectPermissions (boolean, optional, default true).
+leftUserId (string, optional) - First Salesforce User Id; 15- or 18-character Id string;
+required when leftUsername is omitted; example: 0055g00000ABCDe; do not pass names,
+emails, multiple Ids, or SOQL fragments.
+leftUsername (string, optional) - First Salesforce Username; exact username string;
+required when leftUserId is omitted and ignored when leftUserId is present; example:
+admin@example.com; do not pass display names, wildcards, or comma-separated usernames.
+rightUserId (string, optional) - Second Salesforce User Id; 15- or 18-character Id
+string; required when rightUsername is omitted; example: 0055g00000XYZAb; do not pass
+names, emails, multiple Ids, or SOQL fragments.
+rightUsername (string, optional) - Second Salesforce Username; exact username string;
+required when rightUserId is omitted and ignored when rightUserId is present; example:
+rep@example.com; do not pass display names, wildcards, or comma-separated usernames.
+includeExpiredAssignments (boolean, optional) - Whether expired assignments are included
+for both users; boolean; default false filters ExpirationDate before today; example:
+true; do not pass to focus on currently active assignments.
 
 Result
-users (array) - Each: { userId, name, username, profileName }.
-common (object) - System + object + field perms held by every user.
-diff (array) - Each row:
-  category ("system"|"object"|"field"|"apex"|"vf").
-  key (string) - "ModifyAllData" | "Opportunity.delete" | "Account.Phone.read".
-  values (object) - userId -> boolean (or "unknown" when not visible).
-  divergence (number) - Number of users out of total who hold it.
-summary (object) - { totalDivergentRows, byCategory: { system, object, field, apex, vf } }.
+Returns raw Salesforce QueryResult objects for each user and assignment set.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+leftUser (value) - included in the JSON returned by the tool.
+leftAssignments (value) - included in the JSON returned by the tool.
+rightUser (value) - included in the JSON returned by the tool.
+rightAssignments (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Manage Users".
@@ -54,31 +62,21 @@ Errors
 Example request
 
 compare_user_permissions({
-  "usernames": ["jane.doe@magnatech.com", "john.smith@magnatech.com"],
-  "diffOnly": true
+  "leftUserId": "0055g00000ABCDe",
+  "leftUsername": "admin@example.com",
+  "rightUserId": "0055g00000XYZAb"
 })
 
-Example result (truncated)
+Example result
 
 {
-  "users": [
-    { "userId": "005Qg0000020aBcDE", "name": "Jane Doe", "username": "jane.doe@magnatech.com", "profileName": "Standard User" },
-    { "userId": "005Qg0000020aBcFF", "name": "John Smith", "username": "john.smith@magnatech.com", "profileName": "Standard User" }
-  ],
-  "common": { "systemPermissions": ["ApiEnabled", "RunReports"] },
-  "diff": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "category": "object",
-      "key": "Opportunity.delete",
-      "values": { "005Qg0000020aBcDE": false, "005Qg0000020aBcFF": true },
-      "divergence": 1
-    },
-    {
-      "category": "system",
-      "key": "ManageUsers",
-      "values": { "005Qg0000020aBcDE": false, "005Qg0000020aBcFF": true },
-      "divergence": 1
+      "attributes": {
+        "type": "User"
+      }
     }
-  ],
-  "summary": { "totalDivergentRows": 2, "byCategory": { "system": 1, "object": 1, "field": 0, "apex": 0, "vf": 0 } }
+  ]
 }

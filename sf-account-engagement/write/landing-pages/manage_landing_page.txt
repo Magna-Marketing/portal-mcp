@@ -18,41 +18,33 @@ Content-Type: application/json
 Accept: application/json
 
 Body
-{
-  "name": "Spring LP",
-  "title": "Spring 2026",
-  "description": "Limited time offer",
-  "campaignId": 1024,
-  "folderId": 33,
-  "trackerDomainId": 7,
-  "layoutTemplateId": 71,
-  "formId": 4421,
-  "vanityUrlPath": "spring",
-  "isDoNotIndex": true,
-  "isUseRedirectLocation": false,
-  "htmlMessage": "<html>...</html>"
-}
+POST: archiveDate, campaignId, content, description, folderId, formId, isDoNotIndex, layoutTemplateId, name, openingGeneralContent, redirectLocation, regionContent, scriptFragment, title, trackerDomainId, vanityUrlPath
 
 Input (parameters)
-operation (string, required) - "create" only.
-name (string, required).
-title (string, optional).
-description (string, optional).
-campaignId (number, required).
-folderId (number, optional).
-trackerDomainId (number, optional).
-layoutTemplateId (number, optional).
-formId (number, optional) - Inline form on the LP.
-vanityUrlPath (string, optional).
-htmlMessage (string, required if `layoutTemplateId` not set).
-isDoNotIndex (boolean, optional, default true).
-isUseRedirectLocation (boolean, optional, default false).
-redirectLocation (string, optional) - When `isUseRedirectLocation=true`,
-  the LP is just a redirect.
-salesforceCmsId (string, optional) - Source CMS reference.
+operation ("create", required) - Only "create" is supported by the v5 API for landing pages.
+name (string, required) - Landing page display name. Required.
+campaignId (number, required) - Campaign to attribute visits and conversions to. Required.
+title (string, optional) - The landing page title shown in the browser tab.
+description (string, optional) - The landing page's meta description. Used for SEO.
+folderId (number, optional) - Folder to organize the landing page in.
+trackerDomainId (number, optional) - Tracker domain for the landing page URL.
+layoutTemplateId (number, optional) - Layout template id. Required when using a layout template (with or without regions).
+formId (number, optional) - Form id to associate with the landing page.
+vanityUrlPath (string, optional) - URL slug appended to the tracker domain (e.g. "spring-2026").
+content (string, optional) - HTML content for landing pages using a stock template (Landing Page Builder). Do not
+provide layoutTemplateId when using this field.
+openingGeneralContent (string, optional) - HTML placed in the %%form-opening-general-content%% tag. Used with layout templates that
+do NOT have pardot-region attributes.
+regionContent (object, optional) - JSON object overriding region defaults in a layout template that has pardot-region
+attributes. Keys are region names; values are objects with region-type fields (e.g.
+src/alt/href/content).
+scriptFragment (string, optional) - Script specified for a landing page using a stock template. Not queryable.
+isDoNotIndex (boolean, optional) - True to add a noindex meta tag and hide the page from search engines.
+redirectLocation (string, optional) - URL to redirect prospects to (used when isUseRedirectLocation is true on the record).
+archiveDate (string, optional) - Date on which the landing page is archived, in 'yyyy-mm-dd' format.
 
 Result
-landingPage (object) - Created row with `vanityUrl` populated.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -66,13 +58,11 @@ Errors
 Example request
 
 manage_landing_page({
-  "operation": "create",
-  "name": "Spring LP",
-  "campaignId": 1024,
-  "trackerDomainId": 7,
-  "vanityUrlPath": "spring",
-  "htmlMessage": "<html><body>Spring offer!</body></html>"
+  "operation": "",
+  "name": "",
+  "campaignId": 1
 })
 
 Example result
-{ "landingPage": { "id": 6612, "name": "Spring LP", "vanityUrl": "https://go.magnatech.com/spring" } }
+
+{ }

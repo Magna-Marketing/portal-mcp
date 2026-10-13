@@ -18,16 +18,17 @@ Body
 SOAP UpdateRequest on Subscriber.
 
 Input (parameters)
-subscribers (object[], required) - Each:
-  subscriberKey (string, optional) - Or email.
-  email (string, optional).
-  status (string, required) - "Active" | "Unsubscribed" | "Held" | "Bounced".
-  reason (string, optional).
-  scope (string, optional, default "Master") - "Master" (global) | "List" (single list).
-  listId (number, optional, required when scope="List").
+subscribers (object[], required) - Subscribers whose status should be updated. SOAP writes are capped at objects per call.
+scope ("Master" | "List", optional) - Default status scope. Master updates All Subscribers; List updates one list membership.
+list_id (number, optional) - Default list ID when scope is List. Can be overridden per subscriber.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP Client context. Defaults to the
+authenticated Business Unit.
 
 Result
-results (array) - { subscriberKey, status, scope, listId, error }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_write`.

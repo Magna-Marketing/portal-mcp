@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/segments/:segmentApiName/members
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/segments/{segmentApiName}/members
+Optional query: batchSize, offset, fields, filters, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,17 +20,17 @@ Body
 None.
 
 Input (parameters)
-segmentApiName (string, required).
-fields (string[], optional) - Subset of profile fields to return
-  per member.
-limit (number, optional, default 100, max 1000).
-offset (number, optional).
+segmentApiName (string, required) - API name of the segment whose materialized members should be retrieved.
+batchSize (number, optional) - Maximum number of segment members to return, from 1 through 1000. Salesforce applies its
+endpoint default when omitted.
+offset (number, optional) - Number of segment members to skip before returning results. Salesforce skips no rows
+when omitted.
+fields (string[], optional) - Segment member fields to return, such as `Id__c`, `FirstName__c`, or `EmailAddress__c`.
+filters (string, optional) - Salesforce Data 360 filter expression for segment member fields.
+orderBy (string, optional) - Sort expression for segment members, such as `Id__c ASC` or `LastName__c DESC`.
 
 Result
-members (array<object>) - Each: profile-record-shape (the segment's
-  source DMO fields).
-totalSize (number) - The segment's published `populationCount`.
-nextPageUrl (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -43,13 +44,10 @@ Errors
 
 Example request
 
-get_segment_members({ "segmentApiName": "EMEAHighValue",
-  "fields": ["Id__c","FirstName__c","EmailAddress__c"], "limit": 5 })
+get_segment_members({
+  "segmentApiName": ""
+})
 
 Example result
-{
-  "members": [
-    { "Id__c": "IND_001", "FirstName__c": "Jane", "EmailAddress__c": "jane@example.com" }
-  ],
-  "totalSize": 18420
-}
+
+{ }

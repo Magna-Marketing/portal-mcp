@@ -19,10 +19,11 @@ Body
 None.
 
 Input (parameters)
-includeRelationships (boolean, optional, default true).
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-schemas (array) - Each: { entityName, displayName, dataExtensionId, dataExtensionCustomerKey, attributes (array): [{ name, displayName, dataType, length }], relationships (array, optional): [{ relatedEntityName, fromField, toField, relationshipType }] }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read`.

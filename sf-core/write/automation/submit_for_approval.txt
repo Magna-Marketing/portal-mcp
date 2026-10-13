@@ -15,28 +15,35 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "requests": [{
-    "actionType": "Submit",
-    "contextId": "0014Q00000abcDE",
-    "comments": "Please review.",
-    "nextApproverIds": ["005Qg0000020aBcDE"],
-    "skipEntryCriteria": false,
-    "submitterId": null,
-    "processDefinitionNameOrId": null
-  }]
-}
+JSON fields: actionType, contextId, comments, nextApproverIds, contextActorId, processDefinitionNameOrId, skipEntryCriteria.
 
 Input (parameters)
-records (object[], required) - Each:
-  recordId (string, required) - Record to submit.
-  comments (string, optional).
-  nextApproverIds (string[], optional) - Override next approver(s).
-  processDefinitionNameOrId (string, optional) - Force a specific process when multiple exist.
-  skipEntryCriteria (boolean, optional, default false).
+records (object[], optional) - Approval submit requests; non-empty array posted in one
+Process Approvals call; no default; example:
+[{\"recordId\":\"006xx000004TmiQAAS\",\"comments\":\"Please approve\"}]; do not mix
+unrelated records if partial failure handling is undesirable.
+  recordId (string, required) - Process request contextId; string Salesforce record Id
+  to submit; no default; example: '006xx000004TmiQAAS'; do not pass object API names or
+  approval workitem Ids.
+  comments (string, optional) - Process request comments; string stored in approval
+  history; omitted sends no comment; example: 'Submitting for discount approval'; do not
+  pass sensitive data not intended for approvers.
+  nextApproverIds (string[], optional) - Process request nextApproverIds; array of
+  Salesforce User Ids required by some processes; omitted lets Salesforce resolve
+  approvers; example: ['005xx000001Sv6dAAC']; do not pass usernames or group Ids.
+  submitterId (string, optional) - Process request contextActorId; string User Id
+  submitting on behalf of another user; omitted uses the session user; example:
+  '005xx000001Sv6dAAC'; do not pass a username.
+  processDefinitionNameOrId (string, optional) - Process request
+  processDefinitionNameOrId; string approval process developer name or Id; omitted lets
+  Salesforce choose an eligible active process; example: 'Discount_Approval'; do not
+  pass a process label.
+  skipEntryCriteria (boolean, optional) - Process request skipEntryCriteria flag;
+  boolean used when processDefinitionNameOrId is supplied; default false; example: true;
+  do not pass true without explicitly selecting a process.
 
 Result
-results (array) - Per record: { instanceId (ProcessInstance Id), instanceStatus ("Pending"|"Approved"|"Rejected"|"Removed"), entityId, actorIds (next approvers), errors }.
+JSON containing the raw POST /services/data/v66.0/process/approvals/ response.
 
 Required permissions
 - The running user must be a permitted submitter for the process.
@@ -50,5 +57,5 @@ Errors
 Example request
 
 submit_for_approval({
-  "records": [{ "recordId": "006Qg0000020aBcDE", "comments": "Pricing locked at 10% discount" }]
+  "records": "[{\\\"recordId\\\":\\\"006xx000004TmiQAAS\\\",\\\"comments\\\":\\\"Please approve\\\"}]"
 })

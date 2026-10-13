@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/users?fields={fields}&filter[role]=eq,Marketing
+GET https://{pi-domain}/api/v5/objects/users
+Optional query: fields, filter[email], filter[isCrmUser], filter[isDeleted], filter[isVerified], filter[roleName], filter[role], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,24 +22,20 @@ Body
 None.
 
 Input (parameters)
-role (string, optional) - "Administrator" | "Marketing" |
-  "SalesManager" | "Sales".
-roleName (string, optional) - Custom role name.
-emailContains (string, optional).
-isVerified (boolean, optional).
-isCrmUser (boolean, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,email,firstName,lastName,
-  username,jobTitle,role,roleName,salesforceId,createdAt,updatedAt,
-  isDeleted,createdById,updatedById,tagReplacementLanguage).
-limit (number, optional, default 200).
-nextPageToken (string, optional).
+role ("Administrator" | "Marketing" | "SalesManager" | "Sales", optional) - Filter by standard role.
+roleName (string, optional) - Filter by custom role name (for custom roles not in the standard list).
+emailContains (string, optional) - Filter users whose email contains this string (case-insensitive like match).
+isVerified (boolean, optional) - Filter by email verification status.
+isCrmUser (boolean, optional) - Filter to users that are synced from the connected CRM.
+isDeleted (boolean, optional) - Include deleted users. Default false.
+fields (string[], optional) - Field projection. Defaults to id, email, firstName, lastName, username, jobTitle, role,
+roleName, salesforceId, createdAt, updatedAt, isDeleted, createdById, updatedById,
+tagReplacementLanguage.
+limit (number, optional) - Page size. Default 200.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-users (array) - Each: { id, email, firstName, lastName, username,
-  jobTitle, role, roleName, salesforceId, isDeleted, createdAt,
-  updatedAt, tagReplacementLanguage }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -51,12 +48,8 @@ Errors
 
 Example request
 
-list_users({ "role": "Administrator" })
+list_users({})
 
 Example result
-{
-  "users": [
-    { "id": 421, "email": "ops@magnatech.com", "role": "Administrator",
-      "salesforceId": "00558000001abCdEAA" }
-  ]
-}
+
+{ }

@@ -28,28 +28,24 @@ Body
 None.
 
 Input (parameters)
-name (string, required) - FlexiPage DeveloperName.
-strict (boolean, optional, default false) - Treat warnings as errors.
+name (string, optional) - FlexiPage DeveloperName to analyze; string exact API name;
+required unless pageName is set; example: Account_Record_Page; do not pass labels, URLs,
+or multiple names.
+pageName (string, optional) - Alias for name; string exact FlexiPage DeveloperName;
+ignored when name is present; example: Home_Page; do not pass Metadata API file paths.
+strict (boolean, optional) - Whether warnings should be treated as stricter review
+signals; boolean; default false; example: true; do not pass for Salesforce validation
+because this tool is advisory only.
 
 Result
-flexiPage (object) - { id, name, label, type, sObject }.
-metrics (object):
-  totalRegions (number).
-  totalComponents (number).
-  customComponents (number).
-  standardComponents (number).
-  maxNestingDepth (number).
-  componentsByRegion (object) - { regionName: count }.
-  uniqueComponentTypes (number).
-findings (array) - Each:
-  severity ("error"|"warning"|"info").
-  code (string) - "too_many_components", "broken_property", "deep_nesting", "visibility_rule_always_true", etc.
-  region (string|null).
-  componentIdentifier (string|null).
-  message (string).
-  suggestion (string|null).
-recommendations (string[]) - High-level actionable bullets.
-overallScore (number) - 0..100.
+raw FlexiPage row and metadata plus derived metrics, findings, recommendations, and
+score.
+flexiPage (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+metrics (value) - included in the JSON returned by the tool.
+findings (value) - included in the JSON returned by the tool.
+recommendations (value) - included in the JSON returned by the tool.
+overallScore (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -62,15 +58,19 @@ Errors
 
 Example request
 
-analyze_lightning_page({ "name": "Project__c_Record_Page" })
+analyze_lightning_page({
+  "name": "Account_Record_Page",
+  "pageName": "Home_Page",
+  "strict": true
+})
 
-Example result (truncated)
+Example result
 
 {
-  "flexiPage": { "name": "Project__c_Record_Page", "type": "RecordPage", "sObject": "Project__c" },
-  "metrics": { "totalRegions": 4, "totalComponents": 32, "customComponents": 4, "maxNestingDepth": 3, "componentsByRegion": { "main": 18, "right": 8, "header": 4, "footer": 2 } },
-  "findings": [
-    { "severity": "warning", "code": "too_many_components", "region": "main", "message": "main has 18 components; recommend < 12 for fastest load." }
-  ],
-  "overallScore": 76
+  "flexiPage": null,
+  "metadata": null,
+  "metrics": null,
+  "findings": null,
+  "recommendations": null,
+  "overallScore": null
 }

@@ -19,13 +19,21 @@ Body
 SOAP retrieve on SendClassification.
 
 Input (parameters)
-classificationType (string, optional) - "Default Commercial" | "Default Transactional" | etc.
-namePattern (string, optional).
-limit (number, optional, default 200).
+classificationType (string, optional) - SendClassificationType filter, for example "Default Commercial" or "Default
+Transactional".
+namePattern (string, optional) - SOAP like filter for SendClassification.Name. Include Marketing Cloud wildcards if
+needed.
+limit (number, optional) - SOAP retrieve batch size. Defaults to 200, maximum 2500.
+business_unit_id (string, optional) - Business Unit MID used to scope the Marketing Cloud token and SOAP ClientID context.
+Defaults to the authenticated Business Unit.
 
 Result
-totalSize (number).
-sendClassifications (array) - { id, customerKey, name, description, sendClassificationType, senderProfileCustomerKey, deliveryProfileCustomerKey, archiveEmail, honorPublicationListOptOutsForTransactionalSends, sendPriority, dateCreated, dateModified }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_read`.

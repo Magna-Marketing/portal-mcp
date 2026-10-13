@@ -6,10 +6,10 @@ explicitly allowed in the org's Content Security Policy for LWC, Aura,
 and Lightning Out.
 
 Salesforce API
-Metadata API + Tooling, v66.0.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, EndpointUrl, IsActive, Description, Context FROM CspTrustedSite
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, EndpointUrl, IsActive, Description, Context FROM CspTrustedSite
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,12 +19,33 @@ Body
 None.
 
 Input (parameters)
-includeInactive (boolean, optional, default true).
-context (string, optional) - "All" | "LEX" | "Communities" | "PerimeterFirst".
+includeInactive (boolean, optional) - Whether inactive CspTrustedSite rows are included;
+boolean; default true; example: false; do not pass false unless you only want active
+trusted sites.
+context ("All" | "LEX" | "Communities" | "PerimeterFirst", optional) -
+CspTrustedSite.Context filter; enum All, LEX, Communities, or PerimeterFirst; no
+default; example: LEX; do not pass UI labels or multiple contexts.
+urlPattern (string, optional) - CspTrustedSite.EndpointUrl filter; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: https://cdn.example.com*; do not
+pass regex, raw LIKE syntax, or multiple patterns.
+namePattern (string, optional) - DeveloperName filter; string using * and ? wildcards
+converted to SOQL LIKE; no default; example: Trusted_*; do not pass labels separated by
+commas or untrusted user input.
+whereClause (string, optional) - Additional SOQL WHERE condition for CspTrustedSite;
+string with or without WHERE; no default; example: Description != null; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for CspTrustedSite; string with or
+without ORDER BY; default DeveloperName ASC; example: EndpointUrl ASC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum trusted site rows to return; integer from 1 to 2000;
+default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-cspTrustedSites (array) - { id, developerName, endpointUrl, isActive, context, description }.
+raw Salesforce Tooling QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Modify All Data" / "Customize Application".
@@ -37,4 +58,8 @@ Errors
 
 Example request
 
-list_csp_trusted_sites({})
+list_csp_trusted_sites({
+  "includeInactive": false,
+  "context": "LEX",
+  "urlPattern": "https://cdn.example.com*"
+})

@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-transforms/:dataTransformNameOrId/run-history
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-transforms/{dataTransformNameOrId}/run-history
+Optional query: limit, offset
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,17 +19,13 @@ Body
 None.
 
 Input (parameters)
-dataTransformNameOrId (string, required).
-status (string, optional) - "Success" | "Failed" | "Running" |
-  "Cancelled" | "Queued".
-startedAfter (string, optional) - ISO-8601.
-limit (number, optional, default 25, max 200).
+dataTransformNameOrId (string, required) - Name or ID of the data transform to retrieve run history for.
+limit (number, optional) - Maximum number of run history records to return. Omit to use Salesforce's default.
+offset (number, optional) - Number of run history records to skip for pagination. Salesforce skips no rows when
+omitted.
 
 Result
-runs (array) - Each: { runId, status, startedAt, completedAt,
-  durationMs, recordsProcessed, recordsRejected, triggerType
-  ("Scheduled" | "Manual" | "Retry"), errorMessage, errorRef }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,16 +39,9 @@ Errors
 Example request
 
 get_data_transform_run_history({
-  "dataTransformNameOrId": "build_unified_individual",
-  "limit": 5
+  "dataTransformNameOrId": ""
 })
 
 Example result
-{
-  "runs": [
-    { "runId": "RUN_2026-04-29T08", "status": "Success",
-      "startedAt": "2026-04-29T08:00:00Z",
-      "completedAt": "2026-04-29T08:14:32Z",
-      "recordsProcessed": 482000 }
-  ]
-}
+
+{ }

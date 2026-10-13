@@ -5,10 +5,10 @@ List CORS allowlisted origins (`CorsWhitelistEntry`) — the domains
 allowed to call the org's REST APIs from a browser.
 
 Salesforce API
-Tooling API, v66.0. `CorsWhitelistEntry`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, UrlPattern FROM CorsWhitelistEntry
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, NamespacePrefix, UrlPattern, Language FROM CorsWhitelistEntry
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,11 +18,27 @@ Body
 None.
 
 Input (parameters)
-None.
+urlPattern (string, optional) - CorsWhitelistEntry.UrlPattern filter; string using * and
+? wildcards converted to SOQL LIKE; no default; example: https://*.example.com; do not
+pass regex, raw LIKE syntax, or multiple patterns.
+namePattern (string, optional) - DeveloperName or MasterLabel filter; string using * and
+? wildcards converted to SOQL LIKE; no default; example: Partner_*; do not pass labels
+separated by commas or untrusted user input.
+whereClause (string, optional) - Additional SOQL WHERE condition for CorsWhitelistEntry;
+string with or without WHERE; no default; example: NamespacePrefix = null; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for CorsWhitelistEntry; string with or
+without ORDER BY; default UrlPattern ASC; example: DeveloperName ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum CORS entries to return; integer from 1 to 2000;
+default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-corsOrigins (array) - { id, urlPattern }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Modify All Data".
@@ -35,4 +51,8 @@ Errors
 
 Example request
 
-list_cors_origins({})
+list_cors_origins({
+  "urlPattern": "https://*.example.com",
+  "namePattern": "Partner_*",
+  "whereClause": "NamespacePrefix = null"
+})

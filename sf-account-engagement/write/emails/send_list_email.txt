@@ -12,8 +12,8 @@ Salesforce API
 Account Engagement v4 (legacy XML).
 
 Endpoint
-POST https://{pi-domain}/api/email/version/4/do/send/list_email_id/:listEmailId
-POST https://{pi-domain}/api/email/version/4/do/sendBatch          (alternative for multi-list)
+POST https://{pi-domain}/api/email/version/4/do/send/list_email_id/{listEmailId}
+Optional query: format
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,23 +21,26 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-Body (form-urlencoded)
-format=json&campaign_id=1024&list_ids=301,302
+Body
+POST: campaign_id, client_reference, email_template_id, from_email, from_name, from_user_id, prospect_id, send_date
 
 Input (parameters)
-listEmailId (number, required) - From `create_list_email_draft`.
-operation (string, optional, default "send") - "send" | "test" -
-  v4 also exposes `/do/test` to fire to a single recipient for QA.
-testProspectId (number, optional) - Required when operation="test".
-sendDate (string, optional) - ISO-8601; if set, the email is
-  scheduled instead of sent immediately.
-clientReference (string, optional) - Caller-side dedupe key surfaced
-  on the resulting `Email` rows.
+listEmailId (number, required) - Id of the list email draft to send. Obtain from create_list_email_draft.
+operation ("send" | "test", optional) - "send" sends to the full list; "test" sends to a single prospect for QA.
+testProspectId (number, optional) - Prospect id to send the test to. Required when operation="test".
+sendDate (string, optional) - ISO-8601 datetime to schedule the send. If omitted, the email is sent immediately.
+clientReference (string, optional) - Caller-supplied deduplication key. Repeated calls with the same key within the same hour
+are no-ops.
+campaignId (number, optional) - Campaign id. Required by v4 send API. Pass the same campaign id used when creating the
+draft.
+emailTemplateId (number, optional) - Email template id. Required by v4 send API unless providing inline content. Pass the
+same id used when creating the draft.
+fromUserId (number, optional) - Pardot user id to send from. Alternative to emailTemplateId + from_name/from_email.
+fromName (string, optional) - Sender display name. Required when not using emailTemplateId or fromUserId.
+fromEmail (string, optional) - Sender email address. Required when not using emailTemplateId or fromUserId.
 
 Result
-listEmail (object) - Refreshed list email row (status moves to
-  `Scheduled` or `Sending`).
-sendCount (number) - Resolved recipients (post-suppression).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -53,10 +56,10 @@ Errors
 
 Example request
 
-send_list_email({ "listEmailId": 8821 })
+send_list_email({
+  "listEmailId": 1
+})
 
 Example result
-{
-  "listEmail": { "id": 8821, "status": "Sending" },
-  "sendCount": 12450
-}
+
+{ }

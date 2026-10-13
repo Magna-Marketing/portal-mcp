@@ -9,7 +9,7 @@ Marketing Cloud API
 REST API (`/customer/v1/contacts/{contactKey}/engagementScore`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/customer/v1/contacts/{contactKey}/engagementScore
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/customobjectdata/key/{customerKey}/rowset
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,13 +19,24 @@ Body
 None.
 
 Input (parameters)
-contactKey (string, optional).
-contactKeys (string[], optional) - Batch up to 1000.
-  One required.
-channel (string, optional, default "Email") - "Email" | "Push".
+contact_key (string, optional) - Single subscriber/contact key to look up in the Einstein Engagement Scoring Data
+Extension.
+contact_keys (string[], optional) - Batch of subscriber/contact keys to look up with one Data Extension rowset request.
+channel ("Email" | "Push", optional) - Einstein Engagement Scoring channel. Email reads MC_Einstein_Predictive_Scores by
+default; Push reads Einstein_MC_MobilePush_Scores by default.
+data_extension_customer_key (string, optional) - Override the Einstein scoring Data Extension external key. Use this if your account has
+a renamed or legacy Einstein scoring DE.
+identifier_field (string, optional) - Field used to match contact_key/contact_keys in the scoring Data Extension. Defaults to
+SubscriberKey.
+fields (string[], optional) - Optional Data Extension fields to request with $fields. Omit to return all fields
+Salesforce returns.
+page (number, optional) - REST $page value for the Data Extension rowset request. Defaults to 1.
+page_size (number, optional) - REST $pageSize value. Defaults to 100, maximum 2500.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-items (array) - Each: { contactKey, channel, openLikelihood (number 0..1), clickLikelihood (number 0..1), unsubLikelihood (number 0..1), persona ("Loyalist"|"Potential Loyalist"|"Window Shopper"|"Selective Subscriber"|"Inactive"|"Dormant"|"Winback"), engagementBand ("High"|"Medium"|"Low"), lastUpdated (string) }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read` + Einstein license.
@@ -38,4 +49,4 @@ Errors
 
 Example request
 
-get_engagement_score({ "contactKey": "MEM-100023" })
+get_engagement_score({})

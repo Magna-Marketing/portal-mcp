@@ -9,9 +9,10 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST   {instanceUrl}/services/data/v{ver}/ssot/data-streams                                  (operation="create")
-PATCH  {instanceUrl}/services/data/v{ver}/ssot/data-streams/:recordIdOrDeveloperName         (operation="update")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/data-streams/:recordIdOrDeveloperName         (operation="delete")
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-streams
+Optional query: dataspaceName
+PATCH {salesforceInstanceUrl}/services/data/v65.0/ssot/data-streams/{recordIdOrDeveloperName}
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/data-streams/{recordIdOrDeveloperName}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -36,24 +37,15 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-recordIdOrDeveloperName (string, required for update / delete).
-developerName (string, required for create).
-label (string, required for create).
-connectionId (string, required for create).
-sourceObject (string, required for create).
-refreshMode (string, optional, default "Incremental") - "Full" |
-  "Incremental" | "Streaming".
-category (string, optional) - "Profile" | "Engagement" | "Other".
-schedule (object, optional) - { scheduleType, intervalMinutes,
-  cronExpression, startDate? }.
-primaryKeyFields (string[], required for "Incremental").
-lastModifiedFieldName (string, required for "Incremental").
-filter (object, optional) - { rootGroup, conditions, nestedGroups }.
+operation ("create" | "update" | "delete", required) - The operation to perform: create, update, or delete
+recordIdOrDeveloperName (string, optional) - 18-character Salesforce record ID or stream name. Required for update and delete.
 
 Result
-dataStream (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
+_debug (value) - included in the JSON returned by the tool.
+url (value) - included in the JSON returned by the tool.
+resolutionDebug (value) - included in the JSON returned by the tool.
+requestBody (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `api`.
@@ -70,22 +62,9 @@ Errors
 Example request
 
 manage_data_stream({
-  "operation": "create",
-  "developerName": "mc_sends",
-  "label": "MCE Sends",
-  "connectionId": "0Z65800000000ABCAA",
-  "sourceObject": "Send",
-  "refreshMode": "Incremental",
-  "primaryKeyFields": ["ID"],
-  "lastModifiedFieldName": "ModifiedDate"
+  "operation": ""
 })
 
 Example result
-{
-  "dataStream": {
-    "id": "0bcxx0000000001",
-    "developerName": "mc_sends",
-    "status": "Active",
-    "dataLakeObjectName": "mc_sends__dll"
-  }
-}
+
+{ }

@@ -46,10 +46,7 @@ connectorType (string, required for *NewConfig).
 additionalProperties (object, required for *NewConfig).
 
 Result
-action (object): subOperation, command, success (boolean), durationMs.
-result (object|null) - Connector-specific payload (e.g. a list of
-  databases or schemas; or the test outcome).
-errors (array) - When `success=false`.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -69,7 +66,5 @@ run_connection_action({
 })
 
 Example result
-{
-  "action": { "command": "discover-schema", "success": true, "durationMs": 1284 },
-  "result": { "objectsDiscovered": 12, "version": 15 }
-}
+
+{ }

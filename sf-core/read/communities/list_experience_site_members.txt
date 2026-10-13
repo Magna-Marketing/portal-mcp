@@ -6,10 +6,11 @@ user with a profile assigned to the site. Returns user identity, profile,
 last login, and member type.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `NetworkMember`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, NetworkId, Network.Name, MemberId, Member.Name, Member.Username, Member.IsActive, Member.Profile.Name, LastChatterActivityDate FROM NetworkMember WHERE NetworkId = '{networkId}'
+GET /services/data/v66.0/query/?q=SELECT Id, NetworkId, Network.Name, MemberId, Member.Name, Member.Username, Member.Email, Member.IsActive, Member.Profile.Name, LastChatterActivityDate, CreatedDate FROM Network
+GET /services/data/v66.0/query/?q=SELECT Id, NetworkId, Network.Name, MemberId, Member.Name, Member.Username, Member.Email, Member.IsActive, Member.Profile.Name, LastChatterActivityDate, CreatedDate FROM NetworkMember
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,17 +20,39 @@ Body
 None.
 
 Input (parameters)
-siteId (string, optional).
-siteName (string, optional).
-  One required.
-isActiveOnly (boolean, optional, default true).
-sinceLastLoginHours (number, optional).
-limit (number, optional, default 200).
+siteId (string, optional) - Experience site Network Id; 15- or 18-character Salesforce
+Network Id; required unless siteName is provided; example: 0DB5g000000ABCdGAO; do not
+pass a community URL, site label, or multiple Ids.
+siteName (string, optional) - Experience site Network.Name used to resolve NetworkId;
+non-empty string; required unless siteId is provided; example: Customer Community; do
+not pass wildcards, URL path prefixes, or multiple names.
+isActiveOnly (boolean, optional) - Member active-user filter; boolean applied to
+Member.IsActive; default true; example: false; do not pass strings such as active or
+inactive.
+sinceLastChatterActivityHours (number, optional) - Recent chatter activity window;
+positive number of hours converted to LastChatterActivityDate lower bound; no default;
+example: 168; do not pass 0, negatives, dates, or login expectations because this is
+chatter activity, not User.LastLoginDate.
+pattern (string, optional) - Member text pattern matched against Member.Name,
+Member.Username, or Member.Email; string using * and ? wildcards converted to SOQL LIKE;
+no default; example: jane*@example.com; do not pass regex, raw LIKE syntax, or multiple
+patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for NetworkMember;
+string with or without WHERE; no default; example: Member.Profile.Name = 'Customer
+Community Login User'; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user
+input.
+orderBy (string, optional) - SOQL ORDER BY clause for NetworkMember; string with or
+without ORDER BY; default Member.Name ASC; example: LastChatterActivityDate DESC NULLS
+LAST; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum NetworkMember rows to return; integer from 1 to
+2000; default 200; example: 200; do not pass 0, negatives, decimals, or offsets.
 
 Result
-network (object) - { id, name }.
-totalSize (number).
-members (array) - { id, memberId, memberName, memberUsername, memberIsActive, memberProfile, lastChatterActivityDate }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Create and Set Up Experiences".
@@ -42,4 +65,8 @@ Errors
 
 Example request
 
-list_experience_site_members({ "siteName": "Customer_Hub" })
+list_experience_site_members({
+  "siteId": "0DB5g000000ABCdGAO",
+  "siteName": "Customer Community",
+  "isActiveOnly": false
+})

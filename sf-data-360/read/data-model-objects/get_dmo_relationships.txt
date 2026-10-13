@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName/relationships
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-objects/{dataModelObjectName}/relationships
+Optional query: dataspace, creationType, status, sortBy, limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,12 +20,22 @@ Body
 None.
 
 Input (parameters)
-dataModelObjectName (string, required).
+dataModelObjectName (string, required) - DMO developer name, either the source or target DMO in the relationship, for example
+`ssot__Individual__dlm`.
+dataspace (string, optional) - Data space name. Salesforce uses the default data space when omitted.
+creationType (string, optional) - Optional relationship creation type filter, such as `Custom` or `Calculated_Insight`.
+status (string, optional) - Optional relationship status filter, such as `Active`, `Inactive`, `ACTIVE`, or
+`CREATING`, depending on API version.
+sortBy (string, optional) - Field on which to sort results, such as `DeveloperName`.
+limit (number, optional) - Maximum number of records to return. Salesforce applies its endpoint default when
+omitted.
+offset (number, optional) - Number of records to skip before returning results. Salesforce skips no rows when
+omitted.
+orderBy (string, optional) - Sort order for the result set, such as `ASC` or `DESC`, when supported by the Salesforce
+endpoint.
 
 Result
-relationships (array) - Each: { name, label, fromDmo, fromField,
-  toDmo, toField, cardinality ("OneToOne" | "OneToMany" | "ManyToMany"),
-  isRequired }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -37,14 +48,10 @@ Errors
 
 Example request
 
-get_dmo_relationships({ "dataModelObjectName": "UnifiedIndividual__dlm" })
+get_dmo_relationships({
+  "dataModelObjectName": ""
+})
 
 Example result
-{
-  "relationships": [
-    { "name": "EngagementHistory",
-      "fromDmo": "UnifiedIndividual__dlm", "fromField": "Id__c",
-      "toDmo": "EngagementHistory__dlm", "toField": "IndividualId__c",
-      "cardinality": "OneToMany" }
-  ]
-}
+
+{ }

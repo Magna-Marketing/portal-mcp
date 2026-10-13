@@ -12,51 +12,44 @@ permission sets, and `create_differential_permission_set` to capture
 deltas between profiles.
 
 Salesforce API
-Metadata API (`Profile` type), v66.0. Deploy via `metadata/deployRequest`.
-SOQL on `Profile` for read parts of compare.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/data/v66.0/sobjects/Profile
+DELETE /services/data/v66.0/composite/sobjects
+POST /services/Soap/m/66.0  (createMetadata Profile)
+GET /services/data/v66.0/query/?q=SELECT agentAccesses, agentName, applicationVisibilities, application, categoryGroupVisibilities, dataCategoryGroup, classAccesses, apexClass, customMetadataTypeAccesses, name, customPermissions, name, customSettingAccesses, name, externalDataSourceAccesses, externalDataSource, fieldPermissions, field, flowAccesses, flow, genComputingSummaryDefAccess, configName, layoutAssignments, layout, loginFlows, friendlyname, loginIpRanges, startAddress, objectPermissions, object, pageAccesses, apexPage, profileActionOverrides, actionName, recordTypeVisibilities, recordType, servicePresenceStatusAccesses, servicePresenceStatus, tabVisibilities, tab, userPermissions, name FROM UserLicense
+GET /services/data/v66.0/query/?q=SELECT agentAccesses, agentName, applicationVisibilities, application, categoryGroupVisibilities, dataCategoryGroup, classAccesses, apexClass, customMetadataTypeAccesses, name, customPermissions, name, customSettingAccesses, name, externalDataSourceAccesses, externalDataSource, fieldPermissions, field, flowAccesses, flow, genComputingSummaryDefAccess, configName, layoutAssignments, layout, loginFlows, friendlyname, loginIpRanges, startAddress, objectPermissions, object, pageAccesses, apexPage, profileActionOverrides, actionName, recordTypeVisibilities, recordType, servicePresenceStatusAccesses, servicePresenceStatus, tabVisibilities, tab, userPermissions, name FROM Profile
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-operation-specific.
+JSON fields: fullName, userLicense, agentAccesses, applicationVisibilities, categoryGroupVisibilities, classAccesses, customMetadataTypeAccesses, customPermissions, customSettingAccesses, externalDataSourceAccesses, fieldPermissions, flowAccesses, genComputingSummaryDefAccess, layoutAssignments, loginFlows, loginHours, loginIpRanges, objectPermissions, pageAccesses, profileActionOverrides, recordTypeVisibilities, servicePresenceStatusAccesses, tabVisibilities, userPermissions.
+JSON fields: Name, Description, UserLicenseId.
+JSON fields: Name, Description.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "clone" | "compare"
-  | "delete" | "manageRecordTypeVisibility".
-profiles (object[], required for bulk; otherwise single object) - Each:
-  fullName (string) - Profile DeveloperName.
-  label (string) - Master label (used on create/clone).
-  cloneFrom (string) - Source profile DeveloperName for create/clone.
-  description (string|null).
-  userLicense (string) - When create/clone (e.g. "Salesforce", "Salesforce Platform").
-  applicationVisibilities (array, optional) - { application, default, visible }.
-  classAccesses (array, optional) - { apexClass, enabled }.
-  customMetadataTypeAccesses (array, optional) - { name, enabled }.
-  customSettingAccesses (array, optional) - { name, enabled }.
-  externalDataSourceAccesses (array, optional).
-  fieldPermissions (array, optional) - { field, readable, editable }.
-  loginIpRanges (array, optional) - { startAddress, endAddress, description }.
-  objectPermissions (array, optional) - { object, allowCreate, allowDelete, allowEdit, allowRead, viewAllRecords, modifyAllRecords }.
-  pageAccesses (array, optional) - { apexPage, enabled }.
-  recordTypeVisibilities (array, optional) - { recordType, visible, default, personAccountDefault }.
-  tabVisibilities (array, optional) - { tab, visibility ("DefaultOff"|"DefaultOn"|"Hidden") }.
-  userPermissions (array, optional) - { name, enabled }.
-compareWith (string, required for compare) - Other profile DeveloperName.
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "clone" | "compare" | "delete" | "manageRecordTypeVisibility", required) -
+Profile operation to perform; enum create, update, clone, compare, delete, or
+manageRecordTypeVisibility; no default; example 'clone'; do not choose delete unless
+removal is intended.
+profiles (unknown[], required) -
+Profile operation inputs; non-empty array of profile objects; no default; example [{
+fullName: 'Custom Sales User', cloneFrom: 'Standard User' }]; compare uses the first
+profile only.
+compareWith (string, optional) -
+Profile metadata fullName to compare against; string profile name; required for compare;
+example 'Standard User'; do not pass Profile Id.
+checkOnly (boolean, optional) -
+Whether to build/read payloads without mutating where supported; boolean; defaults to
+false; example true; delete and write operations should use this for previews.
 
-Result (deploy operations)
-Same shape as `manage_object` deploy result.
-profiles (array, on success) - { id, fullName, label, userLicense }.
-
-Result (compare)
-profileA, profileB (object) - Identity.
-diff (array) - Each: { category, key, a, b }.
-similarity (number) - 0..1.
+Result
+operation (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets" + "Modify All Data".
@@ -70,27 +63,9 @@ Idempotency & limits
 Errors
 - DUPLICATE_DEVELOPER_NAME, INVALID_FIELD, INSUFFICIENT_ACCESS_OR_READONLY.
 
-Example request (clone)
+Example request
 
 manage_profiles({
-  "operation": "clone",
-  "profiles": [{
-    "fullName": "MTG_Project_Manager",
-    "label": "MTG Project Manager",
-    "cloneFrom": "Standard_User",
-    "userLicense": "Salesforce",
-    "description": "Profile for MTG Project Managers (Q2 2026)"
-  }]
-})
-
-Example request (record-type visibility)
-
-manage_profiles({
-  "operation": "manageRecordTypeVisibility",
-  "profiles": [{
-    "fullName": "MTG_Project_Manager",
-    "recordTypeVisibilities": [
-      { "recordType": "Opportunity.Internal_Project", "visible": true, "default": true }
-    ]
-  }]
+  "operation": "example",
+  "profiles": []
 })

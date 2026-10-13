@@ -21,18 +21,17 @@ SOAP CreateRequest / UpdateRequest / DeleteRequest on Subscriber with
 SaveOptions (`UpdateAdd` for upsert semantics).
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-subscribers (object[], required) - Each:
-  subscriberKey (string, required).
-  email (string, optional).
-  status (string, optional, default "Active") - "Active" | "Unsubscribed" | "Held" | "Bounced".
-  emailTypePreference (string, optional, default "HTML") - "HTML" | "Text".
-  attributes (object, optional) - Subscriber attribute name -> value.
-  listMemberships (object[], optional) - [{ listId, status }] to set list-level membership in the same call.
+operation ("create" | "update" | "upsert" | "delete", required) - create=SOAP Create, update=SOAP Update, upsert=SOAP Create with SaveOptions UpdateAdd,
+delete=SOAP Delete.
+subscribers (object[], required) - Subscribers to manage. SOAP subscriber writes are capped at objects per call.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP Client context. Defaults to the
+authenticated Business Unit.
 
 Result
-results (array) - { subscriberKey, subscriberId, status ("created"|"updated"|"deleted"|"failed"), errors }.
-summary (object) - { created, updated, deleted, failed, total }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_write`.
@@ -47,11 +46,6 @@ Errors
 Example request
 
 manage_subscriber({
-  "operation": "upsert",
-  "subscribers": [{
-    "subscriberKey": "MEM-100023",
-    "email": "jane.doe@example.com",
-    "status": "Active",
-    "attributes": { "FirstName": "Jane", "LastName": "Doe", "TierName": "Gold" }
-  }]
+  "operation": "create",
+  "subscribers": []
 })

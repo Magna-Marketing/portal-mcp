@@ -14,13 +14,11 @@ bypasses compilation and is NOT recommended. Use the container pattern:
 Salesforce API
 Tooling API, v66.0.
 
-Endpoints
+Endpoint
 POST /services/data/v66.0/tooling/sobjects/MetadataContainer
-POST /services/data/v66.0/tooling/sobjects/ApexClassMember
+POST /services/data/v66.0/tooling/sobjects/{memberSObject}
 POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
-GET  /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest/{id}   (poll)
-DELETE /services/data/v66.0/tooling/sobjects/MetadataContainer/{id}     (cleanup on failure)
-GET  /services/data/v66.0/tooling/query/?q=...                          (lookup existing class)
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -47,18 +45,10 @@ checkOnly (boolean, optional, default false) - Compile without saving.
   Useful for syntax validation; does NOT create/update the class.
 
 Result
-{
-  "deploy": {
-    "containerId": "<id>",
-    "state": "Completed | Failed | Aborted | Invalidated",
-    "done": true,
-    "errorMessage": null,
-    "componentSuccesses": [],
-    "componentFailures": [{ "problemType", "problem", "lineNumber", "columnNumber", "fileName" }]
-  },
-  "apexClass": { "Id", "Name", "ApiVersion", "Status", "IsValid", "LengthWithoutComments", "LastModifiedDate" }
-}
-apexClass is null on checkOnly or failure.
+raw ContainerAsyncRequest result plus the raw ApexClass query record when a saved class
+is queried.
+containerAsyncRequest (value) - included in the JSON returned by the tool.
+apexClass (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Author Apex".

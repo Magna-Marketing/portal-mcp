@@ -19,19 +19,10 @@ Body
 None.
 
 Input (parameters)
-dataSpace (string, optional, default "default").
-status (string, optional) - "Active" | "Inactive".
-unifiedDmoApiName (string, optional) - Filter by target unified DMO.
-nameContains (string, optional).
-limit (number, optional, default 100).
+None.
 
 Result
-identityResolutions (array) - Each: { id, apiName, label, status,
-  unifiedDmoApiName, sourceDmos (array), schedule (object),
-  matchRuleCount (number), reconciliationRuleCount (number),
-  lastRunStatus, lastRunDate, unifiedRecordCount, createdDate,
-  lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -44,14 +35,8 @@ Errors
 
 Example request
 
-list_identity_resolutions({ "status": "Active" })
+list_identity_resolutions({})
 
 Example result
-{
-  "identityResolutions": [
-    { "id": "0YR580000000001", "apiName": "UnifiedIndividual_default",
-      "unifiedDmoApiName": "UnifiedIndividual__dlm",
-      "status": "Active", "lastRunStatus": "Success",
-      "unifiedRecordCount": 482000 }
-  ]
-}
+
+{ }

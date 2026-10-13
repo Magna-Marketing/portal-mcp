@@ -26,19 +26,26 @@ Body
 }
 
 Input (parameters)
-journeyIds (string[], required).
-versionNumbers (number[], optional).
-startDate (string, optional) - ISO timestamp.
-endDate (string, optional).
-activityIds (string[], optional) - Restrict to specific activity keys.
-contactKeys (string[], optional) - Restrict to specific contacts.
-columns (string[], optional, default ["ActivityId","ContactKey","ActivityType","Status","EventDate"]) - Output columns.
+definition_ids (string[], optional) - Journey definition IDs to include. Salesforce request body field: definitionIds.
+definition_instance_ids (string[], optional) - Definition instance IDs to include. Salesforce request body field:
+definitionInstanceIds.
+activity_ids (string[], optional) - Journey activity IDs to include. Salesforce request body field: activityIds.
+activity_types (string[], optional) - Journey activity types to include, for example trigger, emailv2, wait, randomsplit, or
+smssync. Salesforce request body field: activityTypes.
+contact_keys (string[], optional) - Contact keys to include. Salesforce request body field: contactKeys.
+statuses (string[], optional) - Journey history statuses to include, for example complete, failed, waiting, active, or
+didnotmeetentrycriteria. Salesforce request body field: statuses.
+start (string, optional) - ISO 8601 start timestamp. Salesforce recommends small windows because journey history is
+retained for 30 days and downloads cannot be resumed.
+end (string, optional) - ISO 8601 end timestamp.
+columns ("ActivityId" | "ActivityName" | "ActivityType" | "ClientStatus" | "ContactKey" | "CreatedDate" | "DefinitionId" | "DefinitionInstanceId" | "DefinitionName" | "EndDate" | "EntrySource" | "EpochTimeInMilliseconds" | "EventId" | "EventName" | "Id" | "Message" | "OutcomeActivityId" | "SourceType" | "StartDate" | "Status" | "TransactionTime" | "Result.Messages" | "Result.Outcome" | "Result.Status" | "Result.Tags"[], optional) - Columns query parameter. Salesforce returns only these columns in the downloaded file.
+format ("csv" | "tsv", optional) - Output format query parameter. Defaults to csv.
+accept_encoding (string, optional) - Optional Accept-Encoding header value such as gzip, deflate, or gzip,deflate.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-operationId (string) - Use to poll status / download.
-status (string) - "Queued" | "Processing".
-downloadUrl (string|null) - Populated when complete.
-estimatedRowCount (number, optional).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `journeys_read`.
@@ -52,8 +59,4 @@ Errors
 
 Example request
 
-download_journey_history({
-  "journeyIds": ["abc-journey-id-1"],
-  "startDate": "2026-04-01T00:00:00Z",
-  "endDate": "2026-04-30T23:59:59Z"
-})
+download_journey_history({})

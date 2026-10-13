@@ -21,9 +21,7 @@ Input (parameters)
 activationId (string, required).
 
 Result
-activation (object): id, apiName, label, segmentId, targetType,
-  targetConfig, status, schedule, contactPoints, lastRunStatus,
-  lastRunDate, populationCount, createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,10 +37,5 @@ Example request
 get_activation({ "activationId": "0YA580000000001" })
 
 Example result
-{
-  "activation": {
-    "id": "0YA580000000001", "apiName": "EMEA_to_MC",
-    "targetType": "MarketingCloudEngagement",
-    "targetConfig": { "memberId": 5001234, "dataExtensionExternalKey": "DE_EMEA_HIGH_VALUE" }
-  }
-}
+
+{ }

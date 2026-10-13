@@ -9,8 +9,7 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName/members
-GET {instanceUrl}/services/data/v{ver}/ssot/data-spaces/:idOrName/members/:dataSpaceMemberObjectName
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-spaces/{idOrName}/members/{dataSpaceMemberObjectName}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -20,16 +19,17 @@ Body
 None.
 
 Input (parameters)
-idOrName (string, required).
-memberObjectName (string, optional) - When supplied, returns a
-  single member (the DMO / CI / Activation api name).
-memberType (string, optional) - "DataModelObject" |
-  "CalculatedInsight" | "Activation" | "Segment" | "DataGraph".
+idOrName (string, required) - ID or API name of the data space whose members should be retrieved.
+dataSpaceMemberObjectName (string, optional) - Developer name of a specific data space member, such as a DLO developer name. When
+omitted, all members are listed.
+limit (number, optional) - Maximum number of items to return, from 1 through 4999. Salesforce defaults to 50 when
+omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort order for the result set, either ASC or DESC. Salesforce returns ascending results
+when omitted.
 
 Result
-members (array, when memberObjectName not supplied) - Each:
-  { memberType, apiName, label, addedDate }.
-member (object|null, when memberObjectName supplied).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,15 +42,10 @@ Errors
 
 Example request
 
-list_data_space_members({ "idOrName": "EMEA",
-  "memberType": "DataModelObject" })
+list_data_space_members({
+  "idOrName": ""
+})
 
 Example result
-{
-  "members": [
-    { "memberType": "DataModelObject",
-      "apiName": "UnifiedIndividual__dlm",
-      "label": "Unified Individual",
-      "addedDate": "2026-04-01T08:00:00Z" }
-  ]
-}
+
+{ }

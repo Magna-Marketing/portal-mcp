@@ -8,11 +8,11 @@ diffing, or cloning. For a single file use `read_lwc_file`. For just
 metadata use `read_lwc` or `get_lwc_bundle_info`.
 
 Salesforce API
-Tooling API, v66.0. `LightningComponentBundle` +
-`LightningComponentResource` (Source field).
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, Source FROM LightningComponentResource WHERE LightningComponentBundleId IN (...)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, ApiVersion, NamespacePrefix, ManageableState, Description, IsExposed, TargetConfigs, CreatedDate, LastModifiedDate FROM LightningComponentBundle
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, FilePath, Format, LightningComponentBundleId, ManageableState, Source, LastModifiedDate FROM LightningComponentResource
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,29 +22,33 @@ Body
 None.
 
 Input (parameters)
-name (string, optional) - Exact DeveloperName for a single bundle.
-pattern (string, optional) - Glob for bulk listing (e.g. "project*").
-  Mutually exclusive with `name`.
-includeBinarySource (boolean, optional, default false) - When true, SVG
-  source is returned as text (it is already text). When false, SVG is
-  returned with `source: null` and only `sizeBytes` to keep payloads small.
-limit (number, optional, default 50, max 200) - Bundle count cap when
-  using pattern.
+name (string, optional) - LWC DeveloperName to read exactly; string matching the bundle
+API name; no default; example: accountSummary; do not pass file paths, labels, or
+namespace prefixes.
+componentName (string, optional) - Alias for name; string LWC DeveloperName; ignored
+when name is present; example: contactTile; do not pass lwc/contactTile/contactTile.js.
+pattern (string, optional) - LWC DeveloperName pattern; string with * and ? wildcards
+converted to SOQL LIKE; no default; example: account*; do not use with name or pass
+regex.
+namePattern (string, optional) - Alias for pattern; string wildcard pattern; ignored
+when pattern is present; example: *Summary; do not pass raw LIKE syntax.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+LightningComponentBundle; string with or without WHERE; no default; example: IsExposed =
+true; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for LightningComponentBundle; string with or
+without ORDER BY; default DeveloperName ASC; example: LastModifiedDate DESC; do not pass
+WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum LWC bundles to read with resources; integer from 1
+to 200; default 50; example: 25; do not pass offsets, decimals,.
 
-Result (single bundle)
-bundle (object):
-  id, name, label, apiVersion, isExposed, namespacePrefix,
-  manageableState, lastModifiedDate.
-  files (array) - Each:
-    id (string).
-    fileName (string).
-    format (string).
-    filePath (string).
-    sizeBytes (number).
-    source (string|null) - File contents or null (see includeBinarySource).
-Result (pattern)
-totalSize (number).
-bundles (array of single shape).
+Result
+raw Salesforce QueryResults for bundles and resources.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+bundles (value) - included in the JSON returned by the tool.
+resources (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -59,4 +63,8 @@ Errors
 
 Example request
 
-read_lwc_comprehensive({ "name": "projectCard" })
+read_lwc_comprehensive({
+  "name": "accountSummary",
+  "componentName": "contactTile",
+  "pattern": "account*"
+})

@@ -9,7 +9,7 @@ Salesforce API
 REST API (Data), v66.0. SOQL with `IsDeleted = true ALL ROWS` (or `/queryAll`).
 
 Endpoint
-GET /services/data/v66.0/queryAll/?q=SELECT Id, Name, LastModifiedDate, LastModifiedById, LastModifiedBy.Name, IsDeleted FROM {sObject} WHERE IsDeleted = true
+GET /services/data/v66.0/queryAll/?q=SELECT Id, IsDeleted FROM {sObject} WHERE IsDeleted = true
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,16 +19,27 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required) - sObject API name to inspect.
-deletedById (string, optional).
-sinceHours (number, optional, default 360 = 15 days).
-namePattern (string, optional).
-limit (number, optional, default 200).
+sObject (string, required) - sObject API name whose soft-deleted records are queried;
+valid Salesforce object API name; required with no default; example: Account; do not
+pass labels, relationship names, object lists, or SOQL fragments.
+fields (string[], optional) - Fields selected from the deleted records; array of field
+API names; default [\"Id\", \"IsDeleted\"]; example: [\"Id\", \"Name\",
+\"LastModifiedDate\", \"IsDeleted\"]; do not pass relationship traversals, functions,
+aliases, commas inside one string, or fields unavailable on the sObject.
+namePattern (string, optional) - Optional Name filter using * and ? wildcards; string
+converted to SOQL LIKE and only valid for objects with a Name field; no default;
+example: Acme*; do not pass raw LIKE syntax, regex, or use on objects without Name.
+whereClause (string, optional) - Additional SOQL WHERE condition combined with IsDeleted
+= true; string without WHERE; no default; example: LastModifiedDate = LAST_N_DAYS:30; do
+not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for the selected sObject; string without
+ORDER BY; default Id; example: LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT,
+or FROM.
+limit (integer, optional) - Maximum deleted rows to query; positive integer clamped to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-sObject (string).
-totalSize (number).
-deletedRecords (array) - { id, name, lastModifiedDate, lastModifiedById, lastModifiedByName }.
+Returns the raw Salesforce QueryAll result for the selected sObject.
 
 Required permissions
 - "View All Data" + read on the sObject.
@@ -42,4 +53,6 @@ Errors
 
 Example request
 
-list_recycle_bin({ "sObject": "Opportunity", "sinceHours": 24 })
+list_recycle_bin({
+  "sObject": "Account"
+})

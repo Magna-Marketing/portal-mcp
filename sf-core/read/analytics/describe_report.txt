@@ -25,29 +25,8 @@ Input (parameters)
 reportId (string, required) - Report Id.
 
 Result
-Verbatim Analytics REST describe payload:
-attributes (object).
-reportMetadata (object):
-  name (string) - Report name.
-  reportFormat (string) - "TABULAR" | "SUMMARY" | "MATRIX" | "JOINED".
-  reportType (object) - { type (developer name), label }.
-  scope (string) - "organization" | "user".
-  hasDetailRows, hasRecordCount, showSubtotals, showGrandTotal (boolean).
-  detailColumns (string[]) - Column API names in detail rows.
-  groupingsAcross (array) - { name, sortOrder, dateGranularity }.
-  groupingsDown (array) - same.
-  reportFilters (array) - { column, operator, value }.
-  standardDateFilter (object|null).
-  reportBooleanFilter (string|null) - e.g. "(1 OR 2) AND 3".
-  customDetailFormulas (array).
-  aggregates (string[]).
-  currency (string|null).
-reportTypeMetadata (object):
-  categories (array) - { name, label, columns: [{ name, label, dataType, filterable, groupable, sortable }] }.
-reportExtendedMetadata (object):
-  detailColumnInfo (object) - { columnApiName: { label, dataType, ... } }.
-  groupingColumnInfo (object).
-  aggregateColumnInfo (object).
+raw Analytics report describe JSON with reportMetadata, reportTypeMetadata, and
+reportExtendedMetadata.
 
 Required permissions
 - "API Enabled".

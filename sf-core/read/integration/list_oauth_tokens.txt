@@ -6,10 +6,10 @@ used time, and use count. Use to audit / revoke stale tokens
 (`revoke_oauth_token`). Fields returned follow the SOQL SELECT.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `OauthToken`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, UserId, AppName, LastUsedDate, UseCount FROM OauthToken ORDER BY LastUsedDate DESC
+GET /services/data/v66.0/query/?q=SELECT Id, UserId, AppName, AppMenuItemId, LastUsedDate, UseCount FROM OauthToken
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,17 +19,29 @@ Body
 None.
 
 Input (parameters)
-userId (string, optional).
-appName (string, optional).
-scopesContains (string, optional) - e.g. "refresh_token".
-sinceLastUsedHours (number, optional) - Only tokens used in the last N hours.
-limit (number, optional, default 500).
+userId (string, optional) - OauthToken.UserId filter; Salesforce User Id string; no
+default; example: 0055g000000abcAAA; do not pass usernames, names, or multiple Ids.
+appNamePattern (string, optional) - OauthToken.AppName filter; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: Mobile*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+sinceLastUsedHours (number, optional) - Relative LastUsedDate filter; positive number of
+hours back from now; no default; example: 24; do not pass 0, negatives, dates, or values
+when you need never-used tokens.
+whereClause (string, optional) - Additional SOQL WHERE condition for OauthToken; string
+with or without WHERE; no default; example: UseCount > 10; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for OauthToken; string with or without
+ORDER BY; default LastUsedDate DESC; example: UseCount DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum OAuth token rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-Standard REST query response body for this call:
-- totalSize (number) - total matching rows for the query.
-- done (boolean) - whether the query is complete (no further pages).
-- records (array) - each record: attributes { type ("OauthToken"), url (string) }, Id, UserId, AppName, LastUsedDate, UseCount (additional fields appear if included in the SELECT).
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Connected Apps" + "Manage Users".
@@ -42,4 +54,8 @@ Errors
 
 Example request
 
-list_oauth_tokens({ "scopesContains": "refresh_token" })
+list_oauth_tokens({
+  "userId": "0055g000000abcAAA",
+  "appNamePattern": "Mobile*",
+  "sinceLastUsedHours": 24
+})

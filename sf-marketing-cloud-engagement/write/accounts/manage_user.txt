@@ -15,25 +15,54 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP CreateRequest / UpdateRequest envelope.
+SOAP request on AccountUser.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "lock" | "unlock" | "delete".
-userId (number, optional, required for non-create).
-username (string, required for create) - Marketing Cloud username (`UserID`).
-name (string, required for create).
-email (string, required for create).
-password (string, optional, required for create) - Initial password.
-mustChangePassword (boolean, optional, default true).
-isApiUser (boolean, optional, default false).
-isActive (boolean, optional).
-defaultBusinessUnit (number, optional) - Default MID.
-roles (number[], optional) - RoleIds to assign.
-timezone (string, optional).
-locale (string, optional).
+operation ("create" | "update" | "lock" | "unlock" | "delete", required) - create=SOAP Create AccountUser, update=SOAP Update AccountUser, lock/unlock=SOAP Update
+AccountUser.IsLocked/Unlock, delete=SOAP Delete AccountUser.
+user_id (number, optional) - Numeric AccountUser.ID. Required for update, lock, unlock, or delete when username/email
+is not supplied.
+username (string, optional) - AccountUser.UserID username. Required for create. Can identify the user for update,
+lock, unlock, or delete.
+name (string, optional) - AccountUser.Name. Required for create unless raw_account_user_xml is supplied.
+email (string, optional) - AccountUser.Email. Required for create unless raw_account_user_xml is supplied. Can
+identify the user for update, lock, unlock, or delete.
+password (string, optional) - Initial or replacement AccountUser.Password. Required for create unless
+raw_account_user_xml is supplied. Avoid XML-sensitive characters in SFMC passwords per
+Salesforce guidance.
+must_change_password (boolean, optional) - AccountUser.MustChangePassword. Defaults to true on create when password is supplied.
+is_api_user (boolean, optional) - AccountUser.IsAPIUser. Defaults to false on create.
+is_active (boolean, optional) - AccountUser.ActiveFlag. Use false to deactivate/offboard without deleting.
+is_locked (boolean, optional) - AccountUser.IsLocked override for update. The lock/unlock operations set this
+automatically.
+default_business_unit_id (number, optional) - AccountUser.DefaultBusinessUnit MID that the user lands in by default.
+default_business_unit_customer_key (string, optional) - Optional customer key for DefaultBusinessUnitObject when assigning by BU customer key
+instead of MID.
+associated_business_unit_ids (number[], optional) - Full AccountUser.AssociatedBusinessUnits collection by MID. Salesforce treats this as
+the assignable BU access collection.
+associated_business_unit_customer_keys (string[], optional) - Full AccountUser.AssociatedBusinessUnits collection by BusinessUnit.CustomerKey. Do not
+mix IDs and customer keys in the same request.
+role_ids (number[], optional) - Role.ID values to assign on create/update as AccountUser.Roles. For partial role
+add/remove use assign_user_role.
+timezone_id (number, optional) - Optional TimeZone.ID for the user.
+timezone_name (string, optional) - Optional TimeZone.Name for the user.
+locale_code (string, optional) - Optional Locale.LocaleCode such as en-US.
+language_locale_code (string, optional) - Optional LanguageLocale.LocaleCode such as en-US.
+raw_account_user_xml (string, optional) - Exact AccountUser object XML to send inside the SOAP request. Use for fields not covered
+by this schema.
+confirm_delete (boolean, optional) - Must be true when operation is delete.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context. Defaults to
+the authenticated Business Unit when the session is already scoped to one.
+client_business_unit_id (number, optional) - Optional AccountUser.Client.ID owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use this when authenticating at parent level but writing user
+settings for a child BU.
 
 Result
-user (object) - { id, accountUserId, username, name, email, isActive, isLocked, mustChangePassword, defaultBusinessUnit, roles }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `users_write`.
@@ -48,11 +77,5 @@ Errors
 Example request
 
 manage_user({
-  "operation": "create",
-  "username": "marketingops@magnatech.com",
-  "name": "Marketing Ops",
-  "email": "marketingops@magnatech.com",
-  "password": "TempPass!123",
-  "isApiUser": false,
-  "defaultBusinessUnit": 5001234
+  "operation": "create"
 })

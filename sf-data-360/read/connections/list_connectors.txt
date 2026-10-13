@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/connectors
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/connectors
+Optional query: fieldGroup, filters, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,15 +20,15 @@ Body
 None.
 
 Input (parameters)
-category (string, optional) - "Storage" | "DataWarehouse" |
-  "MarketingPlatform" | "CRM" | "AdNetwork" | "Other".
-limit (number, optional).
+fieldGroup ("SMALL" | "MEDIUM" | "BIG", optional) - Field group to include in the result. SMALL returns minimal fields, MEDIUM returns more
+fields, and BIG returns all fields. Salesforce defaults to SMALL.
+filters (string, optional) - Comma-separated filters in the Salesforce format field=value. Example:
+'name=SalesforceMarketingCloud'.
+orderBy (string, optional) - Sort by connector field, such as 'name', 'label', 'name ASC', or 'label DESC'.
+Salesforce defaults to name ASC.
 
 Result
-connectors (array) - Each: { connectorType, label, category,
-  description, isAvailable, supportedAuthTypes (array),
-  configFields (array<{ apiName, label, dataType, isRequired,
-  isSecret }>), supportedActions (array) }.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,14 +41,8 @@ Errors
 
 Example request
 
-list_connectors({ "category": "MarketingPlatform" })
+list_connectors({})
 
 Example result
-{
-  "connectors": [
-    { "connectorType": "MarketingCloudEngagement",
-      "label": "Marketing Cloud Engagement",
-      "category": "MarketingPlatform",
-      "supportedAuthTypes": ["OAuth2_ClientCredentials"] }
-  ]
-}
+
+{ }

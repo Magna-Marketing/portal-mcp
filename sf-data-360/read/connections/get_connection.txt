@@ -21,9 +21,7 @@ Input (parameters)
 connectionId (string, required).
 
 Result
-connection (object): id, name, label, connectorType, description,
-  status, isDefaultConnection, additionalProperties (object —
-  per-connector config), createdDate, lastModifiedDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -39,10 +37,5 @@ Example request
 get_connection({ "connectionId": "0Z65800000000ABCAA" })
 
 Example result
-{
-  "connection": {
-    "id": "0Z65800000000ABCAA", "name": "MTG_MCE",
-    "connectorType": "MarketingCloudEngagement",
-    "additionalProperties": { "subdomain": "mc7xxxxxxxxxxx", "memberId": 5001234 }
-  }
-}
+
+{ }

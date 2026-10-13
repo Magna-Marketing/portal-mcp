@@ -23,18 +23,30 @@ Body
 SOAP variant: RetrieveRequest with Filter.
 
 Input (parameters)
-customerKey (string, required) - DE External Key.
-fields (string[], optional) - Project specific fields. Default: all.
-filter (object, optional) - { property, simpleOperator ("equals"|"notEquals"|"isNull"|"isNotNull"|"greaterThan"|"lessThan"|"in"|"like"|"between"), value, secondValue (for between) }.
-filterAnd (object, optional) - { left, operator ("AND"|"OR"), right }.
-top (number, optional, default 1000) - Page size.
-page (number, optional, default 1).
-orderBy (string, optional).
+customer_key (string, required) - DataExtension external key / CustomerKey.
+fields (string[], optional) - Optional field projection. Required when api_mode=soap. REST can omit fields to return
+all row values.
+filter (object, optional) - Optional simple filter object. Converted to REST $filter by default, or SOAP Filter when
+api_mode=soap.
+raw_filter (string, optional) - Optional raw REST $filter expression, for example "EmailAddress eq
+\'person@example.com\'". Used only for REST mode.
+soap_filter (value, optional) - Optional advanced SOAP filter tree with {left, operator:"AND"|"OR", right} and simple
+operands. Forces SOAP mode.
+page (number, optional) - REST $page value. Defaults to 1.
+page_size (number, optional) - REST $pageSize value. Defaults to 2500. SOAP retrieve can return up to 2500 rows per
+request.
+order_by (string, optional) - Optional REST $orderBy expression.
+api_mode ("rest" | "soap", optional) - Use REST Data Extension Data API by default. Choose SOAP for advanced SOAP filters or
+exact SOAP retrieve behavior.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and REST Account-Context or SOAP ClientID
+context.
 
 Result
-rowsetCount (number).
-rows (array) - Each row is a JSON object mapping field name -> value.
-hasMore (boolean), nextPage (number, optional).
+Raw Marketing Cloud response JSON, returned unchanged.
+tool (value) - included in the JSON returned by the tool.
+apiMode (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_read`.

@@ -5,31 +5,63 @@ Create / update / delete List Views for an sObject. List Views are the
 saved filtered views shown in object tabs.
 
 Salesforce API
-Metadata API (`ListView`) + REST API for owner-level views, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (readMetadata CustomObject)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: field, operation, value.
+JSON fields: fullName, label, columns, filterScope, filters, booleanFilter, division, language, queue, sharedTo.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-sObject (string, required).
-fullName (string, required) - "<sObject>.<DeveloperName>", e.g. "Project__c.MyOpenProjects".
-label (string, required for create).
-columns (string[], required for create) - Field API names in display order.
-filterScope (string, optional, default "Everything") - "Everything" | "Mine" | "Queue" | "MyTerritory" | "Team" | "Delegated" | "AllOrders" | "OpenOrders" | "ToBeClosed" | "Pending".
-filters (array, optional) - [{ field, operation, value }].
-booleanFilter (string, optional).
-sortColumn (string, optional).
-sortOrder (string, optional, default "Asc") - "Asc" | "Desc".
-sharedTo (object|null, optional) - { type ("group"|"role"|"roleAndSubordinates"|"queue"|"allInternalUsers"|"allCustomerPortalUsers"|"allPartnerUsers"), name }. Omit for "private to me".
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Metadata action to
+run. Values are create, update, upsert, or delete; no default. Example: upsert. Do not
+pass delete unless the list view should be removed.
+sObject (string, required) - Parent object API name. String sObject name required to
+qualify the ListView fullName. Example: Account. Do not pass a label or record ID.
+fullName (string, required) - ListView fullName. Pass Object.DeveloperName or
+DeveloperName with sObject; required. Example: Account.Active_Customers. Do not pass
+private user list views because Metadata API cannot access them.
+label (string, optional) - Displayed list view name. String; required for create/upsert.
+Example: Active Customers. Do not pass an empty string.
+columns (string[], optional) - Displayed columns. Array of Salesforce ListView column
+names exactly as Metadata API accepts them; required for create/upsert. Standard fields
+can use backend names that differ from field API names, so retrieve an existing ListView
+when unsure. Example: [\"NAME\",\"CreatedDate\",\"Custom_Field__c\"]. Do not pass UI
+labels or SOQL expressions.
+filterScope (string, optional) - Owner scope for the list view. Use a v66.0 FilterScope
+value; defaults to Everything on create. Example: MineAndMyGroups. Do not pass
+deprecated or order-specific scopes.
+filters (unknown[], optional) - Filter line items. Array of ListViewFilter objects;
+omitted by default. Example:
+[{\"field\":\"Status__c\",\"operation\":\"equals\",\"value\":\"Active\"}]. Do not pass
+more than the booleanFilter expression can reference.
+booleanFilter (string, optional) - Advanced filter expression. String using filter
+indexes; omitted by default. Example: 1 AND (2 OR 3). Do not include field names or SOQL
+WHERE.
+division (string, optional) - Division value for orgs using divisions. String Metadata
+API division name; omitted by default. Example: North_America. Do not pass unless
+divisions are enabled.
+language (string, optional) - Filter language for translated startsWith or contains
+searches. Salesforce language code; omitted by default. Example: en_US. Do not pass a
+locale unsupported by the org.
+queue (string, optional) - Queue name when filterScope is Queue. String queue developer
+name; omitted by default. Example: Support_Queue. Do not pass for non-queue scopes.
+sharedTo (object, optional) - List view visibility target. Object or null; omitted for
+default/private behavior. Example: {\"type\":\"allInternalUsers\"}. Do not use for
+user-only private list views.
+  type (string, required) - Metadata API sharedTo child element name.Use
+  allInternalUsers, group, role, queue, or related values; required inside
+  sharedTo.Example: group.Do not pass profile names.
+  name (string, optional) - Target developer name.Required for named targets such as
+  group, queue, or role; all* targets default to their type.Example: Sales_Managers.Do
+  not pass a display label if the developer name differs.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -47,12 +79,8 @@ Errors
 Example request
 
 manage_list_view({
-  "operation": "create",
-  "sObject": "Opportunity",
-  "fullName": "Opportunity.OpenThisQuarter",
-  "label": "Open This Quarter",
-  "columns": ["Name", "Account.Name", "StageName", "Amount", "CloseDate"],
-  "filterScope": "Everything",
-  "filters": [{ "field": "Opportunity.IsClosed", "operation": "equals", "value": "false" }],
-  "sharedTo": { "type": "allInternalUsers", "name": "" }
+  "operation": "upsert.",
+  "sObject": "Account.",
+  "fullName": "Account.Active_Customers.",
+  "metadata": "example"
 })

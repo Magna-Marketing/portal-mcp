@@ -8,7 +8,13 @@ Marketing Cloud API
 REST API (`/interaction/v1/interactions/publishAsync/{id}?versionNumber={v}`).
 
 Endpoint
-POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishAsync/{id}?versionNumber={versionNumber}
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishAsync/{journey_id}
+Optional query: versionNumber
+POST https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishAsync/key:{journey_key}
+Optional query: versionNumber
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions/publishStatus/{statusId}
+GET https://{tenant}.rest.marketingcloudapis.com/interaction/v1/interactions
+Optional query: $orderBy, $page, $pageSize, id, key, mostRecentVersionOnly, status
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,15 +24,21 @@ Body
 None (parameters in URL).
 
 Input (parameters)
-journeyId (string, optional).
-journeyKey (string, optional).
-  One required.
-versionNumber (number, optional, default = latest draft).
-waitForCompletion (boolean, optional, default true) - Poll until published or failed.
+journey_id (string, optional) - Journey definition ID. Required when journey_key is omitted.
+journey_key (string, optional) - Journey external key. Required when journey_id is omitted.
+version_number (number, optional) - Journey version number to publish. Salesforce requires versionNumber; when omitted, the
+tool resolves the latest Draft version.
+wait_for_completion (boolean, optional) - When false, returns the raw publishAsync response. When true, polls publishStatus and
+returns a composite JSON object containing the raw publish response and raw status
+responses.
+poll_interval_ms (number, optional) - Polling interval used only when wait_for_completion is true.
+max_poll_attempts (number, optional) - Maximum publishStatus polls when wait_for_completion is true.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header.
 
 Result
-publication (object) - { statusId, status ("Pending"|"InProgress"|"Published"|"Failed"), errors (array) }.
-journey (object|null, when complete) - { id, key, name, version, status: "Published", lastPublishedDate }.
+Raw Marketing Cloud response JSON, returned unchanged.
+publishResponse (value) - included in the JSON returned by the tool.
+statusResponses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `journeys_write`.
@@ -39,4 +51,4 @@ Errors
 
 Example request
 
-publish_journey({ "journeyKey": "MTG_Welcome_Series", "versionNumber": 1 })
+publish_journey({})

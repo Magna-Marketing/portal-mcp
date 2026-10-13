@@ -19,12 +19,13 @@ Body
 { "channelAddressList": ["jane.doe@example.com", "john.smith@example.com"], "maximumCount": 100 }
 
 Input (parameters)
-emails (string[], required) - Up to 100 per call.
-maximumCount (number, optional, default 100, max 500).
+emails (string[], required) - Email channel addresses to look up. Salesforce accepts an array of email addresses.
+maximum_count (number, optional) - Maximum contact keys to return for each email address. Salesforce defaults to 1.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-totalCount (number).
-contacts (array) - Each: { channelAddress, contactKey, contactId, contactStatus, addressId, isPrimary }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read`.
@@ -37,4 +38,6 @@ Errors
 
 Example request
 
-find_contact_by_email({ "emails": ["jane.doe@example.com"] })
+find_contact_by_email({
+  "emails": []
+})

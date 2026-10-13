@@ -43,8 +43,7 @@ targetDmoApiName (string, required for create).
 extractionRules (array, optional).
 
 Result
-configuration (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -67,4 +66,5 @@ manage_document_ai_configuration({
 })
 
 Example result
-{ "configuration": { "id": "0YE580000000001", "apiName": "Invoice_Default", "status": "Active" } }
+
+{ }

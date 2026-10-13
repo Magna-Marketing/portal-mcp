@@ -22,14 +22,8 @@ Input (parameters)
 sObjects (string[], required) - sObject API names.
 
 Result
-layouts (array) - Each:
-  sObject (string).
-  searchResultsColumns (array) - [{ field, label, format }].
-  searchResultsCustomButtons (array).
-  lookupDialogsColumns (array).
-  lookupPhoneDialogsColumns (array).
-  tabColumns (array).
-  Limit (object|null).
+raw Search Result Layouts response keyed by object layout entries as returned by
+Salesforce.
 
 Required permissions
 - "API Enabled".

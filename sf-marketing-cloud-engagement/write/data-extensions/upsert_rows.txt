@@ -20,14 +20,19 @@ Body
 ]
 
 Input (parameters)
-customerKey (string, required).
-rows (object[], required) - Each: { keys (object) - PK fields, values (object) - non-PK fields to upsert }.
-async (boolean, optional, default = auto).
+customer_key (string, required) - Data Extension external key.
+rows (value[], required) - Rows to upsert. Prefer { keys, values } for synchronous rowset; flat field maps require
+key_fields.
+key_fields (string[], optional) - Primary-key field names, required when rows are supplied as flat field maps.
+async (boolean, optional) - When true, uses PUT /data/v1/async/dataextensions/key:{key}/rows with { items }.
+Defaults to true for more than 50 rows.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus REST Account-Context or SOAP
+ClientID. Defaults to the session BU when available.
+client_business_unit_id (number, optional) - Optional SOAP object Client.ID owner/context MID. Defaults to business_unit_id/session
+MID when numeric. Use this when parent authentication writes into a child BU.
 
 Result
-results (array) - { rowIndex, action ("inserted"|"updated"), success, errors }.
-totalUpserted (number).
-totalFailed (number).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `data_extensions_write`.
@@ -42,8 +47,6 @@ Errors
 Example request
 
 upsert_rows({
-  "customerKey": "Members_DE",
-  "rows": [
-    { "keys": { "MemberId": "MEM-100023" }, "values": { "Email": "jane.doe@new.com", "TierName": "Platinum" } }
-  ]
+  "customer_key": "",
+  "rows": []
 })

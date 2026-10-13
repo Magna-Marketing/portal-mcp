@@ -20,14 +20,30 @@ Body
 SOAP retrieve on List.
 
 Input (parameters)
-type (string, optional) - "Public" | "Private" | "Salesforce" | "GlobalUnsubscribe" | "Master".
-namePattern (string, optional).
-folderId (number, optional).
-limit (number, optional, default 200).
+type ("Public" | "Private" | "Salesforce" | "GlobalUnsubscribe" | "Master", optional) - Optional List.Type filter. Valid values are Public, Private, Salesforce,
+GlobalUnsubscribe, and Master.
+list_classification ("ExactTargetList" | "PublicationList" | "SuppressionList", optional) - Optional List.ListClassification filter, such as PublicationList or SuppressionList.
+name_pattern (string, optional) - Optional SOAP like filter for List.ListName. Include Marketing Cloud wildcards if
+needed.
+folder_id (number, optional) - Optional List.Category folder ID filter.
+customer_key (string, optional) - Optional exact List.CustomerKey filter.
+continue_request_id (string, optional) - SOAP RequestID returned by a prior retrieve with MoreDataAvailable. When set, the tool
+calls ContinueRequest and ignores new filters.
+limit (number, optional) - SOAP retrieve batch size. Defaults to 1000, maximum 2500.
+query_all_accounts (boolean, optional) - Sets SOAP QueryAllAccounts=true. Defaults to false so business_unit_id scoping remains
+precise.
+business_unit_id (string, optional) - Business Unit MID used to scope the token and SOAP ClientID context. Defaults to the
+authenticated Business Unit.
 
 Result
-totalSize (number).
-lists (array) - { id (ListID), customerKey, listName, description, type, listClassification ("ExactTargetList" | "PublicationList" | "SuppressionList"), category (folder Id), subscriberCount (when retrievable), dateCreated, dateModified }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+continueRequestId (value) - included in the JSON returned by the tool.
+queryAllAccounts (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `list_and_subscribers_read`.
@@ -40,4 +56,4 @@ Errors
 
 Example request
 
-list_lists({ "type": "Public" })
+list_lists({})

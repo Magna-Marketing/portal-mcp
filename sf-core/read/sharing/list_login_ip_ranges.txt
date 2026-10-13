@@ -4,11 +4,10 @@ Description
 List Login IP Ranges defined per Profile (and the org-level Trusted IP Ranges). Profiles with restricted ranges only let users log in from those IPs. Trusted ranges skip MFA challenges.
 
 Salesforce API
-Metadata API (`Profile.loginIpRanges`) + Tooling SOQL on `NetworkAccess`, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0   (readMetadata Profile per profile)
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, StartAddress, EndAddress, Description FROM NetworkAccess
+POST /services/Soap/m/66.0  (readMetadata Profile)
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,12 +17,29 @@ Body
 None.
 
 Input (parameters)
-profileNames (string[], optional) - Restrict to these profiles.
-includeTrustedIps (boolean, optional, default true) - Include org-level trusted ranges.
+profileNames (string[], optional) - Profile fullNames to read from Metadata API; array
+of profile names; default queries Profile records; example: [\"Admin\", \"Standard
+User\"]; do not pass profile Ids, labels from another org, empty strings, or
+comma-separated text.
+profileNamePattern (string, optional) - Profile Name pattern for selecting profiles;
+string with * and ? wildcards converted to SOQL LIKE; no default; example: Sales*; do
+not pass regex, raw LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for Profile selection;
+string without WHERE; no default; example: UserType = 'Standard'; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for Profile selection; string without ORDER
+BY; default Name ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT,
+or FROM.
+limit (integer, optional) - Maximum Profile rows to select before reading metadata;
+integer from 1 to 2000; default 200; example: 100; do not pass 0, negatives, decimals,
+or offsets.
+includeTrustedIps (boolean, optional) - Whether to include org-level trusted IP ranges
+from SecuritySettings.networkAccess; boolean; default true; example: false; do not pass
+when only profile login IP ranges are needed.
 
 Result
-profiles (array) - Each: { profileName, ranges: [{ startAddress, endAddress, description }] }.
-trustedIpRanges (array, optional) - [{ id, startAddress, endAddress, description }].
+Returns raw Profile metadata, raw Profile query results, and optional raw
+SecuritySettings metadata.
 
 Required permissions
 - "Manage Profiles and Permission Sets" / "View Setup and Configuration".
@@ -36,4 +52,8 @@ Errors
 
 Example request
 
-list_login_ip_ranges({ "profileNames": ["System Administrator"] })
+list_login_ip_ranges({
+  "profileNames": "[\\\"Admin\\\", \\\"Standard User\\\"]",
+  "profileNamePattern": "Sales*",
+  "whereClause": "UserType = 'Standard'"
+})

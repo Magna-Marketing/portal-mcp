@@ -23,16 +23,25 @@ Body
 }
 
 Input (parameters)
-messageId (number, required) - MobileConnect message Id (template).
-mobileNumbers (string[], required) - E.164 phone numbers.
-subscribe (boolean, optional, default true) - Auto-subscribe new numbers.
-resubscribe (boolean, optional, default true).
-keyword (string, optional) - Auto-routing keyword.
-overrideSendTime (string, optional).
+message_id (value, required) - Encoded MobileConnect messageContact ID/API key from an active API-triggered outbound
+SMS message.
+mobile_numbers (string[], optional) - Mobile numbers to send to. Use the phone-number format expected by the message country,
+for example 13175551212 for US numbers. Provide this or subscribers, not both.
+subscribers (object[], optional) - Subscriber records containing mobile_number and subscriber_key. Provide this or
+mobile_numbers, not both.
+subscribe (boolean, optional) - When true, Salesforce creates a subscription if one does not exist. keyword is required
+when subscribe or resubscribe is true.
+resubscribe (boolean, optional) - When true, Salesforce resets an unsubscribed contact subscription. keyword is required
+when subscribe or resubscribe is true.
+keyword (string, optional) - MobileConnect keyword aligned to the message short code. Required when subscribe or
+resubscribe is true.
+override (boolean, optional) - When true, Salesforce sends message_text instead of the message definition body.
+message_text (string, optional) - Override SMS body. Required by Salesforce when override is true.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-results (array) - { mobileNumber, status, queueTime, errors }.
-totalQueued (number).
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `mobile_connect_send`.
@@ -47,7 +56,5 @@ Errors
 Example request
 
 send_sms({
-  "messageId": 12345,
-  "mobileNumbers": ["+15551234567"],
-  "keyword": "MTG"
+  "message_id": ""
 })

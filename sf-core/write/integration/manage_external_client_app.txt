@@ -12,11 +12,10 @@ ExternalClientApplication using manage_external_client_app + a separate OAuth se
 deploy, or configure them in Setup UI after creation.
 
 Salesforce API
-SOAP Metadata API, v66.0. Metadata type: ExternalClientApplication (available API 59.0+).
-Use conn.metadata.create / update / delete (jsforce).
+Metadata API (SOAP), v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
+POST /services/Soap/m/66.0  (createMetadata ExternalClientApplication)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".

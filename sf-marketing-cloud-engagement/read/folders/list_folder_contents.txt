@@ -6,29 +6,51 @@ folder, Triggered Send folder, etc. without opening Marketing Cloud
 UI).
 
 Marketing Cloud API
-Composite of SOAP retrieves filtered by `CategoryID` for the relevant
-sObject.
+REST API.
+SOAP API.
 
 Endpoint
-POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx     (per content type)
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
+SOAP object: DataFolder
+POST https://{tenant}.rest.marketingcloudapis.com/asset/v1/content/assets/query
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP retrieve on the object type associated with `contentType`.
+POST: fields, page, query, sort
+SOAP request on DataFolder.
 
 Input (parameters)
-folderId (number, required).
-contentType (string, required) - Same enum as `list_folders`.
-recursive (boolean, optional, default false) - When true, include items in subfolders.
-limit (number, optional, default 500).
+folder_id (number, required) - Numeric Marketing Cloud folder/category ID. This is DataFolder.ID and maps to CategoryID
+on SOAP objects or category.id/categoryId on REST objects.
+content_type (string, required) - Folder content type. Supported content retrieval types: asset, automations, automation,
+dataextension, shared_dataextension for Shared Data Extensions, email, triggered_send,
+queryactivity, querydefinition, filteractivity, filterdefinition, list, publication,
+import, userinitiatedsends.
+recursive (boolean, optional) - When true, also retrieves child DataFolder IDs for the same content_type and includes
+those folders in the content lookup.
+fields (string[], optional) - Optional REST asset field projection or SOAP object property projection, depending on
+content_type.
+page (number, optional) - REST page number for asset and automation content lookups. Defaults to 1.
+page_size (number, optional) - REST page size for asset and automation content lookups. Defaults to 50, maximum 200.
+order_by (string, optional) - Optional REST $orderBy for automation content lookups.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID context or REST
+Account-Context header.
+query_all_accounts (boolean, optional) - Set true to add QueryAllAccounts to SOAP retrieves when the installed package can access
+child Business Units.
 
 Result
-folder (object) - { id, name, contentType }.
-items (array) - Each row's identity: { id, customerKey, name, type, dateCreated, dateModified }.
-hasMore (boolean).
+tool (value) - included in the JSON returned by the tool.
+contentType (value) - included in the JSON returned by the tool.
+folderIds (value) - included in the JSON returned by the tool.
+childFolderResponses (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
+folderContentType (value) - included in the JSON returned by the tool.
+contentLookupType (value) - included in the JSON returned by the tool.
 
 Required scopes
 - Varies by contentType.
@@ -41,4 +63,7 @@ Errors
 
 Example request
 
-list_folder_contents({ "folderId": 12345, "contentType": "dataextension" })
+list_folder_contents({
+  "folder_id": 1,
+  "content_type": ""
+})

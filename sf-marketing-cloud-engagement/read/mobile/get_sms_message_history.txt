@@ -10,7 +10,7 @@ Marketing Cloud API
 REST API (`/sms/v1/messageContact/{messageId}/history/{tokenId}/mobileNumber/{number}`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/sms/v1/messageContact/{messageId}/history/{tokenId}/mobileNumber/{mobileNumber}
+GET https://{tenant}.rest.marketingcloudapis.com/sms/v1/messageContact/{message_id}/history/{token_id}/mobileNumber/{mobile_number}
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,12 +20,15 @@ Body
 None.
 
 Input (parameters)
-messageId (number, required).
-tokenId (string, required) - Returned by the original send response.
-mobileNumber (string, required) - E.164.
+message_id (string, required) - Message ID/API key provided for the MobileConnect messageContact send definition.
+token_id (string, required) - Token ID returned by POST /sms/v1/messageContact/{messageId}/send.
+mobile_number (string, required) - Mobile number for the messageContact history lookup. Use the same number format used in
+the send request.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile REST request.
 
 Result
-history (array) - { sentDate, deliveryStatus ("Queued"|"Sent"|"Delivered"|"Failed"|"Bounced"|"Unsubscribed"), failureReason (string|null), shortCode, content }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `sms_read`.
@@ -39,7 +42,7 @@ Errors
 Example request
 
 get_sms_message_history({
-  "messageId": 12345,
-  "tokenId": "abc-token",
-  "mobileNumber": "+15551234567"
+  "message_id": "",
+  "token_id": "",
+  "mobile_number": ""
 })

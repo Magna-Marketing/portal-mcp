@@ -6,32 +6,80 @@ Apps). Configure default landing page, navigation tabs, utility bar
 items, branding, and (optionally) profile access.
 
 Salesforce API
-Metadata API (`CustomApplication`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (updateMetadata Profile)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: headerColor, footerColor, logo, logoVersion, shouldOverrideOrgTheme.
+JSON fields: fullName, label, description, uiType, navType, formFactors, defaultLandingTab, tabs, subscriberTabs, utilityBar, brand, isNavAutoTempTabsDisabled, isNavPersonalizationDisabled, isNavTabPersistenceDisabled, setupExperience, logo.
+JSON fields: application, default, visible.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-fullName (string, required) - DeveloperName.
-label (string, required for create).
-description (string, optional).
-isLightning (boolean, optional, default true).
-navType (string, optional, default "Standard") - "Standard" | "Console".
-formFactor (string, optional, default "Large") - "Large" | "Small".
-defaultLandingTab (string, optional).
-tabs (string[], optional) - Tab DeveloperNames in nav order.
-utilityBar (object, optional) - { label, items: [{ componentName, label, height, width, startAutomatically, properties }] }.
-brand (object, optional) - { headerColor (hex), logoImageUrl, secondaryColor }.
-profileAccess (array, optional) - [{ profileName, default, visible }].
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Metadata action to
+run. Values are create, update, upsert, or delete; no default. Example: upsert. Do not
+pass delete unless the app should be removed.
+fullName (string, required) - CustomApplication developer name. String fullName;
+standard apps use standard__ prefix when applicable. Example: Sales_App. Do not pass the
+app label.
+label (string, optional) - Displayed app name. String; required for create/upsert.
+Example: Sales Console. Do not pass an empty string.
+description (string, optional) - Application description. Plain string; omitted by
+default. Example: Workspace for sales reps. Do not pass HTML.
+isLightning (boolean, optional) - Convenience flag for uiType. Boolean maps true to
+Lightning and false to Aloha when uiType is omitted. Example: true. Do not pass with a
+conflicting uiType.
+uiType (string, optional) - Official app UI type. Values are Aloha or Lightning; not
+updateable after creation. Example: Lightning. Do not pass for updates unless Salesforce
+allows it.
+navType (string, optional) - Lightning navigation type. Values are Standard or Console;
+not updateable after creation. Example: Console. Do not pass for Classic apps.
+formFactor (string, optional) - Single form factor convenience value. Values are Small,
+Medium, or Large; converted to formFactors. Example: Large. Do not pass with conflicting
+formFactors.
+formFactors (string[], optional) - Form factors where the app appears. Array of Small,
+Medium, or Large; omitted by default. Example: [\"Large\",\"Small\"]. Do not pass
+unsupported device labels.
+defaultLandingTab (string, optional) - Tab opened when the app launches. String tab
+fullName; omitted by default. Example: standard-home. Do not pass a URL.
+tabs (string[], optional) - App navigation tabs in order. Array of tab fullNames;
+omitted by default. Example: [\"standard-Account\",\"Project__c\"]. Do not pass labels.
+subscriberTabs (string[], optional) - Subscriber-added managed package tabs. Array of
+tab fullNames; omitted by default. Example: [\"Custom_Tab\"]. Do not pass for unmanaged
+app tab ordering.
+utilityBarFullName (string, optional) - UtilityBar developer name. String reference;
+omitted by default. Example: Sales_UtilityBar. Do not pass embedded utility items.
+utilityBar (string | object, optional) - Compatibility input for utilityBar. String or
+object with fullName/label; maps to a utilityBar name. Example: Sales_UtilityBar. Do not
+pass a full UtilityBar definition.
+brand (unknown, optional) - Lightning AppBrand settings. Object with v66.0 brand fields;
+omitted by default. Example:
+{\"headerColor\":\"#0A2540\",\"shouldOverrideOrgTheme\":true}. Do not pass unsupported
+color formats.
+logo (string, optional) - Classic app logo document reference. String metadata
+reference; omitted by default. Example: SharedDocuments/AppLogo. Do not pass a web URL.
+isNavAutoTempTabsDisabled (boolean, optional) - Disables automatic temporary tabs for
+standard navigation apps. Boolean; omitted by default. Example: true. Do not pass for
+console apps.
+isNavPersonalizationDisabled (boolean, optional) - Disables Lightning navigation
+personalization. Boolean; omitted by default. Example: true. Do not pass for Classic
+apps.
+isNavTabPersistenceDisabled (boolean, optional) - Clears workspace tabs for each new
+console session. Boolean; omitted by default. Example: true. Do not pass for standard
+navigation apps.
+setupExperience ("all" | "essentials" | "service", optional) - Setup tree experience.
+Values are all, essentials, or service; null in Salesforce is equivalent to all.
+Example: service. Do not pass deprecated AllSetup, ServiceSetup, or EssentialsSetup.
+profileAccess (unknown[], optional) - Profile app visibility updates. Array of Profile
+applicationVisibilities entries applied after the app write; omitted by default.
+Example: [{\"profileName\":\"Admin\",\"visible\":true}]. Do not pass when operation is
+delete.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -49,11 +97,7 @@ Errors
 Example request
 
 manage_custom_app({
-  "operation": "create",
-  "fullName": "MTG_Console",
-  "label": "MTG Console",
-  "isLightning": true,
-  "navType": "Console",
-  "tabs": ["standard-Account", "standard-Opportunity", "Project__c", "MTG_Dashboard"],
-  "brand": { "headerColor": "#0A2540", "logoImageUrl": "/resource/MTG_BrandLogo" }
+  "operation": "upsert.",
+  "fullName": "Sales_App.",
+  "metadata": "example"
 })

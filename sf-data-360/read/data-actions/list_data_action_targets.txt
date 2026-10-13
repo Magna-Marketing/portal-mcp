@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-action-targets
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-action-targets
+Optional query: batchSize, offset, orderby
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,16 +19,12 @@ Body
 None.
 
 Input (parameters)
-targetType (string, optional) - "Webhook" | "MuleSoft" |
-  "AmazonEventBridge" | "GoogleCloudPubSub" | "AzureEventGrid".
-status (string, optional) - "Active" | "Paused" | "Failed".
-limit (number, optional, default 100).
+batchSize (number, optional) - Number of data action targets to return. Salesforce controls the default when omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderby (string, optional) - Field sort expression for the result set, for example 'apiName ASC' or 'label DESC'.
 
 Result
-dataActionTargets (array) - Each: { apiName, label, targetType,
-  endpointUrl, status, signingKeyConfigured (boolean), authType,
-  createdDate, lastModifiedDate }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,14 +37,8 @@ Errors
 
 Example request
 
-list_data_action_targets({ "targetType": "Webhook" })
+list_data_action_targets({})
 
 Example result
-{
-  "dataActionTargets": [
-    { "apiName": "WebhookTarget__dat", "label": "Marketing webhook",
-      "targetType": "Webhook",
-      "endpointUrl": "https://hooks.magnatech.com/cdp",
-      "signingKeyConfigured": true }
-  ]
-}
+
+{ }

@@ -12,30 +12,10 @@ handles the underlying SOAP createMetadata / updateMetadata / deleteMetadata
 call and returns the result directly.
 
 Salesforce API
-Metadata API (CustomObject type), v66.0.
-Underlying SOAP endpoint: /services/Soap/m/66.0
-jsforce abstraction: conn.metadata.create/update/delete('CustomObject', ...)
+Metadata API (SOAP), v66.0.
 
-Corrections vs original documentation:
-- Original doc listed "POST /services/data/v66.0/metadata/deployRequest" as the
-  endpoint. While that REST endpoint exists, it requires a ZIP file upload
-  (multipart/form-data) with package.xml and XML component definitions. The
-  implementation uses jsforce's Metadata SOAP API instead (createMetadata /
-  updateMetadata / deleteMetadata), which is the correct programmatic approach
-  and does not require ZIP file assembly.
-- "checkOnly" and "testLevel" are deploy-level options for the deployRequest
-  REST endpoint only, not for individual createMetadata/updateMetadata SOAP
-  calls. They have been removed from this tool.
-- 'upsert' operation: Tries createMetadata first; on DUPLICATE_DEVELOPER_NAME
-  falls back to updateMetadata — making it idempotent on fullName.
-- Added 'recordTypeTrackHistory', 'visibility', 'enableLicensing',
-  'startingNumber' for nameField AutoNumber, and full description/label
-  fields per official CustomObject metadata type spec.
-
-Headers (managed by jsforce internally)
-Authorization: Bearer <access_token>
-Content-Type: text/xml; charset=utf-8
-SOAPAction: createMetadata | updateMetadata | deleteMetadata
+Endpoint
+POST /services/Soap/m/66.0  (createMetadata CustomObject)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "upsert" | "delete".

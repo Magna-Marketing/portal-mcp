@@ -8,40 +8,57 @@ off an asynchronous recalculation; the tool polls until the PSG
 `Status="Updated"` (or surfaces "Outdated"/"Failed").
 
 Salesforce API
-Metadata API (`PermissionSetGroup` type), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+GET /services/data/v66.0/query/
+POST /services/Soap/m/66.0  (createMetadata PermissionSetGroup)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "fullName": "MTG_Delivery_Bundle",
-  "label": "MTG Delivery Bundle",
-  "description": "Project delivery base perms",
-  "permissionSets": ["MTG_Project_Manager", "MTG_Time_Logger"],
-  "mutingPermissionSets": []
-}
+JSON fields: fullName, label, description, permissionSets, mutingPermissionSets, hasActivationRequired.
 
 Input (parameters)
-fullName (string, required) - PSG DeveloperName.
-label (string, required) - Master label.
-description (string, optional).
-permissionSets (string[], required) - PermissionSet DeveloperNames to
-  include.
-mutingPermissionSets (string[], optional) - PermissionSet DeveloperNames
-  whose disabled perms suppress the same perms in the included sets.
-checkOnly (boolean, optional, default false).
-waitForRecalc (boolean, optional, default true) - Poll the PSG until
-  Status reaches a terminal state ("Updated"|"Failed"). Up to 60 s.
+fullName (string, required) - PermissionSetGroup metadata fullName and DeveloperName;
+string such as Finance_Access_Group; no default; do not pass MasterLabel or Id.
+label (string, required) - Permission set group label; string shown in Setup; no
+default; example 'Finance Access Group'; do not pass an API name unless intended.
+description (string, optional) - Permission set group description; string; omitted means
+no description; example 'Finance role permissions'; do not pass private operational
+notes.
+permissionSets (string[], required) - Included PermissionSet API names; non-empty string
+array; no default; example ['Billing_Read', 'Billing_Edit']; do not pass PermissionSet
+Ids.
+mutingPermissionSets (string[], optional) - Muting PermissionSet API names; string
+array; omitted means no muting set; example ['Billing_Muting']; do not pass regular
+members here.
+hasActivationRequired (boolean, optional) - Whether session activation is required;
+boolean supported in API v53.0+; omitted uses Salesforce default false; example false;
+do not enable without activation planning.
+waitForRecalc (boolean, optional) - Whether to poll PermissionSetGroup.Status after
+create; boolean; defaults to true; example true; do not use when immediate response is
+required.
+pollIntervalMs (integer, optional) - Recalculation polling interval in milliseconds;
+integer 1-10000; defaults to 2000; example 3000; do not pass very low values for large
+orgs.
+timeoutMs (integer, optional) - Maximum recalculation polling time in milliseconds;
+integer 1-120000; defaults to 60000; example 90000; do not pass values above two
+minutes.
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Whether to build the payload without calling
+createMetadata; boolean; defaults to false; example true; do not use when you expect
+Salesforce to create the group.
 
 Result
-Standard deploy result, plus:
-group (object) - { id, fullName, label, status, members (string[]),
-  recalcMs (number) }.
+checkOnly (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+createResponse (value) - included in the JSON returned by the tool.
+permissionSetGroupLookup (value) - included in the JSON returned by the tool.
+recalcResponses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -59,7 +76,8 @@ Errors
 Example request
 
 create_permission_set_group({
-  "fullName": "MTG_Delivery_Bundle",
-  "label": "MTG Delivery Bundle",
-  "permissionSets": ["MTG_Project_Manager", "MTG_Time_Logger"]
+  "fullName": "example",
+  "label": "example",
+  "permissionSets": [],
+  "metadataOverride": "example"
 })

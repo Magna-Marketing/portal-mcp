@@ -7,39 +7,49 @@ single subscription. For Change Data Capture channels (channelType=data) use
 manage_change_data_capture_channel instead.
 
 Salesforce API
-SOAP Metadata API, v66.0.
-Metadata types: PlatformEventChannel + PlatformEventChannelMember.
-Use conn.metadata.create / update / delete (jsforce).
+Tooling API, v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
-
-Channel naming
-fullName must end with __chn, e.g. MTG_Project_Stream__chn.
-
-Member selectedEntity
-For channelType=event: Platform Event API name ending with __e, e.g. Project_Status_Update__e.
-For channelType=data: sObject API name.
-
-PlatformEventChannelMember fullName pattern: "{channelFullName}.{selectedEntity}"
-e.g. "MTG_Project_Stream__chn.Project_Status_Update__e"
+POST /services/data/v66.0/tooling/sobjects/PlatformEventChannel
+POST /services/data/v66.0/tooling/sobjects/PlatformEventChannelMember
+PATCH /services/data/v66.0/tooling/sobjects/PlatformEventChannel/{recordId}
+DELETE /services/data/v66.0/tooling/sobjects/PlatformEventChannel/{recordId}
+DELETE /services/data/v66.0/tooling/sobjects/PlatformEventChannelMember/{recordId}
+GET /services/data/v66.0/tooling/query/
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addMember" | "removeMember".
-fullName (string, required) - Channel API name ending with __chn.
-masterLabel (string, required for create).
-channelType (string, optional, default "event") - "event" | "data".
-description (string, optional).
-members (object[], optional) - For addMember/removeMember/create:
-  selectedEntity (string, required).
-  filterExpression (string, optional).
+operation ("create" | "update" | "delete" | "addMember" | "removeMember", required) -
+Action to perform; enum create, update, delete, addMember, or removeMember; no default;
+example addMember; do not use this tool for CDC data channels.
+fullName (string, required) - Platform Event Channel full name; string ending in __chn;
+required for every operation; example MTG_Project_Stream__chn; do not pass an event
+object name.
+masterLabel (string, optional) - Channel label stored as Metadata.label; string;
+required for create and optional for update; example MTG Project Stream; do not pass for
+member-only operations.
+channelType ("event" | "data", optional) - Channel type; enum event or data; defaults to
+event but this tool is intended for event channels; example event; do not pass data
+unless intentionally creating CDC metadata outside the CDC tool.
+description (string, optional) - Channel description; string; omitted leaves it
+unchanged on update; example Partner event stream; do not include secrets.
+members (object[], optional) - Channel member definitions; array of selected entities
+and optional filters; required for addMember/removeMember and optional on create;
+example [{\"selectedEntity\":\"Project_Status_Update__e\"}]; do not pass duplicate
+selectedEntity values.
+  selectedEntity (string, required) - Selected event entity; Platform Event API name
+  ending in __e for event channels; no default; example Project_Status_Update__e; do not
+  pass AccountChangeEvent here unless using a data channel.
+  filterExpression (string, optional) - Member filter expression; SOQL-like subset
+  string supported by event filters; omitted means no filter; example City__c = 'San
+  Francisco'; do not pass arbitrary JavaScript or CEL syntax.
 
 Result
-create: { create: <SaveResult>, members: [<SaveResult>] }
-update: { update: <SaveResult> }
-delete: { delete: <DeleteResult> }
-addMember: { addMember: [<SaveResult>] }
-removeMember: { removeMember: [{ fullName, delete | error }] }
+Returns the raw Tooling API create, patch, delete, query-not-found, or member operation
+JSON response.
+success (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
+channelResult (value) - included in the JSON returned by the tool.
+memberResults (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -53,9 +63,6 @@ Errors
 Example request
 
 manage_platform_event_channel({
-  "operation": "create",
-  "fullName": "MTG_Project_Stream__chn",
-  "masterLabel": "MTG Project Stream",
-  "channelType": "event",
-  "members": [{ "selectedEntity": "Project_Status_Update__e" }]
+  "operation": "example",
+  "fullName": "example"
 })

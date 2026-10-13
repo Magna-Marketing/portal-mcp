@@ -5,30 +5,78 @@ Manage Lead and Case assignment rules and their entries (criteria,
 target user/queue, email template, notify checkbox).
 
 Salesforce API
-Metadata API (`AssignmentRules`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (writeMetadata AssignmentRules)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: assignedTo, assignedToType, emailTemplate, notifyCcRecipients, overrideExistingTeams, sortOrder.
+JSON fields: fullName, active, ruleEntry.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete" | "addEntry" | "removeEntry".
-sObject (string, required) - "Lead" | "Case".
-fullName (string, required for non-create) - Rule fullName.
-label (string, required for create).
-active (boolean, optional, default false) - Only one active rule per object.
-ruleEntries (array, optional) - [{ sortOrder, criteriaItems, formula, booleanFilter, assignedTo, assignedToType, emailTemplate, notifyCcRecipients, overrideExistingTeams }].
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "activate" | "deactivate" | "delete" | "addEntry" | "removeEntry", required) -
+Requested AssignmentRule operation; enum create, update, upsert, activate, deactivate,
+delete, addEntry, or removeEntry; no default; example: 'activate'; do not use
+update/activate/deactivate for a rule that is not already in the container.
+sObject ("Lead" | "Case", required) -
+AssignmentRules parent object; enum Lead or Case; no default; example: 'Case'; do not
+pass custom objects or labels because Salesforce supports assignment rules only for Lead
+and Case.
+fullName (string, required) -
+AssignmentRule fullName within the parent container; string DeveloperName without object
+prefix; no default; example: 'High_Value_Cases'; do not pass a label or Id.
+label (string, optional) -
+Human-readable label context; string not written directly unless supplied through
+metadata; omitted has no effect; example: 'High Value Cases'; do not rely on it as the
+metadata identity.
+active (boolean, optional) -
+AssignmentRule active flag; boolean; defaults to false when creating unless activate is
+used; example: true; do not set multiple rules active for the same object.
+ruleEntries (object[], optional) -
+AssignmentRule ruleEntry values; array of criteria and assignment objects; omitted
+changes rule-level fields only; example:
+[{\"sortOrder\":1,\"assignedToType\":\"Queue\",\"assignedTo\":\"Support_Queue\"}]; do
+not pass entries without criteria unless that is intentional.
+  sortOrder (number, optional) -
+  RuleEntry sortOrder; number controlling evaluation order; omitted lets Salesforce
+  preserve or infer order; example: 1; do not pass decimals or duplicate orders in the
+  same rule.
+  criteriaItems (object, required).
+  formula (string, optional) -
+  RuleEntry formula criteria; string formula evaluated by Salesforce; omitted when using
+  criteriaItems; example: 'Priority = \"High\"'; do not include leading '='.
+  booleanFilter (string, optional) -
+  RuleEntry booleanFilter; string combining criteria item indexes; omitted means
+  Salesforce default criteria behavior; example: '1 AND (2 OR 3)'; do not reference
+  indexes that are not present.
+  assignedTo (string, optional) -
+  RuleEntry assignedTo target; string user, queue, or team reference accepted by
+  Metadata API; omitted leaves no assignment target; example: 'Support_Queue'; do not
+  pass a display name.
+  assignedToType (string, optional) -
+  RuleEntry assignedToType; string Metadata API target type such as User, Queue, or
+  Team; omitted only when assignedTo is not used; example: 'Queue'; do not pass object
+  API names.
+  emailTemplate (string, optional) -
+  RuleEntry emailTemplate; string template fullName; omitted sends no template; example:
+  'Support/New_Case_Assigned'; do not pass template Ids.
+  notifyCcRecipients (boolean, optional) -
+  RuleEntry notifyCcRecipients flag; boolean; omitted leaves Salesforce default;
+  example: true; do not pass string booleans.
+  overrideExistingTeams (boolean, optional) -
+  Case assignment overrideExistingTeams flag; boolean used for Case rules; omitted
+  leaves Salesforce default; example: false; do not pass for Lead-only behavior
+  expectations.
+metadata (unknown, required).
 
 Result
-deploy (object).
-rule (object) - Updated identity + ruleEntries summary.
+JSON containing the raw Metadata API read response and raw create or update response for
+the container.
 
 Required permissions
 - "Customize Application".
@@ -42,10 +90,8 @@ Errors
 Example request
 
 manage_assignment_rule({
-  "operation": "create",
+  "operation": "activate",
   "sObject": "Case",
-  "fullName": "MTG_Tier1_Routing",
-  "label": "Tier 1 Routing",
-  "active": true,
-  "ruleEntries": [{ "sortOrder": 1, "criteriaItems": [{ "field": "Case.Priority", "operation": "equals", "value": "High" }], "assignedTo": "MTG_Tier1_Queue", "assignedToType": "Queue" }]
+  "fullName": "High_Value_Cases",
+  "metadata": "example"
 })

@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-kits/:dataKitName/components/:componentName/dependencies
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-kits/{dataKitName}/components/{componentName}/dependencies
+Optional query: componentType, dataspace
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,14 +19,10 @@ Body
 None.
 
 Input (parameters)
-dataKitName (string, required).
-componentName (string, required).
+None.
 
 Result
-dependencies (object):
-  componentName (string).
-  dependsOn (array<{ componentName, componentType, isResolved }>).
-  dependedOnBy (array<{ componentName, componentType }>).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -38,18 +35,8 @@ Errors
 
 Example request
 
-get_component_dependency({
-  "dataKitName": "B2C_Retail_Foundation",
-  "componentName": "OrderToIndividual_mapping"
-})
+get_component_dependency({})
 
 Example result
-{
-  "dependencies": {
-    "componentName": "OrderToIndividual_mapping",
-    "dependsOn": [
-      { "componentName": "Order__dlm",          "componentType": "DataModelObject", "isResolved": true },
-      { "componentName": "UnifiedIndividual__dlm","componentType": "DataModelObject", "isResolved": true }
-    ]
-  }
-}
+
+{ }

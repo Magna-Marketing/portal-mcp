@@ -9,7 +9,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/prospect-accounts?fields={fields}
+GET https://{pi-domain}/api/v5/objects/prospect-accounts
+Optional query: fields, filter[isDeleted], filter[name], filter[salesforceId], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -20,23 +21,18 @@ Body
 None.
 
 Input (parameters)
-salesforceId (string, optional) - SFDC Account 18-char id.
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,salesforceId,
-  assignedToUserId,industry,website,billingAddressOne,billingAddressTwo,
-  billingCity,billingState,billingZip,billingCountry,createdAt,
-  updatedAt,createdById,updatedById,number,annualRevenue,employees,
-  ownership,sicCode,tickerSymbol).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+salesforceId (string, optional) - Filter by SFDC Account 18-char id.
+nameContains (string, optional) - Filter prospect accounts whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted prospect accounts. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, salesforceId, assignedToUserId, industry,
+website, billingAddressOne, billingAddressTwo, billingCity, billingState, billingZip,
+billingCountry, createdAt, updatedAt, createdById, updatedById, number, annualRevenue,
+employees, ownership, sicCode, tickerSymbol.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-prospectAccounts (array) - Each: { id, name, salesforceId,
-  assignedToUserId, industry, website, billingAddressOne, billingCity,
-  billingState, billingCountry, employees, annualRevenue, ownership,
-  sicCode, tickerSymbol, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -49,12 +45,8 @@ Errors
 
 Example request
 
-list_prospect_accounts({ "salesforceId": "001580000A1B2C3DEAQ" })
+list_prospect_accounts({})
 
 Example result
-{
-  "prospectAccounts": [
-    { "id": 5512, "name": "Acme", "salesforceId": "001580000A1B2C3DEAQ",
-      "industry": "Technology", "employees": 1200 }
-  ]
-}
+
+{ }

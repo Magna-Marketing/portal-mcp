@@ -6,10 +6,10 @@ External Objects are queryable via SOQL but reads forward to the
 external system.
 
 Salesforce API
-REST API + Tooling, v66.0. SOQL/EntityDefinition.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, Description FROM EntityDefinition WHERE QualifiedApiName LIKE '%25__e' LIMIT 100
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,11 +19,24 @@ Body
 None.
 
 Input (parameters)
-externalDataSourceName (string, optional).
+pattern (string, optional) - External Object API name or label pattern; string using *
+and ? wildcards converted to SOQL LIKE; no default; example: SAP*__x; do not pass regex,
+raw LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional EntityDefinition SOQL WHERE condition;
+string with or without WHERE; no default; example: NamespacePrefix = null; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - EntityDefinition SOQL ORDER BY clause; string with or
+without ORDER BY; default QualifiedApiName ASC; example: Label ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum EntityDefinition rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-externalObjects (array) - { qualifiedApiName, label, pluralLabel, externalName, externalDataSourceId, externalDataSourceName }.
+raw Salesforce Tooling QueryResult for EntityDefinition records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -36,4 +49,8 @@ Errors
 
 Example request
 
-list_external_objects({})
+list_external_objects({
+  "pattern": "SAP*__x",
+  "whereClause": "NamespacePrefix = null",
+  "orderBy": "Label ASC"
+})

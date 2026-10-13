@@ -9,39 +9,49 @@ Marketing Cloud API
 REST API (`/automation/v1/automations`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations
-PATCH  https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}
-DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{id}
+POST https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations
+PATCH https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{automation_id}
+PATCH https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/key:{automation_key}
+DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/{automation_id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/automations/key:{automation_key}
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/queries
+GET https://{tenant}.rest.marketingcloudapis.com/automation/v1/scripts
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "name": "MTG_Nightly_Member_Sync",
-  "description": "Sync members nightly from CRM to MC",
-  "key": "mtg_nightly_member_sync",
-  "categoryId": 12345,
-  "steps": [{
-    "name": "Step 1: Import",
-    "annotation": "Import latest members",
-    "stepNumber": 1,
-    "activities": [{ "name": "Import Members", "objectTypeId": 43, "displayOrder": 1 }]
-  }]
-}
+POST: steps
+PATCH: steps
+DELETE: steps
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-automationId (string, optional, required for non-create).
-automationKey (string, optional).
-name (string, required for create).
-description (string, optional).
-categoryId (number, optional).
-steps (object[], optional) - Each: { stepNumber, name, annotation, activities: [{ name, objectTypeId, activityObjectId | activityKey, displayOrder }] }.
+operation ("create" | "update" | "delete", required) - create=POST /automation/v1/automations, update=PATCH
+/automation/v1/automations/{id|key:key}, delete=DELETE
+/automation/v1/automations/{id|key:key}.
+automation_id (string, optional) - Automation id/ObjectID. Required for update/delete when automation_key is omitted.
+automation_key (string, optional) - Automation external key. Used as key:{key} in REST paths. Required for update/delete
+when automation_id is omitted.
+name (string, optional) - Automation name. Required for create unless raw_request is provided.
+key (string, optional) - Automation external key/customer key. Required for create unless raw_request is
+provided.
+description (string, optional) - Automation description.
+category_id (number, optional) - Automation Studio folder categoryId.
+type (string, optional) - Automation type when needed by the REST API, commonly scheduled.
+start_source (object, optional) - Automation startSource payload, for example { "typeId": 1 } for a scheduled automation.
+Sent as startSource.
+status (string, optional) - Optional status value to send to Salesforce when supported by the API.
+steps (object[], optional) - Ordered Automation Studio steps. Each activity should reference an existing activity
+definition by activityObjectId or activityKey and include objectTypeId.
+raw_request (object, optional) - Exact Salesforce REST request body. When provided for create/update, this body is sent
+as-is except for the Account-Context header.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context REST header or
+SOAP ClientID context. Defaults to the authenticated Business Unit when the session is
+already scoped to one.
 
 Result
-automation (object) - { id, key, name, description, status, categoryId, stepCount }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `automations_write`.
@@ -55,9 +65,5 @@ Errors
 Example request
 
 manage_automation({
-  "operation": "create",
-  "name": "MTG_Nightly_Member_Sync",
-  "key": "mtg_nightly_member_sync",
-  "categoryId": 12345,
-  "steps": [{ "stepNumber": 1, "name": "Step 1", "activities": [] }]
+  "operation": "create"
 })

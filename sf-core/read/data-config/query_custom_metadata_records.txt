@@ -6,10 +6,11 @@ wrapper that auto-handles the `__mdt` suffix and lets callers pass
 fields, where, orderBy without writing the full SELECT.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `<CMT>__mdt`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel FROM {cmtName}__mdt
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, Label, NamespacePrefix FROM {cmtName}
+
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
@@ -18,15 +19,28 @@ Body
 None.
 
 Input (parameters)
-cmtName (string, required) - Custom Metadata Type API name (with or without `__mdt`).
-fields (string[], optional, default ["Id","DeveloperName","Label","NamespacePrefix"]).
-where (string, optional).
-orderBy (string, optional).
-limit (number, optional, default 200).
+cmtName (string, optional) - Custom Metadata Type API name; string with or without the
+__mdt suffix; required; example: Feature_Flag__mdt; do not pass object labels, record
+names, or arbitrary SOQL.
+fields (string[], optional) - Fields to select from the __mdt object; array of API field
+paths; default ["Id","DeveloperName","Label","NamespacePrefix"]; example:
+["DeveloperName","Enabled__c"]; do not pass functions, aliases, commas inside one item,
+or untrusted user text.
+whereClause (string, optional) - Additional SOQL WHERE condition for the __mdt object;
+string with or without WHERE; no default; example: Enabled__c = true; do not pass
+SELECT, FROM, ORDER BY, LIMIT, semicolons, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for the __mdt object; string with or
+without ORDER BY; default DeveloperName ASC; example: DeveloperName ASC; do not pass
+WHERE, LIMIT, SELECT, FROM, or semicolons.
+limit (integer, optional) - Maximum custom metadata rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-records (array) - Each: { Id, DeveloperName, Label, NamespacePrefix, ...selected fields }.
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "API Enabled".
@@ -39,4 +53,11 @@ Errors
 
 Example request
 
-query_custom_metadata_records({ "cmtName": "Feature_Flag__mdt", "fields": ["DeveloperName","Label","Enabled__c"] })
+query_custom_metadata_records({
+  "cmtName": "Feature_Flag__mdt",
+  "fields": [
+    "DeveloperName",
+    "Enabled__c"
+  ],
+  "whereClause": "Enabled__c = true"
+})

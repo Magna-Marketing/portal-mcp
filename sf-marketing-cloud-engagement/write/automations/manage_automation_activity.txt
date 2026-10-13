@@ -9,40 +9,52 @@ Marketing Cloud API
 REST API (varies by activity type) and SOAP for some.
 
 Endpoint
-POST/PATCH/DELETE https://{tenant}.rest.marketingcloudapis.com/automation/v1/{activityPath}/{id}
-
-Examples:
-- SQL Query: `/automation/v1/queries`
-- Filter: `/automation/v1/filterdefinitions`
-- Import: `/automation/v1/imports`
-- Send Email: `/automation/v1/sendemail`
-- Data Extract: `/automation/v1/extracts`
-- File Transfer: `/automation/v1/fileTransferActivity`
-- Verification: `/automation/v1/verifications`
+POST https://{tenant}.rest.marketingcloudapis.com/{rest_activity_path}
+PATCH https://{tenant}.rest.marketingcloudapis.com/{rest_activity_path}/{activity_id}
+PATCH https://{tenant}.rest.marketingcloudapis.com/{rest_activity_path}/{key}
+DELETE https://{tenant}.rest.marketingcloudapis.com/{rest_activity_path}/{activity_id}
+DELETE https://{tenant}.rest.marketingcloudapis.com/{rest_activity_path}/{key}
+POST https://{tenant}.soap.marketingcloudapis.com/Service.asmx
 
 Headers
 Authorization: Bearer <access_token>
+Content-Type: text/xml; charset=utf-8
 Content-Type: application/json
+Accept: application/json
 
 Body
 Per activity-type schema. The MCP server provides validation helpers.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "validate".
-activityType (string, required) - "Query" | "Filter" | "Import" | "Export" | "SendEmail" | "DataExtract" | "FileTransfer" | "Verification" | "Wait" | "Refresh" | "Script".
-activityId (string, optional, required for non-create).
-key (string, optional).
-name (string, required for create).
-description (string, optional).
-config (object, required for create / update) - Activity-specific schema:
-  Query: { queryText, targetKey, targetUpdateTypeName ("Append"|"Overwrite"|"Update") }.
-  Filter: { sourceObjectId, destinationObjectId, filterDefinitionId }.
-  Import: { destinationObjectId, fileTransferLocationId, fileSpec, dateFormatLocale, fileType ("CSV"), updateTypeName }.
-  SendEmail: { emailId, sendClassificationId, audience, sendTime }.
-  ... other types per docs.
+operation ("create" | "update" | "delete" | "validate", required) - create/update/delete sends the activity definition to the Salesforce API. validate
+performs local schema/path validation only and does not call Salesforce.
+activity_type ("Query" | "Filter" | "FilterDefinition" | "Import" | "SendEmail" | "DataExtract" | "FileTransfer" | "Verification" | "Wait" | "Refresh" | "Script", required) - Automation activity type. Query, Import, SendEmail, Filter/FilterDefinition, and
+DataExtract use supported SOAP objects by default. FileTransfer and Script use
+Automation Studio REST paths.
+activity_id (string, optional) - Activity definition id/ObjectID. Required for update/delete when key is omitted.
+key (string, optional) - Activity external key/customer key. Required for create unless supplied in
+raw_request/config. Used as CustomerKey for SOAP activity definitions.
+name (string, optional) - Activity name. Required for create unless supplied in raw_request/config.
+description (string, optional) - Activity description.
+category_id (number, optional) - Folder category ID, sent as CategoryID for SOAP objects or categoryId for REST payloads.
+config (object, optional) - Activity-specific Salesforce fields. For Query, helpful aliases include queryText,
+targetKey, targetUpdateTypeName, targetUpdateType, and targetType. Other keys are sent
+through to Salesforce.
+raw_request (object, optional) - Exact Salesforce request body for REST activity paths. For SOAP activity types, prefer
+config so the tool can build the correct SOAP object.
+rest_activity_path (string, optional) - Override REST collection path, for example /automation/v1/fileTransfers. Use this for
+Salesforce activity endpoints not represented by activity_type.
+soap_object_type (string, optional) - Override SOAP object type, for example QueryDefinition, ImportDefinition,
+EmailSendDefinition, FilterDefinition, or ExtractDefinition.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context REST header or
+SOAP ClientID context. Defaults to the authenticated Business Unit when the session is
+already scoped to one.
 
 Result
-activity (object) - { id, key, name, type, status, configurationArguments }.
+valid (value) - included in the JSON returned by the tool.
+api (value) - included in the JSON returned by the tool.
+restActivityPath (value) - included in the JSON returned by the tool.
+soapObjectType (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `automations_write`.

@@ -19,13 +19,21 @@ Body
 SOAP retrieve on Send filtered by ID.
 
 Input (parameters)
-sendId (number, optional).
-sendCustomerKey (string, optional).
-emailCustomerKey (string, optional) - Use to fetch the most recent send for an email.
-recentOnly (boolean, optional, default false) - Return the latest send (when emailCustomerKey is set).
+sendId (number, optional) - Marketing Cloud Send.ID to retrieve.
+sendCustomerKey (string, optional) - Marketing Cloud Send.CustomerKey to retrieve.
+emailCustomerKey (string, optional) - Unsupported by SOAP Send.Retrieve filters. Use sendId or sendCustomerKey instead.
+recentOnly (boolean, optional) - Deprecated. SOAP Send.Retrieve does not support latest-send lookups by emailCustomerKey.
+limit (number, optional) - SOAP retrieve batch size. Defaults to 200, maximum 2500.
+business_unit_id (string, optional) - Business Unit MID used to scope the Marketing Cloud token and SOAP ClientID context.
+Defaults to the authenticated Business Unit.
 
 Result
-send (object) - { id, customerKey, emailId, emailName, sendDate, status ("New"|"Pending"|"Scheduled"|"Sending"|"Complete"|"Cancelled"|"Failed"), queuedCount, sentCount, deliveredCount, openCount, uniqueOpenCount, clickCount, uniqueClickCount, bounceCount, unsubscribeCount, fromAddress, fromName, subjectLine, sourceCustomerKey, isMultipart }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+limit (value) - included in the JSON returned by the tool.
+filter (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_read`.
@@ -38,4 +46,4 @@ Errors
 
 Example request
 
-get_send_status({ "sendId": 1234567 })
+get_send_status({})

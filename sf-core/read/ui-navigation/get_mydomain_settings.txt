@@ -4,11 +4,10 @@ Description
 Read the org's MyDomain configuration: domain name, deploy status, login policy, redirect policy, embedded login disabled flag, partial login policy, branding domain, and the org's instance URL aliases.
 
 Salesforce API
-Metadata API (`MyDomainSettings`, `DomainSettings`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0   (readMetadata MyDomainSettings)
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Domain, OptionsHstsPreload, HttpsOption, CnameTarget FROM Domain
+POST /services/Soap/m/66.0  (readMetadata MyDomainSettings)
 
 Headers
 Authorization: Bearer <access_token>
@@ -21,15 +20,15 @@ Input (parameters)
 None.
 
 Result
-domain (string) - "mtg.my.salesforce.com".
-deployStatus (string) - "InProgress" | "Deployed" | "Failed".
-loginPolicy (string) - "All" | "MyDomainOnly".
-redirectPolicy (string) - "Disabled" | "Warning" | "Frame" | "Redirect".
-disableEmbeddedLogin (boolean).
-partialLoginPolicy (string).
-useNativeBrowserForLogin (boolean).
-domains (array) - [{ domain, optionsHstsPreload, httpsOption, cnameTarget }].
-brandingDomain (string|null).
+object containing raw myDomainSettings, organization QueryResult, and domains
+QueryResult responses.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+myDomainSettings (value) - included in the JSON returned by the tool.
+organization (value) - included in the JSON returned by the tool.
+domains (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".

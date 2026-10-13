@@ -12,13 +12,12 @@ Org-wide permission audit oriented at security/compliance. Reports:
 - Optional per-user enumeration for the high-risk perms.
 
 Salesforce API
-REST API + Tooling, v66.0. Composite of:
-- `Profile`/`PermissionSet`/`PermissionSetGroup` queries.
-- `PermissionSetAssignment` aggregations.
-- `find_users_with_permission` for each high-risk perm.
+REST API (Data), v66.0.
 
 Endpoint
-N/A.
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Label, Type, ProfileId, Profile.Name, PermissionSetGroupId, IsCustom, IsOwnedByProfile, NamespacePrefix, CreatedDate, LastModifiedDate, PermissionsModifyAllData, PermissionsViewAllData, PermissionsApiEnabled, PermissionsManageUsers, PermissionsCustomizeApplication, PermissionsViewSetup FROM PermissionSet
+GET /services/data/v66.0/query/?q=SELECT Id, ParentId, Parent.Name, Parent.Label, SObjectType, PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, PermissionsModifyAllRecords, PermissionsViewAllFields FROM ObjectPermissions
+GET /services/data/v66.0/query/?q=SELECT Id, ParentId, Parent.Name, Parent.Label, SObjectType, Field, PermissionsRead, PermissionsEdit FROM FieldPermissions
 
 Headers
 Authorization: Bearer <access_token>
@@ -28,40 +27,33 @@ Body
 None.
 
 Input (parameters)
-highRiskPermissions (string[], optional) - Override the built-in list of
-  system perms to audit. Default: ["ModifyAllData", "ViewAllData",
-  "ManageUsers", "ManageProfilesPermissionSets", "AuthorApex",
-  "CustomizeApplication", "ApiEnabled", "PasswordNeverExpires",
-  "ManageDataIntegrations", "ViewSetup"].
-includeUserLists (boolean, optional, default false) - When true, embed
-  user arrays (names + ids) per high-risk permission. Otherwise just counts.
-includeUnassignedPermsets (boolean, optional, default true).
-includeStaleGroups (boolean, optional, default true).
-includeProfileBreakdown (boolean, optional, default true).
-limitPerSection (number, optional, default 50).
+permissionSetNamePattern (string, optional) - PermissionSet Name pattern to audit;
+string with * and ? wildcards converted to SOQL LIKE; no default; example: Finance_*; do
+not pass labels, regex, raw LIKE syntax, or multiple names.
+sObjectType (string, optional) - ObjectPermissions or FieldPermissions SObjectType
+filter; Salesforce object API name string; no default; example: Account; do not pass
+object labels, relationship names, or SOQL fragments.
+field (string, optional) - FieldPermissions Field filter; fully qualified field API
+name; no default; example: Account.AnnualRevenue; do not pass unqualified field names,
+labels, or wildcards.
+whereClause (string, optional) - Additional SOQL WHERE condition applied to
+PermissionSet; string without WHERE; no default; example: IsOwnedByProfile = false; do
+not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for PermissionSet; string without ORDER BY;
+default Name ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT, or
+FROM.
+limit (integer, optional) - Maximum rows per query; integer from 1 to 2000; default 200;
+example: 250; do not pass 0, negatives, decimals, or offsets.
 
 Result
-generatedAt (string) - ISO.
-orgInstanceUrl (string).
-summary (object):
-  totalActiveUsers (number).
-  totalProfiles (number).
-  totalPermissionSets (number).
-  totalPermissionSetGroups (number).
-  totalPermissionSetAssignments (number).
-highRisk (array) - Per permission audited:
-  permission (string).
-  totalUsers (number).
-  bySource (object) - { profile, permset, group } counts.
-  topProfiles (array) - { profileName, userCount }.
-  topPermsets (array) - { name, userCount }.
-  users (array, optional, when includeUserLists=true).
-unassignedPermsets (array, optional) - { id, name, label, createdDate }.
-staleGroups (array, optional) - { id, developerName, status, lastError }.
-profileBreakdown (array, optional) - { profileName, userCount,
-  highRiskPermissionCount }.
-recommendations (string[]) - Heuristic suggestions
-  (e.g. "Move 3 users off ModifyAllData via PSG MTG_Security_Admin").
+Returns raw Salesforce QueryResult objects grouped by queried object.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+permissionSets (value) - included in the JSON returned by the tool.
+objectPermissions (value) - included in the JSON returned by the tool.
+fieldPermissions (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration".
@@ -76,35 +68,22 @@ Errors
 
 Example request
 
-audit_permissions({ "includeUserLists": true })
+audit_permissions({
+  "permissionSetNamePattern": "Finance_*",
+  "sObjectType": "Account",
+  "field": "Account.AnnualRevenue"
+})
 
-Example result (truncated)
+Example result
 
 {
-  "generatedAt": "2026-04-29T16:00:00Z",
-  "summary": {
-    "totalActiveUsers": 412,
-    "totalProfiles": 14,
-    "totalPermissionSets": 87,
-    "totalPermissionSetGroups": 12,
-    "totalPermissionSetAssignments": 1456
-  },
-  "highRisk": [
+  "totalSize": 1,
+  "done": true,
+  "records": [
     {
-      "permission": "ModifyAllData",
-      "totalUsers": 4,
-      "bySource": { "profile": 2, "permset": 0, "group": 2 },
-      "topProfiles": [{ "profileName": "System Administrator", "userCount": 2 }],
-      "users": [
-        { "userId": "005Qg0000020aBcAA", "name": "Admin One", "source": ["Profile: System Administrator"] }
-      ]
+      "attributes": {
+        "type": "PermissionSet"
+      }
     }
-  ],
-  "unassignedPermsets": [
-    { "id": "0PSQg0000004XyZAB", "name": "Old_VPN_Access", "label": "Old VPN Access", "createdDate": "2024-01-12T...0Z" }
-  ],
-  "recommendations": [
-    "5 permission sets are unassigned and were last modified > 6 months ago - candidates for archival.",
-    "Permission Set Group 'MTG_Beta' is in Outdated status - re-save to recalc."
   ]
 }

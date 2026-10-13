@@ -6,31 +6,114 @@ the Metadata API. Allows defining entry criteria, approval steps with
 approvers, and final actions.
 
 Salesforce API
-Metadata API (`ApprovalProcess`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (readMetadata Workflow)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: fullName, description, field, formula, lookupValue, lookupValueType, name, newValue, notifyAssignee, operation, protected, reevaluateOnChange, targetObject.
+JSON fields: type, recipient.
+JSON fields: fullName, description, protected, senderType, senderAddress, template, recipients, ccEmails.
+JSON fields: name, label, description, entryCriteria, assignedApprover, allowDelegate, approvalActions, ifCriteriaNotMet, rejectBehavior, rejectionActions.
+JSON fields: type, name.
+JSON fields: fullName, active, allowRecall, label, description, entryCriteria, approvalPageFields, approvalStep, allowedSubmitters, emailTemplate, enableMobileDeviceAccess, recordEditability, finalApprovalActions, finalApprovalRecordLock, finalRejectionActions, finalRejectionRecordLock, recallActions, initialSubmissionActions, nextAutomatedApprover, postTemplate, showApprovalHistory.
+JSON fields: type, submitter.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
-object (string, required) - sObject API name.
-fullName (string, required) - DeveloperName.
-label (string, required for create) - Master label.
-description (string, optional).
-entryCriteria (object, optional) - { booleanFilter, criteriaItems[], formula }.
-approvalSteps (array, optional) - [{ stepNumber, label, description, criteria, assignedApprover ({ type, name }), allowDelegate, ifCriteriaNotMet }].
-initialSubmitters (array, optional) - [{ type, name }].
-recordEditability (string, optional) - "Admin" | "AdminOrCurrentApprover".
-finalApprovalActions (array, optional) - [{ actionName, actionType }].
-finalRejectionActions, recallActions, approvalActions, rejectionActions (array, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "activate" | "deactivate" | "delete", required) -
+Requested ApprovalProcess operation; enum create, update, upsert, activate, deactivate,
+or delete; no default; example: 'upsert'; do not use update/activate/deactivate for a
+process that does not exist.
+object (string, required) -
+ApprovalProcess parent object; string sObject API name; no default; example:
+'Opportunity'; do not pass labels or record Ids.
+fullName (string, required) -
+ApprovalProcess fullName; string DeveloperName with optional ObjectApiName prefix; no
+default; example: 'Discount_Approval'; do not include file extensions or labels.
+label (string, optional) -
+ApprovalProcess label; required when creating a process; example: 'Discount Approval'.
+active (boolean, optional) -
+ApprovalProcess active flag; required when creating a process. Activate and deactivate
+override this value.
+allowRecall (boolean, optional) -
+Whether submitters can recall approval requests.
+description (string, optional) -
+ApprovalProcess description; string metadata description; omitted leaves existing value
+unchanged; example: 'Routes high-discount opportunities'; do not pass criteria formula
+here.
+entryCriteria (object, optional) -
+ApprovalProcess entryCriteria; criteria object with formula or
+criteriaItems/booleanFilter; omitted means no criteria change; example:
+{\"formula\":\"Discount__c > 0.2\"}; do not pass SOQL WHERE clauses.
+  booleanFilter (string, optional) -
+  Criteria boolean filter; string combining criteria item indexes; omitted uses
+  Salesforce default evaluation; example: '1 AND (2 OR 3)'; do not reference missing
+  indexes.
+  criteriaItems (unknown[], optional) -
+  Criteria items; array of Metadata API filter item objects; omitted when formula is
+  used; example:
+  [{\"field\":\"Case.Priority\",\"operation\":\"equals\",\"value\":\"High\"}]; do not
+  pass SOQL WHERE clauses.
+  formula (string, optional) -
+  Formula criteria; string boolean formula evaluated by Salesforce; omitted when
+  criteriaItems are used; example: 'Priority = \"High\"'; do not include a leading '='.
+approvalPageFields (string[], optional) -
+Field API names displayed on the approval page; example: ['Name', 'Owner'].
+approvalSteps (unknown[], optional) -
+Approval steps. Execution order is derived from stepNumber; omit to preserve existing
+steps.
+initialSubmitters (unknown[], optional) -
+ApprovalProcess allowedSubmitters; required when creating a process; example:
+[{\"type\":\"owner\"}].
+recordEditability ("AdminOnly" | "AdminOrCurrentApprover", optional) -
+Who can edit records pending approval; required when creating a process.
+emailTemplate (string, optional) -
+Classic email template fullName used for approval requests.
+enableMobileDeviceAccess (boolean, optional) -
+Whether approvers can access approval pages without logging in. This cannot be enabled
+with adhoc approvers.
+finalApprovalActions (unknown[], optional) -
+Final approval action references; example:
+[{\"name\":\"Notify_Owner\",\"type\":\"Alert\"}].
+finalApprovalRecordLock (boolean, optional) -
+Whether to keep records locked after final approval.
+finalRejectionActions (unknown[], optional) -
+Final rejection action references.
+finalRejectionRecordLock (boolean, optional) -
+Whether to keep records locked after final rejection.
+recallActions (unknown[], optional) -
+Recall action references.
+initialSubmissionActions (unknown[], optional) -
+Initial submission action references.
+nextAutomatedApprover (object, optional) -
+Required when a step uses an approver of type userHierarchyField.
+  userHierarchyField (string, required) -
+  Standard or custom user hierarchy field used by userHierarchyField approvers.
+  useApproverFieldOfRecordOwner (boolean, required) -
+  Whether the first automated approver is derived from the record owner's hierarchy
+  field.
+inlineFieldUpdates (unknown[], optional) -
+WorkflowFieldUpdate definitions to create on the target object before saving the
+process; array of field update objects; these are created automatically so the process
+can reference them immediately; example:
+[{\"name\":\"Set_Approved\",\"field\":\"Status__c\",\"operation\":\"Literal\",\"newValue\":\"Approved\"}];
+do not duplicate names of updates already referenced in finalApprovalActions etc.
+inlineAlerts (unknown[], optional) -
+WorkflowAlert definitions to create on the target object before saving the process;
+array of alert objects; created automatically so the process can reference them
+immediately; example: [{\"name\":\"Approval_Notify\",\"description\":\"Approval
+notification\",\"template\":\"unfiled$public/Approval_Email\"}]; do not duplicate names
+already referenced in action arrays.
+skipPrerequisiteCheck (boolean, optional) -
+Skip the prerequisite action existence check; boolean; defaults to false (check runs by
+default); set to true only if you are certain all referenced actions exist and want to
+skip the extra Workflow read; example: true.
+metadata (unknown, required).
 
 Result
 deploy (object).
@@ -48,10 +131,8 @@ Errors
 Example request
 
 manage_approval_process({
-  "operation": "create",
+  "operation": "upsert",
   "object": "Opportunity",
-  "fullName": "Discount_Over_20_Percent",
-  "label": "Discount > 20%",
-  "entryCriteria": { "criteriaItems": [{ "field": "Opportunity.Discount__c", "operation": "greaterThan", "value": "20" }] },
-  "approvalSteps": [{ "stepNumber": 1, "label": "Sales Director", "assignedApprover": { "type": "User", "name": "sales.dir@magnatech.com" } }]
+  "fullName": "Discount_Approval",
+  "metadata": "example"
 })

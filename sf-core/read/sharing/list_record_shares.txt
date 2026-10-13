@@ -17,24 +17,40 @@ Body
 None.
 
 Input (parameters)
-sObject (string, required) - Record's sObject API name.
-recordId (string, required) - 18-char record Id.
-includeUserOrGroupName (boolean, optional, default true) - Resolve UserOrGroupId.
-rowCause (string, optional) - "Manual" | "Rule" | "ImplicitChild" | "Owner" | "Team" | "Territory" | etc.
-limit (number, optional, default 500).
+sObject (string, required) - Parent object API name for the share table; string
+Salesforce sObject API name; no default; example: Account or Invoice__c; do not pass a
+share object name, label, SOQL, or relationship path.
+recordId (string, optional) - Parent record Id to filter share rows; Salesforce 15- or
+18-character Id; no default; example: 0015g00000ABCDe; do not pass multiple Ids, names,
+or SOQL fragments.
+userOrGroupId (string, optional) - User, role, territory, queue, or group Id granted
+access; Salesforce Id string; no default; example: 0055g0000012345; do not pass names,
+multiple Ids, or SOQL fragments.
+rowCause (string, optional) - RowCause exact value to filter share rows; string picklist
+API value; no default; example: Manual; do not pass labels, wildcards, or SOQL
+operators.
+rowCausePattern (string, optional) - RowCause pattern to filter share rows; string with
+* and ? wildcards converted to SOQL LIKE; no default; example: Rule*; do not pass regex,
+raw LIKE syntax, or multiple patterns.
+fields (string, optional) - Share object fields to select; comma-separated SOQL field
+API names; default uses documented parent, access, RowCause, deletion, and audit fields
+for the object; example: Id, AccountId, UserOrGroupId, AccountAccessLevel, RowCause; do
+not pass SELECT, FROM, subqueries, or untrusted input.
+whereClause (string, optional) - Additional SOQL WHERE condition for the share object;
+string without WHERE; no default; example: IsDeleted = false; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for the share object; string without ORDER
+BY; default LastModifiedDate DESC; example: RowCause ASC, LastModifiedDate DESC; do not
+pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum share rows to query; integer from 1 to 2000; default
+200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-record (object) - { sObject, recordId, ownerId, ownerName }.
-totalSize (number).
-shares (array) - Each:
-  shareId (string).
-  userOrGroupId (string).
-  userOrGroupType ("User"|"Group"|"Role"|"Queue"|"PartnerUser"|"PortalRole"|...).
-  userOrGroupName (string|null).
-  accessLevel (string) - sObject-specific (e.g. "Read", "Edit", "All", or for Account: "AccountAccessLevel").
-  caseAccessLevel, contactAccessLevel, opportunityAccessLevel (string|null) - For AccountShare.
-  rowCause (string).
-hasMore (boolean).
+Returns the raw Salesforce QueryResult for the selected share object.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - Read on the parent sObject + "View All Data" for full visibility.
@@ -48,4 +64,6 @@ Errors
 
 Example request
 
-list_record_shares({ "sObject": "Account", "recordId": "0014Q00000abcDE" })
+list_record_shares({
+  "sObject": "Account or Invoice__c"
+})

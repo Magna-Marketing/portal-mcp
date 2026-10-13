@@ -12,10 +12,12 @@ return per-component success/failure. Three modes:
 For complete view, use `view_permission_set` first.
 
 Salesforce API
-Metadata API (`PermissionSet` type), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+GET /services/data/v66.0/query/
+POST /services/Soap/m/66.0  (updateMetadata PermissionSet)
 
 Headers
 Authorization: Bearer <access_token>
@@ -30,24 +32,100 @@ Body (add)
 }
 
 Input (parameters)
-operation (string, required) - "add" | "remove" | "set".
-fullName (string, required) - Permset DeveloperName.
-label (string, optional) - When changing label.
-description (string, optional).
-userPermissions (array, optional).
-objectPermissions (array, optional) - For `add`, only true flags are
-  applied; for `remove`, listed perms are turned off; for `set`,
-  replaces the entire ObjectPermissions list for matched sObjects.
-fieldPermissions (array, optional).
-classAccesses, pageAccesses (array, optional).
-tabSettings, recordTypeVisibilities, applicationVisibilities (array, optional).
-customMetadataTypeAccesses, customSettingAccesses (array, optional).
-checkOnly (boolean, optional, default false).
-allOrNone (boolean, optional, default true).
+operation ("add" | "remove" | "set", required) - How supplied metadata arrays are
+applied; add merges, remove disables or removes matching entries, and set replaces each
+supplied category; no default; example 'add'; do not use set unless you intend
+replacement.
+fullName (string, required) - PermissionSet metadata fullName and API name; string such
+as MTG_Project_Manager; no default; do not pass the label or Id.
+label (string, optional) - Replacement permission set label; string up to 80 characters;
+omitted preserves current value; example 'Project Manager'; do not pass empty text to
+mean preserve.
+description (string, optional) - Replacement description; string up to 255 characters;
+omitted preserves current value; example 'Updated access'; pass an empty string only to
+clear it.
+license (string, optional) - Replacement PermissionSet license metadata value; string
+license name; omitted preserves current value; example 'Salesforce'; do not pass
+LicenseId.
+hasActivationRequired (boolean, optional) - Whether session activation is required;
+boolean; omitted preserves current value; example false; do not set true unless
+activation is configured.
+userPermissions (object[], optional) - System permission entries; array of { name,
+enabled } and enabled defaults to true for add/set; example { name: 'ApiEnabled',
+enabled: true }; remove with no boolean removes the entry.
+  name (string, required).
+  enabled (boolean, optional).
+objectPermissions (unknown[], optional) - Object CRUD/FLS grants. add merges flags;
+remove turns supplied flags off or removes the object entry when no flags are supplied;
+set replaces objectPermissions.
+fieldPermissions (unknown[], optional) - Field-level grants. add merges flags; remove
+turns supplied flags off or removes the field entry when no flags are supplied; set
+replaces fieldPermissions.
+classAccesses (object[], optional) - Apex class access entries.
+  apexClass (string, required).
+  enabled (boolean, optional).
+pageAccesses (object[], optional) - Visualforce page access entries.
+  apexPage (string, required).
+  enabled (boolean, optional).
+applicationVisibilities (object[], optional) - Custom or standard application visibility
+entries.
+  application (string, required).
+  visible (boolean, optional).
+  default (boolean, optional).
+tabSettings (object[], optional) - PermissionSet tab visibility entries.
+  tab (string, required).
+  visibility ("None" | "Available" | "Visible", optional).
+recordTypeVisibilities (object[], optional) - Record type visibility entries.
+  recordType (string, required).
+  visible (boolean, optional).
+  default (boolean, optional).
+  personAccountDefault (boolean, optional).
+customMetadataTypeAccesses (unknown[], optional) - Custom metadata type read access
+entries.
+customSettingAccesses (unknown[], optional) - Custom setting read access entries.
+customPermissions (unknown[], optional) - Custom permission grants.
+externalDataSourceAccesses (object[], optional) - External data source access entries.
+Use externalDataSource; name is accepted as an alias.
+  externalDataSource (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+flowAccesses (object[], optional) - Flow access entries.
+  flow (string, required).
+  enabled (boolean, optional).
+externalCredentialPrincipalAccesses (object[], optional) - External credential principal
+access entries. Use externalCredentialPrincipal; name is accepted as an alias.
+  externalCredentialPrincipal (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+agentAccesses (object[], optional) - Agentforce employee agent access entries. Use
+agentName; name is accepted as an alias.
+  agentName (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+emailRoutingAddressAccesses (unknown[], optional) - Email Routing Address access
+entries.
+genComputingSummaryDefAccess (object[], optional) - Enhanced summary configuration
+access entries introduced in API v66.0. Use configName; name is accepted as an alias.
+  configName (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+servicePresenceStatusAccesses (object[], optional) - Service presence status access
+entries. Use servicePresenceStatus; name is accepted as an alias.
+  servicePresenceStatus (string, optional).
+  name (string, optional).
+  enabled (boolean, optional).
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Build and return the updated metadata payload without
+calling updateMetadata. Defaults to false.
 
 Result
-Deploy result + `permissionSet` summary. For `set`, the response
-indicates removed-vs-added per category for visibility into the diff.
+JSON object with checkOnly, readResponse, metadata, updateResponse, and
+permissionSetLookup.
+checkOnly (value) - included in the JSON returned by the tool.
+readResponse (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+updateResponse (value) - included in the JSON returned by the tool.
+permissionSetLookup (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -61,10 +139,10 @@ Errors
 - NOT_FOUND on fullName.
 - INVALID_FIELD on bad field reference.
 
-Example request (remove a system permission)
+Example request
 
 update_permission_set({
-  "operation": "remove",
-  "fullName": "MTG_Project_Manager",
-  "userPermissions": [{ "name": "ModifyAllData", "enabled": false }]
+  "operation": "example",
+  "fullName": "example",
+  "metadataOverride": "example"
 })

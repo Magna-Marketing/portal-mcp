@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-lake-objects
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-lake-objects
+Optional query: limit, offset, orderBy
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,18 +19,14 @@ Body
 None.
 
 Input (parameters)
-dataStreamId (string, optional) - Filter to DLOs produced by a
-  specific Data Stream.
-nameContains (string, optional).
-category (string, optional) - "Profile" | "Engagement" | "Other".
-limit (number, optional, default 100).
-offset (number, optional).
+limit (number, optional) - Maximum number of rows or relationships to return. Salesforce defaults to 20 when
+omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort order for the result set, such as 'ASC' or 'DESC'. Salesforce returns results in
+ascending order when omitted.
 
 Result
-dataLakeObjects (array) - Each: { id, developerName, label,
-  category, recordCount, sourceDataStreamId, fields (array<{
-  apiName, label, dataType }>), createdDate, lastModifiedDate }.
-totalSize (number), nextPageUrl (string|null).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -42,15 +39,8 @@ Errors
 
 Example request
 
-list_data_lake_objects({ "category": "Engagement" })
+list_data_lake_objects({})
 
 Example result
-{
-  "dataLakeObjects": [
-    { "id": "0bdxx0000000001",
-      "developerName": "mc_sends__dll",
-      "label": "MCE Sends (Raw)",
-      "sourceDataStreamId": "0bcxx0000000001",
-      "recordCount": 12450 }
-  ]
-}
+
+{ }

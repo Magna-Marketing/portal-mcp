@@ -23,9 +23,7 @@ modelSetupVersionId (string, required).
 modelSetupPartitionId (string, required).
 
 Result
-partition (object): id, name, partitionType, recordCount,
-  datasetRef, metrics (object), featureDistribution (object),
-  createdDate.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -45,9 +43,5 @@ get_model_setup_partition({
 })
 
 Example result
-{
-  "partition": {
-    "id": "P_001", "partitionType": "Train", "recordCount": 800000,
-    "metrics": { "accuracy": 0.85, "f1": 0.80 }
-  }
-}
+
+{ }

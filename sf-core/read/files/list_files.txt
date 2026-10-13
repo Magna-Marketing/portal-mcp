@@ -7,12 +7,10 @@ row carries the latest `ContentVersion` Id needed by `download_file_content`
 and the parent linkages.
 
 Salesforce API
-REST API (Data) + Connect API, v66.0. SOQL on `ContentDocument`,
-`ContentDocumentLink`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Title, FileType, FileExtension, ContentSize, ContentSizeLong, Description, IsInternalOnly,LastReferencedDate, LastViewedDate, LatestPublishedVersionId, SharingPrivacy, SharingOption, PublishStatus, ContentAssetId,  ContentModifiedDate, OwnerId, Owner.Name, ParentId, IsArchived,ArchivedById  FROM ContentDocument
-GET /services/data/v66.0/query/?q=SELECT ContentDocumentId, LinkedEntityId, ShareType, Visibility FROM ContentDocumentLink WHERE LinkedEntityId = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, Title, FileType, FileExtension, ContentSize, ContentSizeLong, Description, IsInternalOnly, LastReferencedDate, LastViewedDate, LatestPublishedVersionId, SharingPrivacy, SharingOption, PublishStatus, ContentAssetId, ContentModifiedDate, OwnerId, Owner.Name, ParentId, IsArchived, ArchivedById, ArchivedDate, MalwareScanStatus, MalwareScanDate FROM ContentDocument
 
 Headers
 Authorization: Bearer <access_token>
@@ -22,17 +20,43 @@ Body
 None.
 
 Input (parameters)
-recordId (string, optional) - Restrict to files linked to this record.
-ownerId (string, optional).
-ownerUsername (string, optional).
-fileType (string, optional) - "PDF" | "PNG" | "DOCX" | etc.
-namePattern (string, optional).
-includeArchived (boolean, optional, default false).
-limit (number, optional, default 200).
+recordId (string, optional) - Salesforce record Id linked to files through
+ContentDocumentLink; string Id in 15- or 18-character format; no default and all
+accessible files are queried when omitted; example: 001xx000003DGbYAAW; do not pass
+object names, file Ids, or comma-separated Ids.
+ownerId (string, optional) - ContentDocument OwnerId filter; string User Id in 15- or
+18-character format; no default; example: 005xx000001Sv6rAAC; do not pass usernames or
+names.
+ownerUsername (string, optional) - ContentDocument owner username filter through
+Owner.Username; string username; no default; example: admin@example.com; do not pass
+User Ids or wildcard syntax.
+fileType (string, optional) - ContentDocument FileType exact filter; string
+picklist-style value returned by Salesforce; no default; example: PDF; do not pass file
+extensions with dots or MIME types.
+pattern (string, optional) - Title wildcard filter using * and ? converted to SOQL LIKE;
+string; no default; example: Contract_*; do not pass regex, raw LIKE percent clauses, or
+unescaped SOQL.
+namePattern (string, optional) - Legacy alias for pattern against Title; string with *
+and ? wildcards; ignored when pattern is provided; example: Invoice_2026*; prefer
+pattern and do not pass regex.
+includeArchived (boolean, optional) - Whether archived ContentDocument rows are
+included; boolean; default false adds IsArchived = false; example: true; do not pass
+strings such as \"true\".
+whereClause (string, optional) - Additional ContentDocument SOQL WHERE conditions
+without the WHERE keyword; string appended with AND after built-in filters; no default;
+example: PublishStatus = 'P'; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+user-supplied untrusted text.
+orderBy (string, optional) - ContentDocument ORDER BY clause without the ORDER BY
+keyword; string; default ContentModifiedDate DESC; example: Title ASC; do not pass
+WHERE, LIMIT, or non-ContentDocument fields.
+limit (integer, optional) - Maximum ContentDocument rows to return; integer from 1 to
+2000; default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-files (array) - Each: { id (ContentDocument Id), title, fileType, fileExtension, contentSize, contentModifiedDate, ownerId, ownerName, latestVersionId, isArchived, links (when recordId present): [{ linkedEntityId, shareType, visibility }] }.
+Returns a JSON object with the raw ContentDocument query response and, when recordId is
+provided, the raw ContentDocumentLink query response.
+links (value) - included in the JSON returned by the tool.
+files (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "API Enabled" + record visibility / file ownership.
@@ -45,4 +69,8 @@ Errors
 
 Example request
 
-list_files({ "recordId": "0014Q00000abcDE" })
+list_files({
+  "recordId": "001xx000003DGbYAAW",
+  "ownerId": "005xx000001Sv6rAAC",
+  "ownerUsername": "admin@example.com"
+})

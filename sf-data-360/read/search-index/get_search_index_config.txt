@@ -21,10 +21,7 @@ Input (parameters)
 None.
 
 Result
-config (object): defaultEmbeddingModel, supportedEmbeddingModels
-  (array), defaultVectorDimension, defaultSimilarityFunction
-  ("cosine" | "dot" | "euclidean"), maxIndexes, currentIndexCount,
-  maxRecordsPerIndex.
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,10 +37,5 @@ Example request
 get_search_index_config({})
 
 Example result
-{
-  "config": {
-    "defaultEmbeddingModel": "openai.text-embedding-3-small",
-    "defaultVectorDimension": 1536,
-    "maxIndexes": 50, "currentIndexCount": 4
-  }
-}
+
+{ }

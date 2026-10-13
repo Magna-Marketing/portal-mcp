@@ -6,11 +6,10 @@ support billions of records and are queried with SOQL but cannot be
 related to standard objects via lookups.
 
 Salesforce API
-Tooling API + REST API, v66.0.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT QualifiedApiName, Label, PluralLabel, Description FROM EntityDefinition WHERE QualifiedApiName LIKE '%25__b' LIMIT 100
-GET /services/data/v66.0/sobjects/{name}/describe
+GET /services/data/v66.0/tooling/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,12 +19,24 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeIndexFields (boolean, optional, default true) - Big Objects require an index; show its fields.
+pattern (string, optional) - Big Object API name or label pattern; string using * and ?
+wildcards converted to SOQL LIKE; no default; example: Audit*__b; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional EntityDefinition SOQL WHERE condition;
+string with or without WHERE; no default; example: NamespacePrefix = null; do not pass
+SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - EntityDefinition SOQL ORDER BY clause; string with or
+without ORDER BY; default QualifiedApiName ASC; example: Label ASC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum EntityDefinition rows to return; integer from 1 to
+2000; default 200; example: 100; do not pass 0, decimals, negatives, or offsets.
 
 Result
-totalSize (number).
-bigObjects (array) - { qualifiedApiName, label, pluralLabel, indexFields (array, when includeIndexFields=true): [{ apiName, label, type, sortDirection }] }.
+raw Salesforce Tooling QueryResult for EntityDefinition records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application".
@@ -38,4 +49,8 @@ Errors
 
 Example request
 
-list_big_objects({})
+list_big_objects({
+  "pattern": "Audit*__b",
+  "whereClause": "NamespacePrefix = null",
+  "orderBy": "Label ASC"
+})

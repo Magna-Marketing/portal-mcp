@@ -19,22 +19,17 @@ Body
 { "name": "MTG_iOS", "applicationType": "iOS", "bundleIdentifier": "com.magnatech.mtg", "locationEnabled": true, "analyticsEnabled": true }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-applicationId (string, optional, required for non-create).
-name (string, required for create).
-description (string, optional).
-applicationType (string, required for create) - "iOS" | "Android" | "FireOS".
-bundleIdentifier (string, required for create).
-locationEnabled (boolean, optional).
-analyticsEnabled (boolean, optional).
-iconBadgeEnabled (boolean, optional).
-iosCertContent (string, optional, base64) - iOS .p8 / .p12 cert.
-iosCertPassword (string, optional).
-gcmSenderId (string, optional) - For Android.
-fcmServiceAccountKey (string, optional) - JSON service account.
+operation ("update_keys" | "delete_keys" | "delete_key", required) - Manage MobilePush app keys using Salesforce documented app key endpoints. Salesforce
+public REST docs do not expose create/update/delete app registration endpoints.
+app_id (string, required) - MobilePush app ID.
+keys (string[], optional) - Replacement custom key list for update_keys. Salesforce replaces all existing app keys
+with this array.
+key (string, optional) - Single app key to delete for delete_key.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+mobile write request.
 
 Result
-application (object) - { id, name, applicationType, bundleIdentifier, certExpirationDate, status }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `push_write`.
@@ -48,8 +43,6 @@ Errors
 Example request
 
 manage_push_app({
-  "operation": "create",
-  "name": "MTG_iOS",
-  "applicationType": "iOS",
-  "bundleIdentifier": "com.magnatech.mtg"
+  "operation": "update_keys",
+  "app_id": ""
 })

@@ -17,59 +17,46 @@ Read-only; produces a plan but does not modify any metadata. Apply with
 `create_permission_set_group`, `bulk_assign_permissions` etc.
 
 Salesforce API
-REST API + Tooling, v66.0. SOQL across:
-- `Profile`, `User WHERE ProfileId IN ...`.
-- `ObjectPermissions`, `FieldPermissions`, `SetupEntityAccess` (with
-  ParentId on Profile).
-- `PermissionSetAssignment` for current state.
+REST API (Data), v66.0.
 
 Endpoint
-N/A (the tool runs many SOQL queries; no single endpoint).
+GET /services/data/v66.0/query/?q=SELECT Id, Name, UserType, UserLicenseId, UserLicense.Name, CreatedDate, LastModifiedDate FROM Profile
 
 Headers
 Authorization: Bearer <access_token>
 Accept: application/json
 
 Body
-None (read-only analysis).
+None.
 
 Input (parameters)
-sourceProfiles (string[], required) - Profile DeveloperNames or Ids to
-  migrate. Use ["*"] for all custom profiles in the org.
-keepBaselineOn (string, optional, default "Standard User") - Profile to
-  use as the post-migration baseline (everything else moves to permsets).
-groupingStrategy (string, optional, default "by_role") - "by_role" |
-  "by_object_cluster" | "by_app". Controls how the recommended permsets
-  are split.
-includeStandardObjects (boolean, optional, default true).
-includeFieldPermissions (boolean, optional, default true) - Detailed FLS
-  delta. Skip for a faster, system+object-only plan.
-maxBatchSize (number, optional, default 50) - Users per migration batch.
-horizonWeeks (number, optional, default 8) - Total rollout horizon.
+profileNamePattern (string, optional) - Profile Name pattern to include; string with *
+and ? wildcards converted to SOQL LIKE; no default; example: Sales*; do not pass regex,
+raw LIKE syntax, or comma-separated profile names.
+whereClause (string, optional) - Additional SOQL WHERE condition for Profile; string
+without WHERE; no default; example: UserType = 'Standard'; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+includeObjectPermissions (boolean, optional) - Whether to query ObjectPermissions for
+profile-owned permission sets; boolean; default true; example: false; do not pass when
+object access is needed.
+includeFieldPermissions (boolean, optional) - Whether to query FieldPermissions for
+profile-owned permission sets; boolean; default true; example: false; do not pass when
+field access is needed.
+orderBy (string, optional) - SOQL ORDER BY for Profile; string without ORDER BY; default
+Name ASC; example: LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum profile rows to query; integer from 1 to 2000;
+default 200; example: 50; do not pass 0, negatives, decimals, or offsets.
 
 Result
-summary (object):
-  profilesAnalyzed (number).
-  usersAffected (number).
-  proposedPermsetCount (number).
-  proposedGroupCount (number).
-  estimatedDuration (string) - "8 weeks".
-recommendedBaselineProfile (object) - { name, retainedPermissions }.
-proposedPermsets (array) - Each:
-  name (string) - Suggested DeveloperName.
-  label (string).
-  source (string) - "extracted from <profile>" or "common across N profiles".
-  systemPermissions (object) - Perms to put in this permset.
-  objectPermissions (array) - Same shape as view_permission_set.
-  fieldPermissions (array, optional).
-  rationale (string).
-proposedGroups (array) - Each: { developerName, label, members[] }.
-userPlan (array) - Each user:
-  userId, name, currentProfile, newProfile, addedPermsets[], addedGroups[],
-  riskLevel ("low"|"medium"|"high") - high when user loses any perm.
-  netPermissionDelta (object) - { added: [], removed: [], unchanged: count }.
-phases (array) - Each: { phase: 1, weeks: "1-2", scope: "...",
-  userBatch: 50, dependencies: [] }.
+Returns raw Salesforce QueryResult objects for profiles and selected permission records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+profiles (value) - included in the JSON returned by the tool.
+profilePermissionSets (value) - included in the JSON returned by the tool.
+objectPermissions (value) - included in the JSON returned by the tool.
+fieldPermissions (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View All Setup" / "Modify All Data" recommended (read-only here, but
@@ -87,26 +74,21 @@ Errors
 Example request
 
 generate_migration_plan({
-  "sourceProfiles": ["MTG_Project_Manager_Profile", "MTG_Delivery_Profile"],
-  "groupingStrategy": "by_role",
-  "horizonWeeks": 6
+  "profileNamePattern": "Sales*",
+  "whereClause": "UserType = 'Standard'",
+  "includeObjectPermissions": false
 })
 
-Example result (skeleton)
+Example result
 
 {
-  "summary": {
-    "profilesAnalyzed": 2,
-    "usersAffected": 41,
-    "proposedPermsetCount": 5,
-    "proposedGroupCount": 2,
-    "estimatedDuration": "6 weeks"
-  },
-  "recommendedBaselineProfile": { "name": "Standard User", "retainedPermissions": ["LoginIPRanges", "PasswordPolicy"] },
-  "proposedPermsets": [ /* ... */ ],
-  "phases": [
-    { "phase": 1, "weeks": "1-2", "scope": "Create permsets and groups in sandbox; smoke test", "userBatch": 0 },
-    { "phase": 2, "weeks": "3-4", "scope": "Migrate first 50 users",                                "userBatch": 50 },
-    { "phase": 3, "weeks": "5-6", "scope": "Migrate remaining users; deprecate source profiles",     "userBatch": 50 }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "PermissionSet"
+      }
+    }
   ]
 }

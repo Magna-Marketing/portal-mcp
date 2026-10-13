@@ -6,31 +6,73 @@ Builder API. For sending invitations programmatically use
 `SurveyInvitation` records (`dml_records`).
 
 Salesforce API
-REST API (Connect API + Data), v66.0.
+Connect REST API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/connect/survey                            (create)
-PATCH /services/data/v66.0/connect/survey/{surveyId}                (update)
-POST /services/data/v66.0/connect/survey/{surveyId}/clone           (clone)
-DELETE /services/data/v66.0/sobjects/Survey/{id}                    (delete)
-PATCH /services/data/v66.0/sobjects/Survey/{id}                     (activate/deactivate)
+GET /services/data/v66.0/sobjects/Survey/{surveyId}
+GET /services/data/v66.0/sobjects/SurveyVersion/{surveyVersionId}
+POST /services/data/v66.0/connect/surveys/{surveyId}/survey-response
+PATCH /services/data/v66.0/connect/surveys/{surveyId}/survey-response
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: invitationSettings, languageCode, recipientEngagementContext, relatedRecordIds, shouldLoadPartiallyCmplSurvey, staticMergeFields.
+JSON fields: flowInterviewState, invitationId, languageCode, navigationAction, surveyPageResponses.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "clone" | "delete".
-surveyId (string, optional) - Required for non-create.
-name (string, required for create/clone).
-description (string, optional).
-welcomeText (string, optional).
-thankYouText (string, optional).
-allowGuestUserAccess (boolean, optional, default false).
-templateName (string, optional, for create) - Survey template to start from.
+operation ("read" | "list" | "readVersion" | "listVersions" | "createResponse" | "submitResponse", required) -
+Represents the survey operation; valid values are read, list, readVersion, listVersions,
+createResponse, and submitResponse; there is no default; example: createResponse; do not
+pass builder operations such as create or activate.
+surveyId (string, optional) -
+Represents a Survey record ID; required for read, listVersions, createResponse, and
+submitResponse; no default; example: 0Kd...; do not pass a SurveyVersion ID.
+surveyVersionId (string, optional) -
+Represents a SurveyVersion record ID; required for readVersion; no default; example:
+0Kq...; do not pass a Survey ID.
+limit (integer, optional) -
+Represents maximum rows for list queries; integer 1-2000 and defaults to 50; example:
+100; do not pass unbounded limits.
+invitationSettings (object, optional) -
+Represents Connect survey invitation settings for createResponse; no default; example:
+{\"allowGuestUserResponse\":true}; do not pass UI-only settings.
+invitationId (string, optional) -
+Represents the SurveyInvitation ID for submitResponse; no default; example: 0Ki...; do
+not pass a contact or case ID.
+languageCode (string, optional) -
+Represents the response language code; defaults to Salesforce behavior when omitted;
+example: en_US; do not pass a label such as English.
+recipientEngagementContext (object, optional) -
+Represents engagement context for createResponse; defaults to none; example:
+{\"channel\":\"Email\"}; do not pass unrelated merge fields.
+relatedRecordIds (string[], optional) -
+Represents records related to the response; defaults to none; example: [\"500...\"]; do
+not pass non-Salesforce IDs.
+shouldLoadPartiallyCmplSurvey (boolean, optional) -
+Represents whether to load an incomplete response when available; defaults to Salesforce
+behavior; example: true; do not pass string booleans.
+staticMergeFields (object, optional) -
+Represents static merge values for createResponse; defaults to none; example:
+{\"CaseNumber\":\"00001000\"}; do not pass secrets.
+flowInterviewState (string, optional) -
+Represents the flow interview state returned by createResponse; required for
+submitResponse unless responseBody supplies it; no default; example: serialized-state;
+do not invent this value.
+navigationAction (string, optional) -
+Represents the submit navigation action; defaults to Salesforce behavior; example: Next;
+do not pass labels not accepted by the survey flow.
+surveyPageResponses (object, optional) -
+Represents page answers for submitResponse; required unless responseBody supplies it; no
+default; example: {\"questionId\":\"answer\"}; do not pass display-only text.
+responseBody (object, optional) -
+Represents a raw Connect request body override merged last; defaults to none; example:
+{\"languageCode\":\"en_US\"}; do not pass fields that conflict unless overriding is
+intended.
 
 Result
 survey (object) - { id, name, status, isActive, version }.
@@ -47,8 +89,5 @@ Errors
 Example request
 
 manage_survey({
-  "operation": "create",
-  "name": "MTG Project CSAT",
-  "description": "Sent at project close",
-  "welcomeText": "Thanks for working with us"
+  "operation": "createResponse"
 })

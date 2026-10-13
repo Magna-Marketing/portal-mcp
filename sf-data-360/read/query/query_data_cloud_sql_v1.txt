@@ -8,16 +8,14 @@ streaming, use `query_data_cloud_sql_v2` (which returns
 `nextBatchId`).
 
 Salesforce API
-Connect plane (default — `/ssot/query`) **or** runtime plane (when
-`plane="runtime"` — `/api/v1/query`). Both accept the same body.
+Runtime plane.
 
 Endpoint
-POST {instanceUrl}/services/data/v{ver}/ssot/query        (plane="connect", default)
-POST {cdpTenantUrl}/api/v1/query                          (plane="runtime")
+POST {instanceUrl}/api/v1/query
+Optional query: limit, offset, orderby
 
 Headers
-Authorization: Bearer <core_access_token>      (connect)
-Authorization: Bearer <data_cloud_token>       (runtime)
+Authorization: Bearer <data_cloud_token>
 Content-Type: application/json
 Accept: application/json
 
@@ -27,16 +25,16 @@ Body
 }
 
 Input (parameters)
-plane (string, optional, default "connect").
-sql (string, required).
-dataSpace (string, optional, default "default").
-rowLimit (number, optional, max 100000) - Server-side cap.
+sql (string, required) - Data 360 SQL statement to execute against Data Cloud objects, such as DMOs, DLOs, CIOs,
+profile, engagement, or unified data objects.
+limit (number, optional) - Maximum records to return for legacy Query API v1. Salesforce defaults to 49,999 when
+omitted.
+offset (number, optional) - Number of records to skip before returning legacy Query API v1 results.
+orderby (string, optional) - Comma-separated sort order for legacy Query API v1, for example `GenderId__c ASC,
+Occupation__c DESC`.
 
 Result
-data (array<array>) - Row-major result set.
-metadata (object) - { columns: [{ name, type }] }.
-queryId (string).
-rowCount (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api` (connect) or `cdp_query_api_read` (runtime).
@@ -52,13 +50,9 @@ Errors
 Example request
 
 query_data_cloud_sql_v1({
-  "sql": "SELECT COUNT(*) AS c FROM UnifiedIndividual__dlm"
+  "sql": ""
 })
 
 Example result
-{
-  "data": [[482000]],
-  "metadata": { "columns": [{ "name": "c", "type": "INTEGER" }] },
-  "queryId": "Q-2026-04-29-abc",
-  "rowCount": 1
-}
+
+{ }

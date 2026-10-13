@@ -19,10 +19,15 @@ Body
 None.
 
 Input (parameters)
-includeCustom (boolean, optional, default true).
+include_custom (boolean, optional) - Whether to include a note about discovering custom or tenant-specific activity types
+from existing automations. Defaults to true.
+business_unit_id (string, optional) - Accepted for compatibility with other automation tools. Activity type catalog data is
+local and is not scoped by Business Unit.
 
 Result
-items (array) - { id, name, description, displayName, category, iconClass, isActive, configurationArguments (object schema) }.
+items (value) - included in the JSON returned by the tool.
+totalCount (value) - included in the JSON returned by the tool.
+source (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `automations_read`.

@@ -15,24 +15,23 @@ Headers
 Authorization: Bearer <access_token>
 Accept: <content type>
 
-
 Body
 None.
 
 Input (parameters)
-contentVersionId (string, optional) - Specific version to download.
-contentDocumentId (string, optional) - Use the document's latest version.
-  One required.
-asBase64 (boolean, optional, default false) - Force base64.
-asTextEncoding (string, optional) - "utf8" | "ascii" | "latin1".
+contentVersionId (string, required) - ContentVersion Id whose VersionData should be
+downloaded; string Id in 15- or 18-character format; required with no default; example:
+068xx0000004D3FAAU; do not pass ContentDocument, Attachment, or ContentDocumentLink Ids.
 
 Result
-file (object) - { contentVersionId, contentDocumentId, title, fileType, fileExtension, contentSize, contentType }.
-content (object):
-  isText (boolean).
-  text (string|null).
-  base64 (string|null).
-  byteLength (number).
+Returns a JSON object with raw ContentVersion metadata, response headers, byte size, and
+base64 content.
+contentVersionId (value) - included in the JSON returned by the tool.
+contentVersion (value) - included in the JSON returned by the tool.
+headers (value) - included in the JSON returned by the tool.
+encoding (value) - included in the JSON returned by the tool.
+size (value) - included in the JSON returned by the tool.
+content (value) - included in the JSON returned by the tool.
 
 Required permissions
 - File read share.
@@ -47,4 +46,6 @@ Errors
 
 Example request
 
-download_file_content({ "contentDocumentId": "069Qg0000004ZyAA" })
+download_file_content({
+  "contentVersionId": "068xx0000004D3FAAU"
+})

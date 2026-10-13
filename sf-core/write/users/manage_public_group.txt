@@ -6,42 +6,83 @@ members, delete. Members can be Users, other Groups, Roles, or
 Roles+Subordinates.
 
 Salesforce API
-REST API (Data), v66.0. SOQL `Group` (Type='Regular') + `GroupMember`.
+REST API (Data), v66.0.
 
 Endpoint
-POST   /services/data/v66.0/sobjects/Group                          (create)
-PATCH  /services/data/v66.0/sobjects/Group/{id}                     (update)
-DELETE /services/data/v66.0/sobjects/Group/{id}                     (delete)
-POST   /services/data/v66.0/sobjects/GroupMember                    (add member)
-DELETE /services/data/v66.0/sobjects/GroupMember/{id}               (remove member)
+POST /services/data/v66.0/sobjects/Group
+PATCH /services/data/v66.0/sobjects/Group/{Id}
+DELETE /services/data/v66.0/sobjects/Group/{Id}
+POST /services/data/v66.0/composite/sobjects
+DELETE /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-Group: { "Name": "MTG Sales Region NA", "DeveloperName": "MTG_Sales_NA", "DoesIncludeBosses": true }
-GroupMember: { "GroupId": "...", "UserOrGroupId": "..." }
+JSON fields: Name, DeveloperName, Type, Description, DoesIncludeBosses, DoesSendEmailToMembers, Email.
+JSON fields: Name, DeveloperName, Description, DoesIncludeBosses, DoesSendEmailToMembers, Email.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "addMembers" | "removeMembers" | "setMembers".
-fullName (string, required for non-create) - DeveloperName.
-groupId (string, optional) - Resolved from fullName.
-name (string, required for create).
-developerName (string, optional, default = name normalized).
-description (string, optional).
-doesIncludeBosses (boolean, optional, default true) - Hierarchy bosses inherit access.
-doesSendEmailToMembers (boolean, optional, default false).
-members (object[], optional) - Each:
-  type (string, required) - "User" | "Group" | "Role" | "RoleAndSubordinates" | "RoleAndSubordinatesInternal".
-  id (string, optional) - User/Group/Role Id.
-  username (string, optional) - For User type.
-  groupName (string, optional) - For Group/Role types.
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "delete" | "addMembers" | "removeMembers" | "setMembers", required) -
+Represents the public group operation; enum value; no default; example 'addMembers'; do
+not pass queue operations.
+fullName (string, optional) -
+Represents existing public group DeveloperName or Name for lookup; exact string;
+required for non-create when groupId is omitted; example 'Project_Managers'; do not pass
+queue names.
+groupId (string, optional) -
+Represents existing Group Id; Salesforce Id string; used before fullName; example
+'00Gxx0000001234'; do not pass GroupMember Ids.
+name (string, optional) -
+Represents Group.Name display label; string; required for create; example 'Project
+Managers'; do not pass the developer name unless intended as label.
+developerName (string, optional) -
+Represents Group.DeveloperName; API name string; defaults from name on create; example
+'Project_Managers'; do not include spaces.
+description (string, optional) -
+Represents Group.Description; string available in API v62.0 and later; omitted by
+default; example 'Project manager access group'; do not pass HTML scripts.
+doesIncludeBosses (boolean, optional) -
+Represents Group.DoesIncludeBosses; boolean; defaults to true on create and omitted on
+update; example false; do not pass role hierarchy names.
+doesSendEmailToMembers (boolean, optional) -
+Represents Group.DoesSendEmailToMembers; boolean; defaults to false on create and
+omitted on update; example true; do not pass email addresses here.
+email (string, optional) -
+Represents optional group email; email address string; omitted by default; example
+'project-managers@example.com'; do not pass multiple addresses.
+members (object[], optional) -
+Represents members to add, remove, or set; array of member references; omitted by
+default; example [{\"type\":\"User\",\"username\":\"pm@example.com\"}]; do not pass raw
+GroupMember rows.
+  type ("User" | "Group" | "Role" | "RoleAndSubordinates" | "RoleAndSubordinatesInternal", required) -
+  Represents the member kind; enum User, Group, Role, RoleAndSubordinates, or
+  RoleAndSubordinatesInternal; no default; example 'User'; do not pass Queue.
+  id (string, optional) -
+  Represents the member Id; User, Group, or UserRole Salesforce Id depending on type;
+  required when username or groupName is omitted; example '005xx0000012345'; do not pass
+  role Ids for Group type.
+  username (string, optional) -
+  Represents User.Username for User members; exact username string; used when type is
+  User and id is omitted; example 'admin@example.com'; do not pass display names.
+  groupName (string, optional) -
+  Represents Group or UserRole DeveloperName/Name; exact string; used for Group and
+  role-derived members when id is omitted; example 'Sales_Role'; do not pass profile
+  names.
+checkOnly (boolean, optional) -
+Represents whether to build payloads without write APIs; boolean; defaults to false;
+example true; do not use when changes must be saved.
+batchSize (integer, optional) -
+Represents records per sObject Collections call; integer 1-200; defaults to 200; example
+100; do not exceed the REST collection limit.
+allOrNone (boolean, optional) -
+Represents sObject Collections rollback behavior; boolean; defaults to false; example
+true; do not set true unless one failure should roll back a batch.
 
 Result
-group (object) - { id, name, developerName, type, doesIncludeBosses }.
-memberChanges (object) - { added: [], removed: [], unchanged: [] }.
+JSON object with operation, checkOnly, lookup responses, request records or Ids, and raw
+create, update, or delete responses.
 
 Required permissions
 - "Manage Users".
@@ -55,10 +96,5 @@ Errors
 Example request
 
 manage_public_group({
-  "operation": "addMembers",
-  "fullName": "MTG_Sales_NA",
-  "members": [
-    { "type": "User", "username": "alice@magnatech.com" },
-    { "type": "Role", "groupName": "MTG_Sales" }
-  ]
+  "operation": "example"
 })

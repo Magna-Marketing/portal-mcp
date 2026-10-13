@@ -23,11 +23,7 @@ Input (parameters)
 apiName (string, required).
 
 Result
-apiName (string).
-signingKey (string) - The fresh secret; **shown only once** in this
-  response.
-keyId (string).
-generatedAt (ISO-8601).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -46,9 +42,5 @@ generate_data_action_target_signing_key({
 })
 
 Example result
-{
-  "apiName": "WebhookTarget__dat",
-  "signingKey": "k_2026_abc...",
-  "keyId": "key_001",
-  "generatedAt": "2026-04-29T13:02:11Z"
-}
+
+{ }

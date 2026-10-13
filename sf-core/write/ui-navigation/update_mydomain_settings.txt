@@ -6,10 +6,10 @@ login disabled, partial login policy. Domain rename is a heavy operation
 (propagates to login URLs) and not exposed by this tool.
 
 Salesforce API
-Metadata API (`MyDomainSettings`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (updateMetadata MyDomainSettings)
 
 Headers
 Authorization: Bearer <access_token>
@@ -19,16 +19,24 @@ Body
 N/A.
 
 Input (parameters)
-loginPolicy (string, optional) - "All" | "MyDomainOnly".
-redirectPolicy (string, optional) - "Disabled" | "Warning" | "Frame" | "Redirect".
-disableEmbeddedLogin (boolean, optional).
-partialLoginPolicy (string, optional).
-useNativeBrowserForLogin (boolean, optional).
-checkOnly (boolean, optional, default false).
+settings (unknown, optional) - Editable MyDomainSettings fields to merge. Object with
+v66.0 writable fields; required to contain at least one field. Example:
+{\"canOnlyLoginWithMyDomainUrl\":true}. Do not pass read-only fields such as
+myDomainName, myDomainSuffix, domainPartition, useEdge, or edgeRoutingMethod.
+checkOnly (boolean, optional) - Preview mode. Boolean; defaults to false and skips
+updateMetadata when true. Example: true. Do not use when you expect Salesforce to
+persist changes.
+fullName (string, optional) - Settings component fullName. String; defaults to MyDomain.
+Example: MyDomain. Do not pass an org domain name.
 
 Result
-deploy (object).
-settings (object) - Updated values.
+JSON containing checkOnly, fullName, raw readResponse, generated metadata, and raw
+updateResponse or null.
+checkOnly (value) - included in the JSON returned by the tool.
+fullName (value) - included in the JSON returned by the tool.
+readResponse (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+updateResponse (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".
@@ -41,4 +49,8 @@ Errors
 
 Example request
 
-update_mydomain_settings({ "loginPolicy": "MyDomainOnly", "redirectPolicy": "Disabled" })
+update_mydomain_settings({
+  "settings": "{\\\"canOnlyLoginWithMyDomainUrl\\\":true}.",
+  "checkOnly": "true.",
+  "fullName": "MyDomain."
+})

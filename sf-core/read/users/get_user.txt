@@ -4,10 +4,10 @@ Description
 Get a single user with everything reasonable to know in one call: profile, role, manager, license, active state, last login, mobile/phone, time zone/locale/language, federation Id, time-tracking flags, plus a count of permission set + group assignments. For deep effective permissions use `analyze_user_permissions`. For login history use `list_login_history`.
 
 Salesforce API
-REST API (Data), v66.0. SOQL on `User`. Optional `PermissionSetAssignment COUNT()` for the assignment summary.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, ... FROM User WHERE Id = '...' OR Username = '...'
+GET /services/data/v66.0/query/?q=SELECT Id, Name, Username, Email, Alias, IsActive, ProfileId, Profile.Name, Profile.UserLicense.Name, UserRoleId, UserRole.Name, ManagerId, Manager.Name, Manager.Username, UserType, Department, Title, Phone, MobilePhone, TimeZoneSidKey, LocaleSidKey, EmailEncodingKey, LanguageLocaleKey, FederationIdentifier, IsPortalEnabled, UserPermissionsMarketingUser, UserPermissionsSupportUser, LastLoginDate, CreatedDate, LastModifiedDate FROM User
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,19 +17,17 @@ Body
 None.
 
 Input (parameters)
-userId (string, optional) - 18-char Id.
-username (string, optional).
-  One required.
-includeAssignmentSummary (boolean, optional, default true) - Adds permset + group counts.
-includeManager (boolean, optional, default true).
-includeManagerChain (boolean, optional, default false) - Walk Manager.Manager.Manager up to 5 levels.
+userId (string, required) - Salesforce User Id to fetch; 15- or 18-character string with
+the 005 key prefix; required with no default; example: 0055g00000ABCdEAA1; do not pass
+usernames, emails, quoted Ids, or comma-separated Ids.
 
 Result
-user (object) - Same fields as `list_users` row plus:
-  managerChain (array, optional) - [{ id, name, username }] from direct manager up.
-  permissionSetCount (number, optional).
-  permissionSetGroupCount (number, optional).
-  hasPermissionSetExpiringSoon (boolean, optional) - Any assignment with ExpirationDate within 30 days.
+raw Salesforce QueryResult with totalSize, done, and records containing zero or one User
+record.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View All Users" or "Manage Users".
@@ -42,4 +40,6 @@ Errors
 
 Example request
 
-get_user({ "username": "jane.doe@magnatech.com", "includeManagerChain": true })
+get_user({
+  "userId": "0055g00000ABCdEAA1"
+})

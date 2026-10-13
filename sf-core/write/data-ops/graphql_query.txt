@@ -19,6 +19,7 @@ KEY DIFFERENCES from original documentation:
 
 Salesforce API
 GraphQL API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
 POST /services/data/v66.0/graphql

@@ -6,30 +6,52 @@ Profile login IP ranges restrict where users with that profile can log
 in from; trusted IP ranges skip MFA challenges.
 
 Salesforce API
-Metadata API (`Profile.loginIpRanges`) + Tooling (`NetworkAccess`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest                   (profile-level)
-POST /services/data/v66.0/tooling/sobjects/NetworkAccess          (trusted IP)
-DELETE /services/data/v66.0/tooling/sobjects/NetworkAccess/{id}
+POST /services/Soap/m/66.0  (updateMetadata Profile)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: startAddress, endAddress, description.
+JSON fields: start, end, description.
 
 Input (parameters)
-target (string, required) - "profile" | "trustedIp".
-profileName (string, required when target="profile").
-operation (string, required) - "add" | "remove" | "set".
-ranges (object[], required) - Each: { startAddress, endAddress, description }.
-checkOnly (boolean, optional, default false, only for profile updates).
+target ("profile" | "trustedIp", required) - Represents the metadata target; enum
+profile or trustedIp; no default; example 'profile'; do not pass networkAccess.
+profileName (string, optional) - Represents the Profile metadata fullName; string;
+required when target is profile; example 'System Administrator'; do not pass profile
+Ids.
+operation ("add" | "remove" | "set", required) - Represents how ranges are applied; enum
+add, remove, or set; no default; example 'add'; do not use set unless replacing the full
+list is intended.
+ranges (object[], required) - Represents IP ranges to add, remove, or set; array of
+start/end objects; no default; example
+[{\"startAddress\":\"203.0.113.0\",\"endAddress\":\"203.0.113.255\"}]; do not pass an
+empty list for add.
+  startAddress (string, required) - Represents the first IPv4 or IPv6 address in the
+  range; IP address string; no default; example '203.0.113.0'; do not pass CIDR
+  notation.
+  endAddress (string, required) - Represents the last IPv4 or IPv6 address in the range;
+  IP address string; no default; example '203.0.113.255'; do not pass a value lower than
+  startAddress.
+  description (string, optional) - Represents the admin-facing range description;
+  string; omitted by default; example 'Corporate VPN'; do not pass secrets.
+checkOnly (boolean, optional) - Represents whether to build metadata without calling
+updateMetadata; boolean; defaults to false; example true; do not use when ranges must be
+saved.
+securitySettingsFullName (string, optional) - Represents the SecuritySettings fullName;
+string; defaults to 'Security'; example 'Security'; do not pass a file path.
 
 Result
-deploy (object|null) - Metadata deploy result for profile updates.
-ranges (array) - Final state of ranges after the operation.
+target (value) - included in the JSON returned by the tool.
+profileName (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+checkOnly (value) - included in the JSON returned by the tool.
+securitySettingsFullName (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets" / "Manage IP Addresses".
@@ -43,8 +65,7 @@ Errors
 Example request
 
 update_login_ip_ranges({
-  "target": "profile",
-  "profileName": "System_Administrator",
-  "operation": "set",
-  "ranges": [{ "startAddress": "203.0.113.0", "endAddress": "203.0.113.255", "description": "MTG Office" }]
+  "target": "example",
+  "operation": "example",
+  "ranges": []
 })

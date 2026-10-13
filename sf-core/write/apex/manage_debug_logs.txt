@@ -14,25 +14,17 @@ Operations:
 
 Salesforce API
 Tooling API, v66.0.
+REST API (Data), v66.0.
 
-Endpoints
-POST   /services/data/v66.0/tooling/sobjects/DebugLevel                (enable: create level)
-POST   /services/data/v66.0/tooling/sobjects/TraceFlag                 (enable: create flag)
-DELETE /services/data/v66.0/tooling/sobjects/TraceFlag/{id}            (disable)
-GET    /services/data/v66.0/tooling/query/?q=SELECT ... FROM TraceFlag (disable: find flag)
-GET    /services/data/v66.0/tooling/query/?q=SELECT ... FROM ApexLog   (list)
-GET    /services/data/v66.0/tooling/sobjects/ApexLog/{id}/Body         (get: log text)
-DELETE /services/data/v66.0/tooling/sobjects/ApexLog/{id}              (delete)
-
-TraceFlag key fields:
-  TracedEntityId (User Id), DebugLevelId, LogType, StartDate, ExpirationDate.
-  ExpirationDate must be ≤ StartDate + 24 h.
-  LogType: USER_DEBUG | DEVELOPER_LOG | CLASS_TRACING | PROFILING.
-
-DebugLevel key fields:
-  DeveloperName, MasterLabel, Language, ApexCode, ApexProfiling, Callout,
-  Database, System, Validation, Visualforce, Workflow.
-  Each level: NONE | ERROR | WARN | INFO | DEBUG | FINE | FINER | FINEST.
+Endpoint
+POST /services/data/v66.0/tooling/sobjects/DebugLevel
+POST /services/data/v66.0/tooling/sobjects/TraceFlag
+DELETE /services/data/v66.0/tooling/sobjects/TraceFlag/{Id}
+DELETE /services/data/v66.0/tooling/sobjects/ApexLog/{logId}
+GET /services/data/v66.0/tooling/query/
+GET /services/data/v66.0/query/
+GET /services/data/v66.0/chatter/users/me
+GET /services/data/v66.0/tooling/sobjects/ApexLog/{logId}/Body
 
 Headers
 Authorization: Bearer <access_token>
@@ -50,23 +42,17 @@ logId (string, required for get / delete) - ApexLog ID.
 limit (number, optional, default 50, max 200) - Max logs for list.
 sinceMinutes (number, optional, default 60) - Only logs from the last N minutes for list.
 
-Result (enable)
-{
-  "traceFlag": { "id", "tracedEntityId", "debugLevelId", "logType", "startDate", "expirationDate", "isActive": true },
-  "debugLevel": { "id", "name", "levels": { ... } }
-}
-
-Result (disable)
-{ "disabled": true, "deletedTraceFlagIds": ["07tXx..."], "tracedEntityId": "005..." }
-
-Result (list)
-{ "logs": [{ "Id", "Application", "Operation", "Status", "StartTime", "DurationMilliseconds", "LogLength", "LogUserId" }], "totalSize": N }
-
-Result (get)
-{ "log": { ...metadata fields..., "body": "<full log text>" } }
-
-Result (delete)
-{ "deleted": true, "id": "07L..." }
+Result
+raw Salesforce create, query, body, or delete responses for the selected Tooling API
+operation.
+debugLevel (value) - included in the JSON returned by the tool.
+traceFlag (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
+tracedEntityId (value) - included in the JSON returned by the tool.
+traceFlags (value) - included in the JSON returned by the tool.
+deleteResults (value) - included in the JSON returned by the tool.
+apexLog (value) - included in the JSON returned by the tool.
+body (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Author Apex" or "Modify All Data" for trace flags on other users.

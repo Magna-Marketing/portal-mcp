@@ -6,11 +6,10 @@ successor to Connected Apps. Includes OAuth config, policies (IP, refresh,
 session), and per-app usage stats.
 
 Salesforce API
-Tooling + Connect API, v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, DeveloperName, MasterLabel, IsActive, IsClientCredentialsFlowEnabled, IsHybridAppFlowEnabled, IsPkceRequired FROM ExternalClientApplication
-GET /services/data/v66.0/apps/oauth/usage    (cross-reference)
+GET /services/data/v66.0/query/?q=SELECT Id, DeveloperName, MasterLabel, CreatedDate, LastModifiedDate FROM ExternalClientApplication
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,13 +19,25 @@ Body
 None.
 
 Input (parameters)
-namePattern (string, optional).
-includeUsage (boolean, optional, default true).
-includeOAuthSettings (boolean, optional, default true).
+namePattern (string, optional) - DeveloperName or MasterLabel filter; string using * and
+? wildcards converted to SOQL LIKE; no default; example: Cursor_*; do not pass regex,
+raw LIKE syntax, or multiple patterns.
+whereClause (string, optional) - Additional SOQL WHERE condition for
+ExternalClientApplication; string with or without WHERE; no default; example:
+CreatedDate = LAST_N_DAYS:30; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted
+user input.
+orderBy (string, optional) - SOQL ORDER BY clause for ExternalClientApplication; string
+with or without ORDER BY; default DeveloperName ASC; example: MasterLabel ASC; do not
+pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum external client app rows to return; integer from 1
+to 2000; default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-externalClientApps (array) - { id, developerName, masterLabel, isActive, isClientCredentialsFlowEnabled, isHybridAppFlowEnabled, isPkceRequired, oauth (object|null), usage (object|null): { totalApiCalls, lastUsedDate, totalUsers } }.
+raw Salesforce REST QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Manage Connected Apps".
@@ -39,4 +50,8 @@ Errors
 
 Example request
 
-list_external_client_apps({})
+list_external_client_apps({
+  "namePattern": "Cursor_*",
+  "whereClause": "CreatedDate = LAST_N_DAYS:30",
+  "orderBy": "MasterLabel ASC"
+})

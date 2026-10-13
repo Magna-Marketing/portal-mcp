@@ -4,7 +4,7 @@ Description
 Read org-level session, password, and MFA settings: timeouts, lockout, password complexity, MFA requirement, identity confirmation, session security level, force re-login on IP change, etc. Use for security audits and reporting.
 
 Salesforce API
-Metadata API (`SecuritySettings`, `ProfilePasswordPolicy`, `ProfileSessionSetting`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
 POST /services/Soap/m/66.0   (readMetadata SecuritySettings + per-profile session/password settings)
@@ -17,33 +17,10 @@ Body
 None.
 
 Input (parameters)
-includeProfileOverrides (boolean, optional, default true) - Include per-profile session and password policy overrides.
+None.
 
 Result
-generatedAt (string).
-session (object):
-  sessionTimeout (string) - "TwoHours" | "FourHours" | etc.
-  forceLogoutOnSessionTimeout (boolean).
-  forceRelogin (boolean).
-  lockSessionsToDomain (boolean).
-  lockSessionsToIp (boolean).
-  requireHttpOnly (boolean).
-  requireHttps (boolean).
-  enableCSRFOnGet (boolean).
-  redirectionWarning (boolean).
-password (object):
-  expiration (string) - "FortyFiveDays" | "Never" | etc.
-  minimumLength (number).
-  complexity (string) - "NoRestriction" | "AlphaNumeric" | "SpecialCharacters" | "UpperLowerCaseNumber" | "UpperLowerCaseNumberSpecialCharacters".
-  historyRestriction (number) - Disallow last N passwords.
-  maxLoginAttempts (number).
-  lockoutInterval (string) - "Forever" | "FifteenMinutes" | "ThirtyMinutes" | "SixtyMinutes".
-  questionRestriction (string).
-mfa (object):
-  enabledForAllUsers (boolean).
-  identityConfirmationOnLogin (boolean).
-  identityConfirmationOnReportExport (boolean).
-profileOverrides (array, optional) - Per profile: { profileName, sessionTimeout, passwordExpiration, complexity, lockoutInterval }.
+Returns the raw SecuritySettings metadata object.
 
 Required permissions
 - "Manage Internal Users" / "View Setup and Configuration".
@@ -56,4 +33,4 @@ Errors
 
 Example request
 
-get_session_settings({ "includeProfileOverrides": true })
+get_session_settings({})

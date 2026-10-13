@@ -4,10 +4,10 @@ Description
 List validation rules for one or more sObjects with their formula, error message, error display field, and active status. Use to understand "why is this insert failing?" and to plan rule cleanup.
 
 Salesforce API
-Tooling API, v66.0. `ValidationRule` sObject.
+Tooling API, v66.0.
 
 Endpoint
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, ValidationName, EntityDefinition.QualifiedApiName, Active, Description, ErrorDisplayField, ErrorMessage, Metadata FROM ValidationRule WHERE EntityDefinition.QualifiedApiName IN (...)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, EntityDefinitionId, ValidationName, Active, Description, ErrorMessage FROM ValidationRule
 
 Headers
 Authorization: Bearer <access_token>
@@ -17,16 +17,30 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional) - Restrict to these sObjects.
-namePattern (string, optional) - Glob on ValidationName.
-includeInactive (boolean, optional, default true).
-includeFormula (boolean, optional, default true) - Include the boolean formula body.
-limit (number, optional, default 500).
+sObjects (string[], optional) - Object API names whose validation rules are queried;
+string array; no default means all queryable ValidationRule rows; example: [\"Account\",
+\"Opportunity\"]; do not pass labels, relationship names, empty strings, or SOQL
+fragments.
+namePattern (string, optional) - ValidationName filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: Billing_*; do not pass raw LIKE syntax,
+object-qualified names, or regex.
+includeInactive (boolean, optional) - Whether inactive rules are included; boolean;
+default true; example: false; do not pass strings such as \"true\".
+includeMetadata (boolean, optional) - Deprecated no-op; kept for clients that still send
+it.
+whereClause (string, optional) - Additional Tooling SOQL WHERE condition for
+ValidationRule; string without WHERE; no default; example: ManageableState =
+'unmanaged'; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Optional Tooling SOQL ORDER BY for ValidationRule; string
+without ORDER BY; example: LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT, or
+FROM.
+limit (integer, optional) - Optional maximum ValidationRule rows to query; positive
+integer; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-validationRules (array) - Each:
-  id, validationName, sObject, active, description, errorDisplayField, errorMessage, errorConditionFormula (when includeFormula=true), createdDate, lastModifiedDate.
+Returns a JSON object with query and toolingResult.
+query (value) - included in the JSON returned by the tool.
+toolingResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -39,4 +53,8 @@ Errors
 
 Example request
 
-list_validation_rules({ "sObjects": ["Opportunity"], "includeInactive": false })
+list_validation_rules({
+  "sObjects": "[\\\"Account\\\", \\\"Opportunity\\\"]",
+  "namePattern": "Billing_*",
+  "includeInactive": false
+})

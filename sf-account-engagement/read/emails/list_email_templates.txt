@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/email-templates?fields={fields}&filter[isDeleted]=eq,false
+GET https://{pi-domain}/api/v5/objects/email-templates
+Optional query: fields, filter[campaignId], filter[folderId], filter[isAutoResponderEmail], filter[isDeleted], filter[isDripEmail], filter[isListEmail], filter[isOneToOneEmail], filter[name], limit, nextPageToken
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,28 +22,23 @@ Body
 None.
 
 Input (parameters)
-isOneToOneEmail (boolean, optional).
-isAutoResponderEmail (boolean, optional).
-isDripEmail (boolean, optional).
-isListEmail (boolean, optional).
-folderId (number, optional).
-campaignId (number, optional).
-nameContains (string, optional).
-isDeleted (boolean, optional, default false).
-fields (string[], optional, default: id,name,subject,type,
-  isOneToOneEmail,isAutoResponderEmail,isDripEmail,isListEmail,
-  isDeleted,folderId,campaignId,trackerDomainId,createdAt,updatedAt,
-  createdById,updatedById,senderOptions.address,senderOptions.name,
-  replyToOptions.address,tagReplacementLanguage).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+isOneToOneEmail (boolean, optional) - Filter to one-to-one email templates.
+isAutoResponderEmail (boolean, optional) - Filter to auto-responder email templates.
+isDripEmail (boolean, optional) - Filter to drip/engagement program email templates.
+isListEmail (boolean, optional) - Filter to list email templates.
+folderId (number, optional) - Filter by folder id.
+campaignId (number, optional) - Filter by campaign id.
+nameContains (string, optional) - Filter templates whose name contains this string (case-insensitive like match).
+isDeleted (boolean, optional) - Include deleted templates. Default false.
+fields (string[], optional) - Field projection. Defaults to id, name, subject, type, isOneToOneEmail,
+isAutoResponderEmail, isDripEmail, isListEmail, isDeleted, folderId, campaignId,
+trackerDomainId, createdAt, updatedAt, createdById, updatedById, senderOptions.address,
+senderOptions.name, replyToOptions.address, tagReplacementLanguage.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-emailTemplates (array) - Each: { id, name, subject, type,
-  isOneToOneEmail, isAutoResponderEmail, isDripEmail, isListEmail,
-  isDeleted, folderId, campaignId, trackerDomainId, senderOptions,
-  replyToOptions, tagReplacementLanguage, createdAt, updatedAt }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -55,12 +51,8 @@ Errors
 
 Example request
 
-list_email_templates({ "isAutoResponderEmail": true })
+list_email_templates({})
 
 Example result
-{
-  "emailTemplates": [
-    { "id": 451, "name": "Welcome", "subject": "Welcome to Magna",
-      "type": "HtmlAndText", "isAutoResponderEmail": true, "campaignId": 1024 }
-  ]
-}
+
+{ }

@@ -19,13 +19,31 @@ Body
 None.
 
 Input (parameters)
-status (string, optional) - "New" | "InProgress" | "Active" | "Error" | "Deleted".
-includeExpired (boolean, optional, default false).
-limit (number, optional, default 100).
+status (string, optional) - ScratchOrgInfo Status exact match; string; no default;
+example: Active; do not pass labels, arrays, or SOQL fragments.
+orgNamePattern (string, optional) - OrgName filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: feature-*; do not pass raw LIKE syntax,
+regex, or usernames.
+usernamePattern (string, optional) - Username filter using * and ? wildcards; string
+converted to SOQL LIKE; no default; example: test-*@example.com; do not pass raw LIKE
+syntax or comma-separated usernames.
+includeExpired (boolean, optional) - Whether expired scratch orgs are included by
+omitting the ExpirationDate filter; boolean; default false filters to today or later;
+example: true; do not pass strings such as \"false\".
+whereClause (string, optional) - Additional SOQL WHERE condition for ScratchOrgInfo;
+string without WHERE; no default; example: Edition = 'Developer'; do not pass SELECT,
+FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY for ScratchOrgInfo; string without ORDER BY;
+default CreatedDate DESC; example: ExpirationDate ASC NULLS LAST; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum ScratchOrgInfo rows to query; positive integer
+clamped to 2000; default 200; example: 100; do not pass 0, negatives, decimals, or
+offsets.
 
 Result
-totalSize (number).
-scratchOrgs (array) - { id, orgName, status, expirationDate, edition, country, namespace, adminEmail, username, signupInstance, scratchOrg (Org Id), createdBy, createdDate }.
+Returns a JSON object with query and raw query result.
+query (value) - included in the JSON returned by the tool.
+result (value) - included in the JSON returned by the tool.
 
 Required permissions
 - Run from a Dev Hub org with "Manage Dev Hub" + "View All Data".
@@ -38,4 +56,8 @@ Errors
 
 Example request
 
-list_scratch_orgs({ "status": "Active" })
+list_scratch_orgs({
+  "status": "Active",
+  "orgNamePattern": "feature-*",
+  "usernamePattern": "test-*@example.com"
+})

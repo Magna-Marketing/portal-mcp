@@ -18,12 +18,16 @@ Body
 SOAP retrieve on Role.
 
 Input (parameters)
-isCustomOnly (boolean, optional, default false).
-namePattern (string, optional).
+custom_only (boolean, optional) - When true, retrieve only non-system/private roles where supported by the SOAP Role
+object.
+name_pattern (string, optional) - SOAP like filter for Role.Name.
+customer_key_pattern (string, optional) - SOAP like filter for Role.CustomerKey, useful for system role keys such as SYS_DEF_*.
+business_unit_id (string, optional) - Business Unit MID used for SOAP ClientID context.
 
 Result
-totalSize (number).
-roles (array) - { id (RoleID), name, description, isPrivate (boolean), isPrivilegedUserRole, customerKey, dateCreated, dateModified }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `users_read`.
@@ -36,4 +40,4 @@ Errors
 
 Example request
 
-list_user_roles({ "isCustomOnly": true })
+list_user_roles({})

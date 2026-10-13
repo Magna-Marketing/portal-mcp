@@ -24,12 +24,7 @@ fields (string[], optional) - Default expands `htmlMessage`,
   `form.*`, `layoutTemplate.*`, `trackerDomain.*`.
 
 Result
-landingPage (object): id, name, htmlMessage, campaignId, folderId,
-  trackerDomainId, layoutTemplateId, formId, vanityUrl, url, title,
-  description, isDoNotIndex, isUseRedirectLocation, redirectLocation,
-  salesforceId, isDeleted, createdAt, updatedAt.
-form (object|null), layoutTemplate (object|null),
-  trackerDomain (object|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -45,10 +40,5 @@ Example request
 get_landing_page({ "id": 6612 })
 
 Example result
-{
-  "landingPage": {
-    "id": 6612, "name": "Spring LP", "title": "Spring 2026",
-    "vanityUrl": "https://go.magnatech.com/spring",
-    "htmlMessage": "<html>...</html>"
-  }
-}
+
+{ }

@@ -11,12 +11,13 @@ Network sObject only supports describeSObjects(), query(), retrieve(), update().
 To deactivate a site, use operation "update" with status "DownForMaintenance".
 
 Salesforce API
-- Create: Connect REST API, v66.0. POST /connect/communities.
-- Update: REST API sObject, v66.0. PATCH /sobjects/Network/{id}.
+Connect REST API, v66.0.
+REST API (Data), v66.0.
 
-Endpoints
-POST  /services/data/v66.0/connect/communities                    (create)
-PATCH /services/data/v66.0/sobjects/Network/{id}                  (update)
+Endpoint
+POST /services/data/v66.0/connect/communities
+PATCH /services/data/v66.0/sobjects/Network/{id}
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -39,33 +40,69 @@ Update Body (Network sObject PATCH — fields that are updatable)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update". Delete is not supported.
-siteId (string, optional) - Network record ID. Required for update when siteName is not provided.
-siteName (string, optional) - Display name used to resolve siteId for update, or as the name for create.
-urlPathPrefix (string, required for create; optional for update) - URL suffix, e.g. "customers" in MyDomain.my.site.com/customers.
-templateName (string, required for create) - Experience Builder template name.
-  Known values: "Customer Service", "Build Your Own", "Partner Central",
-  "Help Center", "B2B Commerce Template".
-  Use GET /connect/communities/templates to list all templates in the org.
-description (string, optional) - Site description.
-templateParams (object, optional, create only) - Template-specific parameters:
-  - "AuthenticationType": "UNAUTHENTICATED"|"AUTHENTICATED"|"AUTHENTICATED_WITH_PUBLIC_ACCESS"
-    (Build Your Own LWR template, API v52.0-55.0 only)
-  - "CreateStoreDefaults": "ALL"|"NONE" (B2B/D2C store templates)
-  - "WebstoreId": "<id>" (B2B Aura, B2B LWR, D2C templates)
-status (string, optional, update only) - "Live" | "DownForMaintenance" | "UnderConstruction".
-  Note: "UnderConstruction" is only valid before first publish. Once published,
-  a site cannot return to "UnderConstruction".
-allowMembersToFlag (boolean, optional, update only) - OptionsAllowMembersToFlag.
-directMessagesEnabled (boolean, optional, update only) - OptionsDirectMessagesEnabled.
-memberVisibility (boolean, optional, update only) - OptionsMemberVisibility.
-invitationsEnabled (boolean, optional, update only) - OptionsInvitationsEnabled.
-selfRegistrationEnabled (boolean, optional, update only) - OptionsSelfRegistrationEnabled.
-sendWelcomeEmail (boolean, optional, update only) - OptionsSendWelcomeEmail.
-guestChatterEnabled (boolean, optional, update only) - OptionsGuestChatterEnabled.
-nicknameDisplayEnabled (boolean, optional, update only) - OptionsNicknameDisplayEnabled.
-privateMessagesEnabled (boolean, optional, update only) - OptionsPrivateMessagesEnabled.
-reputationEnabled (boolean, optional, update only) - OptionsReputationEnabled.
+operation ("create" | "update", required) - Requested site operation; enum create or
+update; no default; example: 'create'; do not pass delete because Network delete is not
+supported by REST or Connect API.
+siteId (string, optional) - Experience Cloud Network record Id; Salesforce 15- or
+18-character Id; required for update when siteName is omitted; example:
+'0DBxx000000abcD'; do not pass the site URL or domain.
+siteName (string, optional) - Experience Cloud site display name; string Name value;
+required for create and used to resolve siteId for update when siteId is omitted;
+example: 'Customer Hub'; do not pass the developer name unless it is also the display
+name.
+urlPathPrefix (string, optional) - Site URL path prefix; string path segment appended
+under the Experience Cloud domain; required for create and optional for update; example:
+'customers'; do not pass a leading slash, full URL, or spaces.
+templateName (string, optional) - Experience Builder template name; string matching an
+available /connect/communities/templates entry; required for create; example: 'Customer
+Service'; do not guess labels that are not available in the target org.
+description (string, optional) - Network Description value; string; omitted leaves the
+current description unchanged; example: 'Customer self-service portal'; do not pass HTML
+expecting rendering.
+templateParams (object, optional) - Template-specific creation parameters; object map of
+string keys to string values accepted by the selected template; omitted uses template
+defaults; example: { 'CreateStoreDefaults': 'ALL' }; do not pass parameters unsupported
+by the selected template.
+status ("Live" | "DownForMaintenance" | "UnderConstruction", optional) - Network Status
+value; enum Live, DownForMaintenance, or UnderConstruction; omitted leaves status
+unchanged; example: 'DownForMaintenance'; do not pass UnderConstruction after the site
+has been published.
+allowMembersToFlag (boolean, optional) - Network OptionsAllowMembersToFlag flag;
+boolean; omitted leaves the current value unchanged; example: true; do not pass for
+create because Connect creation ignores it.
+directMessagesEnabled (boolean, optional) - Network OptionsDirectMessagesEnabled flag;
+boolean; omitted leaves the current value unchanged; example: false; do not pass for
+create because Connect creation ignores it.
+memberVisibility (boolean, optional) - Network OptionsMemberVisibility flag; boolean
+controlling whether members can see other members; omitted leaves the current value
+unchanged; example: true; do not pass for create because Connect creation ignores it.
+invitationsEnabled (boolean, optional) - Network OptionsInvitationsEnabled flag;
+boolean; omitted leaves the current value unchanged; example: true; do not pass for
+create because Connect creation ignores it.
+selfRegistrationEnabled (boolean, optional) - Network OptionsSelfRegistrationEnabled
+flag; boolean; omitted leaves the current value unchanged; example: false; do not pass
+for create because Connect creation ignores it.
+sendWelcomeEmail (boolean, optional) - Network OptionsSendWelcomeEmail flag; boolean;
+omitted leaves the current value unchanged; example: true; do not pass for create
+because Connect creation ignores it.
+guestChatterEnabled (boolean, optional) - Network OptionsGuestChatterEnabled flag;
+boolean; omitted leaves the current value unchanged; example: false; do not enable
+unless public Chatter access is intended.
+nicknameDisplayEnabled (boolean, optional) - Network OptionsNicknameDisplayEnabled flag;
+boolean; omitted leaves the current value unchanged; example: true; do not pass for
+create because Connect creation ignores it.
+privateMessagesEnabled (boolean, optional) - Network OptionsPrivateMessagesEnabled flag;
+boolean; omitted leaves the current value unchanged; example: true; do not pass for
+create because Connect creation ignores it.
+reputationEnabled (boolean, optional) - Network OptionsReputationEnabled flag; boolean;
+omitted leaves the current value unchanged; example: true; do not pass for create
+because Connect creation ignores it.
+recognitionBadgingEnabled (boolean, optional) - Network OptionsRecognitionBadgingEnabled
+flag; boolean; omitted leaves the current value unchanged; example: true; do not pass
+for create because Connect creation ignores it.
+knowledgeableEnabled (boolean, optional) - Network OptionsKnowledgeableEnabled flag;
+boolean; omitted leaves the current value unchanged; example: false; do not pass for
+create because Connect creation ignores it.
 
 Result (create)
 Raw Community Create response: { id, name, url, loginUrl, siteUrl, status, ... }
@@ -93,19 +130,8 @@ Corrections from original documentation
 - "templateOptions" body key does not exist; the correct key is "templateParams".
 - Status "DownForMaintenance" is the correct spelling (not camelCase).
 
-Example requests
+Example request
 
 manage_experience_site({
-  "operation": "create",
-  "siteName": "Customer Hub",
-  "urlPathPrefix": "customerhub",
-  "templateName": "Customer Service",
-  "description": "Self-service portal"
-})
-
-manage_experience_site({
-  "operation": "update",
-  "siteName": "Customer Hub",
-  "status": "DownForMaintenance",
-  "allowMembersToFlag": true
+  "operation": "create"
 })

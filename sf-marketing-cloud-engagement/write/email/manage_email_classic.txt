@@ -19,21 +19,42 @@ Body
 SOAP CreateRequest / UpdateRequest with Email.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-emailId (number, optional, required for non-create).
-customerKey (string, optional).
-name (string, required for create).
-subject (string, required for create).
-htmlBody (string, optional).
-textBody (string, optional).
-fromName (string, optional).
-fromEmail (string, optional).
-emailType (string, optional, default "Standard") - "Standard" | "Triggered" | "Welcome".
-folderId (number, optional).
-isHTMLPaste (boolean, optional, default true).
+operation ("create" | "update" | "delete", required) - SOAP operation for classic Email Studio Email: create, update, or delete.
+email_id (number, optional) - Email.ID legacy identifier. Required for update/delete when customer_key is not
+supplied.
+customer_key (string, optional) - Email.CustomerKey external key. Recommended for create and can identify update/delete.
+name (string, optional) - Email.Name. Required for create unless raw_email_xml is supplied.
+description (string, optional) - Email.Description.
+subject (string, optional) - Email.Subject. Required for create unless raw_email_xml is supplied.
+html_body (string, optional) - Email.HTMLBody for classic HTML emails.
+text_body (string, optional) - Email.TextBody for text-only or multipart content.
+preheader (string, optional) - Email.PreHeader text shown in email clients.
+email_type ("Normal" | "Text Only" | "HTML" | "Text", optional) - Salesforce EmailType. Use Normal for HTML emails or Text Only for plain text. HTML maps
+to Normal and Text maps to Text Only.
+category_id (number, optional) - Email.CategoryID folder identifier.
+folder_id (number, optional) - Alias for category_id.
+is_html_paste (boolean, optional) - Email.IsHTMLPaste. Defaults to true on create when omitted.
+sync_text_with_html (boolean, optional) - Email.SyncTextWithHTML.
+character_set (string, optional) - Email.CharacterSet such as utf-8 or iso-8859-1. Defaults to utf-8 on create.
+is_active (boolean, optional) - Email.IsActive.
+from_name (string, optional) - Email.FromName. Deprecated by Salesforce for send definitions but accepted for legacy
+Email object compatibility.
+from_address (string, optional) - Email.FromAddress. Deprecated by Salesforce for send definitions but accepted for legacy
+Email object compatibility.
+raw_email_xml (string, optional) - Exact <Objects xsi:type="Email">...</Objects> XML to send. Use for content areas or
+uncommon Salesforce fields not exposed by this schema.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication plus SOAP ClientID / REST
+Account-Context. Defaults to the authenticated session MID when present.
+client_business_unit_id (number, optional) - Optional SOAP object owner/context MID. Defaults to business_unit_id, then the
+authenticated session MID. Use when authenticating at parent level but writing into a
+child Business Unit.
 
 Result
-email (object) - { id, customerKey, name, subject, fromName, fromEmail, emailType, folderId }.
+tool (value) - included in the JSON returned by the tool.
+operation (value) - included in the JSON returned by the tool.
+businessUnitId (value) - included in the JSON returned by the tool.
+clientBusinessUnitId (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `email_write`.
@@ -47,10 +68,5 @@ Errors
 Example request
 
 manage_email_classic({
-  "operation": "create",
-  "name": "MTG_Welcome",
-  "subject": "Welcome to MTG",
-  "htmlBody": "<html>...</html>",
-  "fromName": "MTG",
-  "fromEmail": "noreply@magnatech.com"
+  "operation": "create"
 })

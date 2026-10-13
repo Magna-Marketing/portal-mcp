@@ -9,8 +9,8 @@ Marketing Cloud API
 REST API (`/data/v1/async/{requestId}/status` and `.../results`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/{requestId}/status
-GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/{requestId}/results
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/{request_id}/status
+GET https://{tenant}.rest.marketingcloudapis.com/data/v1/async/{request_id}/results
 
 Headers
 Authorization: Bearer <access_token>
@@ -20,15 +20,15 @@ Body
 None.
 
 Input (parameters)
-requestId (string, required).
-fetchResultsOnComplete (boolean, optional, default true) - When status is `Complete`, also fetch result rows in the response.
+request_id (string, required) - Request ID returned by an asynchronous Data Extension row insert or upsert request.
+fetch_results (boolean, optional) - When true, also calls GET /data/v1/async/{requestId}/results and returns that raw
+Salesforce response.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and REST Account-Context.
 
 Result
-status (string) - "Pending" | "InProgress" | "Complete" | "Failed".
-requestId (string).
-resultMessages (string[], optional).
-durationMs (number).
-results (object|null, when fetchResultsOnComplete=true and status=Complete) - { count, items: [...rows] }.
+tool (value) - included in the JSON returned by the tool.
+status (value) - included in the JSON returned by the tool.
+results (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_read`.
@@ -41,4 +41,6 @@ Errors
 
 Example request
 
-get_async_query_status({ "requestId": "abc123-def456" })
+get_async_query_status({
+  "request_id": ""
+})

@@ -5,48 +5,56 @@ Create / update / delete External Data Sources (Salesforce Connect):
 OData2/4, AcrossOrgs, custom Apex Connector, etc.
 
 Salesforce API
-Metadata API (`ExternalDataSource`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+POST /services/Soap/m/66.0  (readMetadata ExternalDataSource)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: multipart/form-data; boundary=...
 
 Body
-multipart/form-data with:
-
-Part 1, name="json", Content-Type: application/json
-{
-  "deployOptions": {
-    "checkOnly": false,
-    "rollbackOnError": true,
-    "singlePackage": true
-  }
-}
-
-Part 2, name="file", filename="deploy.zip", Content-Type: application/zip
-
-Generated ZIP containing:
-- package.xml
-- externalDataSources/<ExternalDataSource>.externalDataSource
+JSON fields: fullName, label, type, endpoint, protocol, principalType, authProvider, certificate, customConfiguration, isWritable, repository, language, smallIcon, largeIcon.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "validateAndSyncSchema".
-fullName (string, required) - DeveloperName.
-masterLabel (string, required for create).
-type (string, required for create) - "OData2" | "OData4" | "AcrossOrgs" | "DataDotCom" | "GoogleDrive" | "Custom".
-endpoint (string, required for create).
-protocol (string, optional) - "NoAuthentication" | "Oauth" | "Password".
-authProvider (string, optional) - For OAuth.
-namedCredentialName (string, optional) - When using Named Credentials for auth.
-defaultIsolationLevel (string, optional, default "ReadOnly") - "ReadOnly" | "Transactional".
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete" | "read", required) - Metadata
+operation to perform.
+fullName (string, required) - ExternalDataSource metadata fullName / DeveloperName.
+masterLabel (string, optional) - Display label. Mapped to Metadata API label. Required
+by Salesforce for create/upsert.
+label (string, optional) - Alias for masterLabel when supplying raw Metadata API
+terminology.
+type (string, optional) - External source adapter type, for example OData4, OData4_01,
+AcrossOrgs, GraphQL, AmazonDynamoDB, AmazonAthena, or Custom.
+endpoint (string, optional) - External system URL, or a named credential callout URL
+such as callout:My_Named_Credential/path.
+namedCredentialName (string, optional) - Convenience field. If endpoint is omitted, the
+tool sends endpoint as callout:<namedCredentialName>.
+protocol (string, optional) - Authentication protocol supported by the external data
+source.
+principalType (string, optional) - Identity type, for example Anonymous, PerUser,
+NamedUser, or system-specific values.
+authProvider (string, optional) - Authentication provider developer name/reference for
+OAuth configurations.
+certificate (string, optional) - Certificate developer name/reference when required by
+the adapter.
+customConfiguration (string | object, optional) - Adapter-specific JSON configuration.
+Objects are JSON-stringified.
+isWritable (boolean, optional) - Whether Salesforce Connect external objects from this
+source allow create/update/delete where the adapter supports it.
+repository (string, optional) - Optional repository name, used by some content adapters
+such as SharePoint.
+language (string, optional) - Language for the label.
+smallIcon (string, optional) - Small icon static resource reference, if supported by the
+adapter.
+largeIcon (string, optional) - Large icon static resource reference, if supported by the
+adapter.
+metadataOverride (object, optional) - Advanced raw Metadata API fields merged into the
+generated ExternalDataSource payload.
 
 Result
-deploy (object).
-externalDataSource (object) - { id, fullName, masterLabel, type, endpoint }.
+the raw Salesforce Metadata API response.
 
 Required permissions
 - "Customize Application" + "Manage External Connections".
@@ -60,10 +68,6 @@ Errors
 Example request
 
 manage_external_data_source({
-  "operation": "create",
-  "fullName": "Partner_Inventory_API",
-  "masterLabel": "Partner Inventory API",
-  "type": "OData4",
-  "endpoint": "https://api.partner.com/odata/",
-  "namedCredentialName": "MTG_Partner_API"
+  "operation": "example",
+  "fullName": "example"
 })

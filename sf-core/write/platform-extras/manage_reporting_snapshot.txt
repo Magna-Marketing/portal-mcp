@@ -6,31 +6,59 @@ Create / update / delete / schedule a Reporting Snapshot
 and write them to a custom object for trending.
 
 Salesforce API
-REST API (Data) + Metadata API (`AnalyticSnapshot`), v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest         (CRUD via Metadata)
-POST /services/data/v66.0/sobjects/AnalyticSnapshot      (alternative)
+POST /services/Soap/m/66.0  (readMetadata AnalyticSnapshot)
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: fullName, name, description, groupColumn, runningUser, sourceReport, targetObject, mappings.
+JSON fields: sourceField, sourceType, aggregateType, targetField.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "schedule" | "unschedule".
-fullName (string, required) - DeveloperName.
-name (string, required for create).
-description (string, optional).
-sourceReportId (string, required for create).
-targetObject (string, required for create) - sObject API name.
-fieldMappings (array, required for create) - [{ sourceField, targetField }].
-runningUserId (string, optional).
-groupName (string, optional).
-schedule (object, optional, for schedule) - { frequency ("hourly"|"daily"|"weekly"|"monthly"), startTime, daysOfWeek, daysOfMonth }.
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete" | "read", required) - Represents
+the Metadata API operation; valid values are create, update, upsert, delete, and read;
+there is no default; example: upsert; do not pass schedule or unschedule.
+fullName (string, required) - Represents the AnalyticSnapshot metadata
+fullName/DeveloperName; there is no default; example: Pipeline_Snapshot; do not pass a
+record ID.
+name (string, optional) - Represents the display name; required for create/upsert unless
+metadataOverride supplies it; no default; example: Pipeline Snapshot; do not pass an API
+path.
+description (string, optional) - Represents the snapshot description; defaults to
+omitted; example: Captures weekly pipeline; do not pass HTML-only help.
+sourceReport (string, optional) - Represents the source report metadata fullName;
+required for create/upsert; no default; example: Public_Reports/Pipeline_Report; do not
+pass the 00O report ID.
+sourceReportId (string, optional) - Represents a compatibility alias for sourceReport;
+no default; example: Public_Reports/Pipeline_Report; do not pass a 00O report ID despite
+the name.
+targetObject (string, optional) - Represents the target custom object API name; required
+for create/upsert; no default; example: Pipeline_Snapshot__c; do not pass a tab label.
+runningUser (string, optional) - Represents the username used to run the snapshot;
+defaults to Salesforce behavior when omitted; example: analyst@example.com; do not pass
+a user ID.
+runningUserId (string, optional) - Represents a compatibility alias for runningUser;
+default is omitted; example: analyst@example.com; do not pass a 005 user ID for Metadata
+API.
+groupColumn (string, optional) - Represents the summary report group column; defaults to
+omitted; example: CLOSE_DATE; do not pass SOQL expressions.
+fieldMappings (object[], optional) - Represents field mappings from report output to
+target object fields; required for create/upsert unless metadataOverride supplies
+mappings; example: [{\"sourceField\":\"AMOUNT\",\"targetField\":\"Amount__c\"}]; do not
+pass target labels.
+  sourceField (string, required) - Source report column, summary, or snapshot-provided
+  value such as RunningUser or ExecutionTime.
+  targetField (string, required) - Target object field API name.
+  sourceType (string, optional) - Report job source type where required by the org.
+  aggregateType (string, optional) - Aggregate type for summary values when needed.
+metadataOverride (object, optional) - Represents raw Metadata API fields merged last;
+defaults to none; example: {\"mappings\":[]}; do not pass conflicting fields unless
+overriding is intended.
 
 Result
 deploy (object|null).
@@ -48,11 +76,6 @@ Errors
 Example request
 
 manage_reporting_snapshot({
-  "operation": "create",
-  "fullName": "MTG_Pipeline_Trend",
-  "name": "MTG Pipeline Trend",
-  "sourceReportId": "00OQg0000004aBcDE",
-  "targetObject": "Pipeline_Snapshot__c",
-  "fieldMappings": [{ "sourceField": "Stage", "targetField": "Stage__c" }, { "sourceField": "Amount", "targetField": "Amount__c" }],
-  "schedule": { "frequency": "daily", "startTime": "09:00:00" }
+  "operation": "upsert",
+  "fullName": "Pipeline_Snapshot"
 })

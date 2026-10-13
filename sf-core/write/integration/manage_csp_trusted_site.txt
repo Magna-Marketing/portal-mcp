@@ -6,19 +6,47 @@ whitelisted in the org's Content Security Policy so that LWC, Aura, and Lightnin
 Out components can make callouts to them from the browser.
 
 Salesforce API
-SOAP Metadata API, v66.0. Metadata type: CspTrustedSite.
-Use conn.metadata.create / update / delete (jsforce).
+Metadata API (SOAP), v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
+POST /services/Soap/m/66.0  (createMetadata CspTrustedSite)
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".
-fullName (string, required) - DeveloperName of the CSP Trusted Site, e.g. Partner_CDN.
-endpointUrl (string, optional) - Endpoint URL to allow. Required for create.
-description (string, optional).
-isActive (boolean, optional, default true) - Whether the entry is active. activate/deactivate set this automatically.
-context (string, optional, default "All") - "All" | "LEX" | "Communities".
+operation ("create" | "update" | "delete" | "activate" | "deactivate", required) -
+Action to perform; enum create, update, delete, activate, or deactivate; no default;
+example create; do not pass enable or disable.
+fullName (string, required) - CSP Trusted Site metadata fullName; string API name;
+required for every operation; example Partner_CDN; do not include .cspTrustedSite.
+endpointUrl (string, optional) - Trusted endpoint URL; URL string with domain and
+optional port; required for create and unchanged when omitted on update; example
+https://cdn.partner.com; do not pass paths that rely on runtime parameters.
+description (string, optional) - Trusted site description; string; omitted leaves it
+unchanged; example Partner CDN; do not include credentials.
+isActive (boolean, optional) - Whether the entry is active; boolean; defaults to true on
+create and activate/deactivate override it; example true; do not pass with delete.
+context ("All" | "LEX" | "Communities", optional) - Lightning context for the trusted
+URL; enum All, LEX, or Communities; defaults to All on create and unchanged when omitted
+on update; example LEX; do not pass unsupported site contexts.
+isApplicableToConnectSrc (boolean, optional) - Whether connect-src can use the URL;
+boolean; defaults to true on create if no directive is supplied; example true; do not
+set all directive flags false in API v66.0.
+isApplicableToFrameSrc (boolean, optional) - Whether frame-src can use the URL; boolean;
+defaults to false when omitted; example false; do not enable unless frames are needed.
+isApplicableToImgSrc (boolean, optional) - Whether img-src can use the URL; boolean;
+defaults to false when omitted; example true; do not enable for non-image hosts.
+isApplicableToStyleSrc (boolean, optional) - Whether style-src can use the URL; boolean;
+defaults to false when omitted; example true; do not enable for untrusted CSS.
+isApplicableToFontSrc (boolean, optional) - Whether font-src can use the URL; boolean;
+defaults to false when omitted; example true; do not enable for unrelated asset hosts.
+isApplicableToMediaSrc (boolean, optional) - Whether media-src can use the URL; boolean;
+defaults to false when omitted; example false; do not enable unless audio or video loads
+are required.
+canAccessCamera (boolean, optional) - Whether the origin can access camera features when
+permissions policy is enabled; boolean; defaults to false when omitted; example false;
+do not enable without explicit user-facing need.
+canAccessMicrophone (boolean, optional) - Whether the origin can access microphone
+features when permissions policy is enabled; boolean; defaults to false when omitted;
+example false; do not enable without explicit user-facing need.
 
 Result
 { create | update | delete: <Metadata API SaveResult / DeleteResult> }
@@ -36,8 +64,6 @@ Errors
 Example request
 
 manage_csp_trusted_site({
-  "operation": "create",
-  "fullName": "Partner_CDN",
-  "endpointUrl": "https://cdn.partner.com",
-  "context": "LEX"
+  "operation": "example",
+  "fullName": "example"
 })

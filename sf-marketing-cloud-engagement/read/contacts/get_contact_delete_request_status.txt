@@ -9,7 +9,7 @@ Marketing Cloud API
 REST API (`/contacts/v1/contacts/analytics/deleterequests`).
 
 Endpoint
-GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/analytics/deleterequests
+GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/deleteOperations
 GET https://{tenant}.rest.marketingcloudapis.com/contacts/v1/contacts/analytics/deleterequests/summary
 
 Headers
@@ -20,14 +20,21 @@ Body
 None.
 
 Input (parameters)
-mode (string, optional, default "details") - "details" | "summary".
-operationId (string, optional, only details) - Filter to one delete request operation.
-sinceDays (number, optional, default 30).
-limit (number, optional, default 100).
+mode ("details" | "summary" | "operations", optional) - details calls the analytics detail endpoint, summary calls the analytics summary
+endpoint, and operations calls the deleteOperations endpoint.
+start_date_utc (string, optional) - UTC range start for analytics endpoints. Defaults to since_days ago.
+end_date_utc (string, optional) - UTC range end for analytics endpoints. Defaults to now.
+since_days (number, optional) - Fallback date range length when start_date_utc or end_date_utc is omitted. Defaults to
+30.
+status_id (value, optional) - Optional analytics status filter. Valid values: 1 Processing, 5 Completed, 7 Invalid.
+page (number, optional) - REST $page value for details or operations. Defaults to 1.
+page_size (number, optional) - REST $pagesize/$pageSize value. Defaults to 100.
+order_by (string, optional) - Optional REST $orderBy value for analytics details. Defaults to operationId desc.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-For details: { totalCount, requests (array): [{ operationId, status ("Pending"|"InProgress"|"Complete"|"Failed"), startedAt, completedAt, requestedCount, queuedCount, processedCount, failedCount, requestedBy }] }.
-For summary: { activeRequests, completedToday, totalProcessedLast30Days, totalFailedLast30Days, oldestPendingRequestAge }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read`.
@@ -40,4 +47,4 @@ Errors
 
 Example request
 
-get_contact_delete_request_status({ "mode": "summary" })
+get_contact_delete_request_status({})

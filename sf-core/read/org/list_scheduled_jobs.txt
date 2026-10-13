@@ -20,14 +20,32 @@ Body
 None.
 
 Input (parameters)
-state (string, optional) - "WAITING" | "ACQUIRED" | "EXECUTING" | "DELETED" | "PAUSED" | "PAUSED_BLOCKED" | "BLOCKED" | "ERROR" | "COMPLETE".
-jobType (string, optional) - "1" (Scheduled Apex) | "3" (Dashboard refresh) | "4" (ReportingSnapshot) | "8" (BatchApex) | "9" (Scheduled Flow) | "ScheduledApex" (string form).
-ownerId (string, optional).
-limit (number, optional, default 200).
+state ("WAITING" | "ACQUIRED" | "EXECUTING" | "COMPLETE" | "ERROR" | "DELETED" | "PAUSED" | "BLOCKED" | "PAUSED_BLOCKED", optional) -
+CronTrigger State exact match; documented uppercase picklist value; no default; example:
+WAITING; do not pass lowercase values, multiple states, or SOQL operators.
+cronJobDetailId (string, optional) -
+CronJobDetailId reference filter; Salesforce Id string; no default; example:
+08e5g00000ABCDe; do not pass job names, multiple Ids, or relationship fields.
+ownerId (string, optional) -
+OwnerId reference filter; Salesforce User Id string; no default; example:
+0055g00000ABCDe; do not pass usernames, emails, multiple Ids, or SOQL fragments.
+whereClause (string, optional) -
+Additional SOQL WHERE condition for CronTrigger; string without WHERE; no default;
+example: NextFireTime != null; do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted
+user input.
+orderBy (string, optional) -
+SOQL ORDER BY for CronTrigger; string without ORDER BY; default NextFireTime ASC;
+example: State ASC, NextFireTime ASC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) -
+Maximum CronTrigger rows to query; positive integer clamped to 2000; default 200;
+example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-scheduledJobs (array) - { id, name, jobType, ownerId, ownerName, cronExpression, nextFireTime, previousFireTime, state, startTime, endTime, timesTriggered, timeZoneSidKey }.
+Returns the raw Salesforce QueryResult for CronTrigger records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration" / "Modify All Data".
@@ -40,4 +58,8 @@ Errors
 
 Example request
 
-list_scheduled_jobs({ "state": "WAITING" })
+list_scheduled_jobs({
+  "state": "WAITING",
+  "cronJobDetailId": "08e5g00000ABCDe",
+  "ownerId": "0055g00000ABCDe"
+})

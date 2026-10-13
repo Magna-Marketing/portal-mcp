@@ -6,52 +6,10 @@ Create, update, delete, activate, or deactivate Salesforce Letterheads
 header, footer, colors, and separator lines used in HTML email templates.
 
 Salesforce API
-Metadata API (Letterhead type), v66.0. Managed via jsforce conn.metadata
-CRUD methods (not a REST deployRequest zip upload).
+Metadata API (SOAP), v66.0.
 
-Endpoints (internal, via jsforce)
-conn.metadata.create("Letterhead", metadata)
-conn.metadata.read("Letterhead", fullName)
-conn.metadata.update("Letterhead", metadata)
-conn.metadata.delete("Letterhead", fullName)
-
-Corrections vs. original documentation
-- The original doc listed POST /services/data/v66.0/metadata/deployRequest,
-  which requires building a multipart zip payload. The tool instead uses jsforce
-  Metadata API CRUD methods, which are simpler and correct.
-- "logoStaticResource" does NOT exist as a header field in the Letterhead
-  Metadata API. The correct field is "logo", which is a document reference
-  string in the format "FolderName/DocumentName.ext".
-- Required Letterhead fields on create: available, backgroundColor, bodyColor,
-  header.backgroundColor, header.height, footer.backgroundColor, footer.height.
-- topLine / middleLine / bottomLine are LetterheadLine objects with "color" and
-  "height" fields (NOT "style" — the style is a separate LINE_STYLES enum
-  applied via the Metadata API file, not exposed directly via API CRUD).
-- activate/deactivate set the "available" boolean field.
-
-Metadata type fields
-fullName      string   Required. DeveloperName/API name of the letterhead.
-name          string   Required for create. Display label.
-available     boolean  Required. Whether the letterhead is available for use.
-backgroundColor string Required. Overall background color in hex, e.g. #FFFFFF.
-bodyColor       string Required. Body section color in hex.
-description     string Optional.
-header          LetterheadHeaderFooter  Required.
-footer          LetterheadHeaderFooter  Required.
-topLine         LetterheadLine          Optional.
-middleLine      LetterheadLine          Optional.
-bottomLine      LetterheadLine          Optional.
-
-LetterheadHeaderFooter fields
-backgroundColor string  Required. Section background color in hex.
-height          int     Required. Height in pixels.
-logo            string  Optional. Document reference, e.g. "MyFolder/Logo.png".
-horizontalAlignment  "None"|"Left"|"Center"|"Right"   Optional.
-verticalAlignment    "None"|"Top"|"Middle"|"Bottom"   Optional.
-
-LetterheadLine fields
-color   string  Required. Line color in hex.
-height  int     Required. Line height in pixels.
+Endpoint
+POST /services/Soap/m/66.0  (deleteMetadata Letterhead)
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete" | "activate" | "deactivate".

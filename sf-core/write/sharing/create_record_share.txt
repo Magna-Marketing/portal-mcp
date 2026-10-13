@@ -5,45 +5,45 @@ Create a manual share row on a record (`<sObject>Share`). This grants
 explicit access to a user, group, or role for a single record.
 
 Salesforce API
-REST API (Data), v66.0. `POST /sobjects/{sObject}Share`.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/sobjects/{sObject}Share
-POST /services/data/v66.0/composite/sobjects        (bulk)
+POST /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "ParentId": "0014Q00000abcDE",
-  "UserOrGroupId": "005Qg0000020aBcDE",
-  "AccessLevel": "Edit"
-}
-
-For Account: also AccountAccessLevel, OpportunityAccessLevel,
-CaseAccessLevel, ContactAccessLevel.
+JSON fields: attributes, parentField, UserOrGroupId, accessField, RowCause, OpportunityAccessLevel, CaseAccessLevel, ContactAccessLevel.
 
 Input (parameters)
-sObject (string, required) - sObject API name.
-shares (object[], required) - Each:
-  recordId (string, required).
-  userOrGroupId (string, optional) - Or `username` / `groupName`.
-  username (string, optional).
-  groupName (string, optional).
-  accessLevel (string, required) - "Read" | "Edit".
-  accountAccessLevel (string, optional, AccountShare only).
-  opportunityAccessLevel (string, optional, AccountShare only).
-  caseAccessLevel (string, optional, AccountShare only).
-  contactAccessLevel (string, optional, AccountShare only).
-  rowCause (string, optional, default "Manual") - Custom Apex sharing
-    reasons must be created first via Setup; "Manual" works for any user.
-allOrNone (boolean, optional, default false).
+sObject (string, required) - Represents the parent sObject API name; standard or custom
+object name; no default; example 'Account' or 'Project__c'; do not pass the share object
+name.
+shares (unknown[], required) - Represents share rows to create; non-empty array sent in
+batches up to 200; no default; example one row with recordId and username; do not pass
+an empty array.
+allOrNone (boolean, optional) - Represents the sObject Collections rollback flag;
+boolean; defaults to false; example true; do not set true unless one failure should roll
+back the whole batch.
+batchSize (integer, optional) - Represents records per sObject Collections request;
+integer 1-200; defaults to 200; example 100; do not exceed the REST collection limit.
+parentIdField (string, optional) - Represents the parent Id field on the share object;
+Salesforce field API name; defaults to ParentId for custom objects and <sObject>Id for
+standard objects; example 'AccountId'; do not override unless the default is wrong.
+accessLevelField (string, optional) - Represents the access level field on the share
+object; Salesforce field API name; defaults to AccessLevel for custom objects and
+<sObject>AccessLevel for standard objects; example 'AccountAccessLevel'; do not pass
+child access fields here.
 
 Result
-results (array) - Per share row: { id, recordId, userOrGroupId, accessLevel, status ("created"|"failed"), error }.
-summary (object) - { created, failed, total }.
+JSON object with request, lookups, records, and responses arrays containing raw
+Salesforce create results.
+request (value) - included in the JSON returned by the tool.
+lookups (value) - included in the JSON returned by the tool.
+records (value) - included in the JSON returned by the tool.
+responses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Modify All" on the parent sObject **or** be the record owner with FullAccess.
@@ -60,10 +60,6 @@ Errors
 Example request
 
 create_record_share({
-  "sObject": "Account",
-  "shares": [
-    { "recordId": "0014Q00000abcDE", "username": "external.partner@magnatech.com",
-      "accountAccessLevel": "Read", "opportunityAccessLevel": "Read",
-      "caseAccessLevel": "Read", "contactAccessLevel": "Read" }
-  ]
+  "sObject": "example",
+  "shares": []
 })

@@ -8,7 +8,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/data-model-objects/:dataModelObjectName
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-objects/{dataModelObjectName}
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/data-model-objects/{dataModelObjectName}/relationships
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -18,16 +19,14 @@ Body
 None.
 
 Input (parameters)
-dataModelObjectName (string, required) - Developer name including
-  suffix (e.g. "UnifiedIndividual__dlm").
-includeRelationships (boolean, optional, default false) - When
-  true, also runs `get_dmo_relationships` and inlines the result.
+dataModelObjectName (string, required) - DMO developer name, including suffix, for example `UnifiedIndividual__dlm` or
+`ssot__Individual__dlm`.
+dataspace (string, optional) - Data space name. Salesforce uses the default data space when omitted.
+includeRelationships (boolean, optional) - When true, also calls GET /ssot/data-model-objects/{dataModelObjectName}/relationships
+and returns `{ dataModelObject, relationships }`.
 
 Result
-dataModelObject (object): id, developerName, label, category, type,
-  primaryKeyField, fields (array), recordCount, createdDate,
-  lastModifiedDate.
-relationships (array, when includeRelationships=true).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -40,16 +39,10 @@ Errors
 
 Example request
 
-get_data_model_object({ "dataModelObjectName": "UnifiedIndividual__dlm",
-  "includeRelationships": true })
+get_data_model_object({
+  "dataModelObjectName": ""
+})
 
 Example result
-{
-  "dataModelObject": {
-    "developerName": "UnifiedIndividual__dlm",
-    "primaryKeyField": "Id__c",
-    "fields": [
-      { "apiName": "Id__c", "dataType": "TEXT", "isPrimaryKey": true }
-    ]
-  }
-}
+
+{ }

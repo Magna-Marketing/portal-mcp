@@ -7,33 +7,54 @@ Engagement, Pardot, etc.). Mirrors `assign_permission_set` but on
 `PermissionSetLicenseAssign`.
 
 Salesforce API
-REST API (Data), v66.0. `POST /sobjects/PermissionSetLicenseAssign` (single) or `POST /composite/sobjects` (bulk).
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/sobjects/PermissionSetLicenseAssign
 POST /services/data/v66.0/composite/sobjects
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{ "AssigneeId": "...", "PermissionSetLicenseId": "..." }
+JSON fields: attributes, AssigneeId, PermissionSetLicenseId.
 
 Input (parameters)
-permissionSetLicenseName (string, optional) - PSL DeveloperName (e.g. "Sales_Console_User").
-permissionSetLicenseId (string, optional).
-  One required.
-userIds (string[], optional).
-usernames (string[], optional).
-  One required.
-allOrNone (boolean, optional, default false).
-skipIfAlreadyAssigned (boolean, optional, default true).
+permissionSetLicenseName (string, optional) - Represents PermissionSetLicense
+DeveloperName, MasterLabel, or PermissionSetLicenseKey; exact string; required when
+permissionSetLicenseId is omitted; example 'SalesConsole'; do not pass PermissionSet
+names.
+permissionSetLicenseId (string, optional) - Represents PermissionSetLicense Id;
+Salesforce Id string; required when permissionSetLicenseName is omitted; example
+'0PLxx0000001234'; do not pass PermissionSet Ids.
+userIds (string[], optional) - Represents users to assign by Id; array of Salesforce
+User Id strings; required when usernames is omitted; example ['005xx0000012345']; do not
+pass Contact Ids.
+usernames (string[], optional) - Represents users to assign by Username; array of exact
+usernames; required when userIds is omitted; example ['user@example.com']; do not pass
+display names.
+includeInactiveUsers (boolean, optional) - Represents whether inactive users can be
+resolved; boolean; defaults to true; example false; do not set true unless inactive
+assignments are intended.
+allOrNone (boolean, optional) - Represents sObject Collections rollback behavior;
+boolean; defaults to false; example true; do not set true unless one failure should roll
+back a batch.
+skipIfAlreadyAssigned (boolean, optional) - Represents whether existing PSL assignments
+are skipped before create; boolean; defaults to true; example true; do not set false
+unless duplicate errors are desired.
+batchSize (integer, optional) - Represents records per sObject Collections create call;
+integer 1-200; defaults to 200; example 100; do not exceed the REST collection limit.
 
 Result
-permissionSetLicense (object) - { id, name, totalLicenses, usedLicenses, availableLicenses }.
-results (array) - { userId, username, status ("created"|"already_assigned"|"failed"), assignmentId, error }.
-summary (object) - { created, alreadyAssigned, failed, total, remainingLicenses }.
+JSON object with permissionSetLicenseLookup, userLookup, existingAssignmentLookup,
+skippedExistingAssignments, createRequestRecords, and createResponses.
+permissionSetLicenseLookup (value) - included in the JSON returned by the tool.
+userLookup (value) - included in the JSON returned by the tool.
+existingAssignmentLookup (value) - included in the JSON returned by the tool.
+skippedExistingAssignments (value) - included in the JSON returned by the tool.
+createRequestRecords (value) - included in the JSON returned by the tool.
+createResponses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Internal Users".
@@ -48,6 +69,7 @@ Errors
 Example request
 
 assign_permission_set_license({
-  "permissionSetLicenseName": "Sales_Console_User",
-  "usernames": ["alice@magnatech.com", "bob@magnatech.com"]
+  "permissionSetLicenseName": "example",
+  "permissionSetLicenseId": "example",
+  "userIds": []
 })

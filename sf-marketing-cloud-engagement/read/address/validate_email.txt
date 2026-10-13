@@ -20,11 +20,14 @@ Body
 { "email": "jane.doe@example.com", "validators": ["SyntaxValidator", "MXValidator", "ListDetectiveValidator"] }
 
 Input (parameters)
-email (string, required) - Address to validate.
-validators (string[], optional, default ["SyntaxValidator","MXValidator","ListDetectiveValidator"]) - Validator chain.
+email (string, required) - Email address to validate.
+validators ("SyntaxValidator" | "MXValidator" | "ListDetectiveValidator"[], optional) - Optional validator chain. Defaults to SyntaxValidator, MXValidator, and
+ListDetectiveValidator.
+business_unit_id (string, optional) - Business Unit MID used to scope the access token and Account-Context header for this
+REST request.
 
 Result
-result (object) - { email, valid (boolean), failedValidation ("None"|"Syntax"|"MX"|"ListDetective"), level (string), description (string|null) }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_send` (or default Installed Package scope).
@@ -38,4 +41,6 @@ Errors
 
 Example request
 
-validate_email({ "email": "jane.doe@example.com" })
+validate_email({
+  "email": ""
+})

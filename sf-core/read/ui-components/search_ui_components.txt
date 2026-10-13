@@ -30,26 +30,38 @@ Body
 None.
 
 Input (parameters)
-pattern (string, required) - Glob with `*` (any chars) and `?` (single
-  char). Case-insensitive substring also accepted (e.g. "card" matches).
-types (string[], optional) - Subset of ["lwc", "aura", "visualforce",
-  "flexipage"]. Default: all four.
-namespacePrefix (string, optional).
-managedOnly (boolean, optional, default false).
-limit (number, optional, default 200, max 1000).
+pattern (string, optional) - Name pattern for DeveloperName or Name; string with * and ?
+wildcards converted to SOQL LIKE; required unless namePattern is set; example:
+*Account*; do not pass regex, raw LIKE syntax, or comma-separated names.
+namePattern (string, optional) - Alias for pattern; string with * and ? wildcards;
+ignored when pattern is present; example: Contact*; do not pass full SOQL predicates.
+types (string[], optional) - Component families to search; array values lwc, aura,
+visualforce, or flexipage; default searches all four; example: [\"lwc\",\"aura\"]; do
+not pass metadata object names or empty strings.
+componentType (string, optional) - Single component family when types is omitted; string
+accepted values lwc, aura, visualforce, or flexipage; no default by itself; example:
+flexipage; do not pass multiple values.
+namespacePrefix (string, optional) - NamespacePrefix filter where supported; string
+namespace without trailing __; no default; example: mypkg; do not pass labels or
+component-qualified names.
+managedOnly (boolean, optional) - Managed package filter; boolean; default false;
+example: true; do not use for permission filtering.
+whereClause (string, optional) - Additional SOQL WHERE condition appended to every
+selected object query; string with or without WHERE; no default; example:
+LastModifiedDate = LAST_N_DAYS:30; do not pass SELECT, FROM, ORDER BY, LIMIT, or
+untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY used for every selected object query; string
+with or without ORDER BY; default uses the object name field ascending; example:
+LastModifiedDate DESC; do not pass WHERE, LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum rows per component family; integer from 1 to 1000;
+default 200; example: 50; do not pass offsets, decimals,.
 
 Result
-totalSize (number).
-results (array) - Each:
-  type ("lwc"|"aura"|"visualforce"|"flexipage").
-  id (string).
-  name (string) - DeveloperName / Name.
-  label (string).
-  apiVersion (number|null).
-  namespacePrefix (string|null).
-  description (string|null).
-  lastModifiedDate (string).
-groupedByType (object|null) - When >1 type returned: { lwc: [...], aura: [...] }.
+object keyed by component family, each value a raw Salesforce QueryResult.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "Customize Application" / "View Setup and Configuration".
@@ -62,14 +74,22 @@ Errors
 
 Example request
 
-search_ui_components({ "pattern": "*Card", "types": ["lwc","aura"] })
+search_ui_components({
+  "pattern": "*Account*",
+  "namePattern": "Contact*",
+  "types": "[\\\"lwc\\\",\\\"aura\\\"]"
+})
 
-Example result (truncated)
+Example result
 
 {
-  "totalSize": 5,
-  "results": [
-    { "type": "lwc",  "id": "0Rb4Q00000abcDE", "name": "projectCard", "label": "Project Card", "apiVersion": 62.0 },
-    { "type": "aura", "id": "0Ad4Q00000xyzAB", "name": "AccountCard",  "label": "Account Card", "apiVersion": 60.0 }
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "SObject"
+      }
+    }
   ]
 }

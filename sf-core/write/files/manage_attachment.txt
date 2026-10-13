@@ -6,31 +6,48 @@ preferred for new uploads; this tool is for systems still on the
 classic Attachment model.
 
 Salesforce API
-REST API (Data), v66.0. `Attachment` sObject.
+REST API (Data), v66.0.
 
 Endpoint
-POST   /services/data/v66.0/sobjects/Attachment
-DELETE /services/data/v66.0/sobjects/Attachment/{id}
+POST /services/data/v66.0/sobjects/Attachment
+DELETE /services/data/v66.0/sobjects/Attachment/{attachmentId}
+PATCH /services/data/v66.0/sobjects/Attachment/{attachmentId}
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{ "Name": "...", "ParentId": "...", "ContentType": "...", "Body": "<base64>", "Description": "...", "IsPrivate": false }
+JSON fields: ParentId, Name, Body, ContentType, Description, IsPrivate, OwnerId.
+JSON fields: Name, Body, ContentType, Description, IsPrivate, OwnerId.
 
 Input (parameters)
-operation (string, required) - "create" | "delete". 
-attachmentId (string, optional, required for delete).
-ParentId (string, required for create).
-Name (string, required for create).
-ContentType (string, optional).
-Description (string, optional).
-IsPrivate (boolean, optional, default false).
-Body (string, required for create).
+operation ("create" | "update" | "delete", required) - Attachment action; enum create,
+update, or delete; required; example \"create\"; use Salesforce Files for new file
+features.
+attachmentId (string, optional) - Attachment Id; Salesforce Id string; required for
+update/delete; example \"00P...\"; do not pass ContentVersionId.
+ParentId (string, optional) - Parent record Id; Salesforce Id string; required for
+create; example \"001...\"; only pass objects that still support Attachment.
+Name (string, optional) - File name; string; required for create; example
+\"contract.pdf\"; include an extension when known.
+Body (string, optional) - Attachment body; base64 string; required for create; example
+\"JVBERi0x...\"; do not pass raw bytes or file paths.
+ContentType (string, optional) - MIME type; string; optional; example
+\"application/pdf\"; omit when unknown.
+Description (string, optional) - Attachment description; string up to 500 chars;
+optional; example \"Signed contract\"; avoid secrets.
+IsPrivate (boolean, optional, default false) - Private visibility flag; boolean;
+defaults to false on create; example true; omit on update when unchanged.
+OwnerId (string, optional) - Owner User Id; Salesforce Id string; optional; example
+\"005...\"; do not pass usernames.
 
 Result
-attachment (object) - { id, name, ParentId, contentType, bodyLength }.
+raw sObject write response plus optional lookup query response.
+createAttachment (value) - included in the JSON returned by the tool.
+attachmentLookup (value) - included in the JSON returned by the tool.
+deleteAttachment (value) - included in the JSON returned by the tool.
+updateAttachment (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Edit" on the parent sObject.
@@ -45,9 +62,5 @@ Errors
 Example request
 
 manage_attachment({
-  "operation": "create",
-  "ParentId": "500Qg0000020aBcDE",
-  "Name": "case_screenshot.png",
-  "ContentType": "image/png",
-  "Body": "iVBORw0KG..."
+  "operation": "example"
 })

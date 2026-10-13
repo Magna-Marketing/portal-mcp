@@ -9,9 +9,13 @@ prefer an export job (`create_export` with object=Prospect).
 
 Salesforce API
 Account Engagement v5 REST API.
+Account Engagement v4 API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/prospects?fields={fields}&filter[email]=eq,jane%40example.com
+GET https://{pi-domain}/api/v5/objects/prospects
+Optional query: fields, filter[assignedToGroupId], filter[assignedToUserId], filter[campaignId], filter[createdAt], filter[crmId], filter[customFields.{apiFieldId}], filter[email], filter[isDoNotEmail], filter[isOptedOut], filter[listId], filter[updatedAt], limit, nextPageToken
+GET https://{pi-domain}/api/prospect/version/4/do/query
+Optional query: assigned_to_user, campaign_id, created_after, email, fields, format, grade_greater_than, limit, list_id, offset, output, salesforce_id, score_greater_than, score_less_than, sort_by, sort_order, updated_after
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -22,38 +26,35 @@ Body
 None.
 
 Input (parameters)
-email (string, optional) - exact match.
-emailContains (string, optional) - `like` match.
-crmId (string, optional) - SFDC Lead/Contact id.
-campaignId (number, optional).
-listId (number, optional) - Filters via list-membership join.
-assignedToUserId (number, optional).
-assignedToGroupId (number, optional).
-isDoNotEmail (boolean, optional).
-isOptedOut (boolean, optional).
-gradeFrom (string, optional) - e.g. "B" — letter grade comparison.
-scoreMin (number, optional).
-scoreMax (number, optional).
-updatedAfter (string, optional) - ISO-8601.
-createdAfter (string, optional) - ISO-8601.
-fields (string[], optional, default: id,email,firstName,lastName,
-  company,jobTitle,score,grade,salesforceId,campaignId,assignedToUserId,
-  isDoNotEmail,isDoNotCall,isOptedOut,isReviewed,isStarred,createdAt,
-  updatedAt,lastActivityAt,prospectAccountId,salutation,phone,fax,
-  mobilePhone,address1,address2,city,state,zip,country,department,
-  industry,annualRevenue,employees,website,years_in_business,source,
-  notes).
-limit (number, optional, default 50, max 200).
-nextPageToken (string, optional).
+email (string, optional) - Exact email match filter.
+emailContains (string, optional) - Case-insensitive like match on email.
+crmId (string, optional) - Filter by SFDC Lead/Contact 18-char id.
+campaignId (number, optional) - Filter by campaign id.
+listId (number, optional) - Filter via list-membership join — returns prospects on this list.
+assignedToUserId (number, optional) - Filter by assigned user id.
+assignedToGroupId (number, optional) - Filter by assigned group id.
+isDoNotEmail (boolean, optional) - Filter by do-not-email flag.
+isOptedOut (boolean, optional) - Filter by global opt-out status.
+gradeFrom (string, optional) - Minimum letter grade filter (e.g. "B" returns B, A, A+).
+scoreMin (number, optional) - Minimum score filter (inclusive).
+scoreMax (number, optional) - Maximum score filter (inclusive).
+updatedAfter (string, optional) - ISO-8601 datetime. Filter to prospects updated after this time.
+createdAfter (string, optional) - ISO-8601 datetime. Filter to prospects created after this time.
+customFieldFilters (object, optional) - Custom field filters as key-value pairs where key is "apiFieldId" and value is the
+filter expression (e.g. { "region__c": "eq,EMEA" }). These are appended as
+filter[customFields.{apiFieldId}] query params.
+fields (string[], optional) - Field projection. Defaults to id, email, firstName, lastName, company, jobTitle, score,
+grade, salesforceId, campaignId, assignedToUserId, isDoNotEmail, isDoNotCall,
+isOptedOut, isReviewed, isStarred, createdAt, updatedAt, lastActivityAt,
+prospectAccountId, plus contact fields, notes, source, and customFields.
+limit (number, optional) - Page size. Default 50, max 200. For large datasets (>100K rows), prefer create_export.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-prospects (array) - Each: { id, email, firstName, lastName, company,
-  jobTitle, score, grade, salesforceId, campaignId, assignedToUserId,
-  isDoNotEmail, isDoNotCall, isOptedOut, isReviewed, isStarred,
-  prospectAccountId, address1, address2, city, state, zip, country,
-  industry, annualRevenue, employees, website, source, notes,
-  createdAt, updatedAt, lastActivityAt, customFields (object) }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
+prospects (value) - included in the JSON returned by the tool.
+nextPageToken (value) - included in the JSON returned by the tool.
+totalResults (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `pardot_api`.
@@ -66,12 +67,8 @@ Errors
 
 Example request
 
-list_prospects({ "campaignId": 1024, "scoreMin": 50, "limit": 25 })
+list_prospects({})
 
 Example result
-{
-  "prospects": [
-    { "id": 7745, "email": "jane@example.com", "firstName": "Jane",
-      "score": 75, "grade": "A", "salesforceId": "00Q5800000xyzABC" }
-  ]
-}
+
+{ }

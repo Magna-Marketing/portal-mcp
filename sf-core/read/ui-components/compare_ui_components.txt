@@ -24,29 +24,34 @@ Body
 None.
 
 Input (parameters)
-type (string, required) - "lwc" | "aura" | "visualforce" | "flexipage".
-componentA (string, required) - Name (DeveloperName / Name) of first.
-componentB (string, required) - Name of second.
-includeFileDiff (boolean, optional, default true) - Show file-by-file
-  textual diff.
-diffFormat (string, optional, default "unified") - "unified" | "split" |
-  "summary".
+component1 (string, optional) - First component name; string exact DeveloperName or Name
+for the selected type; required unless name1 is set; example: accountSummary; do not
+pass file paths, labels, or multiple names.
+component2 (string, optional) - Second component name; string exact DeveloperName or
+Name for the selected type; required unless name2 is set; example: accountSummaryV2; do
+not pass file paths, labels, or multiple names.
+name1 (string, optional) - Alias for component1; string exact component name; ignored
+when component1 is present; example: Account_Record_Page; do not pass multiple names.
+name2 (string, optional) - Alias for component2; string exact component name; ignored
+when component2 is present; example: Account_Record_Page_New; do not pass multiple
+names.
+type (string, optional) - Component family for both names; string accepted values lwc,
+aura, visualforce, or flexipage; default lwc; example: visualforce; do not pass two
+types.
+componentType (string, optional) - Alias for type; string component family; ignored when
+type is present; example: aura; do not pass arrays or metadata labels.
 
 Result
-type (string).
-componentA (object) - { id, name, label, apiVersion, isExposed, lastModifiedDate }.
-componentB (object) - same shape.
-metadataDiff (array) - Each:
-  field (string) - apiVersion | isExposed | label | description | namespacePrefix | targets[] (FlexiPage type, etc.).
-  a, b (any) - Values. null when one side missing.
-fileDiff (array, optional) - Each:
-  fileName (string).
-  inA (boolean), inB (boolean) - Existence.
-  identical (boolean).
-  diff (string|null) - Unified diff text when not identical.
-  size (object) - { a: bytes, b: bytes }.
-similarity (number) - 0..1, computed across files (Jaccard on tokens).
-recommendations (string[]) - "consider deprecating B in favor of A" etc.
+raw Salesforce QueryResults for the left and right component plus simple comparison
+flags.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
+type (value) - included in the JSON returned by the tool.
+left (value) - included in the JSON returned by the tool.
+right (value) - included in the JSON returned by the tool.
+differences (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application" / "View All Setup".
@@ -60,4 +65,8 @@ Errors
 
 Example request
 
-compare_ui_components({ "type": "lwc", "componentA": "projectCard", "componentB": "projectCardV2" })
+compare_ui_components({
+  "component1": "accountSummary",
+  "component2": "accountSummaryV2",
+  "name1": "Account_Record_Page"
+})

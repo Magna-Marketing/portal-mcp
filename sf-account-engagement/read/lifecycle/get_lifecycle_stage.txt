@@ -22,8 +22,7 @@ id (number, required).
 fields (string[], optional).
 
 Result
-lifecycleStage (object): id, name, position, matchType, isLocked,
-  isDeleted, createdAt, updatedAt, createdBy, updatedBy.
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -39,4 +38,5 @@ Example request
 get_lifecycle_stage({ "id": 2 })
 
 Example result
-{ "lifecycleStage": { "id": 2, "name": "MQL", "position": 1 } }
+
+{ }

@@ -37,17 +37,30 @@ mail.setSaveAsActivity(true);
 Messaging.sendEmail(new Messaging.MassEmailMessage[] { mail }, false);
 
 Input (parameters)
-templateId (string, optional) - Salesforce EmailTemplate ID.
-templateName (string, optional) - DeveloperName resolved to ID via SOQL.
-  One of templateId or templateName is required.
-recipients (object[], required) - Each: { recipientId (Contact/Lead/User ID),
-  targetRecordId? (context record for merge fields) }.
-senderType (string, optional, default "CurrentUser") -
-  "CurrentUser" | "OrgWideEmailAddress".
-orgWideEmailAddressId (string, optional) - Required when senderType is
-  OrgWideEmailAddress.
-saveAsActivity (boolean, optional, default true) - Log email on recipient
-  activity timeline.
+templateId (string, optional) - EmailTemplate Id; Salesforce Id string; provide either
+templateId or templateName; example \"00X...\"; do not pass a template DeveloperName
+here.
+templateName (string, optional) - EmailTemplate DeveloperName; string resolved by SOQL;
+provide either templateName or templateId; example \"Renewal_Reminder\"; do not pass the
+label.
+recipients (object[], optional) - Mass email recipients; array with 1-1000 entries;
+required; example [{\"recipientId\":\"003...\",\"targetRecordId\":\"001...\"}]; do not
+exceed Salesforce mass email limits.
+  recipientId (string, required) - Recipient Contact, Lead, or User Id; Salesforce Id
+  string; required; example \"003...\"; do not pass raw email addresses for mass
+  template send.
+  targetRecordId (string, optional) - Related record Id for template merge fields;
+  Salesforce Id string; optional; example \"001...\"; omit when the template only needs
+  recipient fields.
+senderType ("CurrentUser" | "OrgWideEmailAddress", optional) - Sender mode; enum
+CurrentUser or OrgWideEmailAddress; defaults to CurrentUser; example
+\"OrgWideEmailAddress\"; requires orgWideEmailAddressId when using org-wide sender.
+orgWideEmailAddressId (string, optional) - OrgWideEmailAddress Id; Salesforce Id string;
+required when senderType is OrgWideEmailAddress; example \"0D2...\"; do not pass an
+email address.
+saveAsActivity (boolean, optional) - Whether Salesforce logs the email as activity;
+boolean; defaults to true; example false; disable when no activity history should be
+created.
 
 Result
 {
@@ -79,9 +92,7 @@ Errors
 Example request
 
 send_mass_email({
-  "templateName": "MTG_Project_Status_Email",
-  "recipients": [
-    { "recipientId": "003Qg00000a", "targetRecordId": "a01Qg00000A" },
-    { "recipientId": "003Qg00000b", "targetRecordId": "a01Qg00000B" }
-  ]
+  "templateId": "example",
+  "templateName": "example",
+  "recipients": []
 })

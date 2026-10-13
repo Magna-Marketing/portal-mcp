@@ -32,22 +32,24 @@ Body (create)
 }
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "delete".
-id (number, required for update / delete).
-name (string, required for create).
-destinationUrl (string, required for create).
-campaignId (number, required for create).
-trackerDomainId (number, optional).
-vanityUrlPath (string, optional) - Slug after the tracker domain.
-folderId (number, optional).
-gaSource (string, optional), gaMedium (string, optional),
-  gaTerm (string, optional), gaContent (string, optional),
-  gaCampaign (string, optional).
-bitlyIsPersonalized (boolean, optional).
+operation ("create" | "update" | "delete", required) - "create" creates a new custom redirect; "update" modifies it; "delete" soft-deletes it.
+id (number, optional) - Custom redirect id. Required for update and delete.
+name (string, optional) - Display name for the redirect. Required for create.
+destinationUrl (string, optional) - The URL visitors are redirected to. Required for create.
+campaignId (number, optional) - Campaign to attribute clicks to. Required for create.
+trackerDomainId (number, optional) - Tracker domain hosting the vanity URL.
+vanityUrlPath (string, optional) - Slug appended to the tracker domain (e.g. "r/spring-promo").
+folderId (number, optional) - Folder to organize the redirect in.
+gaSource (string, optional) - Google Analytics utm_source value.
+gaMedium (string, optional) - Google Analytics utm_medium value.
+gaTerm (string, optional) - Google Analytics utm_term value.
+gaContent (string, optional) - Google Analytics utm_content value.
+gaCampaign (string, optional) - Google Analytics utm_campaign value.
+bitlyIsPersonalized (boolean, optional) - Use a personalized bit.ly short URL.
 
 Result
-customRedirect (object) - Created/updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -63,16 +65,9 @@ Errors
 Example request
 
 manage_custom_redirect({
-  "operation": "create",
-  "name": "Spring promo",
-  "destinationUrl": "https://magnatech.com/spring",
-  "campaignId": 1024,
-  "trackerDomainId": 7,
-  "vanityUrlPath": "r/spring"
+  "operation": ""
 })
 
 Example result
-{
-  "customRedirect": { "id": 612, "name": "Spring promo",
-    "vanityUrl": "https://go.magnatech.com/r/spring" }
-}
+
+{ }

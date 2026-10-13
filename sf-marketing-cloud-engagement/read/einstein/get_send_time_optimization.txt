@@ -19,14 +19,15 @@ Body
 None.
 
 Input (parameters)
-contactKey (string, optional).
-dataExtensionCustomerKey (string, optional) - Bulk lookup against an entire DE of contacts.
-  One required.
-channel (string, optional, default "Email") - "Email" | "Push" | "SMS".
+contact_key (string, optional) - Contact/subscriber key for a single Einstein Send Time Optimization persona lookup.
+data_extension_customer_key (string, optional) - Data Extension external key for an Einstein Send Time Optimization bulk persona lookup.
+channel ("Email" | "Push" | "SMS", optional) - Einstein STO channel hint sent as a query parameter when provided. Supported values:
+Email, Push, SMS.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for
+Salesforce Marketing Cloud REST requests.
 
 Result
-For contactKey: { contactKey, channel, recommendedHourLocal, confidence, persona ("Morning"|"Afternoon"|"Evening"|"Night") }.
-For DE: { dataExtensionCustomerKey, items: [{ contactKey, recommendedHourLocal, confidence, persona }], totalCount }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `audiences_read` + Einstein license.
@@ -40,4 +41,4 @@ Errors
 
 Example request
 
-get_send_time_optimization({ "contactKey": "MEM-100023" })
+get_send_time_optimization({})

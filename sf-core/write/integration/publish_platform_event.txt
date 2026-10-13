@@ -9,8 +9,8 @@ Salesforce API
 REST API (Data), v66.0.
 
 Endpoint
-Single event:   POST /services/data/v66.0/sobjects/{EventName}__e
-Multiple events: POST /services/data/v66.0/composite/sobjects
+POST /services/data/v66.0/sobjects/{eventType}
+POST /services/data/v66.0/composite/sobjects
 
 Headers
 Authorization: Bearer <access_token>

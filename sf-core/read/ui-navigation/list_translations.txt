@@ -19,21 +19,32 @@ Body
 None.
 
 Input (parameters)
-languages (string[], optional) - Default = all enabled translation languages.
-sObjects (string[], optional) - Restrict to translations for these sObjects.
-sections (string[], optional) - "customLabels" | "customApplications" | "customTabs" | "fieldLabels" | "fieldHelp" | "picklistValues" | "quickActions" | "recordTypes" | "validationRules" | etc.
+language (string, optional) - Translation.Language exact filter; Salesforce language
+code string; no default; example: fr; do not pass locale display names, labels, or
+multiple languages.
+languagePattern (string, optional) - Translation.Language pattern filter; string using *
+and ? wildcards converted to SOQL LIKE; no default; example: en*; do not pass regex, raw
+LIKE syntax, or multiple patterns.
+onlyActive (boolean, optional) - Active-language filter for IsActive; boolean; default
+false means no IsActive filter; example: true; do not pass string booleans.
+onlyManageable (boolean, optional) - Manageability filter for CanManage; boolean;
+default false means no CanManage filter; example: true; do not pass this to infer user
+permissions outside Translation rows.
+whereClause (string, optional) - Additional SOQL WHERE condition for Translation; string
+with or without WHERE; no default; example: IsActive = true; do not pass SELECT, FROM,
+ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - SOQL ORDER BY clause for Translation; string with or
+without ORDER BY; default Language ASC; example: Language DESC; do not pass WHERE,
+LIMIT, SELECT, or FROM.
+limit (integer, optional) - Maximum Translation rows to return; integer from 1 to 2000;
+default 200; example: 100; do not pass 0, negatives, decimals, or offsets.
 
 Result
-totalSize (number).
-translations (array) - Each:
-  language (string) - e.g. "es", "fr".
-  customLabels (array) - [{ name, label }].
-  customApplications (array) - [{ name, label }].
-  fieldLabels (array) - [{ object, field, label, help }].
-  picklistValues (array) - [{ object, field, masterLabel, translation }].
-  recordTypes (array) - [{ object, name, label, description }].
-  validationRules (array) - [{ object, name, errorMessage }].
-  ... (depending on `sections`).
+raw Salesforce QueryResult with totalSize, done, records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "View Setup and Configuration", "Manage Translation".
@@ -46,4 +57,8 @@ Errors
 
 Example request
 
-list_translations({ "languages": ["es"], "sObjects": ["Project__c"] })
+list_translations({
+  "language": "fr",
+  "languagePattern": "en*",
+  "onlyActive": true
+})

@@ -7,11 +7,10 @@ sandbox flag, trial expiration, organization Id (15+18 char), and a
 list of accepted API versions.
 
 Salesforce API
-REST API + Data, v66.0. SOQL on `Organization` + `/services/data`.
+REST API (Data), v66.0.
 
 Endpoint
-GET /services/data
-GET /services/data/v66.0/query/?q=SELECT Id, Name, OrganizationType, IsSandbox, InstanceName, NamespacePrefix, LanguageLocaleKey, DefaultLocaleSidKey, FiscalYearStartMonth, UsesStartDateAsFiscalYearName, ComplianceBccEmail, PrimaryContact, Phone, FaxLine1, Street, City, State, PostalCode, Country, Latitude, Longitude, GeocodeAccuracy, TrialExpirationDate, MonthlyPageViewsUsed, MonthlyPageViewsEntitlement FROM Organization
+GET /services/data/v66.0/query/
 
 Headers
 Authorization: Bearer <access_token>
@@ -24,13 +23,11 @@ Input (parameters)
 None.
 
 Result
-organization (object):
-  id (string), name, organizationType (e.g. "Developer Edition"|"Enterprise"|"Unlimited"|"Performance"|"Group"|"Professional"|"Personal"|"Force.com Free"),
-  isSandbox (boolean), instanceName (string), namespacePrefix (string|null),
-  languageLocaleKey, defaultLocaleSidKey, fiscalYearStartMonth, primaryContact, phone,
-  trialExpirationDate (string|null), monthlyPageViewsUsed, monthlyPageViewsEntitlement.
-apiVersions (array) - Each: { version, label, url }.
-instanceUrl (string).
+Returns the raw Salesforce QueryResult for Organization records.
+totalSize (number) - QueryResult totalSize.
+done (boolean) - true when this response contains the full result.
+records (array) - sObject rows from the query. Returned unchanged; not renamed.
+nextRecordsUrl (string, optional) - present when done is false.
 
 Required permissions
 - "API Enabled".

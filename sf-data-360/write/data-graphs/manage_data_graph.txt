@@ -10,8 +10,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-POST   {instanceUrl}/services/data/v{ver}/ssot/data-graphs               (operation="create")
-DELETE {instanceUrl}/services/data/v{ver}/ssot/data-graphs/:dataGraphName (operation="delete")
+POST {salesforceInstanceUrl}/services/data/v65.0/ssot/data-graphs
+DELETE {salesforceInstanceUrl}/services/data/v65.0/ssot/data-graphs/{graphName}
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -48,8 +48,7 @@ includedDmos (array, required for create) - Each:
   { dmoApiName, relationshipName, cardinality, fields (string[]) }.
 
 Result
-dataGraph (object) - Created row.
-deleted (boolean, when operation="delete").
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -77,10 +76,5 @@ manage_data_graph({
 })
 
 Example result
-{
-  "dataGraph": {
-    "developerName": "UnifiedIndividualGraph",
-    "primaryDmo": "UnifiedIndividual__dlm",
-    "status": "Refreshing"
-  }
-}
+
+{ }

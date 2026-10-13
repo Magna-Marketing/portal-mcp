@@ -9,40 +9,44 @@ Marketing Cloud API
 REST API (`/messaging/v1/email/definitions`).
 
 Endpoint
-POST   https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions
-PATCH  https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}
-DELETE https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{key}
+POST https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions
+DELETE https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{definition_key}
+PATCH https://{tenant}.rest.marketingcloudapis.com/messaging/v1/email/definitions/{definition_key}
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-{
-  "definitionKey": "MTG_OrderConfirmation",
-  "name": "MTG Order Confirmation",
-  "classification": "Default Transactional",
-  "status": "Active",
-  "description": "Sent on order confirmation",
-  "content": { "customerKey": "MTG_OrderConfirmation_Email" },
-  "subscriptions": { "list": "All Subscribers" },
-  "options": { "createJourney": false }
-}
+POST: status
+DELETE: status
+PATCH: status
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "activate" | "deactivate" | "delete".
-definitionKey (string, required) - Stable Id you choose.
-name (string, required for create).
-description (string, optional).
-classification (string, optional, default "Default Transactional") - SendClassification name.
-status (string, optional) - "Active" | "Inactive".
-contentCustomerKey (string, optional, required for create) - Reference to a Content Builder email asset.
-subscriptionsList (string, optional, default "All Subscribers") - Or a custom list.
-subscriptionsDataExtension (string, optional) - DE External Key for sendable DE list.
-options (object, optional) - { createJourney (boolean) }.
+operation ("create" | "update" | "activate" | "deactivate" | "delete", required) - create calls POST, update calls PATCH, activate/deactivate PATCH only status, and delete
+calls DELETE for the send definition.
+definition_key (string, required) - Unique Transactional Messaging email send definition key.
+name (string, optional) - Unique name for the email send definition. Required by Salesforce when creating a
+definition.
+description (string, optional) - Optional description for the send definition.
+classification (string, optional) - Send classification name, commonly Default Transactional. Salesforce requires a valid
+classification for activation.
+status ("active" | "inactive" | "Active" | "Inactive", optional) - Optional definition status. create/update sends Active or Inactive when provided.
+activate/deactivate set this automatically.
+content_customer_key (string, optional) - Content Builder email asset customerKey referenced as content.customerKey. Required by
+Salesforce when creating an email definition.
+subscriptions (object, optional) - Optional Salesforce subscriptions object. Use list, data_extension, auto_add_subscriber,
+and update_subscriber for common fields.
+options (object, optional) - Optional Salesforce options object, for example trackLinks or createJourney when
+supported in your tenant.
+additional_fields (object, optional) - Optional advanced Salesforce definition fields to merge into the request body. Values
+here override generated fields.
+confirm_deletion (boolean, optional) - Must be true when operation is delete.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and the Account-Context header for this
+Transactional Messaging REST request.
 
 Result
-definition (object) - { definitionKey, definitionId, name, status, classification, content, subscriptions, options }.
+Raw Marketing Cloud response JSON, returned unchanged.
 
 Required scopes
 - `email_send`.
@@ -58,8 +62,5 @@ Example request
 
 manage_transactional_email_definition({
   "operation": "create",
-  "definitionKey": "MTG_OrderConfirmation",
-  "name": "MTG Order Confirmation",
-  "contentCustomerKey": "MTG_OrderConfirmation_Email",
-  "classification": "Default Transactional"
+  "definition_key": ""
 })

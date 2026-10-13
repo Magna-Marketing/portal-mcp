@@ -9,21 +9,15 @@ Enriched fields are propagated in change events even when the fields were not ch
 providing denormalized context for event consumers.
 
 Salesforce API
-SOAP Metadata API, v66.0.
-Metadata types: PlatformEventChannel (channelType=data) + PlatformEventChannelMember.
-Use conn.metadata.create / update / delete / read (jsforce).
+Tooling API, v66.0.
 
 Endpoint
-SOAP /services/Soap/m/{version}   (via jsforce metadata client)
-
-Channel naming
-- Default standard channel: ChangeEvents (no __chn suffix needed in channelName).
-- Custom CDC channels: fullName ends with __chn, e.g. MTG_Ops_CDC__chn.
-
-PlatformEventChannelMember fullName pattern: "{channelFullName}.{sObjectApiName}"
-e.g. "ChangeEvents.Account", "MTG_Ops_CDC__chn.Case"
-
-Enriched fields are stored as { name: "FieldApiName" } array on the member.
+POST /services/data/v66.0/tooling/sobjects/PlatformEventChannel
+POST /services/data/v66.0/tooling/sobjects/PlatformEventChannelMember
+PATCH /services/data/v66.0/tooling/sobjects/PlatformEventChannelMember/{recordId}
+DELETE /services/data/v66.0/tooling/sobjects/PlatformEventChannel/{recordId}
+DELETE /services/data/v66.0/tooling/sobjects/PlatformEventChannelMember/{recordId}
+GET /services/data/v66.0/tooling/query/
 
 Input (parameters)
 operation (string, required) - "addEntity" | "removeEntity" | "updateEnrichedFields" |
@@ -37,11 +31,11 @@ enrichedFields (object[], optional) - Required for updateEnrichedFields:
   [{ sObject (string), fields (string[]) }]
 
 Result
-addEntity: { addEntity: [<SaveResult>] }
-removeEntity: { removeEntity: [{ fullName, delete | error }] }
-updateEnrichedFields: { updateEnrichedFields: [<SaveResult>] }
-createCustomChannel: { createCustomChannel: <SaveResult>, members: [<SaveResult>] }
-deleteCustomChannel: { deleteCustomChannel: <DeleteResult> }
+Returns raw Tooling API responses or arrays of raw member operation responses.
+success (value) - included in the JSON returned by the tool.
+message (value) - included in the JSON returned by the tool.
+channelResult (value) - included in the JSON returned by the tool.
+memberResults (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application".

@@ -10,7 +10,8 @@ Salesforce API
 Account Engagement v5 REST API.
 
 Endpoint
-GET https://{pi-domain}/api/v5/objects/campaigns?fields={fields}&filter[name]=like,Welcome*&orderBy=updatedAt desc
+GET https://{pi-domain}/api/v5/objects/campaigns
+Optional query: fields, filter[folderId], filter[isDeleted], filter[name], filter[parentCampaignId], filter[salesforceId], limit, nextPageToken, orderBy
 
 Headers
 Authorization: Bearer <salesforce-access-token>
@@ -21,22 +22,18 @@ Body
 None.
 
 Input (parameters)
-nameContains (string, optional) - `like` filter on `name`.
-folderId (number, optional).
-parentCampaignId (number, optional) - Direct children only.
-isDeleted (boolean, optional, default false).
-hasSalesforceId (boolean, optional) - Filter to Connected Campaigns when true.
-fields (string[], optional, default: id,name,folderId,cost,
-  parentCampaignId,salesforceId,isDeleted,createdAt,updatedAt,
-  createdById,updatedById).
-limit (number, optional, default 50).
-nextPageToken (string, optional).
+nameContains (string, optional) - Filter campaigns whose name contains this string (case-insensitive like match).
+folderId (number, optional) - Filter by folder id.
+parentCampaignId (number, optional) - Filter to direct children of this parent campaign id.
+isDeleted (boolean, optional) - Include deleted campaigns. Default false.
+hasSalesforceId (boolean, optional) - When true, returns only campaigns linked to a Salesforce Campaign (Connected Campaigns).
+fields (string[], optional) - Field projection. Defaults to id, name, folderId, cost, parentCampaignId, salesforceId,
+isDeleted, createdAt, updatedAt, createdById, updatedById.
+limit (number, optional) - Page size. Default 50.
+nextPageToken (string, optional) - Pagination token from a previous response.
 
 Result
-campaigns (array) - Each: { id, name, folderId, cost (number|null),
-  parentCampaignId (number|null), salesforceId (string|null), isDeleted,
-  createdAt, updatedAt, createdById, updatedById }.
-nextPageToken (string|null).
+Raw Account Engagement response JSON, returned unchanged.
 
 Required scopes
 - `pardot_api`.
@@ -49,13 +46,8 @@ Errors
 
 Example request
 
-list_campaigns({ "nameContains": "Welcome", "limit": 20 })
+list_campaigns({})
 
 Example result
-{
-  "campaigns": [
-    { "id": 1024, "name": "Welcome 2026", "folderId": 33, "cost": 1500.00,
-      "salesforceId": "7015800000xyz123", "isDeleted": false }
-  ],
-  "nextPageToken": null
-}
+
+{ }

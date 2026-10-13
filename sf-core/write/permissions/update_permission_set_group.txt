@@ -9,10 +9,12 @@ Salesforce schedules an async recalculation. The tool polls until
 For full replacement use `operation: "set"`.
 
 Salesforce API
-Metadata API (`PermissionSetGroup` type), v66.0.
+Metadata API (SOAP), v66.0.
+REST API (Data), v66.0.
 
 Endpoint
-POST /services/data/v66.0/metadata/deployRequest
+GET /services/data/v66.0/query/
+POST /services/Soap/m/66.0  (updateMetadata PermissionSetGroup)
 
 Headers
 Authorization: Bearer <access_token>
@@ -26,20 +28,48 @@ Body (add)
 }
 
 Input (parameters)
-operation (string, required) - "add" | "remove" | "set".
-fullName (string, required) - PSG DeveloperName.
-label (string, optional) - Update label.
-description (string, optional).
-permissionSets (string[], optional) - For `add`/`remove` the delta;
-  for `set` the new full membership.
-mutingPermissionSets (string[], optional) - Same semantics as permissionSets.
-waitForRecalc (boolean, optional, default true).
-checkOnly (boolean, optional, default false).
+operation ("add" | "remove" | "set", required) - How permissionSets and
+mutingPermissionSets are applied; add/remove are deltas and set replaces supplied lists;
+no default; example 'add'; do not use set unless replacement is intended.
+fullName (string, required) - PermissionSetGroup metadata fullName and DeveloperName;
+string such as Finance_Access_Group; no default; do not pass MasterLabel or Id.
+label (string, optional) - Replacement group label; string; omitted preserves current
+value; example 'Finance Access Group'; do not pass empty text to mean preserve.
+description (string, optional) - Replacement group description; string; omitted
+preserves current value; example 'Updated finance access'; pass empty string only to
+clear it.
+permissionSets (string[], optional) - PermissionSet API names to add, remove, or set;
+string array; omitted leaves membership unchanged; example ['Billing_Read']; do not pass
+Ids.
+mutingPermissionSets (string[], optional) - Muting PermissionSet API names to add,
+remove, or set; string array; omitted leaves muting unchanged; example
+['Billing_Muting']; do not pass regular members here.
+hasActivationRequired (boolean, optional) - Whether session activation is required;
+boolean supported in API v53.0+; omitted preserves current value; example false; do not
+enable without activation planning.
+waitForRecalc (boolean, optional) - Whether to poll PermissionSetGroup.Status after
+update; boolean; defaults to true; example true; do not use when immediate response is
+required.
+pollIntervalMs (integer, optional) - Recalculation polling interval in milliseconds;
+integer 1-10000; defaults to 2000; example 3000; do not pass very low values for large
+orgs.
+timeoutMs (integer, optional) - Maximum recalculation polling time in milliseconds;
+integer 1-120000; defaults to 60000; example 90000; do not pass values above two
+minutes.
+metadataOverride (unknown, required).
+checkOnly (boolean, optional) - Whether to build the payload without calling
+updateMetadata; boolean; defaults to false; example true; do not use when you expect
+Salesforce to update the group.
 
 Result
-Standard deploy result, plus:
-group (object) - { id, fullName, label, status, members, addedMembers,
-  removedMembers, recalcMs }.
+JSON object with checkOnly, readResponse, metadata, updateResponse,
+permissionSetGroupLookup, and recalcResponses.
+checkOnly (value) - included in the JSON returned by the tool.
+readResponse (value) - included in the JSON returned by the tool.
+metadata (value) - included in the JSON returned by the tool.
+updateResponse (value) - included in the JSON returned by the tool.
+permissionSetGroupLookup (value) - included in the JSON returned by the tool.
+recalcResponses (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Manage Profiles and Permission Sets".
@@ -52,10 +82,10 @@ Errors
 - NOT_FOUND on fullName or any referenced permset.
 - PERMISSION_SET_GROUP_RECALC_FAILED.
 
-Example request (remove a permset)
+Example request
 
 update_permission_set_group({
-  "operation": "remove",
-  "fullName": "MTG_Delivery_Bundle",
-  "permissionSets": ["MTG_Time_Logger"]
+  "operation": "example",
+  "fullName": "example",
+  "metadataOverride": "example"
 })

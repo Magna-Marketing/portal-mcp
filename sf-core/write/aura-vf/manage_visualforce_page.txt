@@ -4,36 +4,54 @@ Description
 Create / update / delete a Visualforce page (`ApexPage`).
 
 Salesforce API
-Tooling API, v66.0. Uses the container/save pattern.
+Tooling API, v66.0.
 
 Endpoint
-POST /services/data/v66.0/tooling/sobjects/MetadataContainer
-POST /services/data/v66.0/tooling/sobjects/ApexPageMember
-POST /services/data/v66.0/tooling/sobjects/ContainerAsyncRequest
-DELETE /services/data/v66.0/tooling/sobjects/ApexPage/{id}
+POST /services/data/v66.0/tooling/sobjects/ApexPage
 
 Headers
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 Body
-N/A.
+JSON fields: Name, MasterLabel, ApiVersion, Markup, ControllerType, ControllerKey, IsAvailableInTouch, IsConfirmationTokenRequired, Description.
 
 Input (parameters)
-operation (string, required) - "create" | "update" | "upsert" | "delete".
-name (string, required) - Page Name.
-masterLabel (string, required for create).
-apiVersion (number, optional).
-markup (string, required for create/update) - VF source.
-controllerType (string, optional) - "Default" | "StandardController" | "CustomController".
-controllerKey (string, optional).
-isAvailableInTouch (boolean, optional, default false).
-description (string, optional).
-checkOnly (boolean, optional, default false).
+operation ("create" | "update" | "upsert" | "delete", required) - Requested ApexPage
+operation; enum create, update, upsert, or delete; no default; example: 'upsert'; do not
+use update for a page that does not exist.
+name (string, required) - ApexPage Name field; string API name unique in the org
+namespace; no default; example: 'InvoiceSummary'; do not include .page, namespace
+prefixes unless part of the API name, or folder paths.
+masterLabel (string, optional) - ApexPage MasterLabel; string setup label required for
+create and for upsert when creating; no default; example: 'Invoice Summary'; do not pass
+an empty label.
+apiVersion (number | string, optional) - ApexPage ApiVersion field; number or numeric
+string supported by Tooling API, default 66.0 on create/upsert create; example: 66.0; do
+not pass REST path strings like 'v66.0'.
+markup (string, optional) - ApexPage Markup field; string containing full Visualforce
+page markup; required for create/upsert create; example: '<apex:page>Hi</apex:page>'; do
+not pass base64 or metadata XML.
+controllerType (string, optional) - ApexPage ControllerType; enum Not Specified,
+Standard, StandardSet, or Custom; omitted leaves Salesforce default or existing value;
+example: 'Custom'; do not pass Apex class names here.
+controllerKey (string, optional) - ApexPage ControllerKey; string sObject API name for
+Standard/StandardSet or Apex class name for Custom; omitted leaves it unset or
+unchanged; example: 'Account'; do not pass a record Id.
+isAvailableInTouch (boolean, optional) - ApexPage IsAvailableInTouch flag; boolean
+controlling Salesforce mobile availability for related tabs; omitted leaves default or
+existing value; example: true; do not pass string booleans.
+isConfirmationTokenRequired (boolean, optional) - ApexPage IsConfirmationTokenRequired
+flag; boolean controlling CSRF confirmation token requirement for GET requests; omitted
+leaves default or existing value; example: true; do not disable unless the page design
+requires it.
+description (string, optional) - ApexPage Description; string setup description; omitted
+leaves existing value unchanged; example: 'Invoice summary page'; do not pass markup
+source here.
 
 Result
-deploy (object).
-page (object) - { id, name, masterLabel, apiVersion, controllerType }.
+JSON containing the raw ApexPage lookup plus the raw create, update, or delete Tooling
+API response.
 
 Required permissions
 - "Customize Application" / "Author Apex".
@@ -47,11 +65,6 @@ Errors
 Example request
 
 manage_visualforce_page({
-  "operation": "create",
-  "name": "AccountSummary",
-  "masterLabel": "Account Summary",
-  "apiVersion": 62.0,
-  "markup": "<apex:page standardController=\"Account\"><apex:outputText value=\"{!Account.Name}\"/></apex:page>",
-  "controllerType": "StandardController",
-  "controllerKey": "Account"
+  "operation": "upsert",
+  "name": "InvoiceSummary"
 })

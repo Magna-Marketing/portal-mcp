@@ -15,16 +15,24 @@ Authorization: Bearer <access_token>
 Content-Type: text/xml; charset=utf-8
 
 Body
-SOAP retrieve on DataExtensionField filtered by DataExtension.CustomerKey.
+SOAP request on DataExtension, DataExtensionField.
 
 Input (parameters)
-customerKey (string, optional) - DE External Key.
-deName (string, optional).
-deId (string, optional).
-  One required.
+customer_key (string, optional) - DataExtension external key / CustomerKey. Preferred lookup and required for a direct
+DataExtensionField retrieve.
+de_name (string, optional) - DataExtension name. The tool first retrieves the DataExtension to resolve CustomerKey,
+then retrieves fields.
+object_id (string, optional) - DataExtension ObjectID. The tool first retrieves the DataExtension to resolve
+CustomerKey, then retrieves fields.
+properties (string[], optional) - Optional SOAP property projection for DataExtensionField retrieve.
+business_unit_id (string, optional) - Business Unit MID used to scope authentication and SOAP ClientID context.
 
 Result
-fields (array) - { name, fieldType, maxLength, isPrimaryKey, isRequired, defaultValue, ordinal, scale, customerKey }.
+tool (value) - included in the JSON returned by the tool.
+objectType (value) - included in the JSON returned by the tool.
+resolvedCustomerKey (value) - included in the JSON returned by the tool.
+lookupResponse (value) - included in the JSON returned by the tool.
+response (value) - included in the JSON returned by the tool.
 
 Required scopes
 - `data_extensions_read`.
@@ -37,4 +45,4 @@ Errors
 
 Example request
 
-list_data_extension_fields({ "customerKey": "Members_DE" })
+list_data_extension_fields({})

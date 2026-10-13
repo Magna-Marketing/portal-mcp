@@ -9,7 +9,8 @@ Salesforce API
 Connect plane.
 
 Endpoint
-GET {instanceUrl}/services/data/v{ver}/ssot/activation-targets
+GET {salesforceInstanceUrl}/services/data/v65.0/ssot/activation-targets
+Optional query: batchSize, offset, orderBy, filters
 
 Headers
 Authorization: Bearer <core_access_token>
@@ -19,16 +20,16 @@ Body
 None.
 
 Input (parameters)
-targetType (string, optional).
-status (string, optional) - "Active" | "Paused" | "Failed".
-nameContains (string, optional).
-limit (number, optional, default 100).
+batchSize (number, optional) - Number of results to return, from 1 through 200. Salesforce defaults to 20 when omitted.
+offset (number, optional) - Number of rows to skip before returning results. Salesforce skips no rows when omitted.
+orderBy (string, optional) - Sort by createdDate, for example 'createdDate desc'. If omitted, Salesforce returns
+items by ID in ascending order.
+filters (string, optional) - Salesforce filter expression. Supported filter names: masterLabel, targetStatus,
+connectionType, platformName. Example: 'targetStatus in active AND platformName in
+Amazon S3'.
 
 Result
-activationTargets (array) - Each: { id, name, label, targetType,
-  status, targetConfig (object), createdDate, lastModifiedDate,
-  externalPlatformName }.
-totalSize (number).
+Raw Salesforce response JSON, returned unchanged.
 
 Required scopes
 - `api`.
@@ -41,12 +42,8 @@ Errors
 
 Example request
 
-list_activation_targets({ "targetType": "MarketingCloudEngagement" })
+list_activation_targets({})
 
 Example result
-{
-  "activationTargets": [
-    { "id": "0YT580000000001", "name": "MTG_MCE_DE_EMEA",
-      "targetType": "MarketingCloudEngagement", "status": "Active" }
-  ]
-}
+
+{ }

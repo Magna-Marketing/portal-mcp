@@ -29,10 +29,8 @@ bundleName (string, required) - DeveloperName of the bundle.
 fileName (string, required) - File name including extension.
 source (string, required) - File contents.
 
-Result (raw Tooling API response)
-filePath (string).
-format (string) - Inferred from fileName.
-createResult (object) - { id, success, errors }.
+Result
+raw Tooling API POST response with id, success, and errors.
 
 Required permissions
 - "Customize Application".

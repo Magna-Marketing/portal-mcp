@@ -29,20 +29,10 @@ includeProfileLevel (boolean, optional, default true).
 includeAppLevel (boolean, optional, default true).
 
 Result
-flexiPage (object) - { id, name, label, type, sObject (when RecordPage) }.
-appAssignments (array, when includeAppLevel=true) - Each:
-  appName (string) - CustomApplication DeveloperName.
-  appLabel (string).
-  formFactor (string) - "Large" | "Small".
-  isOrgDefault (boolean).
-profileAssignments (array, when includeProfileLevel=true) - Each:
-  profileName (string).
-  recordType (string|null) - For RecordPage with record-type-specific
-    assignment.
-  formFactor (string).
-  isProfileDefault (boolean).
-isOrgDefault (boolean) - Whether this page is the org-wide default for
-  its sObject + form factor.
+raw FlexiPage row with empty assignment arrays and a metadata-access note.
+flexiPage (value) - included in the JSON returned by the tool.
+isOrgDefault (value) - included in the JSON returned by the tool.
+note (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "Customize Application", "View All Setup".
@@ -60,13 +50,7 @@ get_page_assignments({ "name": "Project__c_Record_Page" })
 Example result
 
 {
-  "flexiPage": { "id": "0M04Q00000aBcDef", "name": "Project__c_Record_Page", "label": "Project Record Page", "type": "RecordPage", "sObject": "Project__c" },
-  "isOrgDefault": true,
-  "appAssignments": [
-    { "appName": "Sales",      "appLabel": "Sales",   "formFactor": "Large", "isOrgDefault": false },
-    { "appName": "MTG_Console","appLabel": "MTG Console","formFactor": "Large", "isOrgDefault": true }
-  ],
-  "profileAssignments": [
-    { "profileName": "MTG Project Manager", "recordType": "Internal_Project", "formFactor": "Large", "isProfileDefault": true }
-  ]
+  "flexiPage": null,
+  "isOrgDefault": null,
+  "note": null
 }

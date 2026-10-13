@@ -19,17 +19,9 @@ Pardot-Business-Unit-Id: <buId>
 Content-Type: application/json
 Accept: application/json
 
-Body (create)
-{
-  "formHandlerId": 8101,
-  "name": "email",
-  "prospectApiFieldId": "email",
-  "isRequired": true,
-  "errorMessage": "Email is required",
-  "isMaintainInitialValue": false,
-  "sortOrder": 0,
-  "dataFormat": "Email"
-}
+Body
+POST: dataFormat, errorMessage, isMaintainInitialValue, isRequired, name, prospectApiFieldId, sortOrder
+PATCH: dataFormat, errorMessage, isMaintainInitialValue, isRequired, name, prospectApiFieldId, sortOrder
 
 Input (parameters)
 operation (string, required) - "create" | "update" | "delete".
@@ -47,8 +39,8 @@ dataFormat (string, optional) - Validation format ("Email", "Number",
   "Date", "Text").
 
 Result
-formHandlerField (object) - Created / updated row.
-deleted (boolean, when operation="delete").
+Raw Account Engagement response JSON, returned unchanged.
+Also included when present: deleted.
 
 Required scopes
 - `pardot_api`.
@@ -70,7 +62,5 @@ manage_form_handler_field({
 })
 
 Example result
-{
-  "formHandlerField": { "id": 1101, "formHandlerId": 8101,
-    "name": "email", "prospectApiFieldId": "email" }
-}
+
+{ }

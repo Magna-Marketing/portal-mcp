@@ -20,10 +20,14 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], required, max 100) - sObject API names.
+sObjects (string[], optional) - sObject API names included in the record count request;
+string array of valid object API names; omitted or empty requests all countable objects;
+example: [\"Account\", \"Contact\"]; invalid or unavailable names are ignored by
+Salesforce, and do not pass labels, relationship names, comma-delimited strings, or SOQL
+fragments.
 
 Result
-counts (array) - { sObject, count (number) }.
+Returns the raw recordCount response with an sObjects array of name and count values.
 
 Required permissions
 - "API Enabled" + read on each sObject.
@@ -37,4 +41,6 @@ Errors
 
 Example request
 
-get_record_counts({ "sObjects": ["Account", "Contact", "Opportunity", "Project__c"] })
+get_record_counts({
+  "sObjects": "[\\\"Account\\\", \\\"Contact\\\"]"
+})

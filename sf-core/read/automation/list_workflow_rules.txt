@@ -4,11 +4,12 @@ Description
 List Workflow Rules (legacy automation; mostly migrated to Flow but still common in older orgs). Returns the trigger criteria, evaluation criteria, time-based triggers, and the actions invoked (field updates, email alerts, outbound messages, tasks).
 
 Salesforce API
-Metadata API (`Workflow` per sObject), v66.0.
+Tooling API, v66.0.
+Metadata API (SOAP), v66.0.
 
 Endpoint
-POST /services/Soap/m/66.0    (readMetadata Workflow per sObject)
-GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, TableEnumOrId, Active FROM WorkflowRule
+POST /services/Soap/m/66.0  (readMetadata Workflow)
+GET /services/data/v66.0/tooling/query/?q=SELECT Id, Name, TableEnumOrId, ManageableState, NamespacePrefix FROM WorkflowRule
 
 Headers
 Authorization: Bearer <access_token>
@@ -18,18 +19,28 @@ Body
 None.
 
 Input (parameters)
-sObjects (string[], optional).
-includeInactive (boolean, optional, default true).
-namePattern (string, optional).
+sObjects (string[], optional) - Object API names whose Workflow containers are read;
+string array; no default resolves objects from WorkflowRule Tooling rows; example:
+[\"Account\", \"Case\"]; do not pass labels, relationship names, or SOQL fragments.
+namePattern (string, optional) - WorkflowRule Name filter using * and ? wildcards
+against the Tooling API Name field; string converted to SOQL LIKE; no default; example:
+Renewal_*; do not pass raw LIKE syntax, object-qualified names, or regex.
+whereClause (string, optional) - Additional Tooling SOQL WHERE condition for
+WorkflowRule; string without WHERE; no default; example: ManageableState = 'unmanaged';
+do not pass SELECT, FROM, ORDER BY, LIMIT, or untrusted user input.
+orderBy (string, optional) - Tooling SOQL ORDER BY for WorkflowRule; string without
+ORDER BY; default TableEnumOrId, Name; example: Name DESC; do not pass WHERE, LIMIT,
+SELECT, or FROM.
+limit (integer, optional) - Maximum WorkflowRule rows used to scope metadata reads;
+positive integer clamped to 2000; default 500; example: 100; do not pass 0, negatives,
+decimals, or offsets.
 
 Result
-totalSize (number).
-workflowRules (array) - Each:
-  id, fullName, sObject, label, active, description.
-  evaluationCriteria (string) - "OnAllChanges" | "OnCreateOnly" | "OnCreateOrTriggeringUpdate".
-  formula (string|null), criteriaItems (array|null) - Filter logic.
-  actions (object) - { fieldUpdates: string[], alerts: string[], tasks: string[], outboundMessages: string[], flowTriggers: string[] }.
-  timeTriggers (array) - Each: { offsetFromField, timeLength, workflowTimeTriggerUnit, actions }.
+Returns a JSON object with query, toolingResult, metadataFullNames, and metadataResult.
+query (value) - included in the JSON returned by the tool.
+toolingResult (value) - included in the JSON returned by the tool.
+metadataFullNames (value) - included in the JSON returned by the tool.
+metadataResult (value) - included in the JSON returned by the tool.
 
 Required permissions
 - "View Setup and Configuration" / "Customize Application".
@@ -42,4 +53,8 @@ Errors
 
 Example request
 
-list_workflow_rules({ "sObjects": ["Opportunity"] })
+list_workflow_rules({
+  "sObjects": "[\\\"Account\\\", \\\"Case\\\"]",
+  "namePattern": "Renewal_*",
+  "whereClause": "ManageableState = 'unmanaged'"
+})
